@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100 select-none overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🤪 Z PAGAL - The Ultimate Rage Game</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fredoka', 'sans-serif'],
+                        arcade: ['"Press Start 2P"', 'monospace'],
+                    },
+                    colors: {
+                        neonGreen: '#00ff66',
+                        neonPink: '#ff0055',
+                        neonCyan: '#00f3ff',
+                        neonYellow: '#ffe600',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-fast': 'bounce 0.5s infinite',
+                        'shake': 'shake 0.3s ease-in-out',
+                    },
+                    keyframes: {
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '20%, 60%': { transform: 'translateX(-8px)' },
+                            '40%, 80%': { transform: 'translateX(8px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles & Utilities */
+        body {
+            font-family: 'Fredoka', sans-serif;
+            touch-action: manipulation;
+        }
+
+        .arcade-font {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+
+        .glow-box-pink {
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.4), inset 0 0 15px rgba(255, 0, 85, 0.2);
+        }
+
+        .glow-text-green {
+            text-shadow: 0 0 10px #00ff66, 0 0 20px #00ff66;
+        }
+
+        .glow-text-pink {
+            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff0055;
+            border-radius: 4px;
+        }
+
+        /* Canvas Grid Styling */
+        #gameCanvas {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 25px 25px;
+            background-color: #090d16;
+        }
+
+        .dpad-btn {
+            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .dpad-btn:active {
+            background: #ff0055;
+            transform: scale(0.92);
+        }
+    </style>
+</head>
+
+<body class="h-full flex flex-col justify-between items-center bg-slate-950 text-slate-100 overflow-hidden">
+
+    <!-- Top Header -->
+    <header class="w-full max-w-5xl px-4 py-3 flex justify-between items-center border-b border-slate-800 bg-slate-900/60 backdrop-blur z-20">
+        <div class="flex items-center gap-2">
+            <span class="text-3xl animate-bounce">🤪</span>
+            <span class="arcade-font text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neonCyan via-neonYellow to-neonPink tracking-wider">
+                Z PAGAL
+            </span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="soundToggle" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs md:text-sm font-semibold flex items-center gap-2 border border-slate-700 transition">
+                <i id="soundIcon" class="fas fa-volume-up text-neonCyan"></i>
+                <span id="soundStatus">Audio: ON</span>
+            </button>
+            <button id="restartBtn" class="hidden px-3 py-1.5 rounded-lg bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 text-xs md:text-sm font-semibold flex items-center gap-1 border border-rose-500/40 transition">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+        </div>
+    </header>
+
+    <!-- Floating Taunt Banner -->
+    <div id="tauntToast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold px-6 py-3 rounded-full shadow-2xl border-2 border-yellow-300 flex items-center gap-3 text-sm md:text-base">
+            <span id="tauntIcon">💥</span>
+            <span id="tauntText">Bhai kya kar raha hai?</span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-4xl flex-1 flex flex-col justify-center items-center p-3 relative z-10">
+
+        <!-- ==================== TROLL LOGIN SCREEN ==================== -->
+        <section id="loginScreen" class="w-full max-w-md bg-slate-900/90 border-2 border-neonPink/40 rounded-3xl p-6 md:p-8 shadow-2xl glow-box-pink backdrop-blur-md relative transition-all duration-500">
+            
+            <div class="text-center mb-6">
+                <div class="inline-block p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 mb-2">
+                    <span class="text-4xl">🤪</span>
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-wide">Z PAGAL Login</h1>
+                <p class="text-slate-400 text-xs mt-1">Dimaag ki dahi hone waali hai. Ready ho?</p>
+            </div>
+
+            <!-- Fake Login Form -->
+            <form id="trollForm" onsubmit="return false;" class="space-y-4">
+                
+                <!-- Username Field -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username (Kuch Bhi Daalo)</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
+                        <input type="text" id="usernameInput" placeholder="e.g. MasterPro69" required
+                            class="w-full bg-slate-950/80 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-neonCyan transition">
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Unbreakable Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
+                        <input type="password" id="passwordInput" placeholder="Secret code..."
+                            class="w-full bg-slate-950/80 border border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-neonPink transition">
+                    </div>
+
+                    <!-- Emoji Show Password Toggle -->
+                    <div class="flex items-center justify-between mt-2 px-1">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-400 hover:text-slate-200">
+                            <input type="checkbox" id="emojiToggle" class="rounded bg-slate-800 border-slate-700 text-neonPink focus:ring-0">
+                            <span>Show Password as Emojis 💩</span>
+                        </label>
+                    </div>
+
+                    <!-- Password Requirement Checklist -->
+                    <div class="mt-3 p-3 bg-slate-950/50 rounded-xl border border-slate-800/80 space-y-1.5 text-xs">
+                        <p class="text-slate-400 font-semibold mb-1">Kadhai Ke Rules (Password Requirements):</p>
+                        <div id="reqLen" class="flex items-center gap-2 text-rose-400">
+                            <i class="fas fa-times-circle text-xs"></i> <span>At least 6 characters</span>
+                        </div>
+                        <div id="reqEmoji" class="flex items-center gap-2 text-rose-400">
+                            <i class="fas fa-times-circle text-xs"></i> <span>Must contain at least 1 emoji (e.g. 🤪)</span>
+                        </div>
+                        <div id="reqSecret" class="flex items-center gap-2 text-rose-400">
+                            <i class="fas fa-times-circle text-xs"></i> <span>Must contain word "PAGAL"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slippery Login Button Container -->
+                <div id="buttonArea" class="relative w-full h-16 mt-6 flex items-center justify-center border border-dashed border-slate-800 rounded-2xl p-1 bg-slate-950/30 overflow-hidden">
+                    
+                    <button id="slipperyBtn" type="button" 
+                        class="absolute px-6 py-2.5 rounded-xl bg-gradient-to-r from-neonPink to-rose-600 text-white font-bold text-sm shadow-lg shadow-neonPink/30 hover:scale-105 transition-transform duration-100 flex items-center gap-2 whitespace-nowrap">
+                        <span>Login Karein</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                    
+                    <p id="dodgeHint" class="text-[10px] text-slate-600 animate-pulse">Button pakad ke dikhao! 😂</p>
+                </div>
+
+                <!-- Fast Pass / Noob Skip -->
+                <div class="pt-2 text-center">
+                    <button id="noobSkipBtn" type="button" class="text-xs text-slate-500 hover:text-amber-400 underline underline-offset-4 transition">
+                        😭 Rehne Do, Main Noob Hoon (Skip Login)
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- ==================== GAME SCREEN ==================== -->
+        <section id="gameScreen" class="hidden w-full flex flex-col items-center justify-center gap-3">
+            
+            <!-- Dashboard Info -->
+            <div class="w-full max-w-xl bg-slate-900/80 border border-slate-800 rounded-2xl p-3 px-4 flex justify-between items-center text-xs md:text-sm shadow-xl">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">Level:</span>
+                    <span id="levelDisplay" class="arcade-font text-neonCyan font-bold text-base">1</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">Gusse Ka Meter (Deaths):</span>
+                    <span id="deathCount" class="arcade-font text-neonPink font-bold text-base">0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="controlModeBadge" class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 text-[11px] font-bold border border-rose-500/40">
+                        🔄 INVERTED
+                    </span>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full max-w-xl aspect-square bg-slate-900 rounded-2xl border-2 border-neonCyan/40 shadow-2xl overflow-hidden glow-box">
+                <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                
+                <!-- Game Over / Level Clear Overlay Modal -->
+                <div id="gameModal" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-30">
+                    <div id="modalEmoji" class="text-6xl mb-3 animate-bounce">👑</div>
+                    <h2 id="modalTitle" class="arcade-font text-xl md:text-2xl text-neonGreen mb-2">LEVEL CLEAR!</h2>
+                    <p id="modalDesc" class="text-sm text-slate-300 max-w-xs mb-6">Tu toh sach mein Pagal nikla re! Next level dekhta hoon.</p>
+                    <button id="modalActionBtn" class="px-6 py-3 rounded-xl bg-gradient-to-r from-neonCyan to-blue-600 text-slate-950 font-bold text-sm shadow-lg hover:scale-105 transition">
+                        Agla Level 👉
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Touch Controls D-Pad -->
+            <div class="w-full max-w-xs mt-1 md:hidden flex flex-col items-center gap-1">
+                <p class="text-[11px] text-rose-400 font-semibold mb-1">⚠️ Controls Ulte Hain! (Up = Down, Left = Right)</p>
+                <div class="grid grid-cols-3 gap-2 w-48 h-48 p-2 bg-slate-900/60 rounded-3xl border border-slate-800">
+                    <div></div>
+                    <button id="btnUp" class="dpad-btn rounded-2xl border border-slate-700 flex items-center justify-center text-neonCyan text-xl active:bg-neonPink">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <div></div>
+                    <button id="btnLeft" class="dpad-btn rounded-2xl border border-slate-700 flex items-center justify-center text-neonCyan text-xl active:bg-neonPink">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="flex items-center justify-center text-xs text-slate-600 font-bold">Z</div>
+                    <button id="btnRight" class="dpad-btn rounded-2xl border border-slate-700 flex items-center justify-center text-neonCyan text-xl active:bg-neonPink">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <div></div>
+                    <button id="btnDown" class="dpad-btn rounded-2xl border border-slate-700 flex items-center justify-center text-neonCyan text-xl active:bg-neonPink">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <div></div>
+                </div>
+            </div>
+
+            <!-- Desktop Keyboard Help -->
+            <div class="hidden md:flex items-center gap-6 text-xs text-slate-400 mt-1">
+                <span><kbd class="px-2 py-1 bg-slate-800 rounded border border-slate-700 text-slate-200">Arrow Keys</kbd> or <kbd class="px-2 py-1 bg-slate-800 rounded border border-slate-700 text-slate-200">WASD</kbd></span>
+                <span class="text-rose-400 font-semibold">⚠️ Up moves Down, Left moves Right!</span>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-3 text-xs text-slate-600 border-t border-slate-900 bg-slate-950">
+        Created for ultimate frustration • <span class="text-neonPink">Z PAGAL Edition</span>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // ==========================================
+        // 1. AUDIO SYNTHESIZER (Web Audio API)
+        // ==========================================
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+            }
+
+            playDodge() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playCrash() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+
+            playWin() {
+                if (!this.enabled) return;
+                this.init();
+                const notes = [400, 550, 700, 950];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + i * 0.08);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.08 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + i * 0.08);
+                    osc.stop(this.ctx.currentTime + i * 0.08 + 0.2);
+                });
+            }
+
+            playTaunt() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(200, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+        }
+
+        const soundFX = new SoundFX();
+
+        // Audio Toggle Setup
+        const soundToggle = document.getElementById('soundToggle');
+        const soundStatus = document.getElementById('soundStatus');
+        const soundIcon = document.getElementById('soundIcon');
+
+        soundToggle.addEventListener('click', () => {
+            soundFX.enabled = !soundFX.enabled;
+            soundStatus.textContent = `Audio: ${soundFX.enabled ? 'ON' : 'OFF'}`;
+            soundIcon.className = soundFX.enabled ? 'fas fa-volume-up text-neonCyan' : 'fas fa-volume-mute text-slate-500';
+            if (soundFX.enabled) soundFX.playDodge();
+        });
+
+        // ==========================================
+        // 2. TROLL LOGIN LOGIC
+        // ==========================================
+        const passwordInput = document.getElementById('passwordInput');
+        const usernameInput = document.getElementById('usernameInput');
+        const emojiToggle = document.getElementById('emojiToggle');
+        const reqLen = document.getElementById('reqLen');
+        const reqEmoji = document.getElementById('reqEmoji');
+        const reqSecret = document.getElementById('reqSecret');
+        const slipperyBtn = document.getElementById('slipperyBtn');
+        const buttonArea = document.getElementById('buttonArea');
+        const noobSkipBtn = document.getElementById('noobSkipBtn');
+        const loginScreen = document.getElementById('loginScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const restartBtn = document.getElementById('restartBtn');
+
+        let rawPassword = "";
+        let dodgeCount = 0;
+        const maxDodges = 5;
+
+        // Taunts for slippery button
+        const dodgeTaunts = [
+            "Pakad ke dikha! 😜",
+            "Pehle gussa control kar! 😂",
+            "Itni jaldi nahi pyare! 🏃‍♂️",
+            "Tez banna hai? ⚡",
+            "Aakhiri baar bhaag raha hoon! 🛑"
+        ];
+
+        // Taunts for collision & failures
+        const failTaunts = [
+            "Bhai kya kar raha hai?",
+            "Rehne de tere se na ho payega 😂",
+            "Border cross karna mana hai!",
+            "Itna noob gameplay? 💀",
+            "Kadhai me dimaag pak gaya?",
+            "Ankh band karke khel raha hai kya?",
+            "Controls ulte hain bewakoof! 🔄"
+        ];
+
+        // Show Toast Notification
+        function showTaunt(text, icon = "💥") {
+            const toast = document.getElementById('tauntToast');
+            document.getElementById('tauntText').textContent = text;
+            document.getElementById('tauntIcon').textContent = icon;
+            
+            toast.classList.remove('opacity-0', '-translate-y-20', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            soundFX.playTaunt();
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-20', 'pointer-events-none');
+            }, 2500);
+        }
+
+        // Real-time password validation
+        passwordInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            rawPassword = val;
+
+            // 1. Length check
+            if (val.length >= 6) {
+                reqLen.className = "flex items-center gap-2 text-emerald-400";
+                reqLen.firstElementChild.className = "fas fa-check-circle text-xs";
+            } else {
+                reqLen.className = "flex items-center gap-2 text-rose-400";
+                reqLen.firstElementChild.className = "fas fa-times-circle text-xs";
+            }
+
+            // 2. Emoji check
+            const emojiRegex = /\p{Extended_Pictographic}/u;
+            if (emojiRegex.test(val)) {
+                reqEmoji.className = "flex items-center gap-2 text-emerald-400";
+                reqEmoji.firstElementChild.className = "fas fa-check-circle text-xs";
+            } else {
+                reqEmoji.className = "flex items-center gap-2 text-rose-400";
+                reqEmoji.firstElementChild.className = "fas fa-times-circle text-xs";
+            }
+
+            // 3. Word PAGAL check
+            if (val.toUpperCase().includes("PAGAL")) {
+                reqSecret.className = "flex items-center gap-2 text-emerald-400";
+                reqSecret.firstElementChild.className = "fas fa-check-circle text-xs";
+            } else {
+                reqSecret.className = "flex items-center gap-2 text-rose-400";
+                reqSecret.firstElementChild.className = "fas fa-times-circle text-xs";
+            }
+        });
+
+        // Toggle Emoji Show Password
+        const emojiList = ["💩", "🤡", "🍌", "🤪", "🦄", "🍕", "🔥", "🐸"];
+        emojiToggle.addEventListener('change', () => {
+            if (emojiToggle.checked) {
+                passwordInput.type = "text";
+                let emojiStr = "";
+                for (let i = 0; i < rawPassword.length; i++) {
+                    emojiStr += emojiList[i % emojiList.length];
+                }
+                passwordInput.value = emojiStr || "💩🤡🤪";
+            } else {
+                passwordInput.type = "password";
+                passwordInput.value = rawPassword;
+            }
+        });
+
+        // Slippery Button Dodge Logic
+        function dodgeButton() {
+            if (dodgeCount >= maxDodges) return;
+
+            dodgeCount++;
+            soundFX.playDodge();
+
+            const areaRect = buttonArea.getBoundingClientRect();
+            const btnRect = slipperyBtn.getBoundingClientRect();
+
+            const maxX = areaRect.width - btnRect.width - 10;
+            const maxY = areaRect.height - btnRect.height - 10;
+
+            const randomX = Math.max(5, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(2, Math.floor(Math.random() * maxY));
+
+            slipperyBtn.style.left = `${randomX}px`;
+            slipperyBtn.style.top = `${randomY}px`;
+
+            showTaunt(dodgeTaunts[dodgeCount - 1] || "Pakad!", "🏃‍♂️");
+
+            if (dodgeCount >= maxDodges) {
+                setTimeout(() => {
+                    slipperyBtn.style.position = "static";
+                    slipperyBtn.classList.remove('bg-gradient-to-r', 'from-neonPink', 'to-rose-600');
+                    slipperyBtn.classList.add('bg-emerald-500', 'text-slate-950');
+                    slipperyBtn.innerHTML = `<span>Thak Gaya! Ab Click Karlo</span> <i class="fas fa-check"></i>`;
+                }, 300);
+            }
+        }
+
+        slipperyBtn.addEventListener('mouseenter', dodgeButton);
+        slipperyBtn.addEventListener('touchstart', (e) => {
+            if (dodgeCount < maxDodges) {
+                e.preventDefault();
+                dodgeButton();
+            }
+        });
+
+        // Handle Login Click
+        slipperyBtn.addEventListener('click', () => {
+            const val = rawPassword;
+            const hasLen = val.length >= 6;
+            const hasEmoji = /\p{Extended_Pictographic}/u.test(val);
+            const hasPagal = val.toUpperCase().includes("PAGAL");
+
+            if (!hasLen || !hasEmoji || !hasPagal) {
+                showTaunt("Password ki shart poori kaun karega tera baap? 🤌", "❌");
+                loginScreen.classList.add('animate-shake');
+                setTimeout(() => loginScreen.classList.remove('animate-shake'), 400);
+                return;
+            }
+
+            // Successful Login
+            soundFX.playWin();
+            startGame();
+        });
+
+        // Skip button
+        noobSkipBtn.addEventListener('click', () => {
+            showTaunt("Haar maan li? Aaja noob section me! 🤡", "💩");
+            startGame();
+        });
+
+        function startGame() {
+            loginScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            restartBtn.classList.remove('hidden');
+            initCanvasGame();
+        }
+
+        restartBtn.addEventListener('click', () => {
+            location.reload();
+        });
+
+        // ==========================================
+        // 3. GAME ENGINE (Canvas 2D)
+        // ==========================================
+        let canvas, ctx;
+        let animationFrameId;
+
+        // Game State
+        const state = {
+            level: 1,
+            deaths: 0,
+            player: { x: 50, y: 50, size: 22, speed: 4, vx: 0, vy: 0 },
+            goal: { x: 300, y: 300, size: 30 },
+            obstacles: [],
+            keys: { up: false, down: false, left: false, right: false },
+            isWin: false,
+            levelMax: 5
+        };
+
+        function initCanvasGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            setupControls();
+            loadLevel(1);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        // Level Generator
+        function loadLevel(lvl) {
+            state.level = lvl;
+            document.getElementById('levelDisplay').textContent = lvl;
+            state.isWin = false;
+            state.player.x = 40;
+            state.player.y = 40;
+            state.player.vx = 0;
+            state.player.vy = 0;
+
+            const w = canvas.width || 400;
+            const h = canvas.height || 400;
+
+            state.obstacles = [];
+
+            // Level Specific Layouts
+            if (lvl === 1) {
+                // Easy open field
+                state.goal = { x: w - 70, y: h - 70, size: 30 };
+            } 
+            else if (lvl === 2) {
+                // Middle Wall
+                state.goal = { x: w - 70, y: 50, size: 30 };
+                state.obstacles.push({ x: w * 0.45, y: h * 0.2, w: 25, h: h * 0.6, invisible: false });
+            } 
+            else if (lvl === 3) {
+                // Invisible Maze
+                state.goal = { x: w / 2 - 15, y: h / 2 - 15, size: 30 };
+                state.obstacles.push(
+                    { x: w * 0.2, y: 0, w: 20, h: h * 0.65, invisible: true, flash: 0 },
+                    { x: w * 0.6, y: h * 0.35, w: 20, h: h * 0.65, invisible: true, flash: 0 }
+                );
+            } 
+            else if (lvl === 4) {
+                // Moving Fake Target + Invisible Barrier
+                state.goal = { x: w - 70, y: h - 70, size: 30, vx: 2 };
+                state.obstacles.push(
+                    { x: w * 0.3, y: h * 0.2, w: w * 0.4, h: 20, invisible: true, flash: 0 },
+                    { x: w * 0.3, y: h * 0.6, w: w * 0.4, h: 20, invisible: true, flash: 0 }
+                );
+            } 
+            else if (lvl === 5) {
+                // Final Hell Level
+                state.goal = { x: w / 2 - 15, y: 50, size: 30 };
+                state.obstacles.push(
+                    { x: 50, y: h * 0.3, w: w - 100, h: 20, invisible: false },
+                    { x: 50, y: h * 0.6, w: w - 100, h: 20, invisible: false }
+                );
+            }
+        }
+
+        // Control Listeners (Keyboard + Touch)
+        function setupControls() {
+            window.addEventListener('keydown', (e) => handleKey(e.code, true));
+            window.addEventListener('keyup', (e) => handleKey(e.code, false));
+
+            // Touch D-Pad bindings (INVERTED HANDLERS)
+            bindTouchBtn('btnUp', 'down');     // Up button activates Down
+            bindTouchBtn('btnDown', 'up');     // Down button activates Up
+            bindTouchBtn('btnLeft', 'right');  // Left button activates Right
+            bindTouchBtn('btnRight', 'left');  // Right button activates Left
+        }
+
+        function bindTouchBtn(elementId, directionKey) {
+            const btn = document.getElementById(elementId);
+            if (!btn) return;
+
+            const start = (e) => {
+                e.preventDefault();
+                state.keys[directionKey] = true;
+            };
+            const end = (e) => {
+                e.preventDefault();
+                state.keys[directionKey] = false;
+            };
+
+            btn.addEventListener('touchstart', start);
+            btn.addEventListener('touchend', end);
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+        }
+
+        function handleKey(code, isPressed) {
+            // INVERTED LOGIC HERE!
+            // Up key triggers Down movement, Left key triggers Right movement!
+            if (code === 'ArrowUp' || code === 'KeyW') {
+                state.keys.down = isPressed; // INVERTED
+            }
+            if (code === 'ArrowDown' || code === 'KeyS') {
+                state.keys.up = isPressed; // INVERTED
+            }
+            if (code === 'ArrowLeft' || code === 'KeyA') {
+                state.keys.right = isPressed; // INVERTED
+            }
+            if (code === 'ArrowRight' || code === 'KeyD') {
+                state.keys.left = isPressed; // INVERTED
+            }
+        }
+
+        // Collision Reset
+        function triggerDeath() {
+            state.deaths++;
+            document.getElementById('deathCount').textContent = state.deaths;
+            soundFX.playCrash();
+
+            const randomMsg = failTaunts[Math.floor(Math.random() * failTaunts.length)];
+            showTaunt(randomMsg, "💥");
+
+            // Reset player position
+            state.player.x = 40;
+            state.player.y = 40;
+        }
+
+        // ==========================================
+        // 4. GAME UPDATE & RENDER LOOP
+        // ==========================================
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            if (state.isWin) return;
+
+            const p = state.player;
+            const speed = p.speed;
+
+            // Player velocity calculation based on state.keys
+            p.vx = 0;
+            p.vy = 0;
+
+            if (state.keys.up) p.vy -= speed;
+            if (state.keys.down) p.vy += speed;
+            if (state.keys.left) p.vx -= speed;
+            if (state.keys.right) p.vx += speed;
+
+            // Diagonals normalization
+            if (p.vx !== 0 && p.vy !== 0) {
+                p.vx *= 0.7071;
+                p.vy *= 0.7071;
+            }
+
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // Canvas Boundary Collisions
+            if (p.x < 0 || p.x + p.size > canvas.width || p.y < 0 || p.y + p.size > canvas.height) {
+                triggerDeath();
+                return;
+            }
+
+            // Moving target logic for Level 4
+            if (state.level === 4) {
+                state.goal.x += state.goal.vx;
+                if (state.goal.x < canvas.width * 0.5 || state.goal.x + state.goal.size > canvas.width - 10) {
+                    state.goal.vx *= -1;
+                }
+            }
+
+            // Obstacle Collisions
+            for (let obs of state.obstacles) {
+                if (p.x < obs.x + obs.w && p.x + p.size > obs.x &&
+                    p.y < obs.y + obs.h && p.y + p.size > obs.y) {
+                    
+                    if (obs.invisible) {
+                        obs.flash = 30; // Flash obstacle briefly on hit
+                    }
+                    triggerDeath();
+                    return;
+                }
+                if (obs.flash && obs.flash > 0) obs.flash--;
+            }
+
+            // Goal Reached Check
+            const g = state.goal;
+            if (p.x < g.x + g.size && p.x + p.size > g.x &&
+                p.y < g.y + g.size && p.y + p.size > g.y) {
+                
+                onLevelClear();
+            }
+        }
+
+        function onLevelClear() {
+            state.isWin = true;
+            soundFX.playWin();
+
+            const modal = document.getElementById('gameModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDesc = document.getElementById('modalDesc');
+            const modalBtn = document.getElementById('modalActionBtn');
+
+            if (state.level < state.levelMax) {
+                modalTitle.textContent = `LEVEL ${state.level} CLEAR!`;
+                modalDesc.textContent = "Jeet gaye? Haha, agle level me dekhta hoon kitna dum hai!";
+                modalBtn.textContent = "Agla Level 👉";
+                modalBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    loadLevel(state.level + 1);
+                };
+            } else {
+                modalTitle.textContent = "🏆 MAHAPAGAL CHAMPION!";
+                modalDesc.textContent = `Bhai maan gaye! Tu sach me Z PAGAL hai! Total Deaths: ${state.deaths}`;
+                modalBtn.textContent = "Phir Se Khel 🔄";
+                modalBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    state.deaths = 0;
+                    document.getElementById('deathCount').textContent = 0;
+                    loadLevel(1);
+                };
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        // Render Canvas Elements
+        function render() {
+            if (!ctx) return;
+
+            // Clear Screen
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Goal (Green Pulsing Box)
+            const g = state.goal;
+            ctx.fillStyle = '#00ff66';
+            ctx.shadowColor = '#00ff66';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(g.x, g.y, g.size, g.size);
+
+            // Goal text icon
+            ctx.fillStyle = '#090d16';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('GOAL', g.x + g.size / 2, g.y + g.size / 2 + 4);
+
+            // 2. Draw Obstacles
+            ctx.shadowBlur = 0;
+            for (let obs of state.obstacles) {
+                if (!obs.invisible) {
+                    ctx.fillStyle = '#ff0055';
+                    ctx.shadowColor = '#ff0055';
+                    ctx.shadowBlur = 10;
+                    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                } else if (obs.flash > 0) {
+                    // Flash invisible wall on hit
+                    ctx.fillStyle = `rgba(255, 0, 85, ${obs.flash / 30})`;
+                    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                }
+            }
+
+            // 3. Draw Player (Blue Glow Box with Face)
+            const p = state.player;
+            ctx.fillStyle = '#00f3ff';
+            ctx.shadowColor = '#00f3ff';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+
+            // Draw Funny Player Face
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#000';
+            // Eyes
+            ctx.fillRect(p.x + 4, p.y + 5, 3, 4);
+            ctx.fillRect(p.x + p.size - 7, p.y + 5, 3, 4);
+            // Tongue out mouth
+            ctx.fillRect(p.x + 6, p.y + 14, 10, 2);
+            ctx.fillStyle = '#ff0055';
+            ctx.fillRect(p.x + 10, p.y + 16, 4, 3);
+        }
+    </script>
+</body>
+</html>
