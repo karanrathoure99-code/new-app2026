@@ -3,7 +3,6 @@
 Duniya ka sabse "aasan" aur "relaxing" game. Agar aapka din bahut accha ja raha hai aur aap usko barbaad karna chahte hain, toh **Z PAGAL** aapke liye hi bana hai! Yeh game aapka dimaag kharab karne ki 100% guarantee leta hai.
 
 🎮 **[Click Here to Play "Z PAGAL"!](https://karanrathoure99-code.github.io/new-app2026/)** 
-*(Note: Yahan apne actual GitHub Pages ka link update kar lena)*
 
 ## 🕹️ Kaise Khelein? (How to Play)
 - **Blue box** ko **Green box** tak le kar jana hai. 
