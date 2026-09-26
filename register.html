@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤪 Z PAJAL - Secure Registration</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #050505;
+            background: linear-gradient(to right, #050505, #0a0a0c, #050505);
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.4;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+        .orb-1 {
+            width: 300px; height: 300px;
+            background: #ff007f;
+            top: -50px; left: -50px;
+        }
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: #00f0ff;
+            bottom: -100px; right: -50px;
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(50px) scale(1.2); }
+        }
+
+        .glass-box {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji {
+            font-size: 34px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border: 2px solid #00f0ff;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+        }
+
+        .hint {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #ff007f, #7928ca);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 5px;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+            transition: 0.3s;
+        }
+
+        .register-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.7);
+        }
+
+        .back-link {
+            margin-top: 15px;
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            color: #00f0ff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="glass-box">
+        <div class="game-title">
+            <span class="emoji">✨</span> CREATE ACCOUNT
+        </div>
+        
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="e.g. gamer_123#" autocomplete="off">
+            <div class="hint">Min 5 letters, 2-5 numbers, and 1 special char (!@#$%^&*()_+)</div>
+        </div>
+
+        <div class="input-group">
+            <label>Gmail Address</label>
+            <input type="email" id="regEmail" placeholder="example@gmail.com">
+        </div>
+
+        <div class="input-group">
+            <label>Create Password</label>
+            <input type="password" id="regPassword" placeholder="Strong password">
+            <div class="hint">Min 5 letters, 2-5 numbers, and 1 special char</div>
+        </div>
+
+        <div class="input-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="Re-enter password">
+        </div>
+        
+        <button type="button" class="register-btn" id="submitBtn" onclick="registerUser()">REGISTER & VERIFY</button>
+
+        <a href="index.html" class="back-link">⬅️ Back to Login</a>
+    </div>
+
+    <!-- Firebase SDK & Validation Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCK9njPkGdw91_vGhI0_mRflpXBbz2D_zo",
+            authDomain: "z-pajal.firebaseapp.com",
+            projectId: "z-pajal",
+            storageBucket: "z-pajal.firebasestorage.app",
+            messagingSenderId: "941362119453",
+            appId: "1:941362119453:web:c52140dba1952a389197f4",
+            measurementId: "G-PKKCQ5CT9P"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        window.registerUser = async function() {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const btn = document.getElementById('submitBtn');
+
+            if (!username || !email || !password || !confirmPassword) {
+                alert("Kripya sabhi fields bharein!");
+                return;
+            }
+
+            // 1. Username Validation Check
+            // Kam se kam 5 alphabets, 2-5 numbers, aur ek special character (!@#$%^&*()_+)
+            const lettersMatch = username.match(/[a-zA-Z]/g);
+            const numbersMatch = username.match(/[0-9]/g);
+            const specialMatch = username.match(/[!@#$%^&*()_+]/g);
+
+            if (!lettersMatch || lettersMatch.length < 5) {
+                alert("Username mein kam se kam 5 alphabetical characters hone chahiye!");
+                return;
+            }
+            if (!numbersMatch || numbersMatch.length < 2 || numbersMatch.length > 5) {
+                alert("Username mein 2 se 5 numbers (counts) hone chahiye!");
+                return;
+            }
+            if (!specialMatch || specialMatch.length < 1) {
+                alert("Username mein !@#$%^&*()_+ mein se koi ek special character hona zaroori hai!");
+                return;
+            }
+
+            // 2. Password Validation Check
+            // Kam se kam 5 alphabets, 2-5 numbers, aur 1 special character
+            const pLetters = password.match(/[a-zA-Z]/g);
+            const pNumbers = password.match(/[0-9]/g);
+            const pSpecial = password.match(/[!@#$%^&*()_+]/g);
+
+            if (!pLetters || pLetters.length < 5 || !pNumbers || pNumbers.length < 2 || pNumbers.length > 5 || !pSpecial) {
+                alert("Password strong hona chahiye: Min 5 letters, 2-5 numbers, aur 1 special character zaroori hai!");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Password aur Confirm Password match nahi ho rahe hain!");
+                return;
+            }
+
+            try {
+                btn.innerText = "Checking Username...";
+                btn.disabled = true;
+
+                // 3. Check if Username already exists in Firebase Database
+                const usernameRef = ref(db, 'usernames/' + username.toLowerCase());
+                const snapshot = await get(usernameRef);
+
+                if (snapshot.exists()) {
+                    alert("⚠️ This name already exists / Access Denied! Kripya koi dusra username chunein.");
+                    btn.innerText = "REGISTER & VERIFY";
+                    btn.disabled = false;
+                    return;
+                }
+
+                btn.innerText = "Creating Account...";
+
+                // 4. Create user in Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Save Username in Realtime Database to block duplicates forever
+                await set(usernameRef, { uid: user.uid, email: email });
+
+                // Set Display Name
+                await updateProfile(user, { displayName: username });
+
+                // Send Email Verification Code / Link
+                await sendEmailVerification(user);
+
+                alert("🎉 Account successful ban gaya! Humne aapke Gmail (" + email + ") par verification link/OTP bhej diya hai. Email verify karne ke baad aap apne aap game mein enter kar jayenge.");
+
+                // Sign out temporarily so they verify, or auto-login loop logic
+                // Yahan user verify karne ke baad seedha home page par ja sakta hai
+                await signOut(auth);
+                window.location.href = "index.html";
+
+            } catch (error) {
+                alert("Error: " + error.message);
+                btn.innerText = "REGISTER & VERIFY";
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>
