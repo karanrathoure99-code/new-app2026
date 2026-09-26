@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤪 Z PAJAL - Rage Mode (Levels 1-10)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🤪 Z PAJAL - Rage Platformer (Levels 1-10)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -11,144 +11,61 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+            user-select: none;
         }
 
         body {
-            background: #05050a;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(255, 0, 85, 0.1) 0%, transparent 60%);
+            background: #030308;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
             overflow: hidden;
             position: relative;
         }
 
-        .game-container {
-            background: rgba(20, 15, 35, 0.9);
-            backdrop-filter: blur(15px);
-            border: 2px solid rgba(255, 0, 85, 0.4);
-            border-radius: 25px;
-            padding: 30px;
+        /* Top HUD Bar */
+        .hud {
+            position: absolute;
+            top: 15px;
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 0 40px rgba(255, 0, 85, 0.2);
-            text-align: center;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 20;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .hud div {
+            background: rgba(20, 15, 35, 0.8);
+            border: 1px solid rgba(255, 0, 85, 0.4);
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+        }
+
+        /* Game Canvas Container */
+        .game-viewport {
             position: relative;
-            z-index: 10;
-        }
-
-        .level-badge {
-            display: inline-block;
-            background: linear-gradient(90deg, #ff0055, #9900ff);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 6px 16px;
+            width: 100%;
+            max-width: 950px;
+            height: 450px;
+            background: linear-gradient(to bottom, #0a0818, #151026);
+            border: 3px solid rgba(0, 255, 204, 0.4);
             border-radius: 20px;
-            margin-bottom: 15px;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.15);
+            overflow: hidden;
+            margin-top: 40px;
         }
 
-        h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 22px;
-            color: #ff0055;
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            font-size: 12px;
-            color: #ffaa00;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .question-box {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
-            padding: 18px;
-            margin: 15px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 17px;
-            font-weight: 600;
-            color: #00ffff;
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            word-break: break-word;
-        }
-
-        .input-box {
+        canvas {
+            display: block;
             width: 100%;
-            padding: 14px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            color: white;
-            font-size: 18px;
-            text-align: center;
-            outline: none;
-            margin-bottom: 15px;
-        }
-
-        .input-box:focus {
-            border-color: #ff0055;
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: linear-gradient(135deg, #ff0055, #ff5500);
-            color: #fff;
-            border: none;
-            padding: 14px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 15px;
-            font-weight: 900;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.2s;
-            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
-        }
-
-        .action-btn:hover {
-            transform: scale(1.02);
-        }
-
-        .next-btn {
-            background: linear-gradient(135deg, #00ff88, #00aa55) !important;
-            color: #000 !important;
-            display: none; /* Jab tak level clear na ho, hide rahega */
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
-        }
-
-        .back-btn {
-            background: transparent;
-            color: #8c8cb2;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 8px;
-            border-radius: 10px;
-            font-size: 13px;
-            cursor: pointer;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
+            height: 100%;
         }
 
         /* 50% Transparent LOJER Overlay */
@@ -158,8 +75,8 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(100, 0, 0, 0.5); /* 50% Transparent Red/Dark */
-            backdrop-filter: blur(5px);
+            background: rgba(120, 0, 0, 0.5); /* 50% transparent red */
+            backdrop-filter: blur(6px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -181,12 +98,11 @@
             font-weight: 900;
             color: #ff0000;
             text-shadow: 0 0 30px #000, 0 0 60px #ff0000;
-            letter-spacing: 5px;
             animation: shake 0.2s infinite alternate;
         }
 
         #lojerOverlay p {
-            font-size: 20px;
+            font-size: 22px;
             color: #ffcc00;
             font-weight: bold;
             margin-top: 10px;
@@ -198,53 +114,279 @@
             100% { transform: translate(-3px, -3px) rotate(-2deg); }
         }
 
-        .stats {
+        /* Level Clear / Next Level Overlay Dialog */
+        #winOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 50, 20, 0.6);
+            backdrop-filter: blur(6px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #winOverlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #winOverlay h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 50px;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 15px;
+        }
+
+        .next-lvl-btn {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            color: #000;
+            border: none;
+            padding: 15px 35px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+            transition: 0.2s;
+        }
+
+        .next-lvl-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Mobile 3D Glass Effect Controls */
+        .mobile-controls {
+            display: none;
+            width: 100%;
+            max-width: 950px;
+            justify-content: space-between;
+            padding: 15px 20px;
+            z-index: 20;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .glass-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .glass-btn:active {
+            background: rgba(0, 255, 204, 0.2);
+        }
+
+        .action-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .glass-btn.action {
+            background: rgba(255, 0, 119, 0.15);
+            border-color: rgba(255, 0, 119, 0.4);
+            font-size: 14px;
+            border-radius: 15px;
+            width: 75px;
+        }
+
+        .quit-btn {
+            position: absolute;
+            bottom: 10px;
+            background: transparent;
+            color: #8c8cb2;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 15px;
+            border-radius: 8px;
             font-size: 12px;
-            color: #888;
-            margin-top: 10px;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .quit-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .game-viewport {
+                height: 320px;
+            }
+            .mobile-controls {
+                display: flex;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Troll Overlay (LOJER) -->
+    <!-- Troll Fail Overlay (LOJER) -->
     <div id="lojerOverlay">
-        <h2 id="lojerText">LOJER 🤪</h2>
-        <p id="trollReason">Hahaha! Kitna asaan samajh raha tha?</p>
+        <h2>LOJER 🤪</h2>
+        <p id="trollMsg">Achanak hamla ho gaya! Hahaha!</p>
     </div>
 
-    <div class="game-container">
-        <div class="level-badge" id="levelBadge">🎮 LEVEL 1 / 10</div>
-        <h1>Z PAJAL - RAGE MODE</h1>
-        <div class="subtitle" id="subTitle">Warning: Ye game tumhara ego hurt karegi!</div>
+    <!-- Win / Next Level Overlay -->
+    <div id="winOverlay">
+        <h2 id="winTitle">🎉 LEVEL COMPLETED!</h2>
+        <button class="next-lvl-btn" onclick="proceedToNextLevel()">NEXT LEVEL ➡</button>
+    </div>
 
-        <div class="question-box" id="questionText">
-            Loading Trap...
+    <div class="hud">
+        <div id="hudLevel">LEVEL: 1 / 10</div>
+        <div id="hudFail">FAILS: 0</div>
+    </div>
+
+    <div class="game-viewport">
+        <canvas id="gameCanvas" width="900" height="450"></canvas>
+    </div>
+
+    <!-- 3D Glass Effect Mobile Controls -->
+    <div class="mobile-controls">
+        <div class="control-group">
+            <button class="glass-btn" id="btnLeft">◀</button>
+            <button class="glass-btn" id="btnRight">▶</button>
+            <button class="glass-btn" id="btnDown">▼</button>
         </div>
-
-        <input type="text" id="userAnswer" class="input-box" placeholder="Type your answer..." autocomplete="off">
-        
-        <button class="action-btn" id="submitBtn" onclick="checkAnswer()">SUBMIT ANSWER</button>
-        <button class="action-btn next-btn" id="nextBtn" onclick="nextLevel()">NEXT LEVEL ➡</button>
-        
-        <div class="stats" id="failStats">Fail Count: 0 | Taunt Level: Safe</div>
-        <button class="back-btn" onclick="goHome()">⬅ Quit to Home</button>
+        <div class="action-controls">
+            <button class="glass-btn action" id="btnJump">JUMP</button>
+            <button class="glass-btn action" id="btnClimb">CLIMB</button>
+            <button class="glass-btn action" id="btnBox">BOX UP</button>
+        </div>
     </div>
+
+    <button class="quit-btn" onclick="goHome()">⬅ Quit to Home</button>
 
     <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
         let currentLevel = parseInt(localStorage.getItem('zPajalRageLevel')) || 1;
         if (currentLevel > 10) currentLevel = 1;
-
         let failCount = 0;
-        let currentQuestionData = {};
+        let levelFinished = false;
 
-        // Web Audio API se achanak hasne wali/trolling aawaz generate karne ke liye
-        function playTrollSound() {
+        let player = {
+            x: 50,
+            y: 320,
+            width: 30,
+            height: 40,
+            vx: 0,
+            vy: 0,
+            speed: 4,
+            jumpPower: -10,
+            gravity: 0.5,
+            isGrounded: false,
+            facing: 'right'
+        };
+
+        let levelData = {};
+        
+        function initLevel(lvl) {
+            player.x = 50;
+            player.y = 320;
+            player.vx = 0;
+            player.vy = 0;
+            levelFinished = false;
+
+            levelData = {
+                platforms: [
+                    { x: 0, y: 380, w: 900, h: 70, type: 'normal' },
+                    { x: 200, y: 290, w: 120, h: 20, type: lvl >= 3 ? 'collapsing' : 'normal' },
+                    { x: 400, y: 220, w: 120, h: 20, type: 'normal' },
+                    { x: 600, y: 150, w: 120, h: 20, type: lvl >= 5 ? 'fake' : 'normal' }
+                ],
+                boxes: [
+                    { x: 280, y: 340, w: 40, h: 40 },
+                    { x: 500, y: 180, w: 40, h: 40 }
+                ],
+                spikes: [
+                    { x: 320, y: 365, w: 60, h: 15 },
+                    { x: 520, y: 205, w: 40, h: 15 }
+                ],
+                walls: [
+                    { x: 800, y: 100, w: 20, h: 280 }
+                ],
+                gate: { x: 840, y: 310, w: 40, h: 70, fleeing: lvl >= 7 }
+            };
+        }
+
+        // Keyboard Controls
+        let keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            if (e.code === 'Space') { e.preventDefault(); handleClimb(); }
+            if (e.code === 'Enter') { e.preventDefault(); handleBoxUp(); }
+            if (e.code === 'ArrowUp') { e.preventDefault(); handleJump(); }
+        });
+        window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+        // Touch Controls
+        document.getElementById('btnLeft').addEventListener('touchstart', () => keys['ArrowLeft'] = true);
+        document.getElementById('btnLeft').addEventListener('touchend', () => keys['ArrowLeft'] = false);
+        document.getElementById('btnRight').addEventListener('touchstart', () => keys['ArrowRight'] = true);
+        document.getElementById('btnRight').addEventListener('touchend', () => keys['ArrowRight'] = false);
+        document.getElementById('btnJump').addEventListener('touchstart', () => handleJump());
+        document.getElementById('btnDown').addEventListener('touchstart', () => keys['ArrowDown'] = true);
+        document.getElementById('btnDown').addEventListener('touchend', () => keys['ArrowDown'] = false);
+        document.getElementById('btnClimb').addEventListener('touchstart', () => handleClimb());
+        document.getElementById('btnBox').addEventListener('touchstart', () => handleBoxUp());
+
+        function handleJump() {
+            if (player.isGrounded && !levelFinished) {
+                player.vy = player.jumpPower;
+                player.isGrounded = false;
+            }
+        }
+
+        function handleClimb() {
+            if (levelFinished) return;
+            levelData.walls.forEach(wall => {
+                if (player.x + player.width >= wall.x - 15 && player.x <= wall.x + wall.w + 15) {
+                    player.vy = -6;
+                }
+            });
+        }
+
+        function handleBoxUp() {
+            if (levelFinished) return;
+            levelData.boxes.forEach(box => {
+                if (Math.abs(player.x - box.x) < 50 && player.y > box.y - 60) {
+                    player.vy = -9;
+                    player.y = box.y - player.height - 5;
+                }
+            });
+        }
+
+        // 1. Trolling Laugh Sound (Fail hone par)
+        function playTrollLaughSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // 3 descending buzz notes to mimic a mocking laugh/sound
-                [300, 200, 150].forEach((freq, index) => {
+                [320, 220, 140].forEach((freq, idx) => {
                     setTimeout(() => {
                         if (audioCtx.state === 'suspended') audioCtx.resume();
                         const osc = audioCtx.createOscillator();
@@ -257,111 +399,199 @@
                         gain.connect(audioCtx.destination);
                         osc.start();
                         osc.stop(audioCtx.currentTime + 0.3);
-                    }, index * 150);
+                    }, idx * 150);
                 });
-            } catch (e) {
-                console.log("Audio not supported");
-            }
+            } catch(e) {}
         }
 
-        function triggerLojer(reasonText) {
+        // 2. Win Voice Sound ("Well Done!")
+        function playWellDoneSound() {
+            try {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance("Well Done!");
+                    utterance.rate = 1.1;
+                    utterance.pitch = 1.2;
+                    window.speechSynthesis.speak(utterance);
+                }
+            } catch(e) {}
+        }
+
+        function triggerFail(msg) {
+            if (levelFinished) return;
             failCount++;
-            document.getElementById('failStats').innerText = `Fail Count: ${failCount} | Status: Raging 🔥`;
-            document.getElementById('trollReason').innerText = reasonText;
+            document.getElementById('hudFail').innerText = `FAILS: ${failCount}`;
+            document.getElementById('trollMsg').innerText = msg;
             
             const overlay = document.getElementById('lojerOverlay');
             overlay.classList.add('show');
-            playTrollSound();
+            playTrollLaughSound();
 
-            // Exactly 2 seconds ke baad LOJER screen gayab ho jayegi
             setTimeout(() => {
                 overlay.classList.remove('show');
+                initLevel(currentLevel);
             }, 2000);
         }
 
-        function loadLevel() {
-            document.getElementById('levelBadge').innerText = `🎮 LEVEL ${currentLevel} / 10`;
-            document.getElementById('userAnswer').value = "";
-            document.getElementById('submitBtn').style.display = "block";
-            document.getElementById('nextBtn').style.display = "none";
-
-            currentQuestionData = getLevelPuzzle(currentLevel);
-            document.getElementById('questionText').innerHTML = currentQuestionData.q;
+        function triggerWin() {
+            if (levelFinished) return;
+            levelFinished = true;
+            playWellDoneSound();
+            document.getElementById('winOverlay').classList.add('show');
         }
 
-        // Levels 1 to 10 with tricky traps & ego-hurt logic
-        function getLevelPuzzle(lvl) {
-            switch(lvl) {
-                case 1:
-                    return { q: "What is 2 + 2 × 2 ?<br><small style='color:#ff5555'>(Hint: Bodmas mat bhulna!)</small>", a: "6" };
-                case 2:
-                    return { q: "Acha? Agar 5 + 3 = 28, 9 + 1 = 810, toh 7 + 3 = ?", a: "410" }; // Logic: (5-3)(5+3) = 28
-                case 3:
-                    return { q: "Spell 'IDIOT' backwards in your mind and type the middle letter:", a: "i" };
-                case 4:
-                    return { q: "If yesterday was the day before Saturday, what day is today?", a: "sunday" };
-                case 5:
-                    return { q: "Jaldi batao! 10 birds sitting on a tree, hunter shot 1. How many left?", a: "0" }; // Sare ud gaye!
-                case 6:
-                    return { q: "Which number comes next? 3, 7, 15, 31, ?", a: "63" }; // x2 + 1
-                case 7:
-                    return { q: "Find the hidden color code by typing opposite of 'WHITE':", a: "black" };
-                case 8:
-                    return { q: "A monkey climbs 3m up a pole during day, slips 2m down at night. Height 10m. Days taken?", a: "8" };
-                case 9:
-                    return { q: "What has keys, but no locks; space, but no room; and you can enter, but not go outside?", a: "keyboard" };
-                case 10:
-                    return { q: "FINAL BOSS LEVEL 10:<br>Solve: (100 - 50) × 0 + 25 = ?", a: "25" };
-                default:
-                    return { q: "What is 1 + 1 ?", a: "2" };
-            }
-        }
-
-        function checkAnswer() {
-            const userAns = document.getElementById('userAnswer').value.toLowerCase().trim();
-
-            if (userAns === "") {
-                triggerLojer("Answer khali chhod diya? Itna darr gaye?");
-                return;
-            }
-
-            // Har level par 1-3 baar fail hone ka maza tab aayega jab user pehli baar me galat answer de ya trap me fase
-            // Yahan hum check karenge ki kya answer sahi hai ya nahi
-            if (userAns === currentQuestionData.a) {
-                // Sahi jawab par hi Next Level ka button khulega
-                document.getElementById('submitBtn').style.display = "none";
-                document.getElementById('nextBtn').style.display = "block";
-                document.getElementById('questionText').innerHTML = "🎉 <span style='color:#00ff88'>Sahi pakde hain! Level Clear!</span> Ab next level dabao.";
-            } else {
-                // Galat jawab par LOJER overlay + 2 second delay + laugh sound
-                let taunts = [
-                    "Galat jawab! Thoda dimaag use kar lo bhai!",
-                    "Haha! Itna asaan sawal aur itna ganda jawab!",
-                    "Tumse na ho payega! Ego hurt ho gaya na?",
-                    "Acha try tha... par ho tum pure LOJER!"
-                ];
-                let randomTaunt = taunts[Math.floor(Math.random() * taunts.length)];
-                triggerLojer(randomTaunt);
-            }
-        }
-
-        function nextLevel() {
+        function proceedToNextLevel() {
+            document.getElementById('winOverlay').classList.remove('show');
             if (currentLevel < 10) {
                 currentLevel++;
                 localStorage.setItem('zPajalRageLevel', currentLevel);
-                loadLevel();
+                document.getElementById('hudLevel').innerText = `LEVEL: ${currentLevel} / 10`;
+                initLevel(currentLevel);
             } else {
-                alert("🏆 KAMAAL KAR DIYA! Tumne saare 10 Rage Levels paas kar liye! Ab asli game shuru hogi!");
-                localStorage.setItem('zPajalRageLevel', 10);
+                alert("👑 BADHAI HO! Tumne saare 10 Rage Levels jeet liye!");
+                currentLevel = 1;
+                localStorage.setItem('zPajalRageLevel', 1);
                 window.location.href = "home.html";
             }
+        }
+
+        function update() {
+            if (levelFinished) return;
+
+            if (keys['ArrowLeft'] || keys['KeyA']) {
+                player.vx = -player.speed;
+                player.facing = 'left';
+            } else if (keys['ArrowRight'] || keys['KeyD']) {
+                player.vx = player.speed;
+                player.facing = 'right';
+            } else {
+                player.vx = 0;
+            }
+
+            player.x += player.vx;
+            player.vy += player.gravity;
+            player.y += player.vy;
+
+            if (player.x < 0) player.x = 0;
+            if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+
+            player.isGrounded = false;
+            levelData.platforms.forEach(plat => {
+                if (
+                    player.x + player.width > plat.x &&
+                    player.x < plat.x + plat.w &&
+                    player.y + player.height >= plat.y &&
+                    player.y + player.height <= plat.y + 15 &&
+                    player.vy >= 0
+                ) {
+                    player.y = plat.y - player.height;
+                    player.vy = 0;
+                    player.isGrounded = true;
+
+                    if (plat.type === 'collapsing') {
+                        setTimeout(() => { plat.y += 500; }, 400);
+                    }
+                }
+            });
+
+            levelData.boxes.forEach(box => {
+                if (
+                    player.x + player.width > box.x &&
+                    player.x < box.x + box.w &&
+                    player.y + player.height >= box.y &&
+                    player.y + player.height <= box.y + 10 &&
+                    player.vy >= 0
+                ) {
+                    player.y = box.y - player.height;
+                    player.vy = 0;
+                    player.isGrounded = true;
+                }
+            });
+
+            levelData.spikes.forEach(spike => {
+                if (
+                    player.x + player.width > spike.x &&
+                    player.x < spike.x + spike.w &&
+                    player.y + player.height > spike.y &&
+                    player.y < spike.y + spike.h
+                ) {
+                    triggerFail("Invisible spike ne attack kar diya! 🤪");
+                }
+            });
+
+            if (player.y > canvas.height) {
+                triggerFail("Zameen gayab ho gayi! Niche gir gaye!");
+            }
+
+            let gate = levelData.gate;
+            if (gate.fleeing && Math.abs(player.x - gate.x) < 80) {
+                gate.x += (Math.random() > 0.5 ? 40 : -40);
+                if (gate.x < 600) gate.x = 600;
+                if (gate.x > 850) gate.x = 850;
+            }
+
+            if (
+                player.x + player.width > gate.x &&
+                player.x < gate.x + gate.w &&
+                player.y + player.height > gate.y &&
+                player.y < gate.y + gate.h
+            ) {
+                triggerWin();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            levelData.platforms.forEach(plat => {
+                ctx.fillStyle = plat.type === 'collapsing' ? '#ffaa00' : '#00ffcc';
+                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+            });
+
+            levelData.walls.forEach(wall => {
+                ctx.fillStyle = '#9900ff';
+                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+            });
+
+            levelData.boxes.forEach(box => {
+                ctx.fillStyle = '#ff007f';
+                ctx.fillRect(box.x, box.y, box.w, box.h);
+            });
+
+            levelData.spikes.forEach(spike => {
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.moveTo(spike.x, spike.y + spike.h);
+                ctx.lineTo(spike.x + spike.w / 2, spike.y);
+                ctx.lineTo(spike.x + spike.w, spike.y + spike.h);
+                ctx.fill();
+            });
+
+            let gate = levelData.gate;
+            ctx.fillStyle = '#ffff00';
+            ctx.fillRect(gate.x, gate.y, gate.w, gate.h);
+            ctx.fillStyle = '#000';
+            ctx.font = '10px Orbitron';
+            ctx.fillText("GATE", gate.x + 6, gate.y + 40);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.fillStyle = '#000';
+            let eyeOffset = player.facing === 'right' ? 18 : 6;
+            ctx.fillRect(player.x + eyeOffset, player.y + 10, 6, 6);
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
         }
 
         function goHome() {
             window.location.href = "home.html";
         }
 
-        window.onload = loadLevel;
+        initLevel(currentLevel);
+        loop();
     </script>
 </body>
 </html>
