@@ -19,7 +19,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #050505; /* 80% darker background */
+            background: #050505;
             background: linear-gradient(to right, #050505, #0a0a0c, #050505);
             overflow: hidden;
             padding: 20px;
@@ -30,7 +30,7 @@
             border-radius: 50%;
             filter: blur(80px);
             z-index: 0;
-            opacity: 0.4; /* Dimming orbs */
+            opacity: 0.4;
             animation: float 10s infinite alternate ease-in-out;
         }
         .orb-1 {
@@ -128,7 +128,7 @@
 
         #loginBtn {
             position: absolute;
-            width: 80px; /* Small Initial Size */
+            width: 80px;
             height: 40px;
             background: linear-gradient(45deg, #ff007f, #7928ca);
             color: white;
@@ -145,7 +145,7 @@
         #loginBtn.final-state {
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, #00b09b, #96c93d); /* Neon Green */
+            background: linear-gradient(45deg, #00b09b, #96c93d);
             font-size: 18px;
             box-shadow: 0 5px 20px rgba(0, 255, 128, 0.5);
             transform: translate(0px, 0px) !important;
@@ -201,14 +201,16 @@
         </div>
     </div>
 
-    <!-- Firebase Authentication Integration -->
+    <!-- Firebase Authentication & Database Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCK9njPkGdw91_vGhI0_mRflpXBbz2D_zo",
             authDomain: "z-pajal.firebaseapp.com",
+            databaseURL: "https://z-pajal-default-rtdb.firebaseio.com",
             projectId: "z-pajal",
             storageBucket: "z-pajal.firebasestorage.app",
             messagingSenderId: "941362119453",
@@ -218,6 +220,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getDatabase(app);
 
         const loginBtn = document.getElementById('loginBtn');
         const gmailInput = document.getElementById('gmail');
@@ -229,29 +232,24 @@
         function dodgeAction(e) {
             if (isFinalState) return;
 
-            // Check if inputs are filled
             if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') return;
 
             if (attempts < 5) {
-                // Block clicking logic while dodging
                 if (e && (e.type === 'click' || e.type === 'touchstart')) {
                     e.preventDefault();
                     e.stopPropagation();
                 }
 
-                // Button moves randomly (far away)
                 const moveX = (Math.random() - 0.5) * 260; 
                 const moveY = (Math.random() - 0.5) * 160; 
                 
                 loginBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
                 
-                // Taunt the user as the button jumps
                 const taunts = ["MISS!", "OOPS!", "NOPE!", "HAHA!", "SLOW!"];
                 loginBtn.innerHTML = taunts[attempts];
                 
                 attempts++;
             } else if (attempts === 5) {
-                // 6th time -> Button stops, becomes big, green and clickable
                 isFinalState = true;
                 loginBtn.classList.add('final-state');
                 loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
@@ -267,7 +265,6 @@
         }, { passive: false });
 
         loginBtn.addEventListener('click', async (e) => {
-            // If not in final state, prevent click entirely
             if (!isFinalState) {
                 e.preventDefault();
                 dodgeAction(e);
@@ -287,15 +284,21 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Check if email is verified
                 if (!user.emailVerified) {
                     alert("⚠️ Pehle apne Gmail (" + email + ") par jaakar verification link par click karein, tabhi game khulegi!");
-                    loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
+                    loginBtn.innerHTML = "GOTCHA! PLAYNOW 🎮";
                     return;
                 }
 
+                // 🛑 Single Device Login Handler: Unique Session ID generate karo
+                const sessionId = 'session_' + Math.random().toString(36).substring(2) + Date.now();
+                localStorage.setItem('userSessionId', sessionId);
+
+                // Firebase Database me activeSession update kar do taaki baaki devices se logout ho jaye
+                await set(ref(db, 'users/' + user.uid + '/activeSession'), sessionId);
+
                 alert("🎉 Welcome to 🤪 Z PAJAL! Login successful. Loading Level 1!");
-                window.location.href = "home.html"; // Yahan home.html par redirect kar diya hai
+                window.location.href = "home.html";
 
             } catch (error) {
                 alert("Login Failed: " + error.message);
