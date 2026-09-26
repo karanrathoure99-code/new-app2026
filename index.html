@@ -19,18 +19,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #0f0c29;  /* fallback for old browsers */
-            background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+            background: #050505;  /* 80% darker background */
+            background: linear-gradient(to right, #050505, #0a0a0c, #050505);
             overflow: hidden;
             padding: 20px;
         }
 
-        /* Animated Background Orbs */
         .orb {
             position: absolute;
             border-radius: 50%;
             filter: blur(80px);
             z-index: 0;
+            opacity: 0.4; /* Dimming orbs */
             animation: float 10s infinite alternate ease-in-out;
         }
         .orb-1 {
@@ -50,12 +50,11 @@
             100% { transform: translateY(50px) scale(1.2); }
         }
 
-        /* Glassmorphism Login Container */
         .glass-box {
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 420px; /* Adapts to phone, tablet, laptop */
+            max-width: 420px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -66,7 +65,6 @@
             text-align: center;
         }
 
-        /* Emoji & Title Styling */
         .game-title {
             font-size: 32px;
             font-weight: 800;
@@ -90,7 +88,6 @@
             100% { opacity: 1; filter: drop-shadow(0 0 25px #ffcc00); transform: scale(1.1); }
         }
 
-        /* Inputs Styling */
         .input-group {
             margin-bottom: 25px;
             position: relative;
@@ -118,31 +115,41 @@
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
-        /* Magic Dodge Button */
         .button-wrapper {
             position: relative;
             height: 55px;
             margin-top: 10px;
             margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #loginBtn {
             position: absolute;
-            left: 0; top: 0;
-            width: 100%;
-            height: 100%;
+            width: 80px; /* Small Initial Size */
+            height: 40px;
             background: linear-gradient(45deg, #ff007f, #7928ca);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 800;
             cursor: pointer;
-            transition: transform 0.25s ease-out, background 0.4s;
+            transition: transform 0.25s ease-out, width 0.4s ease, height 0.4s ease, background 0.4s ease, font-size 0.4s ease, box-shadow 0.4s ease;
             box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+            z-index: 20;
         }
 
-        /* Links at the bottom */
+        #loginBtn.final-state {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #00b09b, #96c93d); /* Neon Green */
+            font-size: 18px;
+            box-shadow: 0 5px 20px rgba(0, 255, 128, 0.5);
+            transform: translate(0px, 0px) !important;
+        }
+
         .footer-options {
             display: flex;
             justify-content: space-between;
@@ -168,11 +175,9 @@
 </head>
 <body>
 
-    <!-- Background Orbs -->
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-    <!-- Login Form -->
     <div class="glass-box">
         <div class="game-title">
             <span class="emoji">🤪</span> Z PAJAL
@@ -186,7 +191,7 @@
         </div>
         
         <div class="button-wrapper">
-            <button id="loginBtn">START GAME</button>
+            <button id="loginBtn">START</button>
         </div>
 
         <div class="footer-options">
@@ -201,45 +206,63 @@
         const passwordInput = document.getElementById('password');
         
         let attempts = 0;
+        let isFinalState = false;
 
         function dodgeAction(e) {
-            // Check if inputs are filled (so user doesn't get frustrated early)
+            if (isFinalState) return;
+
+            // Check if inputs are filled
             if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') return;
 
             if (attempts < 5) {
-                // Button moves randomly (safe distance so it stays on screen on mobile)
-                const moveX = (Math.random() - 0.5) * 120; // Moves left/right randomly
-                const moveY = (Math.random() - 0.5) * 80;  // Moves up/down randomly
+                // Block clicking logic while dodging
+                if (e && (e.type === 'click' || e.type === 'touchstart')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                // Button moves randomly (far away)
+                const moveX = (Math.random() - 0.5) * 260; // Wider distance left/right
+                const moveY = (Math.random() - 0.5) * 160; // Wider distance up/down
                 
                 loginBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                
+                // Taunt the user as the button jumps
+                const taunts = ["MISS!", "OOPS!", "NOPE!", "HAHA!", "SLOW!"];
+                loginBtn.innerHTML = taunts[attempts];
+                
                 attempts++;
             } else if (attempts === 5) {
-                // 6th time -> Button stops and becomes clickable
-                loginBtn.style.transform = `translate(0px, 0px)`;
-                loginBtn.style.background = `linear-gradient(45deg, #00b09b, #96c93d)`; // Turns Green
-                loginBtn.style.boxShadow = `0 5px 20px rgba(0, 255, 128, 0.5)`;
+                // 6th time -> Button stops, becomes big, green and clickable
+                isFinalState = true;
+                loginBtn.classList.add('final-state');
                 loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
-                attempts++; 
             }
         }
 
-        // Mobile touch support and PC mouse support
         loginBtn.addEventListener('mouseenter', dodgeAction);
         loginBtn.addEventListener('touchstart', (e) => {
-            if(attempts < 5) e.preventDefault(); // Prevents clicking on mobile while dodging
-            dodgeAction();
-        });
+            if (!isFinalState) {
+                e.preventDefault(); // Prevents clicking on mobile while dodging
+                dodgeAction(e);
+            }
+        }, { passive: false });
 
         loginBtn.addEventListener('click', (e) => {
+            // If not in final state, prevent click entirely
+            if (!isFinalState) {
+                e.preventDefault();
+                dodgeAction(e);
+                return;
+            }
+
+            // Valid click actions
             if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') {
                 alert("Game rules: Pehle Gmail aur Password fill karo!");
                 return;
             }
 
-            if (attempts >= 6) {
-                alert("🎉 Welcome to 🤪 Z PAJAL! Tumhara dimag kharab hone wala hai... Loading Level 1!");
-                // window.location.href = "game-page.html"; // Next page link
-            }
+            alert("🎉 Welcome to 🤪 Z PAJAL! Tumhara dimag kharab hone wala hai... Loading Level 1!");
         });
     </script>
 
