@@ -3,127 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hardcore Game - Login</title>
+    <title>🤪 Z PAJAL - Login</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Courier New', Courier, monospace; /* Gaming terminal vibe */
+            font-family: 'Comic Sans MS', 'Arial', sans-serif; /* Crazy playful font */
         }
         
         body {
-            background-color: #050505; /* Pitch black */
+            background-color: #121212;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            color: #ff003c; /* Neon Danger Red */
+            color: #fff;
         }
 
-        .login-container {
-            background: rgba(10, 10, 10, 0.9);
-            border: 2px solid #ff003c;
+        .login-box {
+            background: #1e1e1e;
             padding: 40px 30px;
-            width: 350px;
-            box-shadow: 0 0 20px #ff003c, inset 0 0 10px #ff003c;
+            width: 380px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5); /* Purple glow */
+            border: 2px solid #8a2be2;
             text-align: center;
             position: relative;
         }
 
-        /* Glitchy title effect */
-        .login-container h2 {
+        /* Emoji Glowing & Dimming Animation */
+        .title {
+            font-size: 32px;
             margin-bottom: 30px;
-            font-size: 26px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 5px #ff003c;
-            animation: pulse 2s infinite;
+            color: #8a2be2;
+            text-shadow: 2px 2px 5px #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji {
+            font-size: 40px;
+            animation: glow-dim 1.5s infinite alternate;
+        }
+
+        @keyframes glow-dim {
+            0% { opacity: 0.2; text-shadow: 0 0 5px yellow; transform: scale(0.9); }
+            100% { opacity: 1; text-shadow: 0 0 30px yellow, 0 0 50px white; transform: scale(1.1); }
         }
 
         .input-group {
-            margin-bottom: 25px;
-            position: relative;
+            margin-bottom: 20px;
         }
 
         .input-group input {
             width: 100%;
-            padding: 12px;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #555;
+            padding: 12px 15px;
+            background: #2a2a2a;
+            border: 2px solid transparent;
+            border-radius: 10px;
             color: #fff;
             font-size: 16px;
             outline: none;
             transition: 0.3s;
-            text-align: center;
-            letter-spacing: 1px;
         }
 
         .input-group input:focus {
-            border-bottom: 2px solid #ff003c;
-            box-shadow: 0 5px 5px -5px #ff003c;
+            border: 2px solid #8a2be2;
+            background: #111;
         }
 
-        .input-group input::placeholder {
-            color: #666;
-            letter-spacing: 2px;
+        /* The Trick Button */
+        .btn-container {
+            height: 60px; /* Space for button to jump */
+            position: relative;
+            margin-bottom: 15px;
         }
 
-        .btn {
+        #loginBtn {
             width: 100%;
             padding: 15px;
-            background: #ff003c;
-            color: #000;
+            background: #ff3366;
+            color: white;
             border: none;
+            border-radius: 10px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.2s;
-            letter-spacing: 3px;
+            transition: transform 0.2s ease, background 0.3s ease;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 10;
         }
 
-        .btn:hover {
-            background: #000;
-            color: #ff003c;
-            border: 1px solid #ff003c;
-            box-shadow: 0 0 25px #ff003c;
+        .footer-links {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
         }
 
-        .warning-text {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #555;
-            letter-spacing: 1px;
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: 0.3s;
         }
 
-        @keyframes pulse {
-            0% { text-shadow: 2px 2px 5px #ff003c; }
-            50% { text-shadow: 0 0 20px #ff003c, 0 0 30px #ff003c; }
-            100% { text-shadow: 2px 2px 5px #ff003c; }
+        .footer-links a:hover {
+            color: #8a2be2;
+            text-shadow: 0 0 10px #8a2be2;
         }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <h2>Enter The Void</h2>
+    <div class="login-box">
+        <div class="title">
+            <span class="emoji">🤪</span> Z PAJAL
+        </div>
         
-        <form onsubmit="event.preventDefault(); alert('Game Starting... Get Ready to Rage!');">
+        <form id="loginForm">
             <div class="input-group">
-                <input type="text" placeholder="PLAYER ID" required autocomplete="off">
+                <input type="email" id="email" placeholder="Gmail Address" required>
             </div>
             <div class="input-group">
-                <input type="password" placeholder="PASSWORD" required>
+                <input type="password" id="password" placeholder="Password" required>
             </div>
             
-            <button type="submit" class="btn">Start Game</button>
+            <div class="btn-container">
+                <button type="button" id="loginBtn">LOGIN</button>
+            </div>
         </form>
 
-        <p class="warning-text">WARNING: EXTREME DIFFICULTY AHEAD</p>
+        <div class="footer-links">
+            <a href="#">ℹ️ About Game</a>
+            <a href="#">✨ New Account</a>
+        </div>
     </div>
+
+    <script>
+        const loginBtn = document.getElementById('loginBtn');
+        const emailInput = document.getElementById('email');
+        const passInput = document.getElementById('password');
+        
+        let jumpCount = 0;
+
+        // Function to move the button
+        function dodgeButton(e) {
+            // Check if inputs are filled (optional, but good for UX so they don't get frustrated before typing)
+            if(emailInput.value === '' || passInput.value === '') return;
+
+            if (jumpCount < 5) {
+                // Randomly change position
+                const randomX = Math.floor(Math.random() * 200) - 100; // Left or Right (-100 to 100px)
+                const randomY = Math.floor(Math.random() * 150) - 75;  // Up or Down (-75 to 75px)
+                
+                loginBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+                jumpCount++;
+            } else if (jumpCount === 5) {
+                // On the 6th try, bring it back and make it clickable
+                loginBtn.style.transform = `translate(0px, 0px)`;
+                loginBtn.style.background = "#00ffcc"; // Turns neon green/cyan
+                loginBtn.style.color = "#000";
+                loginBtn.innerText = "FINALLY! CLICK ME 😅";
+                jumpCount++; // Move to 6 so it doesn't trigger again
+            }
+        }
+
+        // Trigger dodge on hover (for PC) and click/touch (for Mobile)
+        loginBtn.addEventListener('mouseenter', dodgeButton);
+        
+        loginBtn.addEventListener('click', (e) => {
+            if(emailInput.value === '' || passInput.value === '') {
+                alert("Pehle Gmail aur Password dalo!");
+                return;
+            }
+
+            if (jumpCount < 6) {
+                dodgeButton(e); // If they somehow manage to click it before 6 tries, dodge again
+            } else {
+                alert('Congratulations! Tumne Z PAJAL ka pehla level (Login) paar kar liya! 🎉');
+                // Yahan tum asli login logic ya next page par redirect kar sakte ho
+                // window.location.href = "game.html"; 
+            }
+        });
+    </script>
 
 </body>
 </html>
