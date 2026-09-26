@@ -3,192 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤪 Z PAJAL - Login</title>
+    <title>🤪 Z PAJAL - Premium Login</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Comic Sans MS', 'Arial', sans-serif; /* Crazy playful font */
+            font-family: 'Poppins', sans-serif;
         }
-        
+
         body {
-            background-color: #121212;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            background: #0f0c29;  /* fallback for old browsers */
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
             overflow: hidden;
-            color: #fff;
+            padding: 20px;
         }
 
-        .login-box {
-            background: #1e1e1e;
-            padding: 40px 30px;
-            width: 380px;
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5); /* Purple glow */
-            border: 2px solid #8a2be2;
-            text-align: center;
+        /* Animated Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+        .orb-1 {
+            width: 300px; height: 300px;
+            background: #ff007f;
+            top: -50px; left: -50px;
+        }
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: #00f0ff;
+            bottom: -100px; right: -50px;
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(50px) scale(1.2); }
+        }
+
+        /* Glassmorphism Login Container */
+        .glass-box {
             position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 420px; /* Adapts to phone, tablet, laptop */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+            text-align: center;
         }
 
-        /* Emoji Glowing & Dimming Animation */
-        .title {
+        /* Emoji & Title Styling */
+        .game-title {
             font-size: 32px;
+            font-weight: 800;
+            color: #fff;
             margin-bottom: 30px;
-            color: #8a2be2;
-            text-shadow: 2px 2px 5px #000;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .emoji {
-            font-size: 40px;
-            animation: glow-dim 1.5s infinite alternate;
+            font-size: 45px;
+            animation: pulse-light 1.5s infinite alternate;
         }
 
-        @keyframes glow-dim {
-            0% { opacity: 0.2; text-shadow: 0 0 5px yellow; transform: scale(0.9); }
-            100% { opacity: 1; text-shadow: 0 0 30px yellow, 0 0 50px white; transform: scale(1.1); }
+        @keyframes pulse-light {
+            0% { opacity: 0.3; filter: drop-shadow(0 0 5px #ffcc00); transform: scale(0.9); }
+            100% { opacity: 1; filter: drop-shadow(0 0 25px #ffcc00); transform: scale(1.1); }
         }
 
+        /* Inputs Styling */
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .input-group input {
             width: 100%;
-            padding: 12px 15px;
-            background: #2a2a2a;
-            border: 2px solid transparent;
-            border-radius: 10px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             color: #fff;
             font-size: 16px;
             outline: none;
-            transition: 0.3s;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .input-group input:focus {
-            border: 2px solid #8a2be2;
-            background: #111;
+            border: 2px solid #00f0ff;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
-        /* The Trick Button */
-        .btn-container {
-            height: 60px; /* Space for button to jump */
+        /* Magic Dodge Button */
+        .button-wrapper {
             position: relative;
-            margin-bottom: 15px;
+            height: 55px;
+            margin-top: 10px;
+            margin-bottom: 30px;
         }
 
         #loginBtn {
+            position: absolute;
+            left: 0; top: 0;
             width: 100%;
-            padding: 15px;
-            background: #ff3366;
+            height: 100%;
+            background: linear-gradient(45deg, #ff007f, #7928ca);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, background 0.3s ease;
-            position: absolute;
-            left: 0;
-            top: 0;
-            z-index: 10;
+            transition: transform 0.25s ease-out, background 0.4s;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
         }
 
-        .footer-links {
-            margin-top: 25px;
+        /* Links at the bottom */
+        .footer-options {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
+            align-items: center;
         }
 
-        .footer-links a {
-            color: #aaa;
+        .footer-options a {
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            transition: 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.3s, text-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .footer-links a:hover {
-            color: #8a2be2;
-            text-shadow: 0 0 10px #8a2be2;
+        .footer-options a:hover {
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
         }
     </style>
 </head>
 <body>
 
-    <div class="login-box">
-        <div class="title">
+    <!-- Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Login Form -->
+    <div class="glass-box">
+        <div class="game-title">
             <span class="emoji">🤪</span> Z PAJAL
         </div>
         
-        <form id="loginForm">
-            <div class="input-group">
-                <input type="email" id="email" placeholder="Gmail Address" required>
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" placeholder="Password" required>
-            </div>
-            
-            <div class="btn-container">
-                <button type="button" id="loginBtn">LOGIN</button>
-            </div>
-        </form>
+        <div class="input-group">
+            <input type="email" id="gmail" placeholder="Enter Gmail" required autocomplete="off">
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Enter Password" required>
+        </div>
+        
+        <div class="button-wrapper">
+            <button id="loginBtn">START GAME</button>
+        </div>
 
-        <div class="footer-links">
-            <a href="#">ℹ️ About Game</a>
-            <a href="#">✨ New Account</a>
+        <div class="footer-options">
+            <a href="#"><span>🛡️</span> About Game</a>
+            <a href="#"><span>✨</span> New Account</a>
         </div>
     </div>
 
     <script>
         const loginBtn = document.getElementById('loginBtn');
-        const emailInput = document.getElementById('email');
-        const passInput = document.getElementById('password');
+        const gmailInput = document.getElementById('gmail');
+        const passwordInput = document.getElementById('password');
         
-        let jumpCount = 0;
+        let attempts = 0;
 
-        // Function to move the button
-        function dodgeButton(e) {
-            // Check if inputs are filled (optional, but good for UX so they don't get frustrated before typing)
-            if(emailInput.value === '' || passInput.value === '') return;
+        function dodgeAction(e) {
+            // Check if inputs are filled (so user doesn't get frustrated early)
+            if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') return;
 
-            if (jumpCount < 5) {
-                // Randomly change position
-                const randomX = Math.floor(Math.random() * 200) - 100; // Left or Right (-100 to 100px)
-                const randomY = Math.floor(Math.random() * 150) - 75;  // Up or Down (-75 to 75px)
+            if (attempts < 5) {
+                // Button moves randomly (safe distance so it stays on screen on mobile)
+                const moveX = (Math.random() - 0.5) * 120; // Moves left/right randomly
+                const moveY = (Math.random() - 0.5) * 80;  // Moves up/down randomly
                 
-                loginBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
-                jumpCount++;
-            } else if (jumpCount === 5) {
-                // On the 6th try, bring it back and make it clickable
+                loginBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                attempts++;
+            } else if (attempts === 5) {
+                // 6th time -> Button stops and becomes clickable
                 loginBtn.style.transform = `translate(0px, 0px)`;
-                loginBtn.style.background = "#00ffcc"; // Turns neon green/cyan
-                loginBtn.style.color = "#000";
-                loginBtn.innerText = "FINALLY! CLICK ME 😅";
-                jumpCount++; // Move to 6 so it doesn't trigger again
+                loginBtn.style.background = `linear-gradient(45deg, #00b09b, #96c93d)`; // Turns Green
+                loginBtn.style.boxShadow = `0 5px 20px rgba(0, 255, 128, 0.5)`;
+                loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
+                attempts++; 
             }
         }
 
-        // Trigger dodge on hover (for PC) and click/touch (for Mobile)
-        loginBtn.addEventListener('mouseenter', dodgeButton);
-        
+        // Mobile touch support and PC mouse support
+        loginBtn.addEventListener('mouseenter', dodgeAction);
+        loginBtn.addEventListener('touchstart', (e) => {
+            if(attempts < 5) e.preventDefault(); // Prevents clicking on mobile while dodging
+            dodgeAction();
+        });
+
         loginBtn.addEventListener('click', (e) => {
-            if(emailInput.value === '' || passInput.value === '') {
-                alert("Pehle Gmail aur Password dalo!");
+            if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') {
+                alert("Game rules: Pehle Gmail aur Password fill karo!");
                 return;
             }
 
-            if (jumpCount < 6) {
-                dodgeButton(e); // If they somehow manage to click it before 6 tries, dodge again
-            } else {
-                alert('Congratulations! Tumne Z PAJAL ka pehla level (Login) paar kar liya! 🎉');
-                // Yahan tum asli login logic ya next page par redirect kar sakte ho
-                // window.location.href = "game.html"; 
+            if (attempts >= 6) {
+                alert("🎉 Welcome to 🤪 Z PAJAL! Tumhara dimag kharab hone wala hai... Loading Level 1!");
+                // window.location.href = "game-page.html"; // Next page link
             }
         });
     </script>
