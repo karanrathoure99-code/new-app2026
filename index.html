@@ -91,6 +91,7 @@
         .input-group {
             margin-bottom: 25px;
             position: relative;
+            text-align: left;
         }
 
         .input-group input {
@@ -191,16 +192,33 @@
         </div>
         
         <div class="button-wrapper">
-            <button id="loginBtn">START</button>
+            <button id="loginBtn" type="button">START</button>
         </div>
 
         <div class="footer-options">
             <a href="about.html"><span>🛡️</span> About Game</a>
-            <a href="#"><span>✨</span> New Account</a>
+            <a href="register.html"><span>✨</span> New Account</a>
         </div>
     </div>
 
-    <script>
+    <!-- Firebase Authentication Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCK9njPkGdw91_vGhI0_mRflpXBbz2D_zo",
+            authDomain: "z-pajal.firebaseapp.com",
+            projectId: "z-pajal",
+            storageBucket: "z-pajal.firebasestorage.app",
+            messagingSenderId: "941362119453",
+            appId: "1:941362119453:web:c52140dba1952a389197f4",
+            measurementId: "G-PKKCQ5CT9P"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
         const loginBtn = document.getElementById('loginBtn');
         const gmailInput = document.getElementById('gmail');
         const passwordInput = document.getElementById('password');
@@ -222,8 +240,8 @@
                 }
 
                 // Button moves randomly (far away)
-                const moveX = (Math.random() - 0.5) * 260; // Wider distance left/right
-                const moveY = (Math.random() - 0.5) * 160; // Wider distance up/down
+                const moveX = (Math.random() - 0.5) * 260; 
+                const moveY = (Math.random() - 0.5) * 160; 
                 
                 loginBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
                 
@@ -243,12 +261,12 @@
         loginBtn.addEventListener('mouseenter', dodgeAction);
         loginBtn.addEventListener('touchstart', (e) => {
             if (!isFinalState) {
-                e.preventDefault(); // Prevents clicking on mobile while dodging
+                e.preventDefault(); 
                 dodgeAction(e);
             }
         }, { passive: false });
 
-        loginBtn.addEventListener('click', (e) => {
+        loginBtn.addEventListener('click', async (e) => {
             // If not in final state, prevent click entirely
             if (!isFinalState) {
                 e.preventDefault();
@@ -256,13 +274,33 @@
                 return;
             }
 
-            // Valid click actions
-            if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') {
+            const email = gmailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if(email === '' || password === '') {
                 alert("Game rules: Pehle Gmail aur Password fill karo!");
                 return;
             }
 
-            alert("🎉 Welcome to 🤪 Z PAJAL! Tumhara dimag kharab hone wala hai... Loading Level 1!");
+            try {
+                loginBtn.innerHTML = "Logging in...";
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Check if email is verified
+                if (!user.emailVerified) {
+                    alert("⚠️ Pehle apne Gmail (" + email + ") par jaakar verification link par click karein, tabhi game khulegi!");
+                    loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
+                    return;
+                }
+
+                alert("🎉 Welcome to 🤪 Z PAJAL! Login successful. Loading Level 1!");
+                // window.location.href = "game.html"; // Yahan apne game ka main page laga sakte ho
+
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+                loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
+            }
         });
     </script>
 
