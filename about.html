@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤪 Z PAJAL - About Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #050505;
+            background: linear-gradient(135deg, #050505, #120c1f, #050505);
+            overflow-x: hidden;
+            padding: 40px 20px;
+            color: #fff;
+        }
+
+        /* Animated Background Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            animation: float 10s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 350px; height: 350px;
+            background: rgba(255, 0, 127, 0.15);
+            top: -50px; left: -50px;
+        }
+        .orb-2 {
+            width: 450px; height: 450px;
+            background: rgba(0, 240, 255, 0.15);
+            bottom: -100px; right: -50px;
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(40px) scale(1.1); }
+        }
+
+        /* Header Title */
+        .header-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-container h1 {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .emoji {
+            font-size: 45px;
+            animation: pulse-light 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-light {
+            0% { opacity: 0.3; filter: drop-shadow(0 0 5px #ffcc00); transform: scale(0.9); }
+            100% { opacity: 1; filter: drop-shadow(0 0 25px #ffcc00); transform: scale(1.1); }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* Grid for 6 3D Glass Squares */
+        .grid-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 25px;
+        }
+
+        /* 3D Glass Squares */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 30px 60px rgba(0, 240, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #00f0ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .glass-card p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* Back Button */
+        .back-btn-container {
+            text-align: center;
+            margin-top: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .back-btn {
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #ff007f, #7928ca);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.7);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="header-container">
+        <h1><span class="emoji">🤪</span> ABOUT Z PAJAL</h1>
+        <p class="subtitle">Dimag ka dahi karne wale is safar ki poori kahani...</p>
+    </div>
+
+    <!-- 6 3D Glass Squares Containing Deep Lore & Details -->
+    <div class="grid-container">
+        
+        <!-- Square 1 -->
+        <div class="glass-card">
+            <h3>🎮 1. Game Overview & Concept</h3>
+            <p><strong>🤪 Z PAJAL</strong> koi aam puzzle game nahi hai. Yeh ek aisi virtual duniya hai jahan har ek kadm par aapka dimaag aur patience test kiya jata hai. Is game ko design karne ka sirf ek hi maqsad tha—player ko itna challenge karna ki wo haar na maane balki baar-baar koshish karne par majbur ho jaye. Iska har ek level ek naya psychological trap hai jo aapko sochne par majbur karega.</p>
+        </div>
+
+        <!-- Square 2 -->
+        <div class="glass-card">
+            <h3>🔥 2. Extreme Difficulty & Logic</h3>
+            <p>Yahan wahi jeet sakta hai jo traditional thinking ko chhod kar "out of the box" soche. Game ke traps itne unpredictable hain ki seedha rasta hamesha galat sabit hota hai. Aapko har ek button, har ek click, aur har ek movement par dhyan dena hoga. Ek choti si chook aapko seedha starting point par bhej sakti hai.</p>
+        </div>
+
+        <!-- Square 3 -->
+        <div class="glass-card">
+            <h3>⚡ 3. Zero Loading & Rage System</h3>
+            <p>Hum samajhte hain ki jab player out hota hai, toh gussa aata hai. Isliye Z PAJAL mein <strong>Zero Loading Time</strong> ka concept rakha gaya hai—aap jaise hi marengey, bina kisi delay ke turant dobara start ho jayega. "Bas ek aur baar try karta hoon" wali feeling hi is game ki sabse badi taakat hai jo aapko chhodi nahi degi.</p>
+        </div>
+
+        <!-- Square 4 -->
+        <div class="glass-card">
+            <h3>🧠 4. Player Psychology & Addiction</h3>
+            <p>Yeh game sirf entertainment ke liye nahi hai, yeh ek addiction hai. "Near-Miss Effect" (jab aap jeette-jeette reh jaate hain) aur trolls aapke andar ek aisi zidd paida kar dete hain ki jab tak level clear nahi hoga, aap chain se nahi baith sakte. Doston ke beech competition ke liye yeh game sabse best aur khatarnak option hai.</p>
+        </div>
+
+        <!-- Square 5 -->
+        <div class="glass-card">
+            <h3>⚠️ 5. Developer's Warning</h3>
+            <p><strong>Warning:</strong> Agar aapko jaldi gussa aata hai ya aapka phone nazuk hai, toh yeh game aapke liye khatarnak ho sakta hai! Game khelte samay phone todne ya screen par gussa nikalne ki poori zimmedari aapki khud ki hogi. Developer is baat ki koi guarantee nahi leta ki aapka dimag is game ko khelne ke baad shant rahega.</p>
+        </div>
+
+        <!-- Square 6 -->
+        <div class="glass-card">
+            <h3>🏆 6. Future Updates & Survival</h3>
+            <p>Z PAJAL ki yatra yahi khatam nahi hoti. Aage aane wale updates mein aur bhi zyada dimag kharab karne wale levels, hidden traps, aur global leaderboard features add kiye jayenge jahan aap apne doston ko challenge kar sakenge. Kya aap is impossible maze ko poora karke 'Z PAJAL Legend' ban sakte hain?</p>
+        </div>
+
+    </div>
+
+    <div class="back-btn-container">
+        <a href="index.html" class="back-btn">⬅️ Back to Login</a>
+    </div>
+
+</body>
+</html>
