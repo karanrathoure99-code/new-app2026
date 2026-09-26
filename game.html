@@ -12,29 +12,40 @@
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background: #030308;
             color: #ffffff;
+            width: 100vw;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
+            padding: 10px;
+        }
+
+        /* Master Wrapper to keep everything strictly inside screen bounds */
+        .game-wrapper {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
 
         /* Top HUD Bar */
         .hud {
-            position: absolute;
-            top: 15px;
             width: 100%;
-            max-width: 900px;
             display: flex;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 0 5px;
             z-index: 20;
             font-family: 'Orbitron', sans-serif;
         }
@@ -42,24 +53,23 @@
         .hud div {
             background: rgba(20, 15, 35, 0.8);
             border: 1px solid rgba(255, 0, 85, 0.4);
-            padding: 8px 15px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 13px;
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
         }
 
-        /* Game Canvas Container */
+        /* Game Canvas Container (Auto Scaling) */
         .game-viewport {
             position: relative;
             width: 100%;
-            max-width: 950px;
-            height: 450px;
+            aspect-ratio: 2 / 1; /* Automatically adjusts height based on width */
+            max-height: 400px;
             background: linear-gradient(to bottom, #0a0818, #151026);
             border: 3px solid rgba(0, 255, 204, 0.4);
-            border-radius: 20px;
-            box-shadow: 0 0 40px rgba(0, 255, 204, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
             overflow: hidden;
-            margin-top: 40px;
         }
 
         canvas {
@@ -75,7 +85,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(120, 0, 0, 0.5); /* 50% transparent red */
+            background: rgba(120, 0, 0, 0.5);
             backdrop-filter: blur(6px);
             display: flex;
             flex-direction: column;
@@ -94,7 +104,7 @@
 
         #lojerOverlay h2 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 80px;
+            font-size: 70px;
             font-weight: 900;
             color: #ff0000;
             text-shadow: 0 0 30px #000, 0 0 60px #ff0000;
@@ -102,11 +112,13 @@
         }
 
         #lojerOverlay p {
-            font-size: 22px;
+            font-size: 18px;
             color: #ffcc00;
             font-weight: bold;
             margin-top: 10px;
             text-shadow: 0 2px 5px #000;
+            text-align: center;
+            padding: 0 20px;
         }
 
         @keyframes shake {
@@ -114,7 +126,7 @@
             100% { transform: translate(-3px, -3px) rotate(-2deg); }
         }
 
-        /* Level Clear / Next Level Overlay Dialog */
+        /* Win Overlay */
         #winOverlay {
             position: fixed;
             top: 0;
@@ -140,83 +152,80 @@
 
         #winOverlay h2 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 50px;
+            font-size: 40px;
             color: #00ff88;
             text-shadow: 0 0 20px #00ff88;
             margin-bottom: 15px;
+            text-align: center;
         }
 
         .next-lvl-btn {
             background: linear-gradient(135deg, #00ff88, #00aa55);
             color: #000;
             border: none;
-            padding: 15px 35px;
+            padding: 14px 30px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 900;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
             box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
-            transition: 0.2s;
         }
 
-        .next-lvl-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* Mobile 3D Glass Effect Controls */
+        /* Mobile 3D Glass Effect Controls (Fully Responsive & Fit) */
         .mobile-controls {
             display: none;
             width: 100%;
-            max-width: 950px;
             justify-content: space-between;
-            padding: 15px 20px;
+            align-items: center;
+            padding: 5px 0;
             z-index: 20;
+            gap: 10px;
         }
 
         .control-group {
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
         .glass-btn {
-            width: 60px;
-            height: 60px;
+            width: 52px;
+            height: 52px;
             background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             color: white;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.2);
             cursor: pointer;
         }
 
         .glass-btn:active {
-            background: rgba(0, 255, 204, 0.2);
+            background: rgba(0, 255, 204, 0.25);
+            transform: scale(0.92);
         }
 
         .action-controls {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .glass-btn.action {
             background: rgba(255, 0, 119, 0.15);
             border-color: rgba(255, 0, 119, 0.4);
-            font-size: 14px;
-            border-radius: 15px;
-            width: 75px;
+            font-size: 12px;
+            border-radius: 12px;
+            width: 65px;
+            height: 52px;
         }
 
         .quit-btn {
-            position: absolute;
-            bottom: 10px;
             background: transparent;
             color: #8c8cb2;
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -224,7 +233,7 @@
             border-radius: 8px;
             font-size: 12px;
             cursor: pointer;
-            z-index: 20;
+            margin-top: 5px;
         }
 
         .quit-btn:hover {
@@ -232,10 +241,8 @@
             color: white;
         }
 
+        /* Show mobile controls only on mobile screen widths */
         @media (max-width: 768px) {
-            .game-viewport {
-                height: 320px;
-            }
             .mobile-controls {
                 display: flex;
             }
@@ -256,30 +263,32 @@
         <button class="next-lvl-btn" onclick="proceedToNextLevel()">NEXT LEVEL ➡</button>
     </div>
 
-    <div class="hud">
-        <div id="hudLevel">LEVEL: 1 / 10</div>
-        <div id="hudFail">FAILS: 0</div>
-    </div>
-
-    <div class="game-viewport">
-        <canvas id="gameCanvas" width="900" height="450"></canvas>
-    </div>
-
-    <!-- 3D Glass Effect Mobile Controls -->
-    <div class="mobile-controls">
-        <div class="control-group">
-            <button class="glass-btn" id="btnLeft">◀</button>
-            <button class="glass-btn" id="btnRight">▶</button>
-            <button class="glass-btn" id="btnDown">▼</button>
+    <div class="game-wrapper">
+        <div class="hud">
+            <div id="hudLevel">LEVEL: 1 / 10</div>
+            <div id="hudFail">FAILS: 0</div>
         </div>
-        <div class="action-controls">
-            <button class="glass-btn action" id="btnJump">JUMP</button>
-            <button class="glass-btn action" id="btnClimb">CLIMB</button>
-            <button class="glass-btn action" id="btnBox">BOX UP</button>
-        </div>
-    </div>
 
-    <button class="quit-btn" onclick="goHome()">⬅ Quit to Home</button>
+        <div class="game-viewport">
+            <canvas id="gameCanvas" width="900" height="450"></canvas>
+        </div>
+
+        <!-- 3D Glass Effect Mobile Controls -->
+        <div class="mobile-controls">
+            <div class="control-group">
+                <button class="glass-btn" id="btnLeft">◀</button>
+                <button class="glass-btn" id="btnRight">▶</button>
+                <button class="glass-btn" id="btnDown">▼</button>
+            </div>
+            <div class="action-controls">
+                <button class="glass-btn action" id="btnJump">JUMP</button>
+                <button class="glass-btn action" id="btnClimb">CLIMB</button>
+                <button class="glass-btn action" id="btnBox">BOX UP</button>
+            </div>
+        </div>
+
+        <button class="quit-btn" onclick="goHome()">⬅ Quit to Home</button>
+    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -346,15 +355,15 @@
         window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
         // Touch Controls
-        document.getElementById('btnLeft').addEventListener('touchstart', () => keys['ArrowLeft'] = true);
-        document.getElementById('btnLeft').addEventListener('touchend', () => keys['ArrowLeft'] = false);
-        document.getElementById('btnRight').addEventListener('touchstart', () => keys['ArrowRight'] = true);
-        document.getElementById('btnRight').addEventListener('touchend', () => keys['ArrowRight'] = false);
-        document.getElementById('btnJump').addEventListener('touchstart', () => handleJump());
-        document.getElementById('btnDown').addEventListener('touchstart', () => keys['ArrowDown'] = true);
-        document.getElementById('btnDown').addEventListener('touchend', () => keys['ArrowDown'] = false);
-        document.getElementById('btnClimb').addEventListener('touchstart', () => handleClimb());
-        document.getElementById('btnBox').addEventListener('touchstart', () => handleBoxUp());
+        document.getElementById('btnLeft').addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
+        document.getElementById('btnLeft').addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
+        document.getElementById('btnRight').addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
+        document.getElementById('btnRight').addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
+        document.getElementById('btnJump').addEventListener('touchstart', (e) => { e.preventDefault(); handleJump(); });
+        document.getElementById('btnDown').addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowDown'] = true; });
+        document.getElementById('btnDown').addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowDown'] = false; });
+        document.getElementById('btnClimb').addEventListener('touchstart', (e) => { e.preventDefault(); handleClimb(); });
+        document.getElementById('btnBox').addEventListener('touchstart', (e) => { e.preventDefault(); handleBoxUp(); });
 
         function handleJump() {
             if (player.isGrounded && !levelFinished) {
@@ -382,7 +391,6 @@
             });
         }
 
-        // 1. Trolling Laugh Sound (Fail hone par)
         function playTrollLaughSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -404,7 +412,6 @@
             } catch(e) {}
         }
 
-        // 2. Win Voice Sound ("Well Done!")
         function playWellDoneSound() {
             try {
                 if ('speechSynthesis' in window) {
