@@ -1,11 +1,26 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤪 Z PAJAL - Premium Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body {
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #050505;  /* 80% darker background */
-            background: linear-gradient(to right, #050505, #0a0a0c, #050505); /* Very dark cosmic vibe */
+            background: #0f0c29;  /* fallback for old browsers */
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
             overflow: hidden;
             padding: 20px;
         }
@@ -16,11 +31,87 @@
             border-radius: 50%;
             filter: blur(80px);
             z-index: 0;
-            opacity: 0.4; /* Dimming orbs to keep the dark intense feel */
             animation: float 10s infinite alternate ease-in-out;
         }
         .orb-1 {
-<!-- ... existing code ... -->
+            width: 300px; height: 300px;
+            background: #ff007f;
+            top: -50px; left: -50px;
+        }
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: #00f0ff;
+            bottom: -100px; right: -50px;
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(50px) scale(1.2); }
+        }
+
+        /* Glassmorphism Login Container */
+        .glass-box {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 420px; /* Adapts to phone, tablet, laptop */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        /* Emoji & Title Styling */
+        .game-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .emoji {
+            font-size: 45px;
+            animation: pulse-light 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-light {
+            0% { opacity: 0.3; filter: drop-shadow(0 0 5px #ffcc00); transform: scale(0.9); }
+            100% { opacity: 1; filter: drop-shadow(0 0 25px #ffcc00); transform: scale(1.1); }
+        }
+
+        /* Inputs Styling */
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         .input-group input:focus {
             border: 2px solid #00f0ff;
             background: rgba(0, 0, 0, 0.4);
@@ -33,50 +124,75 @@
             height: 55px;
             margin-top: 10px;
             margin-bottom: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         #loginBtn {
             position: absolute;
-            width: 70px; /* Small Initial Size */
-            height: 35px;
+            left: 0; top: 0;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(45deg, #ff007f, #7928ca);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 12px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: transform 0.25s ease-out, width 0.4s ease, height 0.4s ease, background 0.4s ease, font-size 0.4s ease, box-shadow 0.4s ease;
-            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
-            z-index: 20;
-        }
-
-        /* 6th Attempt Final State */
-        #loginBtn.final-state {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #00b09b, #96c93d); /* Neon Green */
             font-size: 18px;
-            box-shadow: 0 5px 20px rgba(0, 255, 128, 0.5);
-            transform: translate(0px, 0px) !important;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.25s ease-out, background 0.4s;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
         }
 
         /* Links at the bottom */
         .footer-options {
-<!-- ... existing code ... -->
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-options a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.3s, text-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .footer-options a:hover {
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Login Form -->
+    <div class="glass-box">
+        <div class="game-title">
+            <span class="emoji">🤪</span> Z PAJAL
+        </div>
+        
+        <div class="input-group">
+            <input type="email" id="gmail" placeholder="Enter Gmail" required autocomplete="off">
+        </div>
         <div class="input-group">
             <input type="password" id="password" placeholder="Enter Password" required>
         </div>
         
         <div class="button-wrapper">
-            <button id="loginBtn">START</button>
+            <button id="loginBtn">START GAME</button>
         </div>
 
         <div class="footer-options">
-<!-- ... existing code ... -->
+            <a href="#"><span>🛡️</span> About Game</a>
+            <a href="#"><span>✨</span> New Account</a>
+        </div>
     </div>
 
     <script>
@@ -85,65 +201,45 @@
         const passwordInput = document.getElementById('password');
         
         let attempts = 0;
-        let isFinalState = false;
 
         function dodgeAction(e) {
-            if (isFinalState) return;
-
             // Check if inputs are filled (so user doesn't get frustrated early)
             if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') return;
 
             if (attempts < 5) {
-                // Block clicking logic while dodging
-                if (e && (e.type === 'click' || e.type === 'touchstart')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-
-                // Button moves randomly (safe distance so it stays on screen)
-                const moveX = (Math.random() - 0.5) * 180; // Moves left/right randomly
-                const moveY = (Math.random() - 0.5) * 100;  // Moves up/down randomly
+                // Button moves randomly (safe distance so it stays on screen on mobile)
+                const moveX = (Math.random() - 0.5) * 120; // Moves left/right randomly
+                const moveY = (Math.random() - 0.5) * 80;  // Moves up/down randomly
                 
                 loginBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
-                
-                // Taunt the user as the button jumps
-                const taunts = ["MISS!", "OOPS!", "NOPE!", "HAHA!", "SLOW!"];
-                loginBtn.innerHTML = taunts[attempts];
-                
                 attempts++;
             } else if (attempts === 5) {
-                // 6th time -> Button stops, becomes big, green and clickable
-                isFinalState = true;
-                loginBtn.classList.add('final-state');
+                // 6th time -> Button stops and becomes clickable
+                loginBtn.style.transform = `translate(0px, 0px)`;
+                loginBtn.style.background = `linear-gradient(45deg, #00b09b, #96c93d)`; // Turns Green
+                loginBtn.style.boxShadow = `0 5px 20px rgba(0, 255, 128, 0.5)`;
                 loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
+                attempts++; 
             }
         }
 
         // Mobile touch support and PC mouse support
         loginBtn.addEventListener('mouseenter', dodgeAction);
         loginBtn.addEventListener('touchstart', (e) => {
-            if (!isFinalState) {
-                e.preventDefault(); // Prevents clicking on mobile while dodging
-                dodgeAction(e);
-            }
-        }, { passive: false });
+            if(attempts < 5) e.preventDefault(); // Prevents clicking on mobile while dodging
+            dodgeAction();
+        });
 
         loginBtn.addEventListener('click', (e) => {
-            // If not in final state, prevent click entirely
-            if (!isFinalState) {
-                e.preventDefault();
-                dodgeAction(e);
-                return;
-            }
-
-            // Valid click actions
             if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') {
                 alert("Game rules: Pehle Gmail aur Password fill karo!");
                 return;
             }
 
-            alert("🎉 Welcome to 🤪 Z PAJAL! Tumhara dimag kharab hone wala hai... Loading Level 1!");
-            // window.location.href = "game-page.html"; // Next page link
+            if (attempts >= 6) {
+                alert("🎉 Welcome to 🤪 Z PAJAL! Tumhara dimag kharab hone wala hai... Loading Level 1!");
+                // window.location.href = "game-page.html"; // Next page link
+            }
         });
     </script>
 
