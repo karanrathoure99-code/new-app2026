@@ -215,22 +215,22 @@
 
         // Thin surface extending to right edge with a hidden trap near the end
         let platforms = [
-            { x: 0, y: canvas.height - 30, w: 720, h: 10, type: 'ground' },
-            { x: 720, y: canvas.height - 30, w: 40, h: 10, type: 'hiddenTrap', triggered: false }, 
-            { x: 760, y: canvas.height - 30, w: 200, h: 10, type: 'ground' }
+            { x: 0, y: canvas.height - 30, w: 720, h: 6, type: 'ground' },
+            { x: 720, y: canvas.height - 30, w: 40, h: 6, type: 'hiddenTrap', triggered: false }, 
+            { x: 760, y: canvas.height - 30, w: 260, h: 6, type: 'ground' }
         ];
 
-        // Exactly 5 Coins with completely identical color (Coin at index 3 has hidden bomb)
+        // Exactly 5 Coins with identical color (Index 3 has hidden bomb)
         let coins = [
-            { x: 160, y: canvas.height - 60, collected: false, hasBomb: false },
-            { x: 300, y: canvas.height - 60, collected: false, hasBomb: false },
-            { x: 450, y: canvas.height - 60, collected: false, hasBomb: false },
-            { x: 590, y: canvas.height - 60, collected: false, hasBomb: true },   
-            { x: 690, y: canvas.height - 60, collected: false, hasBomb: false }
+            { x: 160, y: canvas.height - 55, collected: false, hasBomb: false },
+            { x: 300, y: canvas.height - 55, collected: false, hasBomb: false },
+            { x: 450, y: canvas.height - 55, collected: false, hasBomb: false },
+            { x: 590, y: canvas.height - 55, collected: false, hasBomb: true },   
+            { x: 690, y: canvas.height - 55, collected: false, hasBomb: false }
         ];
 
-        // White Exit Gate sized perfectly for the dummy character
-        let goal = { x: 880, y: canvas.height - 58, w: 16, h: 28 };
+        // White Exit Gate sized perfectly matching dummy character dimensions
+        let goal = { x: 920, y: canvas.height - 58, w: 14, h: 28 };
 
         let cameraX = 0;
         let keys = { left: false, right: false };
@@ -305,7 +305,7 @@
                 { x: player.x + 5, y: player.y + 10, vx: 3, vy: -6, color: '#ffffff' },
                 { x: player.x + 2, y: player.y + 15, vx: -5, vy: 1, color: '#ffffff' },
                 { x: player.x + 8, y: player.y + 15, vx: 5, vy: 2, color: '#ffffff' },
-                { x: player.x + 4, y: player.y + 4, vx: -2, vy: -3, color: '#ffcc00' } // debris/spark
+                { x: player.x + 4, y: player.y + 4, vx: -2, vy: -3, color: '#ffcc00' }
             ];
 
             setTimeout(() => {
@@ -406,7 +406,7 @@
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
             });
 
-            // Draw Identical Coins (No visible difference for bomb coin)
+            // Draw Identical Coins (No visual difference for bomb coin)
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.beginPath();
@@ -419,12 +419,15 @@
                 }
             });
 
-            // Draw White Exit Gate
+            // Draw Styled White Exit Gate with glow & pillars
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
             ctx.strokeStyle = '#00ffcc';
             ctx.lineWidth = 2;
             ctx.strokeRect(goal.x - 2, goal.y - 2, goal.w + 4, goal.h + 4);
+            // Inner door handle/detail
+            ctx.fillStyle = '#00ffcc';
+            ctx.fillRect(goal.x + 2, goal.y + 10, 2, 6);
 
             // Draw Dummy Character or Blast Fragments
             if (isExploding) {
@@ -454,7 +457,7 @@
                 // Torso
                 ctx.fillRect(px + 5, py + 9, 4, 11);
 
-                // Arms (Stationary)
+                // Arms
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
@@ -463,7 +466,7 @@
                 ctx.moveTo(px + 9, py + 11);
                 ctx.lineTo(px + 13, py + 16);
 
-                // Only Legs Move for Walking Animation
+                // Walking Legs Animation
                 let legSwing = Math.sin(player.legAngle) * 4;
                 ctx.moveTo(px + 6, py + 20);
                 ctx.lineTo(px + 4 + legSwing, py + 28);
