@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Rage Platformer (Levels 1-10)</title>
+    <title>🤪 Z PAJAL - Level 1 Game Arena</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -12,462 +12,308 @@
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #030308;
+            background: linear-gradient(135deg, #3d0a3d 0%, #070514 50%, #032b29 100%);
+            background-attachment: fixed;
             color: #ffffff;
             width: 100vw;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow-x: hidden;
-            overflow-y: auto;
-            position: relative;
-            padding: 10px;
         }
 
-        /* Master Wrapper to keep everything strictly inside screen bounds */
+        /* Responsive Landscape Game Wrapper */
         .game-wrapper {
             width: 100%;
-            max-width: 900px;
+            height: 100%;
+            max-width: 1280px;
+            max-height: 720px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            padding: 10px;
+            position: relative;
         }
 
         /* Top HUD Bar */
-        .hud {
-            width: 100%;
+        .game-hud {
             display: flex;
             justify-content: space-between;
-            padding: 0 5px;
-            z-index: 20;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .hud div {
-            background: rgba(20, 15, 35, 0.8);
-            border: 1px solid rgba(255, 0, 85, 0.4);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
-        }
-
-        /* Game Canvas Container (Auto Scaling) */
-        .game-viewport {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 2 / 1; /* Automatically adjusts height based on width */
-            max-height: 400px;
-            background: linear-gradient(to bottom, #0a0818, #151026);
-            border: 3px solid rgba(0, 255, 204, 0.4);
+            align-items: center;
+            background: rgba(20, 18, 40, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
-            overflow: hidden;
+            padding: 8px 20px;
+            margin-bottom: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* 50% Transparent LOJER Overlay */
-        #lojerOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(120, 0, 0, 0.5);
-            backdrop-filter: blur(6px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease-in-out;
-        }
-
-        #lojerOverlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        #lojerOverlay h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 70px;
-            font-weight: 900;
-            color: #ff0000;
-            text-shadow: 0 0 30px #000, 0 0 60px #ff0000;
-            animation: shake 0.2s infinite alternate;
-        }
-
-        #lojerOverlay p {
-            font-size: 18px;
-            color: #ffcc00;
-            font-weight: bold;
-            margin-top: 10px;
-            text-shadow: 0 2px 5px #000;
-            text-align: center;
-            padding: 0 20px;
-        }
-
-        @keyframes shake {
-            0% { transform: translate(3px, 3px) rotate(0deg); }
-            100% { transform: translate(-3px, -3px) rotate(-2deg); }
-        }
-
-        /* Win Overlay */
-        #winOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 50, 20, 0.6);
-            backdrop-filter: blur(6px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9998;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        #winOverlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        #winOverlay h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 40px;
-            color: #00ff88;
-            text-shadow: 0 0 20px #00ff88;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .next-lvl-btn {
-            background: linear-gradient(135deg, #00ff88, #00aa55);
-            color: #000;
-            border: none;
-            padding: 14px 30px;
+        .hud-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
             font-weight: 900;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+            color: #ff007f;
+            text-shadow: 0 0 8px rgba(255,0,127,0.5);
         }
 
-        /* Mobile 3D Glass Effect Controls (Fully Responsive & Fit) */
-        .mobile-controls {
-            display: none;
+        .hud-stats {
+            display: flex;
+            gap: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #00ffcc;
+        }
+
+        /* 3D Square Arena Container */
+        .arena-container {
+            flex: 1;
+            background: rgba(10, 8, 20, 0.75);
+            border: 2px solid rgba(0, 255, 204, 0.3);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 25px rgba(0, 255, 204, 0.1), 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        /* Canvas where game renders */
+        #gameCanvas {
             width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* 70% Transparent Controls Overlay for Mobile/Tablet */
+        .controls-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            z-index: 20;
-            gap: 10px;
+            padding: 12px 20px;
+            pointer-events: none;
         }
 
         .control-group {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            pointer-events: auto;
         }
 
-        .glass-btn {
-            width: 52px;
-            height: 52px;
-            background: rgba(255, 255, 255, 0.08);
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.2);
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s, background 0.2s;
         }
 
-        .glass-btn:active {
-            background: rgba(0, 255, 204, 0.25);
-            transform: scale(0.92);
+        .ctrl-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 0, 127, 0.4);
+            border-color: #ff007f;
         }
 
-        .action-controls {
-            display: flex;
-            gap: 8px;
+        .ctrl-btn.wide {
+            width: 75px;
+            border-radius: 25px;
+            font-size: 10px;
         }
 
-        .glass-btn.action {
-            background: rgba(255, 0, 119, 0.15);
-            border-color: rgba(255, 0, 119, 0.4);
-            font-size: 12px;
-            border-radius: 12px;
-            width: 65px;
-            height: 52px;
-        }
-
-        .quit-btn {
+        /* Back to Home button */
+        .back-btn {
             background: transparent;
-            color: #8c8cb2;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 6px 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #a0a0c0;
+            padding: 4px 12px;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
-            margin-top: 5px;
         }
-
-        .quit-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
-        /* Show mobile controls only on mobile screen widths */
-        @media (max-width: 768px) {
-            .mobile-controls {
-                display: flex;
-            }
+        .back-btn:hover {
+            color: #fff;
+            border-color: #fff;
         }
     </style>
 </head>
 <body>
 
-    <!-- Troll Fail Overlay (LOJER) -->
-    <div id="lojerOverlay">
-        <h2>LOJER 🤪</h2>
-        <p id="trollMsg">Achanak hamla ho gaya! Hahaha!</p>
-    </div>
-
-    <!-- Win / Next Level Overlay -->
-    <div id="winOverlay">
-        <h2 id="winTitle">🎉 LEVEL COMPLETED!</h2>
-        <button class="next-lvl-btn" onclick="proceedToNextLevel()">NEXT LEVEL ➡</button>
-    </div>
-
     <div class="game-wrapper">
-        <div class="hud">
-            <div id="hudLevel">LEVEL: 1 / 10</div>
-            <div id="hudFail">FAILS: 0</div>
-        </div>
-
-        <div class="game-viewport">
-            <canvas id="gameCanvas" width="900" height="450"></canvas>
-        </div>
-
-        <!-- 3D Glass Effect Mobile Controls -->
-        <div class="mobile-controls">
-            <div class="control-group">
-                <button class="glass-btn" id="btnLeft">◀</button>
-                <button class="glass-btn" id="btnRight">▶</button>
-                <button class="glass-btn" id="btnDown">▼</button>
+        <!-- Top HUD -->
+        <div class="game-hud">
+            <div class="hud-title">⚡ LEVEL 1: ARCADE TRIAL</div>
+            <div class="hud-stats">
+                <span id="scoreDisplay">COINS: 0</span>
+                <span id="shieldDisplay">SHIELD: OFF</span>
             </div>
-            <div class="action-controls">
-                <button class="glass-btn action" id="btnJump">JUMP</button>
-                <button class="glass-btn action" id="btnClimb">CLIMB</button>
-                <button class="glass-btn action" id="btnBox">BOX UP</button>
-            </div>
+            <button class="back-btn" onclick="goHome()">QUIT</button>
         </div>
 
-        <button class="quit-btn" onclick="goHome()">⬅ Quit to Home</button>
+        <!-- 3D Square Game Arena -->
+        <div class="arena-container">
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- Touch Controls (70% Transparent) -->
+            <div class="controls-overlay">
+                <!-- Left Hand Controls: Movement & Down/Climb -->
+                <div class="control-group">
+                    <button class="ctrl-btn" id="leftBtn">◀</button>
+                    <button class="ctrl-btn" id="rightBtn">▶</button>
+                    <button class="ctrl-btn wide" id="jumpClimbBtn">JUMP/UP</button>
+                    <button class="ctrl-btn" id="downBtn">▼</button>
+                </div>
+
+                <!-- Right Hand Controls: Shield, Crack Box, Coin Collect -->
+                <div class="control-group">
+                    <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(0,255,204,0.2);">SHIELD</button>
+                    <button class="ctrl-btn wide" id="crackBtn" style="background: rgba(255,204,0,0.2);">CRACK</button>
+                    <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.2);">COLLECT</button>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Game Engine Script -->
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let currentLevel = parseInt(localStorage.getItem('zPajalRageLevel')) || 1;
-        if (currentLevel > 10) currentLevel = 1;
-        let failCount = 0;
-        let levelFinished = false;
+        // Resize Canvas dynamically to match container size in landscape
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
+        // Game State Variables
+        let score = 0;
+        let shieldActive = false;
+        let shieldTimer = 0;
+
+        // 3D Dummy Character Object (Head, 2 Hands, 2 Legs, Body)
         let player = {
             x: 50,
-            y: 320,
-            width: 30,
-            height: 40,
+            y: canvas.height - 180,
+            width: 40,
+            height: 70,
             vx: 0,
             vy: 0,
             speed: 4,
-            jumpPower: -10,
+            jumpForce: -11,
             gravity: 0.5,
             isGrounded: false,
             facing: 'right'
         };
 
-        let levelData = {};
+        // Level Platforms & Obstacles (Level 1 Design with Pits & Crackable Boxes)
+        let platforms = [
+            { x: 0, y: canvas.height - 50, w: 400, h: 50, type: 'ground' },
+            { x: 450, y: canvas.height - 50, w: 200, h: 50, type: 'pit' }, // Pit/Gadda
+            { x: 700, y: canvas.height - 50, w: 600, h: 50, type: 'ground' },
+            { x: 1350, y: canvas.height - 50, w: 150, h: 50, type: 'pit' },
+            { x: 1550, y: canvas.height - 50, w: 800, h: 50, type: 'ground' },
+            // Elevated Platforms & Crackable boxes
+            { x: 250, y: canvas.height - 150, w: 120, h: 20, type: 'platform' },
+            { x: 500, y: canvas.height - 180, w: 80, h: 20, type: 'crackable', cracked: false },
+            { x: 850, y: canvas.height - 160, w: 140, h: 20, type: 'platform' },
+            { x: 1100, y: canvas.height - 210, w: 100, h: 20, type: 'crackable', cracked: false }
+        ];
+
+        // Collectible Coins
+        let coins = [
+            { x: 280, y: canvas.height - 190, collected: false },
+            { x: 520, y: canvas.height - 220, collected: false },
+            { x: 900, y: canvas.height - 200, collected: false },
+            { x: 1200, y: canvas.height - 80, collected: false },
+            { x: 1700, y: canvas.height - 100, collected: false }
+        ];
+
+        // Goal Finish Point at rightmost end
+        let goal = { x: 2250, y: canvas.height - 130, w: 40, h: 80 };
+
+        let cameraX = 0;
+
+        // Input Controls Tracking
+        let keys = { left: false, right: false, up: false, down: false };
+
+        // Touch Control Listeners
+        document.getElementById('leftBtn').addEventListener('touchstart', () => keys.left = true);
+        document.getElementById('leftBtn').addEventListener('touchend', () => keys.left = false);
+        document.getElementById('rightBtn').addEventListener('touchstart', () => keys.right = true);
+        document.getElementById('rightBtn').addEventListener('touchend', () => keys.right = false);
         
-        function initLevel(lvl) {
-            player.x = 50;
-            player.y = 320;
-            player.vx = 0;
-            player.vy = 0;
-            levelFinished = false;
-
-            levelData = {
-                platforms: [
-                    { x: 0, y: 380, w: 900, h: 70, type: 'normal' },
-                    { x: 200, y: 290, w: 120, h: 20, type: lvl >= 3 ? 'collapsing' : 'normal' },
-                    { x: 400, y: 220, w: 120, h: 20, type: 'normal' },
-                    { x: 600, y: 150, w: 120, h: 20, type: lvl >= 5 ? 'fake' : 'normal' }
-                ],
-                boxes: [
-                    { x: 280, y: 340, w: 40, h: 40 },
-                    { x: 500, y: 180, w: 40, h: 40 }
-                ],
-                spikes: [
-                    { x: 320, y: 365, w: 60, h: 15 },
-                    { x: 520, y: 205, w: 40, h: 15 }
-                ],
-                walls: [
-                    { x: 800, y: 100, w: 20, h: 280 }
-                ],
-                gate: { x: 840, y: 310, w: 40, h: 70, fleeing: lvl >= 7 }
-            };
-        }
-
-        // Keyboard Controls
-        let keys = {};
-        window.addEventListener('keydown', (e) => {
-            keys[e.code] = true;
-            if (e.code === 'Space') { e.preventDefault(); handleClimb(); }
-            if (e.code === 'Enter') { e.preventDefault(); handleBoxUp(); }
-            if (e.code === 'ArrowUp') { e.preventDefault(); handleJump(); }
-        });
-        window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-
-        // Touch Controls
-        document.getElementById('btnLeft').addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
-        document.getElementById('btnLeft').addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
-        document.getElementById('btnRight').addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
-        document.getElementById('btnRight').addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
-        document.getElementById('btnJump').addEventListener('touchstart', (e) => { e.preventDefault(); handleJump(); });
-        document.getElementById('btnDown').addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowDown'] = true; });
-        document.getElementById('btnDown').addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowDown'] = false; });
-        document.getElementById('btnClimb').addEventListener('touchstart', (e) => { e.preventDefault(); handleClimb(); });
-        document.getElementById('btnBox').addEventListener('touchstart', (e) => { e.preventDefault(); handleBoxUp(); });
-
-        function handleJump() {
-            if (player.isGrounded && !levelFinished) {
-                player.vy = player.jumpPower;
+        document.getElementById('jumpClimbBtn').addEventListener('touchstart', () => {
+            if (player.isGrounded) {
+                player.vy = player.jumpForce;
                 player.isGrounded = false;
             }
-        }
+        });
 
-        function handleClimb() {
-            if (levelFinished) return;
-            levelData.walls.forEach(wall => {
-                if (player.x + player.width >= wall.x - 15 && player.x <= wall.x + wall.w + 15) {
-                    player.vy = -6;
+        document.getElementById('shieldBtn').addEventListener('click', () => {
+            shieldActive = true;
+            shieldTimer = 300; // 5 seconds active
+            document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
+            document.getElementById('shieldDisplay').style.color = "#00ffcc";
+        });
+
+        document.getElementById('crackBtn').addEventListener('click', () => {
+            // Crack visible blocks near player
+            platforms.forEach(p => {
+                if (p.type === 'crackable' && !p.cracked && Math.abs(p.x - player.x) < 100) {
+                    p.cracked = true;
+                    score += 10;
                 }
             });
-        }
+        });
 
-        function handleBoxUp() {
-            if (levelFinished) return;
-            levelData.boxes.forEach(box => {
-                if (Math.abs(player.x - box.x) < 50 && player.y > box.y - 60) {
-                    player.vy = -9;
-                    player.y = box.y - player.height - 5;
+        document.getElementById('coinBtn').addEventListener('click', () => {
+            // Manual collect if close to coin
+            coins.forEach(c => {
+                if (!c.collected && Math.abs(c.x - player.x) < 60) {
+                    c.collected = true;
+                    score += 50;
                 }
             });
-        }
+        });
 
-        function playTrollLaughSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                [320, 220, 140].forEach((freq, idx) => {
-                    setTimeout(() => {
-                        if (audioCtx.state === 'suspended') audioCtx.resume();
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start();
-                        osc.stop(audioCtx.currentTime + 0.3);
-                    }, idx * 150);
-                });
-            } catch(e) {}
-        }
-
-        function playWellDoneSound() {
-            try {
-                if ('speechSynthesis' in window) {
-                    const utterance = new SpeechSynthesisUtterance("Well Done!");
-                    utterance.rate = 1.1;
-                    utterance.pitch = 1.2;
-                    window.speechSynthesis.speak(utterance);
-                }
-            } catch(e) {}
-        }
-
-        function triggerFail(msg) {
-            if (levelFinished) return;
-            failCount++;
-            document.getElementById('hudFail').innerText = `FAILS: ${failCount}`;
-            document.getElementById('trollMsg').innerText = msg;
-            
-            const overlay = document.getElementById('lojerOverlay');
-            overlay.classList.add('show');
-            playTrollLaughSound();
-
-            setTimeout(() => {
-                overlay.classList.remove('show');
-                initLevel(currentLevel);
-            }, 2000);
-        }
-
-        function triggerWin() {
-            if (levelFinished) return;
-            levelFinished = true;
-            playWellDoneSound();
-            document.getElementById('winOverlay').classList.add('show');
-        }
-
-        function proceedToNextLevel() {
-            document.getElementById('winOverlay').classList.remove('show');
-            if (currentLevel < 10) {
-                currentLevel++;
-                localStorage.setItem('zPajalRageLevel', currentLevel);
-                document.getElementById('hudLevel').innerText = `LEVEL: ${currentLevel} / 10`;
-                initLevel(currentLevel);
-            } else {
-                alert("👑 BADHAI HO! Tumne saare 10 Rage Levels jeet liye!");
-                currentLevel = 1;
-                localStorage.setItem('zPajalRageLevel', 1);
-                window.location.href = "home.html";
+        // Keyboard support for testing on laptop/pc
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && player.isGrounded) {
+                player.vy = player.jumpForce;
+                player.isGrounded = false;
             }
-        }
+        });
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+        });
 
+        // Game Loop Update & Render
         function update() {
-            if (levelFinished) return;
-
-            if (keys['ArrowLeft'] || keys['KeyA']) {
+            // Horizontal movement
+            if (keys.left) {
                 player.vx = -player.speed;
                 player.facing = 'left';
-            } else if (keys['ArrowRight'] || keys['KeyD']) {
+            } else if (keys.right) {
                 player.vx = player.speed;
                 player.facing = 'right';
             } else {
@@ -478,113 +324,152 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
-            if (player.x < 0) player.x = 0;
-            if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
-
+            // Platform collision detection
             player.isGrounded = false;
-            levelData.platforms.forEach(plat => {
-                if (
-                    player.x + player.width > plat.x &&
-                    player.x < plat.x + plat.w &&
-                    player.y + player.height >= plat.y &&
-                    player.y + player.height <= plat.y + 15 &&
-                    player.vy >= 0
-                ) {
-                    player.y = plat.y - player.height;
-                    player.vy = 0;
-                    player.isGrounded = true;
-
-                    if (plat.type === 'collapsing') {
-                        setTimeout(() => { plat.y += 500; }, 400);
+            platforms.forEach(p => {
+                if (p.type !== 'pit' && (!p.crackable || !p.cracked)) {
+                    if (
+                        player.x + player.width > p.x &&
+                        player.x < p.x + p.w &&
+                        player.y + player.height >= p.y &&
+                        player.y + player.height - player.vy <= p.y + 10
+                    ) {
+                        player.y = p.y - player.height;
+                        player.vy = 0;
+                        player.isGrounded = true;
                     }
                 }
             });
 
-            levelData.boxes.forEach(box => {
-                if (
-                    player.x + player.width > box.x &&
-                    player.x < box.x + box.w &&
-                    player.y + player.height >= box.y &&
-                    player.y + player.height <= box.y + 10 &&
-                    player.vy >= 0
-                ) {
-                    player.y = box.y - player.height;
-                    player.vy = 0;
-                    player.isGrounded = true;
-                }
-            });
-
-            levelData.spikes.forEach(spike => {
-                if (
-                    player.x + player.width > spike.x &&
-                    player.x < spike.x + spike.w &&
-                    player.y + player.height > spike.y &&
-                    player.y < spike.y + spike.h
-                ) {
-                    triggerFail("Invisible spike ne attack kar diya! 🤪");
-                }
-            });
-
+            // Fall into pit check (Respawn if falls down)
             if (player.y > canvas.height) {
-                triggerFail("Zameen gayab ho gayi! Niche gir gaye!");
+                player.x = 50;
+                player.y = canvas.height - 180;
+                player.vy = 0;
+                score = Math.max(0, score - 20);
             }
 
-            let gate = levelData.gate;
-            if (gate.fleeing && Math.abs(player.x - gate.x) < 80) {
-                gate.x += (Math.random() > 0.5 ? 40 : -40);
-                if (gate.x < 600) gate.x = 600;
-                if (gate.x > 850) gate.x = 850;
+            // Camera follow player smoothly
+            cameraX = player.x - canvas.width / 3;
+            if (cameraX < 0) cameraX = 0;
+
+            // Shield countdown
+            if (shieldActive) {
+                shieldTimer--;
+                if (shieldTimer <= 0) {
+                    shieldActive = false;
+                    document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+                    document.getElementById('shieldDisplay').style.color = "#00ffcc";
+                }
             }
 
-            if (
-                player.x + player.width > gate.x &&
-                player.x < gate.x + gate.w &&
-                player.y + player.height > gate.y &&
-                player.y < gate.y + gate.h
-            ) {
-                triggerWin();
+            // Coin auto-collection proximity check
+            coins.forEach(c => {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 35) {
+                    c.collected = true;
+                    score += 50;
+                }
+            });
+
+            // Check Goal Reached
+            if (player.x >= goal.x) {
+                alert("🎉 Level 1 Cleared! Moving to next challenge.");
+                window.location.href = "index.html";
             }
+
+            document.getElementById('scoreDisplay').innerText = "COINS: " + score;
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            levelData.platforms.forEach(plat => {
-                ctx.fillStyle = plat.type === 'collapsing' ? '#ffaa00' : '#00ffcc';
-                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // Draw Platforms & Pits
+            platforms.forEach(p => {
+                if (p.type === 'pit') {
+                    ctx.fillStyle = '#030308';
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                    // Danger hazard lines in pit
+                    ctx.strokeStyle = '#ff007f';
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(p.x, p.y, p.w, p.h);
+                    ctx.setLineDash([]);
+                } else if (p.type === 'crackable') {
+                    ctx.fillStyle = p.cracked ? 'rgba(100,100,100,0.3)' : '#ffcc00';
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                } else {
+                    ctx.fillStyle = '#1b143f';
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                    ctx.strokeStyle = '#00ffcc';
+                    ctx.strokeRect(p.x, p.y, p.w, p.h);
+                }
             });
 
-            levelData.walls.forEach(wall => {
-                ctx.fillStyle = '#9900ff';
-                ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+            // Draw Coins
+            coins.forEach(c => {
+                if (!c.collected) {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffcc00';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#fff';
+                    ctx.stroke();
+                }
             });
 
-            levelData.boxes.forEach(box => {
-                ctx.fillStyle = '#ff007f';
-                ctx.fillRect(box.x, box.y, box.w, box.h);
-            });
+            // Draw Goal Portal
+            ctx.fillStyle = '#ff007f';
+            ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
-            levelData.spikes.forEach(spike => {
-                ctx.fillStyle = '#ff0000';
+            // Draw 3D Dummy Character (Head, Body, 2 Hands, 2 Legs)
+            let px = player.x;
+            let py = player.y;
+
+            // Shield Aura if active
+            if (shieldActive) {
                 ctx.beginPath();
-                ctx.moveTo(spike.x, spike.y + spike.h);
-                ctx.lineTo(spike.x + spike.w / 2, spike.y);
-                ctx.lineTo(spike.x + spike.w, spike.y + spike.h);
+                ctx.arc(px + 20, py + 35, 45, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 255, 204, 0.25)';
                 ctx.fill();
-            });
+                ctx.strokeStyle = '#00ffcc';
+                ctx.stroke();
+            }
 
-            let gate = levelData.gate;
-            ctx.fillStyle = '#ffff00';
-            ctx.fillRect(gate.x, gate.y, gate.w, gate.h);
-            ctx.fillStyle = '#000';
-            ctx.font = '10px Orbitron';
-            ctx.fillText("GATE", gate.x + 6, gate.y + 40);
+            // Head
+            ctx.fillStyle = '#ff007f';
+            ctx.beginPath();
+            ctx.arc(px + 20, py + 12, 12, 0, Math.PI * 2);
+            ctx.fill();
 
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            ctx.fillStyle = '#000';
-            let eyeOffset = player.facing === 'right' ? 18 : 6;
-            ctx.fillRect(player.x + eyeOffset, player.y + 10, 6, 6);
+            // Body (Torso)
+            ctx.fillStyle = '#00ffcc';
+            ctx.fillRect(px + 12, py + 24, 16, 26);
+
+            // Hands
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(px + 12, py + 28);
+            ctx.lineTo(px - 4, py + 38);
+            ctx.moveTo(px + 28, py + 28);
+            ctx.lineTo(px + 44, py + 38);
+            ctx.stroke();
+
+            // Legs
+            ctx.beginPath();
+            ctx.moveTo(px + 14, py + 50);
+            ctx.lineTo(px + 8, py + 70);
+            ctx.moveTo(px + 26, py + 50);
+            ctx.lineTo(px + 32, py + 70);
+            ctx.stroke();
+
+            ctx.restore();
         }
 
         function loop() {
@@ -593,12 +478,11 @@
             requestAnimationFrame(loop);
         }
 
-        function goHome() {
-            window.location.href = "home.html";
-        }
-
-        initLevel(currentLevel);
         loop();
+
+        function goHome() {
+            window.location.href = "index.html";
+        }
     </script>
 </body>
 </html>
