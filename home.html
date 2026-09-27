@@ -24,7 +24,6 @@
             padding: 20px;
         }
 
-        /* Main Dashboard Container */
         .dashboard-container {
             background: rgba(20, 18, 40, 0.5);
             backdrop-filter: blur(25px);
@@ -61,7 +60,6 @@
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
-        /* Top Profile & Rank Row */
         .profile-rank-row {
             display: flex;
             justify-content: space-between;
@@ -70,7 +68,6 @@
             margin-bottom: 20px;
         }
 
-        /* Left Side: 3D Oval Profile Box */
         .left-profile-wrapper {
             flex: 1;
             display: flex;
@@ -124,7 +121,6 @@
             color: #8c8cb2;
         }
 
-        /* Level shown outside oval on left side */
         .level-outside {
             margin-top: 8px;
             font-size: 12px;
@@ -134,7 +130,6 @@
             text-shadow: 0 0 5px rgba(0, 255, 204, 0.4);
         }
 
-        /* Right Side: Rank with Logo Box */
         .right-rank-wrapper {
             flex: 1;
             background: rgba(0, 0, 0, 0.4);
@@ -169,7 +164,6 @@
             margin-top: 2px;
         }
 
-        /* 3D Square Info Box */
         .info-square-box {
             background: rgba(15, 12, 30, 0.6);
             border: 1px solid rgba(0, 255, 204, 0.25);
@@ -178,7 +172,6 @@
             margin-bottom: 20px;
             text-align: left;
             box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.05), 0 8px 20px rgba(0, 0, 0, 0.4);
-            position: relative;
         }
 
         .info-square-box h3 {
@@ -202,7 +195,6 @@
             margin-bottom: 0;
         }
 
-        /* Neon Play Button */
         .play-btn {
             background: linear-gradient(135deg, #ff007f, #7928ca);
             color: white;
@@ -225,11 +217,6 @@
             box-shadow: 0 8px 25px rgba(255, 0, 127, 0.7);
         }
 
-        .play-btn:active {
-            transform: translateY(1px);
-        }
-
-        /* Cyber Logout Button */
         .logout-btn {
             background: transparent;
             color: #8c8cb2;
@@ -256,9 +243,7 @@
         <div class="arcade-badge">🎮 ARCADE ZONE</div>
         <h1>🤪 Z PAJAL</h1>
 
-        <!-- Profile & Rank Row -->
         <div class="profile-rank-row">
-            <!-- Left Side: 3D Oval Profile + Level Outside -->
             <div class="left-profile-wrapper">
                 <div class="profile-oval">
                     <div class="avatar-img">🧑‍💻</div>
@@ -270,7 +255,6 @@
                 <div class="level-outside" id="displayLevel">LEVEL: 1</div>
             </div>
 
-            <!-- Right Side: Rank with Logo -->
             <div class="right-rank-wrapper">
                 <div class="rank-logo" id="displayRankLogo">🛡️</div>
                 <div class="rank-title-label">Current Rank</div>
@@ -278,7 +262,6 @@
             </div>
         </div>
 
-        <!-- 3D Square Info Box -->
         <div class="info-square-box">
             <h3>⚡ REALM STATUS</h3>
             <div class="info-line">🎯 <b>Objective:</b> Dam hai to level up karke dikhao</div>
@@ -286,12 +269,10 @@
             <div class="info-line">🏆 <b>Goal:</b> Reach Grand Master status</div>
         </div>
 
-        <!-- Action Buttons -->
         <button class="play-btn" onclick="startGame()">🚀 PLAY GAME - LEVEL 1</button>
         <button class="logout-btn" onclick="logoutUser()">LOGOUT SESSION</button>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -335,23 +316,21 @@
             }
         }
 
-        // Boy Voice Simulation (Low pitch, no laugh)
         function playBoyWelcomeVoice(username) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const welcomeText = "Welcome to Z Pajal game, " + username + "!";
                 const utterance = new SpeechSynthesisUtterance(welcomeText);
                 utterance.rate = 1.0; 
-                utterance.pitch = 0.8; // Boy low tone
+                utterance.pitch = 0.8; 
                 utterance.volume = 1.0;
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // Calculate Rank and set dynamic logo colors
         function updateRankInfo(level) {
             let rankName = "Silver";
-            let color = "#c0c0c0"; // Silver
+            let color = "#c0c0c0";
 
             if (level >= 1 && level <= 10) { rankName = "Silver"; color = "#c0c0c0"; }
             else if (level >= 11 && level <= 25) { rankName = "Shine Silver"; color = "#e0e0e0"; }
@@ -372,28 +351,28 @@
             if (user) {
                 const uid = user.uid;
                 const userRef = ref(db, 'users/' + uid);
+                let finalUsername = "Player";
+                let userLevel = 1;
+
                 try {
                     const snapshot = await get(userRef);
                     if (snapshot.exists()) {
                         const userData = snapshot.val();
-                        const username = userData.username || "Player";
-                        const level = userData.level || 1;
-
-                        document.getElementById('displayUsername').innerText = username;
-                        document.getElementById('displayLevel').innerText = "LEVEL: " + level;
-                        updateRankInfo(level);
-
-                        playBoyWelcomeVoice(username);
+                        finalUsername = userData.username || userData.name || user.displayName || (user.email ? user.email.split('@')[0] : "Player");
+                        userLevel = userData.level || 1;
                     } else {
-                        const fallbackName = user.email.split('@')[0];
-                        document.getElementById('displayUsername').innerText = fallbackName;
-                        document.getElementById('displayLevel').innerText = "LEVEL: 1";
-                        updateRankInfo(1);
-                        playBoyWelcomeVoice(fallbackName);
+                        finalUsername = user.displayName || (user.email ? user.email.split('@')[0] : "Gamer");
                     }
                 } catch (error) {
-                    console.error("Error fetching user data:", error);
+                    console.error("Error fetching user data from DB:", error);
+                    finalUsername = user.displayName || (user.email ? user.email.split('@')[0] : "Player");
                 }
+
+                document.getElementById('displayUsername').innerText = finalUsername;
+                document.getElementById('displayLevel').innerText = "LEVEL: " + userLevel;
+                updateRankInfo(userLevel);
+
+                playBoyWelcomeVoice(finalUsername);
             } else {
                 window.location.href = "index.html";
             }
