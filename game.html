@@ -12,6 +12,7 @@
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
@@ -123,9 +124,10 @@
             align-items: center;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            touch-action: manipulation;
         }
 
-        .ctrl-btn:active {
+        .ctrl-btn:active, .ctrl-btn.active-touch {
             transform: scale(0.92);
             background: rgba(210, 140, 60, 0.5);
             border-color: #ffaa00;
@@ -187,8 +189,17 @@
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            const displayWidth = canvas.parentElement.clientWidth;
+            const displayHeight = canvas.parentElement.clientHeight;
+            
+            // Handle High-DPI screens for sharp rendering
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = displayWidth * dpr;
+            canvas.height = displayHeight * dpr;
+            ctx.scale(dpr, dpr);
+            
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
@@ -198,44 +209,42 @@
         let isExploding = false;
         let fragments = [];
 
-        // Dummy Character
+        // Dynamic player positioning relative to canvas size
         let player = {
             x: 50,
-            y: canvas.height - 100,
+            y: 100,
             width: 14,
             height: 28,
             vx: 0,
             vy: 0,
-            speed: 3,
-            jumpForce: -8.5,
-            gravity: 0.4,
+            speed: 3.5,
+            jumpForce: -9,
+            gravity: 0.42,
             isGrounded: false,
             legAngle: 0
         };
 
-        // Thin surface extending to right edge with a hidden trap near the end
+        // Platforms layout
         let platforms = [
-            { x: 0, y: canvas.height - 30, w: 720, h: 6, type: 'ground' },
-            { x: 720, y: canvas.height - 30, w: 40, h: 6, type: 'hiddenTrap', triggered: false }, 
-            { x: 760, y: canvas.height - 30, w: 260, h: 6, type: 'ground' }
+            { x: 0, y: 550, w: 720, h: 6, type: 'ground' },
+            { x: 720, y: 550, w: 40, h: 6, type: 'hiddenTrap', triggered: false }, 
+            { x: 760, y: 550, w: 300, h: 6, type: 'ground' }
         ];
 
-        // Exactly 5 Coins with identical color (Index 3 has hidden bomb)
+        // Coins placement
         let coins = [
-            { x: 160, y: canvas.height - 55, collected: false, hasBomb: false },
-            { x: 300, y: canvas.height - 55, collected: false, hasBomb: false },
-            { x: 450, y: canvas.height - 55, collected: false, hasBomb: false },
-            { x: 590, y: canvas.height - 55, collected: false, hasBomb: true },   
-            { x: 690, y: canvas.height - 55, collected: false, hasBomb: false }
+            { x: 160, y: 520, collected: false, hasBomb: false },
+            { x: 300, y: 520, collected: false, hasBomb: false },
+            { x: 450, y: 520, collected: false, hasBomb: false },
+            { x: 590, y: 520, collected: false, hasBomb: true },   
+            { x: 690, y: 520, collected: false, hasBomb: false }
         ];
 
-        // White Exit Gate sized perfectly matching dummy character dimensions
-        let goal = { x: 920, y: canvas.height - 58, w: 14, h: 28 };
-
+        let goal = { x: 920, y: 518, w: 14, h: 32 };
         let cameraX = 0;
         let keys = { left: false, right: false };
 
-        // Realistic Bomb Blast Sound Effect using Web Audio API
+        // Web Audio API Blast Sound Effect
         function playBlastSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -255,40 +264,59 @@
             }
         }
 
-        document.getElementById('leftBtn').addEventListener('touchstart', () => keys.left = true);
-        document.getElementById('leftBtn').addEventListener('touchend', () => keys.left = false);
-        document.getElementById('rightBtn').addEventListener('touchstart', () => keys.right = true);
-        document.getElementById('rightBtn').addEventListener('touchend', () => keys.right = false);
-        
-        document.getElementById('jumpBtn').addEventListener('touchstart', () => {
+        // Improved Touch & Click Handlers
+        const bindButton = (id, onStart, onEnd) => {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(); });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
+            btn.addEventListener('mousedown', () => onStart());
+            btn.addEventListener('mouseup', () => onEnd());
+        };
+
+        bindButton('leftBtn', () => keys.left = true, () => keys.left = false);
+        bindButton('rightBtn', () => keys.right = true, () => keys.right = false);
+
+        document.getElementById('jumpBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            triggerJump();
+        });
+        document.getElementById('jumpBtn').addEventListener('mousedown', () => triggerJump());
+
+        function triggerJump() {
             if (player.isGrounded && !isExploding) {
                 player.vy = player.jumpForce;
                 player.isGrounded = false;
             }
-        });
+        }
 
         const shieldBtn = document.getElementById('shieldBtn');
-        shieldBtn.addEventListener('touchstart', () => {
+        const activateShield = () => {
             shieldActive = true;
             document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
             document.getElementById('shieldDisplay').style.color = "#ffaa00";
-        });
-        shieldBtn.addEventListener('touchend', () => {
+        };
+        const deactivateShield = () => {
             shieldActive = false;
             document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
             document.getElementById('shieldDisplay').style.color = "#ffcc66";
-        });
+        };
+
+        shieldBtn.addEventListener('touchstart', (e) => { e.preventDefault(); activateShield(); });
+        shieldBtn.addEventListener('touchend', (e) => { e.preventDefault(); deactivateShield(); });
+        shieldBtn.addEventListener('mousedown', activateShield);
+        shieldBtn.addEventListener('mouseup', deactivateShield);
 
         document.getElementById('coinBtn').addEventListener('click', () => checkCoins());
 
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && player.isGrounded && !isExploding) {
-                player.vy = player.jumpForce;
-                player.isGrounded = false;
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
+                e.preventDefault();
+                triggerJump();
             }
         });
+
         window.addEventListener('keyup', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
@@ -299,7 +327,6 @@
             isExploding = true;
             playBlastSound();
 
-            // Scattered body parts animation on blast
             fragments = [
                 { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffffff' },
                 { x: player.x + 5, y: player.y + 10, vx: 3, vy: -6, color: '#ffffff' },
@@ -372,16 +399,16 @@
                 }
             });
 
-            if (player.y > canvas.height) {
+            if (player.y > canvas.height / (window.devicePixelRatio || 1) + 100) {
                 triggerExplosion();
             }
 
-            cameraX = player.x - canvas.width / 3;
+            const logicalWidth = canvas.width / (window.devicePixelRatio || 1);
+            cameraX = player.x - logicalWidth / 3;
             if (cameraX < 0) cameraX = 0;
 
             checkCoins();
 
-            // Win condition: Reach inside white exit gate
             if (player.x >= goal.x && player.y + player.height >= goal.y) {
                 alert("🎉 Level 1 Cleared Successfully!");
                 window.location.href = "index.html";
@@ -391,12 +418,14 @@
         }
 
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const logicalWidth = canvas.width / (window.devicePixelRatio || 1);
+            const logicalHeight = canvas.height / (window.devicePixelRatio || 1);
+
+            ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
             ctx.save();
             ctx.translate(-cameraX, 0);
 
-            // Draw Thin Surface Platforms
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return;
                 ctx.fillStyle = '#4e311a';
@@ -406,7 +435,6 @@
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
             });
 
-            // Draw Identical Coins (No visual difference for bomb coin)
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.beginPath();
@@ -419,17 +447,14 @@
                 }
             });
 
-            // Draw Styled White Exit Gate with glow & pillars
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
             ctx.strokeStyle = '#00ffcc';
             ctx.lineWidth = 2;
             ctx.strokeRect(goal.x - 2, goal.y - 2, goal.w + 4, goal.h + 4);
-            // Inner door handle/detail
             ctx.fillStyle = '#00ffcc';
             ctx.fillRect(goal.x + 2, goal.y + 10, 2, 6);
 
-            // Draw Dummy Character or Blast Fragments
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
@@ -448,16 +473,13 @@
                     ctx.stroke();
                 }
 
-                // Head
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(px + 7, py + 4, 4, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Torso
                 ctx.fillRect(px + 5, py + 9, 4, 11);
 
-                // Arms
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
@@ -466,7 +488,6 @@
                 ctx.moveTo(px + 9, py + 11);
                 ctx.lineTo(px + 13, py + 16);
 
-                // Walking Legs Animation
                 let legSwing = Math.sin(player.legAngle) * 4;
                 ctx.moveTo(px + 6, py + 20);
                 ctx.lineTo(px + 4 + legSwing, py + 28);
