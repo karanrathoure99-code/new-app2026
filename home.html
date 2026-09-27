@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Level 1 Game Arena</title>
+    <title>🤪 Z PAJAL - Home Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -26,18 +26,19 @@
             align-items: center;
         }
 
-        .game-wrapper {
+        .dashboard-wrapper {
             width: 100%;
             height: 100%;
             max-width: 1280px;
             max-height: 720px;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 15px;
             position: relative;
         }
 
-        .game-hud {
+        /* Top Navigation Bar */
+        .top-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -45,431 +46,181 @@
             backdrop-filter: blur(15px);
             border: 1px solid rgba(210, 140, 60, 0.3);
             border-radius: 15px;
-            padding: 8px 20px;
-            margin-bottom: 8px;
+            padding: 10px 25px;
+            margin-bottom: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
 
-        .hud-title {
+        .nav-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 900;
             color: #ffaa00;
             text-shadow: 0 0 8px rgba(255,170,0,0.5);
         }
 
-        .hud-stats {
+        .user-info {
             display: flex;
-            gap: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
+            gap: 15px;
+            align-items: center;
+            font-size: 14px;
             color: #ffcc66;
         }
 
-        .arena-container {
+        .logout-btn {
+            background: rgba(255, 0, 127, 0.2);
+            border: 1px solid rgba(255, 0, 127, 0.5);
+            color: #ff75bc;
+            padding: 6px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 0, 127, 0.4);
+            color: #fff;
+        }
+
+        /* Main Center Dashboard Arena */
+        .main-arena {
             flex: 1;
             background: rgba(20, 12, 5, 0.85);
             border: 2px solid rgba(210, 140, 60, 0.4);
             border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
             position: relative;
-            overflow: hidden;
             box-shadow: inset 0 0 25px rgba(210, 140, 60, 0.1), 0 10px 30px rgba(0,0,0,0.6);
         }
 
-        #gameCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        .controls-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 25px;
-            pointer-events: none;
-        }
-
-        @media (min-width: 1024px) {
-            .controls-overlay {
-                display: none;
-            }
-        }
-
-        .control-group {
-            display: flex;
-            gap: 12px;
-            pointer-events: auto;
-            align-items: center;
-        }
-
-        .ctrl-btn {
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 255, 255, 0.35);
-            color: #ffffff;
+        .welcome-badge {
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            font-weight: 700;
-            width: 55px;
-            height: 55px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            transition: transform 0.1s, background 0.2s;
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.4);
         }
 
-        .ctrl-btn:active {
-            transform: scale(0.92);
-            background: rgba(210, 140, 60, 0.5);
-            border-color: #ffaa00;
-        }
-
-        .ctrl-btn.wide {
-            width: 85px;
-            border-radius: 16px;
-            font-size: 10px;
-        }
-
-        .back-btn {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
+        .desc-text {
             color: #d0b090;
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            cursor: pointer;
+            font-size: 14px;
+            max-width: 500px;
+            margin-bottom: 30px;
+            line-height: 1.6;
         }
-        .back-btn:hover {
+
+        .play-game-btn {
+            background: linear-gradient(45deg, #ffaa00, #ff5500);
+            border: none;
             color: #fff;
-            border-color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            padding: 15px 40px;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 170, 0, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .play-game-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 170, 0, 0.6);
         }
     </style>
 </head>
 <body>
 
-    <div class="game-wrapper">
-        <div class="game-hud">
-            <div class="hud-title">⚡ LEVEL 1: TRAP ARENA</div>
-            <div class="hud-stats">
-                <span id="scoreDisplay">COINS: 0</span>
-                <span id="shieldDisplay">SHIELD: OFF</span>
+    <div class="dashboard-wrapper">
+        <!-- Top Navigation Bar -->
+        <div class="top-nav">
+            <div class="nav-title">🤪 Z PAJAL - DASHBOARD</div>
+            <div class="user-info">
+                <span id="userEmailDisplay">Loading...</span>
+                <button class="logout-btn" onclick="logoutUser()">LOGOUT</button>
             </div>
-            <button class="back-btn" onclick="goHome()">QUIT</button>
         </div>
 
-        <div class="arena-container">
-            <canvas id="gameCanvas"></canvas>
-
-            <div class="controls-overlay">
-                <div class="control-group">
-                    <button class="ctrl-btn" id="leftBtn">◀</button>
-                    <button class="ctrl-btn" id="rightBtn">▶</button>
-                    <button class="ctrl-btn wide" id="jumpBtn">JUMP/UP</button>
-                </div>
-
-                <div class="control-group">
-                    <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(255,170,0,0.25);">SHIELD</button>
-                    <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.25);">COLLECT</button>
-                </div>
+        <!-- Main Arena Box -->
+        <div class="main-arena">
+            <div class="welcome-badge">SELECT YOUR CHALLENGE</div>
+            <div class="desc-text">
+                Prepare yourself for Level 1! Avoid hidden traps, collect coins carefully, and reach the white exit gate without getting blown up.
             </div>
+            <button class="play-game-btn" onclick="startLevel1()">PLAY LEVEL 1 🎮</button>
         </div>
     </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    <!-- Firebase Auth & Session Security Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        let score = 0;
-        let shieldActive = false;
-        let isExploding = false;
-        let explosionTimer = 0;
-
-        // 50% Smaller Dummy Character
-        let player = {
-            x: 60,
-            y: canvas.height - 150,
-            width: 18,
-            height: 34,
-            vx: 0,
-            vy: 0,
-            speed: 3.5,
-            jumpForce: -9,
-            gravity: 0.45,
-            isGrounded: false,
-            walkCycle: 0
+        const firebaseConfig = {
+            apiKey: "AIzaSyCK9njPkGdw91_vGhI0_mRflpXBbz2D_zo",
+            authDomain: "z-pajal.firebaseapp.com",
+            databaseURL: "https://z-pajal-default-rtdb.firebaseio.com",
+            projectId: "z-pajal",
+            storageBucket: "z-pajal.firebasestorage.app",
+            messagingSenderId: "941362119453",
+            appId: "1:941362119453:web:c52140dba1952a389197f4",
+            measurementId: "G-PKKCQ5CT9P"
         };
 
-        // Short track surface with a breaking trap block near the goal
-        let platforms = [
-            { x: 0, y: canvas.height - 50, w: 900, h: 50, type: 'ground' },
-            { x: 900, y: canvas.height - 50, w: 60, h: 50, type: 'trap', triggered: false }, // Trap surface block
-            { x: 960, y: canvas.height - 50, w: 240, h: 50, type: 'ground' }
-        ];
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-        // 10 Small Coins (including 2 explosive trap coins at index 3 and 7)
-        let coins = [
-            { x: 150, y: canvas.height - 90, collected: false, explosive: false },
-            { x: 250, y: canvas.height - 90, collected: false, explosive: false },
-            { x: 350, y: canvas.height - 90, collected: false, explosive: false },
-            { x: 450, y: canvas.height - 90, collected: false, explosive: true },  // Trap coin 1
-            { x: 550, y: canvas.height - 90, collected: false, explosive: false },
-            { x: 650, y: canvas.height - 90, collected: false, explosive: false },
-            { x: 750, y: canvas.height - 90, collected: false, explosive: false },
-            { x: 830, y: canvas.height - 90, collected: false, explosive: true },  // Trap coin 2
-            { x: 1000, y: canvas.height - 90, collected: false, explosive: false },
-            { x: 1100, y: canvas.height - 90, collected: false, explosive: false }
-        ];
-
-        let goal = { x: 1150, y: canvas.height - 120, w: 30, h: 70 };
-        let cameraX = 0;
-        let keys = { left: false, right: false };
-
-        document.getElementById('leftBtn').addEventListener('touchstart', () => keys.left = true);
-        document.getElementById('leftBtn').addEventListener('touchend', () => keys.left = false);
-        document.getElementById('rightBtn').addEventListener('touchstart', () => keys.right = true);
-        document.getElementById('rightBtn').addEventListener('touchend', () => keys.right = false);
-        
-        document.getElementById('jumpBtn').addEventListener('touchstart', () => {
-            if (player.isGrounded && !isExploding) {
-                player.vy = player.jumpForce;
-                player.isGrounded = false;
-            }
+        // 🛑 Strict Security & Back Button Trap
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function () {
+            history.pushState(null, null, location.href);
         });
 
-        const shieldBtn = document.getElementById('shieldBtn');
-        shieldBtn.addEventListener('touchstart', () => {
-            shieldActive = true;
-            document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-            document.getElementById('shieldDisplay').style.color = "#ffaa00";
-        });
-        shieldBtn.addEventListener('touchend', () => {
-            shieldActive = false;
-            document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-            document.getElementById('shieldDisplay').style.color = "#ffcc66";
-        });
+        // Check active session & authentication
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('userEmailDisplay').innerText = user.email;
 
-        document.getElementById('coinBtn').addEventListener('click', () => {
-            checkCoins();
-        });
-
-        window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && player.isGrounded && !isExploding) {
-                player.vy = player.jumpForce;
-                player.isGrounded = false;
-            }
-            if (e.key === 's' || e.key === 'Shift') {
-                shieldActive = true;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-            }
-        });
-
-        window.addEventListener('keyup', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-            if (e.key === 's' || e.key === 'Shift') {
-                shieldActive = false;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-            }
-        });
-
-        function triggerExplosion() {
-            if (shieldActive) return; // Shield saves from blast
-            isExploding = true;
-            explosionTimer = 40;
-            setTimeout(() => {
-                alert("💥 Boom! You hit a trap. Restarting level.");
-                window.location.reload();
-            }, 600);
-        }
-
-        function checkCoins() {
-            coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 25) {
-                    c.collected = true;
-                    if (c.explosive) {
-                        triggerExplosion();
-                    } else {
-                        score += 20;
+                // Single device session tracking
+                const localSession = localStorage.getItem('userSessionId');
+                onValue(ref(db, 'users/' + user.uid + '/activeSession'), (snapshot) => {
+                    const serverSession = snapshot.val();
+                    if (serverSession && localSession !== serverSession) {
+                        alert("⚠️ Your account was logged in from another device!");
+                        signOut(auth).then(() => {
+                            localStorage.clear();
+                            window.location.href = "index.html";
+                        });
                     }
-                }
-            });
-        }
-
-        function update() {
-            if (isExploding) return;
-
-            if (keys.left) {
-                player.vx = -player.speed;
-                player.walkCycle += 0.15;
-            } else if (keys.right) {
-                player.vx = player.speed;
-                player.walkCycle += 0.15;
+                });
             } else {
-                player.vx = 0;
-                player.walkCycle = 0;
-            }
-
-            player.x += player.vx;
-            player.vy += player.gravity;
-            player.y += player.vy;
-
-            // Blast if player touches extreme left wall (x <= 0)
-            if (player.x <= 0) {
-                triggerExplosion();
-            }
-
-            player.isGrounded = false;
-            platforms.forEach(p => {
-                if (p.type === 'trap' && p.triggered) return; // Broken trap surface
-
-                if (
-                    player.x + player.width > p.x &&
-                    player.x < p.x + p.w &&
-                    player.y + player.height >= p.y &&
-                    player.y + player.height - player.vy <= p.y + 10
-                ) {
-                    if (p.type === 'trap') {
-                        p.triggered = true; // Trigger collapse 1 step before goal
-                        setTimeout(() => triggerExplosion(), 200);
-                    }
-                    player.y = p.y - player.height;
-                    player.vy = 0;
-                    player.isGrounded = true;
-                }
-            });
-
-            // Fall into gap check
-            if (player.y > canvas.height) {
-                triggerExplosion();
-            }
-
-            cameraX = player.x - canvas.width / 3;
-            if (cameraX < 0) cameraX = 0;
-
-            checkCoins();
-
-            if (player.x >= goal.x) {
-                alert("🎉 Level 1 Cleared Successfully!");
+                // Agar user login nahi hai toh wapas login page par bhej do
                 window.location.href = "index.html";
             }
+        });
 
-            document.getElementById('scoreDisplay').innerText = "COINS: " + score;
+        window.startLevel1 = function() {
+            // Yahan aap apni game wali file ka naam likh sakte hain (jaise game.html)
+            window.location.href = "game.html";
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.save();
-            ctx.translate(-cameraX, 0);
-
-            // Draw Platforms
-            platforms.forEach(p => {
-                if (p.type === 'trap' && p.triggered) return; // Don't draw if collapsed
-                ctx.fillStyle = '#3d2314';
-                ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.strokeStyle = '#d28c3c';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(p.x, p.y, p.w, p.h);
+        window.logoutUser = function() {
+            signOut(auth).then(() => {
+                localStorage.clear();
+                window.location.href = "index.html";
+            }).catch((error) => {
+                console.error("Logout Error:", error);
             });
-
-            // Draw Smaller Coins (Radius 5 instead of 10)
-            coins.forEach(c => {
-                if (!c.collected) {
-                    ctx.beginPath();
-                    ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = c.explosive ? '#ff3300' : '#ffcc00';
-                    ctx.fill();
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = '#fff';
-                    ctx.stroke();
-                }
-            });
-
-            // Draw Goal Portal
-            ctx.fillStyle = '#ffaa00';
-            ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
-
-            // Draw 50% Smaller White Dummy with human walk animation
-            let px = player.x;
-            let py = player.y;
-
-            if (isExploding) {
-                ctx.fillStyle = '#ff0000';
-                ctx.beginPath();
-                ctx.arc(px + 9, py + 17, 30, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                if (shieldActive) {
-                    ctx.beginPath();
-                    ctx.arc(px + 9, py + 17, 24, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
-                    ctx.fill();
-                    ctx.strokeStyle = '#ffaa00';
-                    ctx.stroke();
-                }
-
-                // Head (White)
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(px + 9, py + 5, 5, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Torso (Thin & White)
-                ctx.fillRect(px + 7, py + 10, 4, 14);
-
-                // Animated Human Walk Hands & Legs
-                let swing = Math.sin(player.walkCycle) * 6;
-
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                // Arms
-                ctx.moveTo(px + 7, py + 12);
-                ctx.lineTo(px + 2 + swing, py + 18);
-                ctx.moveTo(px + 11, py + 12);
-                ctx.lineTo(px + 16 - swing, py + 18);
-
-                // Legs
-                ctx.moveTo(px + 8, py + 24);
-                ctx.lineTo(px + 5 + swing, py + 34);
-                ctx.moveTo(px + 10, py + 24);
-                ctx.lineTo(px + 13 - swing, py + 34);
-                ctx.stroke();
-            }
-
-            ctx.restore();
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        loop();
-
-        function goHome() {
-            window.location.href = "index.html";
         }
     </script>
 </body>
