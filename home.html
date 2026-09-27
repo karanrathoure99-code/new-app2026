@@ -21,22 +21,21 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            padding: 20px;
         }
 
-        /* Login page matching Glassmorphism Box */
+        /* Main Dashboard Container */
         .dashboard-container {
-            background: rgba(20, 18, 40, 0.45);
+            background: rgba(20, 18, 40, 0.5);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 25px;
-            padding: 35px 30px;
-            width: 90%;
-            max-width: 440px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.05);
+            padding: 30px 25px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.05);
             text-align: center;
-            position: relative;
         }
 
         .arcade-badge {
@@ -47,73 +46,160 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
-            padding: 5px 15px;
+            padding: 4px 14px;
             border-radius: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 30px;
+            font-size: 28px;
             font-weight: 900;
-            margin-bottom: 5px;
+            margin-bottom: 20px;
             color: #ffffff;
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
-        .subtitle {
-            font-size: 13px;
-            color: #a0a0c0;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
+        /* Top Profile & Rank Row */
+        .profile-rank-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        /* Gamer Profile Card */
-        .profile-card {
-            background: rgba(0, 0, 0, 0.35);
-            border-radius: 18px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            position: relative;
+        /* Left Side: 3D Oval Profile Box */
+        .left-profile-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-oval {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 0, 127, 0.4);
+            border-radius: 50px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.1), 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .avatar-img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff007f, #00ffcc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .username-container {
+            text-align: left;
             overflow: hidden;
-        }
-
-        .profile-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, #00ffcc);
-            animation: scanLine 3s infinite;
-        }
-
-        @keyframes scanLine {
-            0% { left: -100%; }
-            100% { left: 100%; }
         }
 
         .username {
             font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
+            font-size: 14px;
             font-weight: 700;
             color: #ff007f;
-            margin-bottom: 8px;
             text-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 110px;
+        }
+
+        .user-tag {
+            font-size: 10px;
+            color: #8c8cb2;
+        }
+
+        /* Level shown outside oval on left side */
+        .level-outside {
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #00ffcc;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(0, 255, 204, 0.4);
+        }
+
+        /* Right Side: Rank with Logo Box */
+        .right-rank-wrapper {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 204, 0, 0.3);
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.1), 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .rank-logo {
+            font-size: 24px;
+            margin-bottom: 3px;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .rank-title-label {
+            font-size: 10px;
+            color: #8c8cb2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .rank {
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffcc00;
-            margin-bottom: 5px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 2px;
         }
 
-        .level-count {
-            font-size: 13px;
-            color: #8c8cb2;
-            font-weight: 500;
+        /* 3D Square Info Box */
+        .info-square-box {
+            background: rgba(15, 12, 30, 0.6);
+            border: 1px solid rgba(0, 255, 204, 0.25);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+            box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.05), 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .info-square-box h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: #00ffcc;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .info-line {
+            font-size: 12px;
+            color: #b0b0d0;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-line:last-child {
+            margin-bottom: 0;
         }
 
         /* Neon Play Button */
@@ -121,9 +207,9 @@
             background: linear-gradient(135deg, #ff007f, #7928ca);
             color: white;
             border: none;
-            padding: 16px;
+            padding: 15px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             letter-spacing: 1px;
             border-radius: 14px;
@@ -131,14 +217,12 @@
             width: 100%;
             transition: all 0.3s ease;
             box-shadow: 0 5px 20px rgba(255, 0, 127, 0.4);
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 12px;
         }
 
         .play-btn:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 0, 127, 0.7);
-            background: linear-gradient(135deg, #ff198c, #893ad6);
         }
 
         .play-btn:active {
@@ -150,12 +234,11 @@
             background: transparent;
             color: #8c8cb2;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            margin-top: 15px;
             width: 100%;
             transition: all 0.3s ease;
         }
@@ -172,14 +255,38 @@
     <div class="dashboard-container">
         <div class="arcade-badge">🎮 ARCADE ZONE</div>
         <h1>🤪 Z PAJAL</h1>
-        <p class="subtitle">ENTER THE HARDCORE GAME REALM</p>
 
-        <div class="profile-card">
-            <div class="username" id="displayUsername">Loading...</div>
-            <div class="rank" id="displayRank">Rank: Loading...</div>
-            <div class="level-count" id="displayLevel">Level: 1</div>
+        <!-- Profile & Rank Row -->
+        <div class="profile-rank-row">
+            <!-- Left Side: 3D Oval Profile + Level Outside -->
+            <div class="left-profile-wrapper">
+                <div class="profile-oval">
+                    <div class="avatar-img">🧑‍💻</div>
+                    <div class="username-container">
+                        <div class="username" id="displayUsername">Loading...</div>
+                        <div class="user-tag">Rage Gamer</div>
+                    </div>
+                </div>
+                <div class="level-outside" id="displayLevel">LEVEL: 1</div>
+            </div>
+
+            <!-- Right Side: Rank with Logo -->
+            <div class="right-rank-wrapper">
+                <div class="rank-logo" id="displayRankLogo">🛡️</div>
+                <div class="rank-title-label">Current Rank</div>
+                <div class="rank" id="displayRank">Silver</div>
+            </div>
         </div>
 
+        <!-- 3D Square Info Box -->
+        <div class="info-square-box">
+            <h3>⚡ REALM STATUS</h3>
+            <div class="info-line">🎯 <b>Objective:</b> Clear all 10 troll levels</div>
+            <div class="info-line">⚠️ <b>Warning:</b> Watch out for fake floors</div>
+            <div class="info-line">🏆 <b>Goal:</b> Reach Grand Master status</div>
+        </div>
+
+        <!-- Action Buttons -->
         <button class="play-btn" onclick="startGame()">🚀 PLAY GAME - LEVEL 1</button>
         <button class="logout-btn" onclick="logoutUser()">LOGOUT SESSION</button>
     </div>
@@ -224,34 +331,41 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.08);
             } catch (e) {
-                console.log("Audio not supported or blocked");
+                console.log("Audio not supported");
             }
         }
 
-        // Boy Voice Simulation (Laugh removed, low pitch set)
+        // Boy Voice Simulation (Low pitch, no laugh)
         function playBoyWelcomeVoice(username) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const welcomeText = "Welcome to Z Pajal game, " + username + "!";
                 const utterance = new SpeechSynthesisUtterance(welcomeText);
                 utterance.rate = 1.0; 
-                utterance.pitch = 0.8; // Lower pitch for boy voice tone
+                utterance.pitch = 0.8; // Boy low tone
                 utterance.volume = 1.0;
-
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        function calculateRank(level) {
-            if (level >= 1 && level <= 10) return "Silver";
-            if (level >= 11 && level <= 25) return "Shine Silver";
-            if (level >= 26 && level <= 40) return "Gold";
-            if (level >= 41 && level <= 65) return "Shine Gold";
-            if (level >= 66 && level <= 80) return "Diamond";
-            if (level >= 81 && level <= 110) return "Pro Diamond";
-            if (level >= 111 && level <= 200) return "Grand Pro Diamond";
-            if (level >= 300) return "Legend Grand Master";
-            return "Grand Pro Diamond";
+        // Calculate Rank and set dynamic logo colors
+        function updateRankInfo(level) {
+            let rankName = "Silver";
+            let color = "#c0c0c0"; // Silver
+
+            if (level >= 1 && level <= 10) { rankName = "Silver"; color = "#c0c0c0"; }
+            else if (level >= 11 && level <= 25) { rankName = "Shine Silver"; color = "#e0e0e0"; }
+            else if (level >= 26 && level <= 40) { rankName = "Gold"; color = "#ffd700"; }
+            else if (level >= 41 && level <= 65) { rankName = "Shine Gold"; color = "#ffea75"; }
+            else if (level >= 66 && level <= 80) { rankName = "Diamond"; color = "#00ffff"; }
+            else if (level >= 81 && level <= 110) { rankName = "Pro Diamond"; color = "#00bfff"; }
+            else if (level >= 111 && level <= 200) { rankName = "Grand Pro Diamond"; color = "#7b68ee"; }
+            else if (level >= 300) { rankName = "Legend Grand Master"; color = "#ff00ff"; }
+            else { rankName = "Grand Pro Diamond"; color = "#7b68ee"; }
+
+            document.getElementById('displayRank').innerText = rankName;
+            document.getElementById('displayRank').style.color = color;
+            document.getElementById('displayRankLogo').style.color = color;
         }
 
         onAuthStateChanged(auth, async (user) => {
@@ -266,15 +380,15 @@
                         const level = userData.level || 1;
 
                         document.getElementById('displayUsername').innerText = username;
-                        document.getElementById('displayLevel').innerText = "Level: " + level;
-                        document.getElementById('displayRank').innerText = "Rank: " + calculateRank(level);
+                        document.getElementById('displayLevel').innerText = "LEVEL: " + level;
+                        updateRankInfo(level);
 
                         playBoyWelcomeVoice(username);
                     } else {
                         const fallbackName = user.email.split('@')[0];
                         document.getElementById('displayUsername').innerText = fallbackName;
-                        document.getElementById('displayLevel').innerText = "Level: 1";
-                        document.getElementById('displayRank').innerText = "Rank: Silver";
+                        document.getElementById('displayLevel').innerText = "LEVEL: 1";
+                        updateRankInfo(1);
                         playBoyWelcomeVoice(fallbackName);
                     }
                 } catch (error) {
