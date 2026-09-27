@@ -206,7 +206,6 @@
             updateGameLayout();
         }
 
-        // Screen lock landscape support if available
         if (screen.orientation && screen.orientation.lock) {
             screen.orientation.lock('landscape').catch(() => {});
         }
@@ -232,8 +231,8 @@
 
         let platforms = [];
         let coins = [];
-        // Goal size 25% bada kiya gaya hai (Width: 18, Height: 40)
-        let goal = { x: 0, y: 0, w: 18, h: 40 };
+        // Goal (damee) ka size pehle se 50% aur bada kar diya hai (Width: 27, Height: 60)
+        let goal = { x: 0, y: 0, w: 27, h: 60 };
 
         function updateGameLayout() {
             const surfaceHeight = 24;
@@ -243,7 +242,6 @@
                 { x: 0, y: groundY, w: canvasWidth, h: surfaceHeight, type: 'ground' }
             ];
 
-            // Coins ke beech ka space bada kiya gaya hai aur total 4 coins rakhe gaye hain taaki proper spacing mile
             coins = [
                 { x: 180, y: groundY - 30, collected: false, hasBomb: false },
                 { x: 380, y: groundY - 30, collected: false, hasBomb: false },
@@ -251,8 +249,8 @@
                 { x: 780, y: groundY - 30, collected: false, hasBomb: false }
             ];
 
-            goal.y = groundY - 40;
-            goal.x = canvasWidth - 35;
+            goal.y = groundY - 60;
+            goal.x = canvasWidth - 45;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -368,7 +366,8 @@
                     if (c.hasBomb) {
                         triggerExplosion();
                     } else {
-                        score += 24;
+                        // 1 coin lene par 1 coin count hoga (score += 1)
+                        score += 1;
                     }
                 }
             });
@@ -443,7 +442,6 @@
             ctx.save();
             ctx.translate(-cameraX, 0);
 
-            // Surface ka color thoda aur halka (bright & glowing) kar diya gaya hai
             platforms.forEach(p => {
                 let surfGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
                 surfGrad.addColorStop(0, '#ffc233');
@@ -461,7 +459,6 @@
                 ctx.stroke();
             });
 
-            // Coins ka size 50% bada kar diya gaya hai (Radius 2.5 se badha kar 3.75 aur outer ring 7.5)
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.beginPath();
@@ -479,21 +476,21 @@
                 }
             });
 
-            // Goal - 3D White Color Effect
+            // Goal (Damee) - 3D White Color & 50% Bigger Size
             let goalGrad = ctx.createLinearGradient(goal.x, goal.y, goal.x + goal.w, goal.y + goal.h);
             goalGrad.addColorStop(0, '#ffffff');
-            goalGrad.addColorStop(0.5, '#d0d0d0');
-            goalGrad.addColorStop(1, '#888888');
+            goalGrad.addColorStop(0.5, '#c5c5c5');
+            goalGrad.addColorStop(1, '#777777');
 
             ctx.fillStyle = goalGrad;
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.5;
             ctx.strokeRect(goal.x - 2, goal.y - 2, goal.w + 4, goal.h + 4);
             
             // 3D Inner detail on Goal
-            ctx.fillStyle = '#333333';
-            ctx.fillRect(goal.x + 3, goal.y + 12, 3, 8);
+            ctx.fillStyle = '#222222';
+            ctx.fillRect(goal.x + 5, goal.y + 18, 4, 14);
 
             if (isExploding) {
                 fragments.forEach(f => {
