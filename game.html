@@ -83,7 +83,6 @@
             display: block;
         }
 
-        /* 70% Transparent Tekken Style Controls (Hidden on Laptop, visible on Mobile/Tablet) */
         .controls-overlay {
             position: absolute;
             bottom: 0;
@@ -97,7 +96,7 @@
 
         @media (min-width: 1024px) {
             .controls-overlay {
-                display: none; /* Hide touch buttons on laptop/desktop */
+                display: none;
             }
         }
 
@@ -118,13 +117,12 @@
             font-weight: 700;
             width: 55px;
             height: 55px;
-            border-radius: 14px; /* Tekken style rectangular rounded shape */
+            border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            transition: transform 0.1s, background 0.2s;
         }
 
         .ctrl-btn:active {
@@ -158,7 +156,7 @@
 
     <div class="game-wrapper">
         <div class="game-hud">
-            <div class="hud-title">⚡ LEVEL 1: BROWN ARENA</div>
+            <div class="hud-title">⚡ LEVEL 1: STEALTH ARENA</div>
             <div class="hud-stats">
                 <span id="scoreDisplay">COINS: 0</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
@@ -170,18 +168,14 @@
             <canvas id="gameCanvas"></canvas>
 
             <div class="controls-overlay">
-                <!-- Left Hand Controls -->
                 <div class="control-group">
                     <button class="ctrl-btn" id="leftBtn">◀</button>
                     <button class="ctrl-btn" id="rightBtn">▶</button>
                     <button class="ctrl-btn wide" id="jumpBtn">JUMP/UP</button>
-                    <button class="ctrl-btn" id="downBtn">▼</button>
                 </div>
 
-                <!-- Right Hand Controls (Shield active only on hold) -->
                 <div class="control-group">
                     <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(255,170,0,0.25);">SHIELD</button>
-                    <button class="ctrl-btn wide" id="crackBtn" style="background: rgba(210,140,60,0.25);">CRACK</button>
                     <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.25);">COLLECT</button>
                 </div>
             </div>
@@ -201,51 +195,78 @@
 
         let score = 0;
         let shieldActive = false;
+        let isExploding = false;
+        let fragments = [];
 
+        // Dummy Character
         let player = {
             x: 50,
-            y: canvas.height - 180,
-            width: 36,
-            height: 68,
+            y: canvas.height - 120,
+            width: 14,
+            height: 28,
             vx: 0,
             vy: 0,
-            speed: 4,
-            jumpForce: -11,
-            gravity: 0.5,
-            isGrounded: false
+            speed: 3,
+            jumpForce: -8.5,
+            gravity: 0.4,
+            isGrounded: false,
+            legAngle: 0
         };
 
-        // Simple Surface Platform (No pits, no extra floating obstacles)
+        // Thin surface extending to right end, with a hidden trap near the end
         let platforms = [
-            { x: 0, y: canvas.height - 60, w: 3000, h: 60, type: 'ground' }
+            { x: 0, y: canvas.height - 35, w: 750, h: 15, type: 'ground' },
+            { x: 750, y: canvas.height - 35, w: 45, h: 15, type: 'hiddenTrap', triggered: false }, // Hidden breaking block
+            { x: 795, y: canvas.height - 35, w: 155, h: 15, type: 'ground' }
         ];
 
+        // Exactly 5 Coins with identical color (Coin at index 3 contains hidden bomb)
         let coins = [
-            { x: 400, y: canvas.height - 110, collected: false },
-            { x: 800, y: canvas.height - 110, collected: false },
-            { x: 1200, y: canvas.height - 110, collected: false },
-            { x: 1600, y: canvas.height - 110, collected: false },
-            { x: 2000, y: canvas.height - 110, collected: false }
+            { x: 180, y: canvas.height - 70, collected: false, hasBomb: false },
+            { x: 320, y: canvas.height - 70, collected: false, hasBomb: false },
+            { x: 480, y: canvas.height - 70, collected: false, hasBomb: false },
+            { x: 620, y: canvas.height - 70, collected: false, hasBomb: true },   // Hidden Bomb Coin
+            { x: 720, y: canvas.height - 70, collected: false, hasBomb: false }
         ];
 
-        let goal = { x: 2600, y: canvas.height - 140, w: 40, h: 80 };
+        // White Exit Gate sized perfectly for dummy character
+        let goal = { x: 900, y: canvas.height - 63, w: 18, h: 28 };
+
         let cameraX = 0;
         let keys = { left: false, right: false };
 
-        // Touch Listeners
+        // Audio synthesizer for bomb blast sound effect
+        function playBlastSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } catch (e) {
+                console.log("Audio error", e);
+            }
+        }
+
         document.getElementById('leftBtn').addEventListener('touchstart', () => keys.left = true);
         document.getElementById('leftBtn').addEventListener('touchend', () => keys.left = false);
         document.getElementById('rightBtn').addEventListener('touchstart', () => keys.right = true);
         document.getElementById('rightBtn').addEventListener('touchend', () => keys.right = false);
         
         document.getElementById('jumpBtn').addEventListener('touchstart', () => {
-            if (player.isGrounded) {
+            if (player.isGrounded && !isExploding) {
                 player.vy = player.jumpForce;
                 player.isGrounded = false;
             }
         });
 
-        // Shield active only while holding the button down
         const shieldBtn = document.getElementById('shieldBtn');
         shieldBtn.addEventListener('touchstart', () => {
             shieldActive = true;
@@ -258,48 +279,73 @@
             document.getElementById('shieldDisplay').style.color = "#ffcc66";
         });
 
-        document.getElementById('crackBtn').addEventListener('click', () => {
-            score += 10;
-        });
+        document.getElementById('coinBtn').addEventListener('click', () => checkCoins());
 
-        document.getElementById('coinBtn').addEventListener('click', () => {
-            coins.forEach(c => {
-                if (!c.collected && Math.abs(c.x - player.x) < 70) {
-                    c.collected = true;
-                    score += 50;
-                }
-            });
-        });
-
-        // Keyboard Support for Laptop/PC
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && player.isGrounded) {
+            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && player.isGrounded && !isExploding) {
                 player.vy = player.jumpForce;
                 player.isGrounded = false;
             }
-            if (e.key === 's' || e.key === 'Shift') {
-                shieldActive = true;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-                document.getElementById('shieldDisplay').style.color = "#ffaa00";
-            }
         });
-
         window.addEventListener('keyup', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-            if (e.key === 's' || e.key === 'Shift') {
-                shieldActive = false;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                document.getElementById('shieldDisplay').style.color = "#ffcc66";
-            }
         });
 
+        function triggerExplosion() {
+            if (shieldActive) return;
+            isExploding = true;
+            playBlastSound();
+
+            // Create body fragments for destruction effect
+            fragments = [
+                { x: player.x, y: player.y, vx: -3, vy: -4, part: 'head' },
+                { x: player.x + 5, y: player.y + 10, vx: 2, vy: -5, part: 'torso' },
+                { x: player.x, y: player.y + 15, vx: -4, vy: 2, part: 'leg1' },
+                { x: player.x + 8, y: player.y + 15, vx: 4, vy: 3, part: 'leg2' }
+            ];
+
+            setTimeout(() => {
+                alert("💥 Boom! Blast detected. Restarting level.");
+                window.location.reload();
+            }, 800);
+        }
+
+        function checkCoins() {
+            coins.forEach(c => {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
+                    c.collected = true;
+                    if (c.hasBomb) {
+                        triggerExplosion();
+                    } else {
+                        score += 20;
+                    }
+                }
+            });
+        }
+
         function update() {
-            if (keys.left) player.vx = -player.speed;
-            else if (keys.right) player.vx = player.speed;
-            else player.vx = 0;
+            if (isExploding) {
+                fragments.forEach(f => {
+                    f.x += f.vx;
+                    f.y += f.vy;
+                    f.vy += 0.4; // gravity on pieces
+                });
+                return;
+            }
+
+            if (keys.left) {
+                player.vx = -player.speed;
+                player.legAngle += 0.2;
+            } else if (keys.right) {
+                player.vx = player.speed;
+                player.legAngle += 0.2;
+            } else {
+                player.vx = 0;
+                player.legAngle = 0;
+            }
 
             player.x += player.vx;
             player.vy += player.gravity;
@@ -307,29 +353,35 @@
 
             player.isGrounded = false;
             platforms.forEach(p => {
+                if (p.type === 'hiddenTrap' && p.triggered) return;
+
                 if (
                     player.x + player.width > p.x &&
                     player.x < p.x + p.w &&
                     player.y + player.height >= p.y &&
                     player.y + player.height - player.vy <= p.y + 10
                 ) {
+                    if (p.type === 'hiddenTrap') {
+                        p.triggered = true;
+                        setTimeout(() => triggerExplosion(), 150);
+                    }
                     player.y = p.y - player.height;
                     player.vy = 0;
                     player.isGrounded = true;
                 }
             });
 
+            if (player.y > canvas.height) {
+                triggerExplosion();
+            }
+
             cameraX = player.x - canvas.width / 3;
             if (cameraX < 0) cameraX = 0;
 
-            coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 40) {
-                    c.collected = true;
-                    score += 50;
-                }
-            });
+            checkCoins();
 
-            if (player.x >= goal.x) {
+            // Check White Exit Gate Reached
+            if (player.x >= goal.x && player.y + player.height >= goal.y) {
                 alert("🎉 Level 1 Cleared Successfully!");
                 window.location.href = "index.html";
             }
@@ -343,74 +395,81 @@
             ctx.save();
             ctx.translate(-cameraX, 0);
 
-            // Draw Simple Brown Surface Platform
+            // Draw Thin Surface Platforms
             platforms.forEach(p => {
+                if (p.type === 'hiddenTrap' && p.triggered) return;
                 ctx.fillStyle = '#3d2314';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
                 ctx.strokeStyle = '#d28c3c';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 1;
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
             });
 
-            // Draw Coins
+            // Draw Identical Coins (No distinction for bomb)
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.beginPath();
-                    ctx.arc(c.x, c.y, 10, 0, Math.PI * 2);
+                    ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
                     ctx.fillStyle = '#ffcc00';
                     ctx.fill();
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 1;
                     ctx.strokeStyle = '#fff';
                     ctx.stroke();
                 }
             });
 
-            // Draw Goal Portal
-            ctx.fillStyle = '#ffaa00';
+            // Draw White Exit Gate
+            ctx.fillStyle = '#ffffff';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(goal.x - 2, goal.y - 2, goal.w + 4, goal.h + 4);
 
-            // Draw Fully White Dummy Character (Thin body parts)
-            let px = player.x;
-            let py = player.y;
+            // Draw Dummy Character or Blast Fragments
+            if (isExploding) {
+                ctx.fillStyle = '#ffffff';
+                fragments.forEach(f => {
+                    ctx.fillRect(f.x, f.y, 4, 4);
+                });
+            } else {
+                let px = player.x;
+                let py = player.y;
 
-            if (shieldActive) {
+                if (shieldActive) {
+                    ctx.beginPath();
+                    ctx.arc(px + 7, py + 14, 20, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffaa00';
+                    ctx.stroke();
+                }
+
+                // Head
+                ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-                ctx.arc(px + 18, py + 34, 42, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
+                ctx.arc(px + 7, py + 4, 4, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.strokeStyle = '#ffaa00';
+
+                // Torso
+                ctx.fillRect(px + 5, py + 9, 4, 11);
+
+                // Arms (Static)
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(px + 5, py + 11);
+                ctx.lineTo(px + 1, py + 16);
+                ctx.moveTo(px + 9, py + 11);
+                ctx.lineTo(px + 13, py + 16);
+
+                // Walking Legs (Only legs move to simulate human walking)
+                let legSwing = Math.sin(player.legAngle) * 4;
+                ctx.moveTo(px + 6, py + 20);
+                ctx.lineTo(px + 4 + legSwing, py + 28);
+                ctx.moveTo(px + 8, py + 20);
+                ctx.lineTo(px + 10 - legSwing, py + 28);
                 ctx.stroke();
             }
-
-            // Head (White)
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(px + 18, py + 10, 10, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Torso (Thin & White)
-            ctx.fillRect(px + 14, py + 20, 8, 28);
-
-            // Hands (Thin White Lines)
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(px + 14, py + 24);
-            ctx.lineTo(px + 2, py + 36);
-            ctx.moveTo(px + 22, py + 24);
-            ctx.lineTo(px + 34, py + 36);
-            ctx.stroke();
-
-            // Legs (Thin White Lines)
-            ctx.beginPath();
-            ctx.moveTo(px + 15, py + 48);
-            ctx.lineTo(px + 10, py + 68);
-            ctx.moveTo(px + 21, py + 48);
-            ctx.lineTo(px + 26, py + 68);
-            ctx.stroke();
 
             ctx.restore();
         }
