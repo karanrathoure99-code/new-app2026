@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤪 Z PAJAL - Arcade Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🤪 Z PAJAL - Level 1 Game Arena</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -11,387 +11,465 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+            user-select: none;
         }
 
         body {
-            background: linear-gradient(135deg, #3d0a3d 0%, #070514 50%, #032b29 100%);
+            background: linear-gradient(135deg, #2b1a09 0%, #0f0803 50%, #1a0f03 100%);
             background-attachment: fixed;
             color: #ffffff;
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
 
-        .dashboard-container {
-            background: rgba(20, 18, 40, 0.5);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 25px;
-            padding: 30px 25px;
+        .game-wrapper {
             width: 100%;
-            max-width: 480px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.05);
-            text-align: center;
+            height: 100%;
+            max-width: 1280px;
+            max-height: 720px;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            position: relative;
         }
 
-        .arcade-badge {
-            display: inline-block;
-            background: linear-gradient(90deg, #ff007f, #7928ca);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 4px 14px;
-            border-radius: 20px;
-            margin-bottom: 12px;
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
-        }
-
-        h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 28px;
-            font-weight: 900;
-            margin-bottom: 20px;
-            color: #ffffff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-        }
-
-        .profile-rank-row {
+        .game-hud {
             display: flex;
             justify-content: space-between;
-            align-items: stretch;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .left-profile-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
             align-items: center;
-        }
-
-        .profile-oval {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 0, 127, 0.4);
-            border-radius: 50px;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.1), 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .avatar-img {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff007f, #00ffcc);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .username-container {
-            text-align: left;
-            overflow: hidden;
-        }
-
-        .username {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: #ff007f;
-            text-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 110px;
-        }
-
-        .user-tag {
-            font-size: 10px;
-            color: #8c8cb2;
-        }
-
-        .level-outside {
-            margin-top: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #00ffcc;
-            letter-spacing: 1px;
-            text-shadow: 0 0 5px rgba(0, 255, 204, 0.4);
-        }
-
-        .right-rank-wrapper {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 204, 0, 0.3);
-            border-radius: 20px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.1), 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .rank-logo {
-            font-size: 24px;
-            margin-bottom: 3px;
-            filter: drop-shadow(0 0 8px currentColor);
-        }
-
-        .rank-title-label {
-            font-size: 10px;
-            color: #8c8cb2;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .rank {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 2px;
-        }
-
-        .info-square-box {
-            background: rgba(15, 12, 30, 0.6);
-            border: 1px solid rgba(0, 255, 204, 0.25);
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: left;
-            box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.05), 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .info-square-box h3 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
-            color: #00ffcc;
+            background: rgba(43, 26, 9, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(210, 140, 60, 0.3);
+            border-radius: 15px;
+            padding: 8px 20px;
             margin-bottom: 8px;
-            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
 
-        .info-line {
-            font-size: 12px;
-            color: #b0b0d0;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .info-line:last-child {
-            margin-bottom: 0;
-        }
-
-        .play-btn {
-            background: linear-gradient(135deg, #ff007f, #7928ca);
-            color: white;
-            border: none;
-            padding: 15px;
+        .hud-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            border-radius: 14px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(255, 0, 127, 0.4);
-            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 900;
+            color: #ffaa00;
+            text-shadow: 0 0 8px rgba(255,170,0,0.5);
         }
 
-        .play-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.7);
-        }
-
-        .logout-btn {
-            background: transparent;
-            color: #8c8cb2;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px;
-            border-radius: 12px;
+        .hud-stats {
+            display: flex;
+            gap: 20px;
+            font-family: 'Orbitron', sans-serif;
             font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            color: #ffcc66;
         }
 
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
+        .arena-container {
+            flex: 1;
+            background: rgba(20, 12, 5, 0.85);
+            border: 2px solid rgba(210, 140, 60, 0.4);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 25px rgba(210, 140, 60, 0.1), 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 25px;
+            pointer-events: none;
+        }
+
+        @media (min-width: 1024px) {
+            .controls-overlay {
+                display: none;
+            }
+        }
+
+        .control-group {
+            display: flex;
+            gap: 12px;
+            pointer-events: auto;
+            align-items: center;
+        }
+
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.35);
             color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.3);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            width: 55px;
+            height: 55px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.92);
+            background: rgba(210, 140, 60, 0.5);
+            border-color: #ffaa00;
+        }
+
+        .ctrl-btn.wide {
+            width: 85px;
+            border-radius: 16px;
+            font-size: 10px;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #d0b090;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            color: #fff;
+            border-color: #fff;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <div class="arcade-badge">🎮 ARCADE ZONE</div>
-        <h1>🤪 Z PAJAL</h1>
+    <div class="game-wrapper">
+        <div class="game-hud">
+            <div class="hud-title">⚡ LEVEL 1: TRAP ARENA</div>
+            <div class="hud-stats">
+                <span id="scoreDisplay">COINS: 0</span>
+                <span id="shieldDisplay">SHIELD: OFF</span>
+            </div>
+            <button class="back-btn" onclick="goHome()">QUIT</button>
+        </div>
 
-        <div class="profile-rank-row">
-            <div class="left-profile-wrapper">
-                <div class="profile-oval">
-                    <div class="avatar-img">🧑‍💻</div>
-                    <div class="username-container">
-                        <div class="username" id="displayUsername">Loading...</div>
-                        <div class="user-tag">Rage Gamer</div>
-                    </div>
+        <div class="arena-container">
+            <canvas id="gameCanvas"></canvas>
+
+            <div class="controls-overlay">
+                <div class="control-group">
+                    <button class="ctrl-btn" id="leftBtn">◀</button>
+                    <button class="ctrl-btn" id="rightBtn">▶</button>
+                    <button class="ctrl-btn wide" id="jumpBtn">JUMP/UP</button>
                 </div>
-                <div class="level-outside" id="displayLevel">LEVEL: 1</div>
-            </div>
 
-            <div class="right-rank-wrapper">
-                <div class="rank-logo" id="displayRankLogo">🛡️</div>
-                <div class="rank-title-label">Current Rank</div>
-                <div class="rank" id="displayRank">Silver</div>
+                <div class="control-group">
+                    <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(255,170,0,0.25);">SHIELD</button>
+                    <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.25);">COLLECT</button>
+                </div>
             </div>
         </div>
-
-        <div class="info-square-box">
-            <h3>⚡ REALM STATUS</h3>
-            <div class="info-line">🎯 <b>Objective:</b> Dam hai to level up karke dikhao</div>
-            <div class="info-line">⚠️ <b>Warning:</b> Watch out for fake floors</div>
-            <div class="info-line">🏆 <b>Goal:</b> Reach Grand Master status</div>
-        </div>
-
-        <button class="play-btn" onclick="startGame()">🚀 PLAY GAME - LEVEL 1</button>
-        <button class="logout-btn" onclick="logoutUser()">LOGOUT SESSION</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCK9njPkGdw91_vGhI0_mRflpXBbz2D_zo",
-            authDomain: "z-pajal.firebaseapp.com",
-            databaseURL: "https://z-pajal-default-rtdb.firebaseio.com",
-            projectId: "z-pajal",
-            storageBucket: "z-pajal.firebasestorage.app",
-            messagingSenderId: "941362119453",
-            appId: "1:941362119453:web:c52140dba1952a389197f4",
-            measurementId: "G-PKKCQ5CT9P"
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let score = 0;
+        let shieldActive = false;
+        let isExploding = false;
+        let explosionTimer = 0;
+
+        // 50% Smaller Dummy Character
+        let player = {
+            x: 60,
+            y: canvas.height - 150,
+            width: 18,
+            height: 34,
+            vx: 0,
+            vy: 0,
+            speed: 3.5,
+            jumpForce: -9,
+            gravity: 0.45,
+            isGrounded: false,
+            walkCycle: 0
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+        // Short track surface with a breaking trap block near the goal
+        let platforms = [
+            { x: 0, y: canvas.height - 50, w: 900, h: 50, type: 'ground' },
+            { x: 900, y: canvas.height - 50, w: 60, h: 50, type: 'trap', triggered: false }, // Trap surface block
+            { x: 960, y: canvas.height - 50, w: 240, h: 50, type: 'ground' }
+        ];
 
-        function playTechSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+        // 10 Small Coins (including 2 explosive trap coins at index 3 and 7)
+        let coins = [
+            { x: 150, y: canvas.height - 90, collected: false, explosive: false },
+            { x: 250, y: canvas.height - 90, collected: false, explosive: false },
+            { x: 350, y: canvas.height - 90, collected: false, explosive: false },
+            { x: 450, y: canvas.height - 90, collected: false, explosive: true },  // Trap coin 1
+            { x: 550, y: canvas.height - 90, collected: false, explosive: false },
+            { x: 650, y: canvas.height - 90, collected: false, explosive: false },
+            { x: 750, y: canvas.height - 90, collected: false, explosive: false },
+            { x: 830, y: canvas.height - 90, collected: false, explosive: true },  // Trap coin 2
+            { x: 1000, y: canvas.height - 90, collected: false, explosive: false },
+            { x: 1100, y: canvas.height - 90, collected: false, explosive: false }
+        ];
 
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.08);
+        let goal = { x: 1150, y: canvas.height - 120, w: 30, h: 70 };
+        let cameraX = 0;
+        let keys = { left: false, right: false };
 
-                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.08);
-            } catch (e) {
-                console.log("Audio not supported");
-            }
-        }
-
-        function playBoyWelcomeVoice(username) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const welcomeText = "Welcome to Z Pajal game, " + username + "!";
-                const utterance = new SpeechSynthesisUtterance(welcomeText);
-                utterance.rate = 1.0; 
-                utterance.pitch = 0.8; 
-                utterance.volume = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function updateRankInfo(level) {
-            let rankName = "Silver";
-            let color = "#c0c0c0";
-
-            if (level >= 1 && level <= 10) { rankName = "Silver"; color = "#c0c0c0"; }
-            else if (level >= 11 && level <= 25) { rankName = "Shine Silver"; color = "#e0e0e0"; }
-            else if (level >= 26 && level <= 40) { rankName = "Gold"; color = "#ffd700"; }
-            else if (level >= 41 && level <= 65) { rankName = "Shine Gold"; color = "#ffea75"; }
-            else if (level >= 66 && level <= 80) { rankName = "Diamond"; color = "#00ffff"; }
-            else if (level >= 81 && level <= 110) { rankName = "Pro Diamond"; color = "#00bfff"; }
-            else if (level >= 111 && level <= 200) { rankName = "Grand Pro Diamond"; color = "#7b68ee"; }
-            else if (level >= 300) { rankName = "Legend Grand Master"; color = "#ff00ff"; }
-            else { rankName = "Grand Pro Diamond"; color = "#7b68ee"; }
-
-            document.getElementById('displayRank').innerText = rankName;
-            document.getElementById('displayRank').style.color = color;
-            document.getElementById('displayRankLogo').style.color = color;
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const uid = user.uid;
-                const userRef = ref(db, 'users/' + uid);
-                let finalUsername = "Player";
-                let userLevel = 1;
-
-                try {
-                    const snapshot = await get(userRef);
-                    if (snapshot.exists()) {
-                        const userData = snapshot.val();
-                        finalUsername = userData.username || userData.name || user.displayName || (user.email ? user.email.split('@')[0] : "Player");
-                        userLevel = userData.level || 1;
-                    } else {
-                        finalUsername = user.displayName || (user.email ? user.email.split('@')[0] : "Gamer");
-                    }
-                } catch (error) {
-                    console.error("Error fetching user data from DB:", error);
-                    finalUsername = user.displayName || (user.email ? user.email.split('@')[0] : "Player");
-                }
-
-                document.getElementById('displayUsername').innerText = finalUsername;
-                document.getElementById('displayLevel').innerText = "LEVEL: " + userLevel;
-                updateRankInfo(userLevel);
-
-                playBoyWelcomeVoice(finalUsername);
-            } else {
-                window.location.href = "index.html";
+        document.getElementById('leftBtn').addEventListener('touchstart', () => keys.left = true);
+        document.getElementById('leftBtn').addEventListener('touchend', () => keys.left = false);
+        document.getElementById('rightBtn').addEventListener('touchstart', () => keys.right = true);
+        document.getElementById('rightBtn').addEventListener('touchend', () => keys.right = false);
+        
+        document.getElementById('jumpBtn').addEventListener('touchstart', () => {
+            if (player.isGrounded && !isExploding) {
+                player.vy = player.jumpForce;
+                player.isGrounded = false;
             }
         });
 
-        window.logoutUser = function() {
-            playTechSound();
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            }).catch((error) => {
-                console.error("Sign out error", error);
-            });
-        };
+        const shieldBtn = document.getElementById('shieldBtn');
+        shieldBtn.addEventListener('touchstart', () => {
+            shieldActive = true;
+            document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
+            document.getElementById('shieldDisplay').style.color = "#ffaa00";
+        });
+        shieldBtn.addEventListener('touchend', () => {
+            shieldActive = false;
+            document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+            document.getElementById('shieldDisplay').style.color = "#ffcc66";
+        });
 
-        window.startGame = function() {
-            playTechSound();
+        document.getElementById('coinBtn').addEventListener('click', () => {
+            checkCoins();
+        });
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && player.isGrounded && !isExploding) {
+                player.vy = player.jumpForce;
+                player.isGrounded = false;
+            }
+            if (e.key === 's' || e.key === 'Shift') {
+                shieldActive = true;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+            if (e.key === 's' || e.key === 'Shift') {
+                shieldActive = false;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+            }
+        });
+
+        function triggerExplosion() {
+            if (shieldActive) return; // Shield saves from blast
+            isExploding = true;
+            explosionTimer = 40;
             setTimeout(() => {
-                window.location.href = "game.html?level=1";
-            }, 150);
+                alert("💥 Boom! You hit a trap. Restarting level.");
+                window.location.reload();
+            }, 600);
+        }
+
+        function checkCoins() {
+            coins.forEach(c => {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 25) {
+                    c.collected = true;
+                    if (c.explosive) {
+                        triggerExplosion();
+                    } else {
+                        score += 20;
+                    }
+                }
+            });
+        }
+
+        function update() {
+            if (isExploding) return;
+
+            if (keys.left) {
+                player.vx = -player.speed;
+                player.walkCycle += 0.15;
+            } else if (keys.right) {
+                player.vx = player.speed;
+                player.walkCycle += 0.15;
+            } else {
+                player.vx = 0;
+                player.walkCycle = 0;
+            }
+
+            player.x += player.vx;
+            player.vy += player.gravity;
+            player.y += player.vy;
+
+            // Blast if player touches extreme left wall (x <= 0)
+            if (player.x <= 0) {
+                triggerExplosion();
+            }
+
+            player.isGrounded = false;
+            platforms.forEach(p => {
+                if (p.type === 'trap' && p.triggered) return; // Broken trap surface
+
+                if (
+                    player.x + player.width > p.x &&
+                    player.x < p.x + p.w &&
+                    player.y + player.height >= p.y &&
+                    player.y + player.height - player.vy <= p.y + 10
+                ) {
+                    if (p.type === 'trap') {
+                        p.triggered = true; // Trigger collapse 1 step before goal
+                        setTimeout(() => triggerExplosion(), 200);
+                    }
+                    player.y = p.y - player.height;
+                    player.vy = 0;
+                    player.isGrounded = true;
+                }
+            });
+
+            // Fall into gap check
+            if (player.y > canvas.height) {
+                triggerExplosion();
+            }
+
+            cameraX = player.x - canvas.width / 3;
+            if (cameraX < 0) cameraX = 0;
+
+            checkCoins();
+
+            if (player.x >= goal.x) {
+                alert("🎉 Level 1 Cleared Successfully!");
+                window.location.href = "index.html";
+            }
+
+            document.getElementById('scoreDisplay').innerText = "COINS: " + score;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // Draw Platforms
+            platforms.forEach(p => {
+                if (p.type === 'trap' && p.triggered) return; // Don't draw if collapsed
+                ctx.fillStyle = '#3d2314';
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.strokeStyle = '#d28c3c';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(p.x, p.y, p.w, p.h);
+            });
+
+            // Draw Smaller Coins (Radius 5 instead of 10)
+            coins.forEach(c => {
+                if (!c.collected) {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = c.explosive ? '#ff3300' : '#ffcc00';
+                    ctx.fill();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#fff';
+                    ctx.stroke();
+                }
+            });
+
+            // Draw Goal Portal
+            ctx.fillStyle = '#ffaa00';
+            ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
+
+            // Draw 50% Smaller White Dummy with human walk animation
+            let px = player.x;
+            let py = player.y;
+
+            if (isExploding) {
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(px + 9, py + 17, 30, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                if (shieldActive) {
+                    ctx.beginPath();
+                    ctx.arc(px + 9, py + 17, 24, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffaa00';
+                    ctx.stroke();
+                }
+
+                // Head (White)
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(px + 9, py + 5, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Torso (Thin & White)
+                ctx.fillRect(px + 7, py + 10, 4, 14);
+
+                // Animated Human Walk Hands & Legs
+                let swing = Math.sin(player.walkCycle) * 6;
+
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                // Arms
+                ctx.moveTo(px + 7, py + 12);
+                ctx.lineTo(px + 2 + swing, py + 18);
+                ctx.moveTo(px + 11, py + 12);
+                ctx.lineTo(px + 16 - swing, py + 18);
+
+                // Legs
+                ctx.moveTo(px + 8, py + 24);
+                ctx.lineTo(px + 5 + swing, py + 34);
+                ctx.moveTo(px + 10, py + 24);
+                ctx.lineTo(px + 13 - swing, py + 34);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+        function goHome() {
+            window.location.href = "index.html";
         }
     </script>
 </body>
