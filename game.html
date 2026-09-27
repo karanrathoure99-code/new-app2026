@@ -227,15 +227,15 @@
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 920, y: 0, w: 14, h: 32 };
+        let goal = { x: 1360, y: 0, w: 14, h: 32 };
 
         function updateGameLayout() {
-            const surfaceHeight = 12;
+            const surfaceHeight = 24;
             const groundY = canvasHeight - surfaceHeight;
 
-            // Surface ko pure last tak extend kar diya hai (Width 1400px)
+            // Surface ko aur bada kar diya hai taaki kone mein sirf goal ki jagah bache (Width: 1390)
             platforms = [
-                { x: 0, y: groundY, w: 1400, h: surfaceHeight, type: 'ground' }
+                { x: 0, y: groundY, w: 1390, h: surfaceHeight, type: 'ground' }
             ];
 
             coins = [
@@ -245,11 +245,15 @@
                 { x: 590, y: groundY - 25, collected: false, hasBomb: true },    
                 { x: 690, y: groundY - 25, collected: false, hasBomb: false },
                 { x: 820, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 950, y: groundY - 25, collected: false, hasBomb: false }
+                { x: 950, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 1100, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 1220, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 1320, y: groundY - 25, collected: false, hasBomb: false }
             ];
 
             goal.y = groundY - 32;
-            goal.x = 1100;
+            // Goal bilkul kone mein set kiya hai jahan surface khatam hoti hai
+            goal.x = 1360;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -365,7 +369,7 @@
                     if (c.hasBomb) {
                         triggerExplosion();
                     } else {
-                        score += 24; // Reward 20% bada diya gaya hai (20 se 24)
+                        score += 24;
                     }
                 }
             });
