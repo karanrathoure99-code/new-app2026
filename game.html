@@ -230,13 +230,12 @@
         let goal = { x: 920, y: 0, w: 14, h: 32 };
 
         function updateGameLayout() {
-            // Surface ki motai box ki nichi wali line se chipakaker (thickness 12px, bottom flush at canvasHeight)
             const surfaceHeight = 12;
             const groundY = canvasHeight - surfaceHeight;
 
-            // Lambai box ki left hand side (x: 0) se goal tak ya end tak
+            // Surface ko pure last tak extend kar diya hai (Width 1400px)
             platforms = [
-                { x: 0, y: groundY, w: 950, h: surfaceHeight, type: 'ground' }
+                { x: 0, y: groundY, w: 1400, h: surfaceHeight, type: 'ground' }
             ];
 
             coins = [
@@ -244,11 +243,13 @@
                 { x: 300, y: groundY - 25, collected: false, hasBomb: false },
                 { x: 450, y: groundY - 25, collected: false, hasBomb: false },
                 { x: 590, y: groundY - 25, collected: false, hasBomb: true },    
-                { x: 690, y: groundY - 25, collected: false, hasBomb: false }
+                { x: 690, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 820, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 950, y: groundY - 25, collected: false, hasBomb: false }
             ];
 
             goal.y = groundY - 32;
-            goal.x = 900;
+            goal.x = 1100;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -364,7 +365,7 @@
                     if (c.hasBomb) {
                         triggerExplosion();
                     } else {
-                        score += 20;
+                        score += 24; // Reward 20% bada diya gaya hai (20 se 24)
                     }
                 }
             });
@@ -429,7 +430,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Sun-like background glow / sun rays effect in canvas
             ctx.save();
             let sunGrad = ctx.createRadialGradient(canvasWidth/2, canvasHeight/2, 20, canvasWidth/2, canvasHeight/2, canvasWidth);
             sunGrad.addColorStop(0, 'rgba(255, 150, 0, 0.08)');
@@ -441,7 +441,6 @@
             ctx.save();
             ctx.translate(-cameraX, 0);
 
-            // Sun-like structure formatting for platforms (Surface)
             platforms.forEach(p => {
                 let surfGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
                 surfGrad.addColorStop(0, '#ffaa00');
@@ -451,7 +450,6 @@
                 ctx.fillStyle = surfGrad;
                 ctx.fillRect(p.x, p.y, p.w, p.h);
 
-                // Glowing top border for sun structure edge
                 ctx.strokeStyle = '#ffea75';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -460,7 +458,6 @@
                 ctx.stroke();
             });
 
-            // Coins size 50% smaller (Radius reduced from 5 to 2.5) with sun-like aura
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.beginPath();
@@ -471,7 +468,6 @@
                     ctx.strokeStyle = '#ff6600';
                     ctx.stroke();
 
-                    // Tiny sun glow around coin
                     ctx.beginPath();
                     ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
                     ctx.strokeStyle = 'rgba(255, 200, 0, 0.3)';
@@ -479,7 +475,6 @@
                 }
             });
 
-            // Goal portal with sun theme
             ctx.fillStyle = '#ffcc00';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
             ctx.strokeStyle = '#ff9900';
@@ -507,7 +502,6 @@
                     ctx.stroke();
                 }
 
-                // Solar player character styling
                 ctx.fillStyle = '#ffea75';
                 ctx.beginPath();
                 ctx.arc(px + 7, py + 4, 4, 0, Math.PI * 2);
