@@ -218,8 +218,8 @@
         let player = {
             x: 50,
             y: 100,
-            width: 14,
-            height: 28,
+            width: 21,
+            height: 42,
             vx: 0,
             vy: 0,
             speed: 3.5,
@@ -231,7 +231,6 @@
 
         let platforms = [];
         let coins = [];
-        // Goal (damee) ka size pehle se 50% aur bada kar diya hai (Width: 27, Height: 60)
         let goal = { x: 0, y: 0, w: 27, h: 60 };
 
         function updateGameLayout() {
@@ -250,7 +249,8 @@
             ];
 
             goal.y = groundY - 60;
-            goal.x = canvasWidth - 45;
+            // Goal ko bilkul right side ke kinare (edge) se chipka diya gaya hai
+            goal.x = canvasWidth - goal.w;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -347,10 +347,10 @@
 
             fragments = [
                 { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffcc00' },
-                { x: player.x + 5, y: player.y + 10, vx: 3, vy: -6, color: '#ff9900' },
-                { x: player.x + 2, y: player.y + 15, vx: -5, vy: 1, color: '#ffffff' },
-                { x: player.x + 8, y: player.y + 15, vx: 5, vy: 2, color: '#ffaa00' },
-                { x: player.x + 4, y: player.y + 4, vx: -2, vy: -3, color: '#ffea75' }
+                { x: player.x + 8, y: player.y + 15, vx: 3, vy: -6, color: '#ff9900' },
+                { x: player.x + 4, y: player.y + 22, vx: -5, vy: 1, color: '#ffffff' },
+                { x: player.x + 12, y: player.y + 22, vx: 5, vy: 2, color: '#ffaa00' },
+                { x: player.x + 6, y: player.y + 6, vx: -2, vy: -3, color: '#ffea75' }
             ];
 
             setTimeout(() => {
@@ -361,12 +361,11 @@
 
         function checkCoins() {
             coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 26) {
                     c.collected = true;
                     if (c.hasBomb) {
                         triggerExplosion();
                     } else {
-                        // 1 coin lene par 1 coin count hoga (score += 1)
                         score += 1;
                     }
                 }
@@ -420,7 +419,7 @@
 
             checkCoins();
 
-            if (player.x >= goal.x && player.y + player.height >= goal.y) {
+            if (player.x + player.width >= goal.x && player.y + player.height >= goal.y) {
                 alert("☀️ Level 1 Solar Arena Cleared Successfully!");
                 window.location.href = "index.html";
             }
@@ -476,7 +475,6 @@
                 }
             });
 
-            // Goal (Damee) - 3D White Color & 50% Bigger Size
             let goalGrad = ctx.createLinearGradient(goal.x, goal.y, goal.x + goal.w, goal.y + goal.h);
             goalGrad.addColorStop(0, '#ffffff');
             goalGrad.addColorStop(0.5, '#c5c5c5');
@@ -488,14 +486,13 @@
             ctx.lineWidth = 2.5;
             ctx.strokeRect(goal.x - 2, goal.y - 2, goal.w + 4, goal.h + 4);
             
-            // 3D Inner detail on Goal
             ctx.fillStyle = '#222222';
             ctx.fillRect(goal.x + 5, goal.y + 18, 4, 14);
 
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 4, 4);
+                    ctx.fillRect(f.x, f.y, 5, 5);
                 });
             } else {
                 let px = player.x;
@@ -503,7 +500,7 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + 7, py + 14, 22, 0, Math.PI * 2);
+                    ctx.arc(px + 10.5, py + 21, 30, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 180, 0, 0.35)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffea75';
@@ -513,24 +510,24 @@
 
                 ctx.fillStyle = '#ffea75';
                 ctx.beginPath();
-                ctx.arc(px + 7, py + 4, 4, 0, Math.PI * 2);
+                ctx.arc(px + 10.5, py + 6, 6, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.fillRect(px + 5, py + 9, 4, 11);
+                ctx.fillRect(px + 7.5, py + 13.5, 6, 16.5);
 
                 ctx.strokeStyle = '#ffea75';
-                ctx.lineWidth = 1.5;
+                ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(px + 5, py + 11);
-                ctx.lineTo(px + 1, py + 16);
-                ctx.moveTo(px + 9, py + 11);
-                ctx.lineTo(px + 13, py + 16);
+                ctx.moveTo(px + 7.5, py + 16.5);
+                ctx.lineTo(px + 1.5, py + 24);
+                ctx.moveTo(px + 13.5, py + 16.5);
+                ctx.lineTo(px + 19.5, py + 24);
 
-                let legSwing = Math.sin(player.legAngle) * 4;
-                ctx.moveTo(px + 6, py + 20);
-                ctx.lineTo(px + 4 + legSwing, py + 28);
-                ctx.moveTo(px + 8, py + 20);
-                ctx.lineTo(px + 10 - legSwing, py + 28);
+                let legSwing = Math.sin(player.legAngle) * 6;
+                ctx.moveTo(px + 9, py + 30);
+                ctx.lineTo(px + 6 + legSwing, py + 42);
+                ctx.moveTo(px + 12, py + 30);
+                ctx.lineTo(px + 15 - legSwing, py + 42);
                 ctx.stroke();
             }
 
