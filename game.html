@@ -127,7 +127,7 @@
             touch-action: manipulation;
         }
 
-        .ctrl-btn:active, .ctrl-btn.active-touch {
+        .ctrl-btn:active {
             transform: scale(0.92);
             background: rgba(210, 140, 60, 0.5);
             border-color: #ffaa00;
@@ -188,28 +188,29 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        let canvasWidth = 800;
+        let canvasHeight = 500;
+
         function resizeCanvas() {
-            const displayWidth = canvas.parentElement.clientWidth;
-            const displayHeight = canvas.parentElement.clientHeight;
-            
-            // Handle High-DPI screens for sharp rendering
+            canvasWidth = canvas.parentElement.clientWidth;
+            canvasHeight = canvas.parentElement.clientHeight;
+
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = displayWidth * dpr;
-            canvas.height = displayHeight * dpr;
+            canvas.width = canvasWidth * dpr;
+            canvas.height = canvasHeight * dpr;
             ctx.scale(dpr, dpr);
             
-            canvas.style.width = displayWidth + 'px';
-            canvas.style.height = displayHeight + 'px';
+            canvas.style.width = canvasWidth + 'px';
+            canvas.style.height = canvasHeight + 'px';
+
+            updateGameLayout();
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
         let score = 0;
         let shieldActive = false;
         let isExploding = false;
         let fragments = [];
 
-        // Dynamic player positioning relative to canvas size
         let player = {
             x: 50,
             y: 100,
@@ -224,27 +225,37 @@
             legAngle: 0
         };
 
-        // Platforms layout
-        let platforms = [
-            { x: 0, y: 550, w: 720, h: 6, type: 'ground' },
-            { x: 720, y: 550, w: 40, h: 6, type: 'hiddenTrap', triggered: false }, 
-            { x: 760, y: 550, w: 300, h: 6, type: 'ground' }
-        ];
+        let platforms = [];
+        let coins = [];
+        let goal = { x: 920, y: 0, w: 14, h: 32 };
 
-        // Coins placement
-        let coins = [
-            { x: 160, y: 520, collected: false, hasBomb: false },
-            { x: 300, y: 520, collected: false, hasBomb: false },
-            { x: 450, y: 520, collected: false, hasBomb: false },
-            { x: 590, y: 520, collected: false, hasBomb: true },   
-            { x: 690, y: 520, collected: false, hasBomb: false }
-        ];
+        function updateGameLayout() {
+            const groundY = canvasHeight - 50;
 
-        let goal = { x: 920, y: 518, w: 14, h: 32 };
+            platforms = [
+                { x: 0, y: groundY, w: 720, h: 6, type: 'ground' },
+                { x: 720, y: groundY, w: 40, h: 6, type: 'hiddenTrap', triggered: false }, 
+                { x: 760, y: groundY, w: 300, h: 6, type: 'ground' }
+            ];
+
+            coins = [
+                { x: 160, y: groundY - 30, collected: false, hasBomb: false },
+                { x: 300, y: groundY - 30, collected: false, hasBomb: false },
+                { x: 450, y: groundY - 30, collected: false, hasBomb: false },
+                { x: 590, y: groundY - 30, collected: false, hasBomb: true },   
+                { x: 690, y: groundY - 30, collected: false, hasBomb: false }
+            ];
+
+            goal.y = groundY - 32;
+            goal.x = 920;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
         let cameraX = 0;
         let keys = { left: false, right: false };
 
-        // Web Audio API Blast Sound Effect
         function playBlastSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -264,9 +275,9 @@
             }
         }
 
-        // Improved Touch & Click Handlers
         const bindButton = (id, onStart, onEnd) => {
             const btn = document.getElementById(id);
+            if (!btn) return;
             btn.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(); });
             btn.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
             btn.addEventListener('mousedown', () => onStart());
@@ -276,11 +287,11 @@
         bindButton('leftBtn', () => keys.left = true, () => keys.left = false);
         bindButton('rightBtn', () => keys.right = true, () => keys.right = false);
 
-        document.getElementById('jumpBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            triggerJump();
-        });
-        document.getElementById('jumpBtn').addEventListener('mousedown', () => triggerJump());
+        const jumpBtn = document.getElementById('jumpBtn');
+        if (jumpBtn) {
+            jumpBtn.addEventListener('touchstart', (e) => { e.preventDefault(); triggerJump(); });
+            jumpBtn.addEventListener('mousedown', () => triggerJump());
+        }
 
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
@@ -290,23 +301,27 @@
         }
 
         const shieldBtn = document.getElementById('shieldBtn');
-        const activateShield = () => {
-            shieldActive = true;
-            document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-            document.getElementById('shieldDisplay').style.color = "#ffaa00";
-        };
-        const deactivateShield = () => {
-            shieldActive = false;
-            document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-            document.getElementById('shieldDisplay').style.color = "#ffcc66";
-        };
+        if (shieldBtn) {
+            const activateShield = () => {
+                shieldActive = true;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
+                document.getElementById('shieldDisplay').style.color = "#ffaa00";
+            };
+            const deactivateShield = () => {
+                shieldActive = false;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+                document.getElementById('shieldDisplay').style.color = "#ffcc66";
+            };
+            shieldBtn.addEventListener('touchstart', (e) => { e.preventDefault(); activateShield(); });
+            shieldBtn.addEventListener('touchend', (e) => { e.preventDefault(); deactivateShield(); });
+            shieldBtn.addEventListener('mousedown', activateShield);
+            shieldBtn.addEventListener('mouseup', deactivateShield);
+        }
 
-        shieldBtn.addEventListener('touchstart', (e) => { e.preventDefault(); activateShield(); });
-        shieldBtn.addEventListener('touchend', (e) => { e.preventDefault(); deactivateShield(); });
-        shieldBtn.addEventListener('mousedown', activateShield);
-        shieldBtn.addEventListener('mouseup', deactivateShield);
-
-        document.getElementById('coinBtn').addEventListener('click', () => checkCoins());
+        const coinBtn = document.getElementById('coinBtn');
+        if (coinBtn) {
+            coinBtn.addEventListener('click', () => checkCoins());
+        }
 
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
@@ -399,12 +414,11 @@
                 }
             });
 
-            if (player.y > canvas.height / (window.devicePixelRatio || 1) + 100) {
+            if (player.y > canvasHeight + 100) {
                 triggerExplosion();
             }
 
-            const logicalWidth = canvas.width / (window.devicePixelRatio || 1);
-            cameraX = player.x - logicalWidth / 3;
+            cameraX = player.x - canvasWidth / 3;
             if (cameraX < 0) cameraX = 0;
 
             checkCoins();
@@ -418,10 +432,7 @@
         }
 
         function draw() {
-            const logicalWidth = canvas.width / (window.devicePixelRatio || 1);
-            const logicalHeight = canvas.height / (window.devicePixelRatio || 1);
-
-            ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             ctx.save();
             ctx.translate(-cameraX, 0);
