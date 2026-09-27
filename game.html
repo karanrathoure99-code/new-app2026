@@ -227,33 +227,29 @@
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 1360, y: 0, w: 14, h: 32 };
+        let goal = { x: 0, y: 0, w: 14, h: 32 };
 
         function updateGameLayout() {
             const surfaceHeight = 24;
             const groundY = canvasHeight - surfaceHeight;
 
-            // Surface ko aur bada kar diya hai taaki kone mein sirf goal ki jagah bache (Width: 1390)
+            // Surface ki length ko box ki width (canvasWidth) ke barabar kar diya hai
             platforms = [
-                { x: 0, y: groundY, w: 1390, h: surfaceHeight, type: 'ground' }
+                { x: 0, y: groundY, w: canvasWidth, h: surfaceHeight, type: 'ground' }
             ];
 
             coins = [
-                { x: 160, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 300, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 450, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 590, y: groundY - 25, collected: false, hasBomb: true },    
-                { x: 690, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 820, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 950, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 1100, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 1220, y: groundY - 25, collected: false, hasBomb: false },
-                { x: 1320, y: groundY - 25, collected: false, hasBomb: false }
+                { x: 120, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 220, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 340, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 450, y: groundY - 25, collected: false, hasBomb: true },    
+                { x: 560, y: groundY - 25, collected: false, hasBomb: false },
+                { x: 670, y: groundY - 25, collected: false, hasBomb: false }
             ];
 
             goal.y = groundY - 32;
-            // Goal bilkul kone mein set kiya hai jahan surface khatam hoti hai
-            goal.x = 1360;
+            // Goal ko bilkul box ke aakhri kone mein chipka diya hai
+            goal.x = canvasWidth - 30;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -418,8 +414,8 @@
                 triggerExplosion();
             }
 
-            cameraX = player.x - canvasWidth / 3;
-            if (cameraX < 0) cameraX = 0;
+            // Camera movement hata diya hai kyunki ab poora level ek hi screen/box ke andar fit hai
+            cameraX = 0;
 
             checkCoins();
 
