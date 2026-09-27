@@ -286,19 +286,22 @@
 
                 if (!user.emailVerified) {
                     alert("⚠️ Pehle apne Gmail (" + email + ") par jaakar verification link par click karein, tabhi game khulegi!");
-                    loginBtn.innerHTML = "GOTCHA! PLAYNOW 🎮";
+                    loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
                     return;
                 }
 
-                // 🛑 Single Device Login Handler: Unique Session ID generate karo
+                // Session ID handle karna
                 const sessionId = 'session_' + Math.random().toString(36).substring(2) + Date.now();
                 localStorage.setItem('userSessionId', sessionId);
 
-                // Firebase Database me activeSession update kar do taaki baaki devices se logout ho jaye
                 await set(ref(db, 'users/' + user.uid + '/activeSession'), sessionId);
 
-                alert("🎉 Welcome to 🤪 Z PAJAL! Login successful. Loading Level 1!");
-                window.location.href = "home.html";
+                alert("🎉 Welcome to 🤪 Z PAJAL! Login successful. Loading Home...");
+                
+                // 1 second delay ke sath home.html par redirect hoga
+                setTimeout(() => {
+                    window.location.href = "home.html";
+                }, 1000);
 
             } catch (error) {
                 alert("Login Failed: " + error.message);
