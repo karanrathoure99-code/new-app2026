@@ -15,7 +15,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #3d0a3d 0%, #070514 50%, #032b29 100%);
+            background: linear-gradient(135deg, #2b1a09 0%, #0f0803 50%, #1a0f03 100%);
             background-attachment: fixed;
             color: #ffffff;
             width: 100vw;
@@ -26,7 +26,6 @@
             align-items: center;
         }
 
-        /* Responsive Landscape Game Wrapper */
         .game-wrapper {
             width: 100%;
             height: 100%;
@@ -38,14 +37,13 @@
             position: relative;
         }
 
-        /* Top HUD Bar */
         .game-hud {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(20, 18, 40, 0.6);
+            background: rgba(43, 26, 9, 0.7);
             backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(210, 140, 60, 0.3);
             border-radius: 15px;
             padding: 8px 20px;
             margin-bottom: 8px;
@@ -56,8 +54,8 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
             font-weight: 900;
-            color: #ff007f;
-            text-shadow: 0 0 8px rgba(255,0,127,0.5);
+            color: #ffaa00;
+            text-shadow: 0 0 8px rgba(255,170,0,0.5);
         }
 
         .hud-stats {
@@ -66,28 +64,26 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 13px;
             font-weight: 700;
-            color: #00ffcc;
+            color: #ffcc66;
         }
 
-        /* 3D Square Arena Container */
         .arena-container {
             flex: 1;
-            background: rgba(10, 8, 20, 0.75);
-            border: 2px solid rgba(0, 255, 204, 0.3);
+            background: rgba(20, 12, 5, 0.85);
+            border: 2px solid rgba(210, 140, 60, 0.4);
             border-radius: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 25px rgba(0, 255, 204, 0.1), 0 10px 30px rgba(0,0,0,0.6);
+            box-shadow: inset 0 0 25px rgba(210, 140, 60, 0.1), 0 10px 30px rgba(0,0,0,0.6);
         }
 
-        /* Canvas where game renders */
         #gameCanvas {
             width: 100%;
             height: 100%;
             display: block;
         }
 
-        /* 70% Transparent Controls Overlay for Mobile/Tablet */
+        /* 70% Transparent Tekken Style Controls (Hidden on Laptop, visible on Mobile/Tablet) */
         .controls-overlay {
             position: absolute;
             bottom: 0;
@@ -95,52 +91,58 @@
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 12px 20px;
+            padding: 15px 25px;
             pointer-events: none;
+        }
+
+        @media (min-width: 1024px) {
+            .controls-overlay {
+                display: none; /* Hide touch buttons on laptop/desktop */
+            }
         }
 
         .control-group {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             pointer-events: auto;
+            align-items: center;
         }
 
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.35);
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            border-radius: 14px; /* Tekken style rectangular rounded shape */
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             transition: transform 0.1s, background 0.2s;
         }
 
         .ctrl-btn:active {
-            transform: scale(0.9);
-            background: rgba(255, 0, 127, 0.4);
-            border-color: #ff007f;
+            transform: scale(0.92);
+            background: rgba(210, 140, 60, 0.5);
+            border-color: #ffaa00;
         }
 
         .ctrl-btn.wide {
-            width: 75px;
-            border-radius: 25px;
+            width: 85px;
+            border-radius: 16px;
             font-size: 10px;
         }
 
-        /* Back to Home button */
         .back-btn {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
-            color: #a0a0c0;
+            color: #d0b090;
             padding: 4px 12px;
             border-radius: 8px;
             font-size: 11px;
@@ -155,9 +157,8 @@
 <body>
 
     <div class="game-wrapper">
-        <!-- Top HUD -->
         <div class="game-hud">
-            <div class="hud-title">⚡ LEVEL 1: ARCADE TRIAL</div>
+            <div class="hud-title">⚡ LEVEL 1: BROWN ARENA</div>
             <div class="hud-stats">
                 <span id="scoreDisplay">COINS: 0</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
@@ -165,36 +166,32 @@
             <button class="back-btn" onclick="goHome()">QUIT</button>
         </div>
 
-        <!-- 3D Square Game Arena -->
         <div class="arena-container">
             <canvas id="gameCanvas"></canvas>
 
-            <!-- Touch Controls (70% Transparent) -->
             <div class="controls-overlay">
-                <!-- Left Hand Controls: Movement & Down/Climb -->
+                <!-- Left Hand Controls -->
                 <div class="control-group">
                     <button class="ctrl-btn" id="leftBtn">◀</button>
                     <button class="ctrl-btn" id="rightBtn">▶</button>
-                    <button class="ctrl-btn wide" id="jumpClimbBtn">JUMP/UP</button>
+                    <button class="ctrl-btn wide" id="jumpBtn">JUMP/UP</button>
                     <button class="ctrl-btn" id="downBtn">▼</button>
                 </div>
 
-                <!-- Right Hand Controls: Shield, Crack Box, Coin Collect -->
+                <!-- Right Hand Controls (Shield active only on hold) -->
                 <div class="control-group">
-                    <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(0,255,204,0.2);">SHIELD</button>
-                    <button class="ctrl-btn wide" id="crackBtn" style="background: rgba(255,204,0,0.2);">CRACK</button>
-                    <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.2);">COLLECT</button>
+                    <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(255,170,0,0.25);">SHIELD</button>
+                    <button class="ctrl-btn wide" id="crackBtn" style="background: rgba(210,140,60,0.25);">CRACK</button>
+                    <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.25);">COLLECT</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Game Engine Script -->
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Resize Canvas dynamically to match container size in landscape
         function resizeCanvas() {
             canvas.width = canvas.parentElement.clientWidth;
             canvas.height = canvas.parentElement.clientHeight;
@@ -202,98 +199,79 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Game State Variables
         let score = 0;
         let shieldActive = false;
-        let shieldTimer = 0;
 
-        // 3D Dummy Character Object (Head, 2 Hands, 2 Legs, Body)
         let player = {
             x: 50,
             y: canvas.height - 180,
-            width: 40,
-            height: 70,
+            width: 36,
+            height: 68,
             vx: 0,
             vy: 0,
             speed: 4,
             jumpForce: -11,
             gravity: 0.5,
-            isGrounded: false,
-            facing: 'right'
+            isGrounded: false
         };
 
-        // Level Platforms & Obstacles (Level 1 Design with Pits & Crackable Boxes)
+        // Simple Surface Platform (No pits, no extra floating obstacles)
         let platforms = [
-            { x: 0, y: canvas.height - 50, w: 400, h: 50, type: 'ground' },
-            { x: 450, y: canvas.height - 50, w: 200, h: 50, type: 'pit' }, // Pit/Gadda
-            { x: 700, y: canvas.height - 50, w: 600, h: 50, type: 'ground' },
-            { x: 1350, y: canvas.height - 50, w: 150, h: 50, type: 'pit' },
-            { x: 1550, y: canvas.height - 50, w: 800, h: 50, type: 'ground' },
-            // Elevated Platforms & Crackable boxes
-            { x: 250, y: canvas.height - 150, w: 120, h: 20, type: 'platform' },
-            { x: 500, y: canvas.height - 180, w: 80, h: 20, type: 'crackable', cracked: false },
-            { x: 850, y: canvas.height - 160, w: 140, h: 20, type: 'platform' },
-            { x: 1100, y: canvas.height - 210, w: 100, h: 20, type: 'crackable', cracked: false }
+            { x: 0, y: canvas.height - 60, w: 3000, h: 60, type: 'ground' }
         ];
 
-        // Collectible Coins
         let coins = [
-            { x: 280, y: canvas.height - 190, collected: false },
-            { x: 520, y: canvas.height - 220, collected: false },
-            { x: 900, y: canvas.height - 200, collected: false },
-            { x: 1200, y: canvas.height - 80, collected: false },
-            { x: 1700, y: canvas.height - 100, collected: false }
+            { x: 400, y: canvas.height - 110, collected: false },
+            { x: 800, y: canvas.height - 110, collected: false },
+            { x: 1200, y: canvas.height - 110, collected: false },
+            { x: 1600, y: canvas.height - 110, collected: false },
+            { x: 2000, y: canvas.height - 110, collected: false }
         ];
 
-        // Goal Finish Point at rightmost end
-        let goal = { x: 2250, y: canvas.height - 130, w: 40, h: 80 };
-
+        let goal = { x: 2600, y: canvas.height - 140, w: 40, h: 80 };
         let cameraX = 0;
+        let keys = { left: false, right: false };
 
-        // Input Controls Tracking
-        let keys = { left: false, right: false, up: false, down: false };
-
-        // Touch Control Listeners
+        // Touch Listeners
         document.getElementById('leftBtn').addEventListener('touchstart', () => keys.left = true);
         document.getElementById('leftBtn').addEventListener('touchend', () => keys.left = false);
         document.getElementById('rightBtn').addEventListener('touchstart', () => keys.right = true);
         document.getElementById('rightBtn').addEventListener('touchend', () => keys.right = false);
         
-        document.getElementById('jumpClimbBtn').addEventListener('touchstart', () => {
+        document.getElementById('jumpBtn').addEventListener('touchstart', () => {
             if (player.isGrounded) {
                 player.vy = player.jumpForce;
                 player.isGrounded = false;
             }
         });
 
-        document.getElementById('shieldBtn').addEventListener('click', () => {
+        // Shield active only while holding the button down
+        const shieldBtn = document.getElementById('shieldBtn');
+        shieldBtn.addEventListener('touchstart', () => {
             shieldActive = true;
-            shieldTimer = 300; // 5 seconds active
             document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-            document.getElementById('shieldDisplay').style.color = "#00ffcc";
+            document.getElementById('shieldDisplay').style.color = "#ffaa00";
+        });
+        shieldBtn.addEventListener('touchend', () => {
+            shieldActive = false;
+            document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+            document.getElementById('shieldDisplay').style.color = "#ffcc66";
         });
 
         document.getElementById('crackBtn').addEventListener('click', () => {
-            // Crack visible blocks near player
-            platforms.forEach(p => {
-                if (p.type === 'crackable' && !p.cracked && Math.abs(p.x - player.x) < 100) {
-                    p.cracked = true;
-                    score += 10;
-                }
-            });
+            score += 10;
         });
 
         document.getElementById('coinBtn').addEventListener('click', () => {
-            // Manual collect if close to coin
             coins.forEach(c => {
-                if (!c.collected && Math.abs(c.x - player.x) < 60) {
+                if (!c.collected && Math.abs(c.x - player.x) < 70) {
                     c.collected = true;
                     score += 50;
                 }
             });
         });
 
-        // Keyboard support for testing on laptop/pc
+        // Keyboard Support for Laptop/PC
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
@@ -301,79 +279,58 @@
                 player.vy = player.jumpForce;
                 player.isGrounded = false;
             }
+            if (e.key === 's' || e.key === 'Shift') {
+                shieldActive = true;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
+                document.getElementById('shieldDisplay').style.color = "#ffaa00";
+            }
         });
+
         window.addEventListener('keyup', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+            if (e.key === 's' || e.key === 'Shift') {
+                shieldActive = false;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+                document.getElementById('shieldDisplay').style.color = "#ffcc66";
+            }
         });
 
-        // Game Loop Update & Render
         function update() {
-            // Horizontal movement
-            if (keys.left) {
-                player.vx = -player.speed;
-                player.facing = 'left';
-            } else if (keys.right) {
-                player.vx = player.speed;
-                player.facing = 'right';
-            } else {
-                player.vx = 0;
-            }
+            if (keys.left) player.vx = -player.speed;
+            else if (keys.right) player.vx = player.speed;
+            else player.vx = 0;
 
             player.x += player.vx;
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Platform collision detection
             player.isGrounded = false;
             platforms.forEach(p => {
-                if (p.type !== 'pit' && (!p.crackable || !p.cracked)) {
-                    if (
-                        player.x + player.width > p.x &&
-                        player.x < p.x + p.w &&
-                        player.y + player.height >= p.y &&
-                        player.y + player.height - player.vy <= p.y + 10
-                    ) {
-                        player.y = p.y - player.height;
-                        player.vy = 0;
-                        player.isGrounded = true;
-                    }
+                if (
+                    player.x + player.width > p.x &&
+                    player.x < p.x + p.w &&
+                    player.y + player.height >= p.y &&
+                    player.y + player.height - player.vy <= p.y + 10
+                ) {
+                    player.y = p.y - player.height;
+                    player.vy = 0;
+                    player.isGrounded = true;
                 }
             });
 
-            // Fall into pit check (Respawn if falls down)
-            if (player.y > canvas.height) {
-                player.x = 50;
-                player.y = canvas.height - 180;
-                player.vy = 0;
-                score = Math.max(0, score - 20);
-            }
-
-            // Camera follow player smoothly
             cameraX = player.x - canvas.width / 3;
             if (cameraX < 0) cameraX = 0;
 
-            // Shield countdown
-            if (shieldActive) {
-                shieldTimer--;
-                if (shieldTimer <= 0) {
-                    shieldActive = false;
-                    document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                    document.getElementById('shieldDisplay').style.color = "#00ffcc";
-                }
-            }
-
-            // Coin auto-collection proximity check
             coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 35) {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 40) {
                     c.collected = true;
                     score += 50;
                 }
             });
 
-            // Check Goal Reached
             if (player.x >= goal.x) {
-                alert("🎉 Level 1 Cleared! Moving to next challenge.");
+                alert("🎉 Level 1 Cleared Successfully!");
                 window.location.href = "index.html";
             }
 
@@ -386,25 +343,13 @@
             ctx.save();
             ctx.translate(-cameraX, 0);
 
-            // Draw Platforms & Pits
+            // Draw Simple Brown Surface Platform
             platforms.forEach(p => {
-                if (p.type === 'pit') {
-                    ctx.fillStyle = '#030308';
-                    ctx.fillRect(p.x, p.y, p.w, p.h);
-                    // Danger hazard lines in pit
-                    ctx.strokeStyle = '#ff007f';
-                    ctx.setLineDash([5, 5]);
-                    ctx.strokeRect(p.x, p.y, p.w, p.h);
-                    ctx.setLineDash([]);
-                } else if (p.type === 'crackable') {
-                    ctx.fillStyle = p.cracked ? 'rgba(100,100,100,0.3)' : '#ffcc00';
-                    ctx.fillRect(p.x, p.y, p.w, p.h);
-                } else {
-                    ctx.fillStyle = '#1b143f';
-                    ctx.fillRect(p.x, p.y, p.w, p.h);
-                    ctx.strokeStyle = '#00ffcc';
-                    ctx.strokeRect(p.x, p.y, p.w, p.h);
-                }
+                ctx.fillStyle = '#3d2314';
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.strokeStyle = '#d28c3c';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(p.x, p.y, p.w, p.h);
             });
 
             // Draw Coins
@@ -421,52 +366,50 @@
             });
 
             // Draw Goal Portal
-            ctx.fillStyle = '#ff007f';
+            ctx.fillStyle = '#ffaa00';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-            ctx.strokeStyle = '#00ffcc';
+            ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 3;
             ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
-            // Draw 3D Dummy Character (Head, Body, 2 Hands, 2 Legs)
+            // Draw Fully White Dummy Character (Thin body parts)
             let px = player.x;
             let py = player.y;
 
-            // Shield Aura if active
             if (shieldActive) {
                 ctx.beginPath();
-                ctx.arc(px + 20, py + 35, 45, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 255, 204, 0.25)';
+                ctx.arc(px + 18, py + 34, 42, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                 ctx.fill();
-                ctx.strokeStyle = '#00ffcc';
+                ctx.strokeStyle = '#ffaa00';
                 ctx.stroke();
             }
 
-            // Head
-            ctx.fillStyle = '#ff007f';
+            // Head (White)
+            ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(px + 20, py + 12, 12, 0, Math.PI * 2);
+            ctx.arc(px + 18, py + 10, 10, 0, Math.PI * 2);
             ctx.fill();
 
-            // Body (Torso)
-            ctx.fillStyle = '#00ffcc';
-            ctx.fillRect(px + 12, py + 24, 16, 26);
+            // Torso (Thin & White)
+            ctx.fillRect(px + 14, py + 20, 8, 28);
 
-            // Hands
+            // Hands (Thin White Lines)
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(px + 12, py + 28);
-            ctx.lineTo(px - 4, py + 38);
-            ctx.moveTo(px + 28, py + 28);
-            ctx.lineTo(px + 44, py + 38);
+            ctx.moveTo(px + 14, py + 24);
+            ctx.lineTo(px + 2, py + 36);
+            ctx.moveTo(px + 22, py + 24);
+            ctx.lineTo(px + 34, py + 36);
             ctx.stroke();
 
-            // Legs
+            // Legs (Thin White Lines)
             ctx.beginPath();
-            ctx.moveTo(px + 14, py + 50);
-            ctx.lineTo(px + 8, py + 70);
-            ctx.moveTo(px + 26, py + 50);
-            ctx.lineTo(px + 32, py + 70);
+            ctx.moveTo(px + 15, py + 48);
+            ctx.lineTo(px + 10, py + 68);
+            ctx.moveTo(px + 21, py + 48);
+            ctx.lineTo(px + 26, py + 68);
             ctx.stroke();
 
             ctx.restore();
