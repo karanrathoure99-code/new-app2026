@@ -156,7 +156,7 @@
 
     <div class="game-wrapper">
         <div class="game-hud">
-            <div class="hud-title">⚡ LEVEL 1: STEALTH ARENA</div>
+            <div class="hud-title">⚡ LEVEL 1: STEALTH ARENA v2</div>
             <div class="hud-stats">
                 <span id="scoreDisplay">COINS: 0</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
@@ -201,7 +201,7 @@
         // Dummy Character
         let player = {
             x: 50,
-            y: canvas.height - 120,
+            y: canvas.height - 100,
             width: 14,
             height: 28,
             vx: 0,
@@ -213,45 +213,45 @@
             legAngle: 0
         };
 
-        // Thin surface extending to right end, with a hidden trap near the end
+        // Thin surface extending to right edge with a hidden trap near the end
         let platforms = [
-            { x: 0, y: canvas.height - 35, w: 750, h: 15, type: 'ground' },
-            { x: 750, y: canvas.height - 35, w: 45, h: 15, type: 'hiddenTrap', triggered: false }, // Hidden breaking block
-            { x: 795, y: canvas.height - 35, w: 155, h: 15, type: 'ground' }
+            { x: 0, y: canvas.height - 30, w: 720, h: 10, type: 'ground' },
+            { x: 720, y: canvas.height - 30, w: 40, h: 10, type: 'hiddenTrap', triggered: false }, 
+            { x: 760, y: canvas.height - 30, w: 200, h: 10, type: 'ground' }
         ];
 
-        // Exactly 5 Coins with identical color (Coin at index 3 contains hidden bomb)
+        // Exactly 5 Coins with completely identical color (Coin at index 3 has hidden bomb)
         let coins = [
-            { x: 180, y: canvas.height - 70, collected: false, hasBomb: false },
-            { x: 320, y: canvas.height - 70, collected: false, hasBomb: false },
-            { x: 480, y: canvas.height - 70, collected: false, hasBomb: false },
-            { x: 620, y: canvas.height - 70, collected: false, hasBomb: true },   // Hidden Bomb Coin
-            { x: 720, y: canvas.height - 70, collected: false, hasBomb: false }
+            { x: 160, y: canvas.height - 60, collected: false, hasBomb: false },
+            { x: 300, y: canvas.height - 60, collected: false, hasBomb: false },
+            { x: 450, y: canvas.height - 60, collected: false, hasBomb: false },
+            { x: 590, y: canvas.height - 60, collected: false, hasBomb: true },   
+            { x: 690, y: canvas.height - 60, collected: false, hasBomb: false }
         ];
 
-        // White Exit Gate sized perfectly for dummy character
-        let goal = { x: 900, y: canvas.height - 63, w: 18, h: 28 };
+        // White Exit Gate sized perfectly for the dummy character
+        let goal = { x: 880, y: canvas.height - 58, w: 16, h: 28 };
 
         let cameraX = 0;
         let keys = { left: false, right: false };
 
-        // Audio synthesizer for bomb blast sound effect
+        // Realistic Bomb Blast Sound Effect using Web Audio API
         function playBlastSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.4);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(15, audioCtx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.4);
+                osc.stop(audioCtx.currentTime + 0.5);
             } catch (e) {
-                console.log("Audio error", e);
+                console.log("Audio not allowed yet", e);
             }
         }
 
@@ -299,18 +299,19 @@
             isExploding = true;
             playBlastSound();
 
-            // Create body fragments for destruction effect
+            // Scattered body parts animation on blast
             fragments = [
-                { x: player.x, y: player.y, vx: -3, vy: -4, part: 'head' },
-                { x: player.x + 5, y: player.y + 10, vx: 2, vy: -5, part: 'torso' },
-                { x: player.x, y: player.y + 15, vx: -4, vy: 2, part: 'leg1' },
-                { x: player.x + 8, y: player.y + 15, vx: 4, vy: 3, part: 'leg2' }
+                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffffff' },
+                { x: player.x + 5, y: player.y + 10, vx: 3, vy: -6, color: '#ffffff' },
+                { x: player.x + 2, y: player.y + 15, vx: -5, vy: 1, color: '#ffffff' },
+                { x: player.x + 8, y: player.y + 15, vx: 5, vy: 2, color: '#ffffff' },
+                { x: player.x + 4, y: player.y + 4, vx: -2, vy: -3, color: '#ffcc00' } // debris/spark
             ];
 
             setTimeout(() => {
-                alert("💥 Boom! Blast detected. Restarting level.");
+                alert("💥 Boom! Blast! Restarting level.");
                 window.location.reload();
-            }, 800);
+            }, 900);
         }
 
         function checkCoins() {
@@ -331,17 +332,17 @@
                 fragments.forEach(f => {
                     f.x += f.vx;
                     f.y += f.vy;
-                    f.vy += 0.4; // gravity on pieces
+                    f.vy += 0.45; 
                 });
                 return;
             }
 
             if (keys.left) {
                 player.vx = -player.speed;
-                player.legAngle += 0.2;
+                player.legAngle += 0.22;
             } else if (keys.right) {
                 player.vx = player.speed;
-                player.legAngle += 0.2;
+                player.legAngle += 0.22;
             } else {
                 player.vx = 0;
                 player.legAngle = 0;
@@ -363,7 +364,7 @@
                 ) {
                     if (p.type === 'hiddenTrap') {
                         p.triggered = true;
-                        setTimeout(() => triggerExplosion(), 150);
+                        setTimeout(() => triggerExplosion(), 120);
                     }
                     player.y = p.y - player.height;
                     player.vy = 0;
@@ -380,7 +381,7 @@
 
             checkCoins();
 
-            // Check White Exit Gate Reached
+            // Win condition: Reach inside white exit gate
             if (player.x >= goal.x && player.y + player.height >= goal.y) {
                 alert("🎉 Level 1 Cleared Successfully!");
                 window.location.href = "index.html";
@@ -398,14 +399,14 @@
             // Draw Thin Surface Platforms
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return;
-                ctx.fillStyle = '#3d2314';
+                ctx.fillStyle = '#4e311a';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
                 ctx.strokeStyle = '#d28c3c';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
             });
 
-            // Draw Identical Coins (No distinction for bomb)
+            // Draw Identical Coins (No visible difference for bomb coin)
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.beginPath();
@@ -427,8 +428,8 @@
 
             // Draw Dummy Character or Blast Fragments
             if (isExploding) {
-                ctx.fillStyle = '#ffffff';
                 fragments.forEach(f => {
+                    ctx.fillStyle = f.color;
                     ctx.fillRect(f.x, f.y, 4, 4);
                 });
             } else {
@@ -453,7 +454,7 @@
                 // Torso
                 ctx.fillRect(px + 5, py + 9, 4, 11);
 
-                // Arms (Static)
+                // Arms (Stationary)
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
@@ -462,7 +463,7 @@
                 ctx.moveTo(px + 9, py + 11);
                 ctx.lineTo(px + 13, py + 16);
 
-                // Walking Legs (Only legs move to simulate human walking)
+                // Only Legs Move for Walking Animation
                 let legSwing = Math.sin(player.legAngle) * 4;
                 ctx.moveTo(px + 6, py + 20);
                 ctx.lineTo(px + 4 + legSwing, py + 28);
