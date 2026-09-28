@@ -79,7 +79,6 @@
             box-shadow: inset 0 0 40px rgba(140, 88, 48, 0.25), 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        /* Highly Attractive Distractor Background Design (Brown Theme) */
         .distractor-bg {
             position: absolute;
             inset: 0;
@@ -234,6 +233,22 @@
     </div>
 
     <script>
+        // Fullscreen and Landscape Lock Initialization on First User Interaction
+        function enableFullscreenAndLandscape() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
+            window.removeEventListener('click', enableFullscreenAndLandscape);
+            window.removeEventListener('touchstart', enableFullscreenAndLandscape);
+        }
+        window.addEventListener('click', enableFullscreenAndLandscape);
+        window.addEventListener('touchstart', enableFullscreenAndLandscape);
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -263,8 +278,8 @@
         let player = {
             x: 40,
             y: 100,
-            width: 10,       
-            height: 27,      
+            width: 12,        // Increased by 20% (from 10)
+            height: 32.4,     // Increased by 20% (from 27)
             vx: 0,
             vy: 0,
             speed: 3.15,     
@@ -443,9 +458,9 @@
             }
 
             if (keys.down) {
-                player.height = 17; 
+                player.height = 20.4; // 20% bigger than crouched size (17 * 1.2)
             } else {
-                player.height = 27; 
+                player.height = 32.4; // 20% bigger than normal size (27 * 1.2)
             }
 
             player.x += player.vx;
@@ -537,25 +552,23 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 20, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 24, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
                     ctx.stroke();
                 }
 
-                // --- Updated 3D Character Styling (Cyan/Blue Theme) ---
-                
                 // 3D Shadow/Depth Effect
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
                 ctx.ellipse(px + player.width/2 + 2, py + player.height + 2, player.width/1.5, 3, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Head
-                let headRadius = 4;
+                // Proportional Head (scaled up)
+                let headRadius = 4.8;
                 let headX = px + player.width/2;
-                let headY = py + 4;
+                let headY = py + 4.8;
                 
                 let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 1, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
@@ -568,46 +581,46 @@
 
                 // Upper Body / Chest
                 ctx.fillStyle = '#caf0f8';
-                ctx.fillRect(px + 1, py + 8, player.width - 2, 8);
+                ctx.fillRect(px + 1, py + 9.6, player.width - 2, 9.6);
                 
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(px + 2, py + 8, 2, 8);
+                ctx.fillRect(px + 2, py + 9.6, 2, 9.6);
 
                 // Kamar Wala Part (Patla/Slim Waist)
                 ctx.fillStyle = '#0077b6';
-                ctx.fillRect(px + 3, py + 16, player.width - 6, 4);
+                ctx.fillRect(px + 3.6, py + 19.2, player.width - 7.2, 4.8);
 
                 // Lower Body / Pelvis
                 ctx.fillStyle = '#48cae4';
-                ctx.fillRect(px + 1, py + 20, player.width - 2, 4);
+                ctx.fillRect(px + 1, py + 24, player.width - 2, 4.8);
 
                 // Upright Stable Limbs
                 let legAnim = Math.sin(player.animTimer) * 2;
                 let isJumping = !player.isGrounded;
 
                 ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.8;
+                ctx.lineWidth = 2.1;
                 ctx.beginPath();
 
                 if (isJumping) {
-                    ctx.moveTo(px + 1, py + 10);
-                    ctx.lineTo(px - 2, py + 6);
-                    ctx.moveTo(px + player.width - 1, py + 10);
-                    ctx.lineTo(px + player.width + 2, py + 6);
+                    ctx.moveTo(px + 1, py + 12);
+                    ctx.lineTo(px - 2, py + 7);
+                    ctx.moveTo(px + player.width - 1, py + 12);
+                    ctx.lineTo(px + player.width + 2, py + 7);
 
-                    ctx.moveTo(px + 2, py + player.height - 4);
+                    ctx.moveTo(px + 2, py + player.height - 4.8);
                     ctx.lineTo(px + 1, py + player.height);
-                    ctx.moveTo(px + player.width - 2, py + player.height - 4);
+                    ctx.moveTo(px + player.width - 2, py + player.height - 4.8);
                     ctx.lineTo(px + player.width - 1, py + player.height);
                 } else {
-                    ctx.moveTo(px + 1, py + 10);
-                    ctx.lineTo(px - 1, py + 14);
-                    ctx.moveTo(px + player.width - 1, py + 10);
-                    ctx.lineTo(px + player.width + 1, py + 14);
+                    ctx.moveTo(px + 1, py + 12);
+                    ctx.lineTo(px - 1, py + 16.8);
+                    ctx.moveTo(px + player.width - 1, py + 12);
+                    ctx.lineTo(px + player.width + 1, py + 16.8);
 
-                    ctx.moveTo(px + 2, py + player.height - 4);
+                    ctx.moveTo(px + 2, py + player.height - 4.8);
                     ctx.lineTo(px + 2 + legAnim, py + player.height);
-                    ctx.moveTo(px + player.width - 2, py + player.height - 4);
+                    ctx.moveTo(px + player.width - 2, py + player.height - 4.8);
                     ctx.lineTo(px + player.width - 2 - legAnim, py + player.height);
                 }
 
