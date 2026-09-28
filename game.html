@@ -279,12 +279,12 @@
         let player = {
             x: 40,
             y: 100,
-            width: 7,         
-            height: 18,       
+            width: 22,        // Restored to original size
+            height: 48,       // Restored to original size
             vx: 0,
             vy: 0,
             speed: 3.2,     
-            jumpForce: -8.2,  
+            jumpForce: -8.5,  
             gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
@@ -308,10 +308,10 @@
             for (let i = 1; i <= 6; i++) {
                 coins.push({
                     x: 60 + (i - 1) * coinSpacing,
-                    y: surfaceTop - 20,
+                    y: surfaceTop - 25,
                     collected: false,
                     hasBomb: (i === 4),
-                    radius: 3
+                    radius: 4
                 });
             }
 
@@ -407,14 +407,14 @@
         function triggerExplosion() {
             if (shieldActive || isExploding) return;
             isExploding = true;
-            isSlowMo = true; // Enable slow-motion effect
+            isSlowMo = true;
             playBlastSound();
 
             fragments = [
-                { x: player.x, y: player.y, vx: -3, vy: -4, color: '#ffffff' },
-                { x: player.x + 2, y: player.y + 4, vx: 3, vy: -5, color: '#00f2fe' },
-                { x: player.x + 1, y: player.y + 6, vx: -4, vy: 1, color: '#ffffff' },
-                { x: player.x + 3, y: player.y + 6, vx: 4, vy: 2, color: '#4facfe' }
+                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffffff' },
+                { x: player.x + 8, y: player.y + 12, vx: 4, vy: -6, color: '#00f2fe' },
+                { x: player.x + 4, y: player.y + 20, vx: -5, vy: 2, color: '#ffffff' },
+                { x: player.x + 12, y: player.y + 24, vx: 5, vy: 3, color: '#4facfe' }
             ];
 
             // 2-second slow motion period before page reload
@@ -425,7 +425,7 @@
 
         function checkCoins() {
             coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 18) {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
                     c.collected = true;
                     if (c.hasBomb) {
                         triggerExplosion();
@@ -463,9 +463,9 @@
             }
 
             if (keys.down) {
-                player.height = 11; 
+                player.height = 30; // Original duck height
             } else {
-                player.height = 18; 
+                player.height = 48; // Original standing height
             }
 
             player.x += player.vx;
@@ -549,7 +549,7 @@
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 2.5, 2.5);
+                    ctx.fillRect(f.x, f.y, 4, 4);
                 });
             } else {
                 let px = player.x;
@@ -557,7 +557,7 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 16, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 32, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
@@ -567,15 +567,16 @@
                 // Shadow
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
-                ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.3, 2, 0, 0, Math.PI * 2);
+                ctx.ellipse(px + player.width/2 + 2, py + player.height + 3, player.width/1.3, 3, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Compact Head
-                let headRadius = 2.8;
+                // Original Detailed 3D Character Drawing
+                let bounce = Math.sin(player.animTimer) * 2;
+                let headRadius = 7.5;
                 let headX = px + player.width/2;
-                let headY = py + 3;
+                let headY = py + 9 + (player.height === 30 ? 0 : bounce);
                 
-                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
+                let headGrad = ctx.createRadialGradient(headX - 2, headY - 2, 1, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
                 headGrad.addColorStop(1, '#00f2fe');
                 
@@ -584,17 +585,21 @@
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Compact Upper Body
-                ctx.fillStyle = '#caf0f8';
-                ctx.fillRect(px + 1, py + 6, player.width - 2, 5);
+                // Upper Torso
+                let chestGrad = ctx.createLinearGradient(px, py + 16, px + player.width, py + 16);
+                chestGrad.addColorStop(0, '#00c6ff');
+                chestGrad.addColorStop(1, '#0072ff');
+                ctx.fillStyle = chestGrad;
+                ctx.fillRect(px + 2, py + 16 + (player.height === 30 ? 0 : bounce), player.width - 4, 14);
 
-                // Slim Waist
-                ctx.fillStyle = '#0077b6';
-                ctx.fillRect(px + 2, py + 11, player.width - 4, 3);
+                // Belt
+                ctx.fillStyle = '#ffcc00';
+                ctx.fillRect(px + 2, py + 30 + (player.height === 30 ? 0 : bounce), player.width - 4, 3);
 
-                // Pelvis
-                ctx.fillStyle = '#48cae4';
-                ctx.fillRect(px + 1, py + 14, player.width - 2, 4);
+                // Legs
+                ctx.fillStyle = '#03045e';
+                ctx.fillRect(px + 3, py + 33 + (player.height === 30 ? 0 : bounce), 5, player.height === 30 ? 12 : 15);
+                ctx.fillRect(px + player.width - 8, py + 33 + (player.height === 30 ? 0 : bounce), 5, player.height === 30 ? 12 : 15);
             }
         }
 
