@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🤪 Z PAJAL - Secure Registration</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
@@ -14,15 +14,38 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        /* Landscape Mode & Responsive Fit for All Devices */
+        @media screen and (orientation: portrait) {
+            body::before {
+                content: "Please rotate your device to Landscape Mode 🔄";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #050505;
+                color: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 20px;
+                font-weight: 600;
+                text-align: center;
+                z-index: 99999;
+                padding: 20px;
+            }
+        }
+
         body {
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             background: #050505;
             background: linear-gradient(to right, #050505, #0a0a0c, #050505);
-            overflow-x: hidden;
-            padding: 20px;
+            overflow: hidden;
+            padding: 10px;
         }
 
         .orb {
@@ -54,22 +77,32 @@
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 450px;
+            max-width: 420px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 30px 25px;
+            border-radius: 20px;
+            padding: 20px 20px;
             box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
             text-align: center;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .glass-box::-webkit-scrollbar {
+            width: 4px;
+        }
+        .glass-box::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
         }
 
         .game-title {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 800;
             color: #fff;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             letter-spacing: 2px;
             display: flex;
             justify-content: center;
@@ -78,31 +111,31 @@
         }
 
         .emoji {
-            font-size: 34px;
+            font-size: 30px;
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             position: relative;
             text-align: left;
         }
 
         .input-group label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             font-weight: 600;
         }
 
         .input-group input {
             width: 100%;
-            padding: 10px 15px;
+            padding: 9px 14px;
             background: rgba(0, 0, 0, 0.2);
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
             transition: all 0.3s ease;
         }
@@ -114,19 +147,19 @@
         }
 
         .hint {
-            font-size: 10px;
+            font-size: 9px;
             color: rgba(255, 255, 255, 0.4);
             margin-top: 2px;
         }
 
         .register-btn {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: linear-gradient(45deg, #ff007f, #7928ca);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 15px;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 800;
             cursor: pointer;
             margin-top: 5px;
@@ -140,11 +173,11 @@
         }
 
         .back-link {
-            margin-top: 15px;
+            margin-top: 12px;
             display: block;
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             transition: 0.3s;
         }
@@ -300,15 +333,21 @@
         }
     </script>
 
-    <!-- Fullscreen API Script -->
+    <!-- Fullscreen API & Landscape Orientation Lock Integration -->
     <script>
         function requestFullscreen() {
             const docElement = document.documentElement;
             if (!document.fullscreenElement) {
-                if (docElement.requestFullscreen) {
-                    docElement.requestFullscreen().catch(() => {});
-                } else if (docElement.webkitRequestFullscreen) {
-                    docElement.webkitRequestFullscreen();
+                const requestPromise = docElement.requestFullscreen ? docElement.requestFullscreen() :
+                                       docElement.webkitRequestFullscreen ? docElement.webkitRequestFullscreen() :
+                                       docElement.msRequestFullscreen ? docElement.msRequestFullscreen() : null;
+
+                if (requestPromise) {
+                    Promise.resolve(requestPromise).then(() => {
+                        if (screen.orientation && screen.orientation.lock) {
+                            screen.orientation.lock('landscape').catch(() => {});
+                        }
+                    }).catch(() => {});
                 }
             }
         }
