@@ -27,7 +27,7 @@
             align-items: center;
         }
 
-        /* Landscape Orientation Enforcement for Phones and Tablets */
+        /* Landscape Orientation Enforcement & Fullscreen Prompt */
         @media screen and (orientation: portrait) {
             body::before {
                 content: "⚠️ Kripya apne phone ya tablet ko Landscape mode mein ghumayein! (Please rotate your device)";
@@ -199,7 +199,7 @@
                     <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.25);">COLLECT</button>
                 </div>
 
-                <!-- Right Side: Move Left, Move Right, Jump/Up, Down/Lie Down[cite: 6] -->
+                <!-- Right Side: Move Left, Move Right, Jump/Up, Down/Lie Down -->
                 <div class="control-group">
                     <button class="ctrl-btn" id="leftBtn">◀</button>
                     <button class="ctrl-btn" id="rightBtn">▶</button>
@@ -232,18 +232,28 @@
             updateGameLayout();
         }
 
-        // Automatic Landscape Lock API Request
-        function lockLandscape() {
+        // Fullscreen API & Landscape Lock Enforcement on Interaction
+        function triggerFullscreenAndLandscape() {
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('landscape').catch(() => {});
             }
+            
+            const docEl = document.documentElement;
+            if (!document.fullscreenElement) {
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().catch(() => {});
+                } else if (docEl.webkitRequestFullscreen) {
+                    docEl.webkitRequestFullscreen();
+                }
+            }
         }
-        window.addEventListener('load', lockLandscape);
-        window.addEventListener('click', lockLandscape, { once: true });
+
+        window.addEventListener('click', triggerFullscreenAndLandscape, { once: true });
+        window.addEventListener('touchstart', triggerFullscreenAndLandscape, { once: true });
 
         let score = 0;
         let shieldActive = false;
-        let isLyingDown = false; // Player ne niche letne / jhukne ki state[cite: 6]
+        let isLyingDown = false; 
         let isExploding = false;
         let fragments = [];
 
@@ -334,7 +344,7 @@
             }
         }
 
-        // Down Button Action (Player lets/lays down)[cite: 6]
+        // Down Button Action (Player lets/lays down)
         const downBtn = document.getElementById('downBtn');
         if (downBtn) {
             const setDownOn = () => { isLyingDown = true; };
@@ -542,9 +552,7 @@
                 let px = player.x;
                 let py = player.y;
                 let pHeight = player.height;
-                let pWidth = player.width;
 
-                // Agar Down button dabaya hai toh player let/jhuk jayega[cite: 6]
                 if (isLyingDown) {
                     pHeight = 20;
                     py += 22;
@@ -583,7 +591,6 @@
                     ctx.lineTo(px + 15 - legSwing, py + 42);
                     ctx.stroke();
                 } else {
-                    // Lying down body pose
                     ctx.fillRect(px + 4, py + 10, 20, 8);
                 }
             }
