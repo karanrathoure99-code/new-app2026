@@ -43,7 +43,7 @@
         @media (max-width: 768px) {
             .game-wrapper {
                 transform: scale(0.6);
-                width: 166.66%; /* 100 / 0.6 taaki screen par overflow na ho aur center me fit rahe */
+                width: 166.66%; 
                 height: 166.66%;
                 position: absolute;
             }
@@ -117,6 +117,7 @@
             z-index: 2;
         }
 
+        /* Desktop par controls-overlay arena-container ke andar rahega */
         .controls-overlay {
             position: absolute;
             bottom: 10px;
@@ -132,6 +133,26 @@
         @media (min-width: 1024px) {
             .controls-overlay {
                 display: none;
+            }
+        }
+
+        /* Phone aur tablet (max-width: 1023px) ke liye controls-overlay ko game box ke BILKUL NICHE (outside arena) position kiya gaya hai */
+        @media (max-width: 1023px) {
+            .controls-overlay {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                margin-top: 10px;
+                padding: 0 10px;
+                pointer-events: auto;
+                background: transparent;
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                z-index: 30;
+            }
+            .game-wrapper {
+                justify-content: flex-start;
             }
         }
 
@@ -165,7 +186,7 @@
             position: relative;
         }
 
-        /* Phone aur tablet (max-width: 1023px) ke liye sabhi control buttons ka size 50% bada kiya gaya hai (48px -> 72px) aur font-size adjust ki gayi hai */
+        /* Phone aur tablet ke liye sabhi control buttons ka size bada kiya gaya hai (72px) */
         @media (max-width: 1023px) {
             .ctrl-btn {
                 width: 72px;
@@ -179,7 +200,6 @@
             .btn-label {
                 font-size: 11px !important;
             }
-            /* Right side buttons ko bade box ke niche position karne ke liye column direction aur gap */
             .control-group.right-group {
                 flex-direction: column;
                 align-items: flex-end;
@@ -223,7 +243,6 @@
             border-color: #d4a373;
         }
 
-        /* Custom Toast Modal for alerts */
         #notificationModal {
             position: absolute;
             top: 20%;
@@ -268,14 +287,12 @@
             <div class="distractor-bg"></div>
             <canvas id="gameCanvas"></canvas>
 
-            <div class="controls-overlay">
-                <!-- Left side: down button remove kar diya gaya hai, sirf left aur right buttons rahenge -->
+            <!-- Desktop ke liye control buttons box ke andar (absolute overlay) -->
+            <div class="controls-overlay" id="desktopControls">
                 <div class="control-group">
                     <button class="ctrl-btn" id="leftBtn">◀</button>
                     <button class="ctrl-btn" id="rightBtn">▶</button>
                 </div>
-
-                <!-- Right side: buttons bade box ke niche stack kiye gaye hain -->
                 <div class="control-group right-group">
                     <button class="ctrl-btn" id="jumpBtn">
                         <span class="btn-logo">Z</span>
@@ -290,6 +307,28 @@
                         <span class="btn-label">SHLD</span>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Phone aur Tablet ke liye control buttons box ke BILKUL NICHE (outside arena) -->
+        <div class="controls-overlay" id="mobileControls" style="display: none;">
+            <div class="control-group">
+                <button class="ctrl-btn" id="leftBtnM">◀</button>
+                <button class="ctrl-btn" id="rightBtnM">▶</button>
+            </div>
+            <div class="control-group right-group">
+                <button class="ctrl-btn" id="jumpBtnM">
+                    <span class="btn-logo">Z</span>
+                    <span class="btn-label">JUMP</span>
+                </button>
+                <button class="ctrl-btn" id="rightDownBtnM">
+                    <span class="btn-logo">Z</span>
+                    <span class="btn-label">DOWN</span>
+                </button>
+                <button class="ctrl-btn" id="shieldBtnM" style="background: rgba(255,170,0,0.25);">
+                    <span class="btn-logo" style="color:#ffaa00;">Z</span>
+                    <span class="btn-label">SHLD</span>
+                </button>
             </div>
         </div>
     </div>
@@ -316,6 +355,12 @@
         let canvasWidth = 800;
         let canvasHeight = 500;
 
+        function checkDeviceControls() {
+            const isMobileOrTablet = window.innerWidth <= 1023;
+            document.getElementById('desktopControls').style.display = isMobileOrTablet ? 'none' : 'flex';
+            document.getElementById('mobileControls').style.display = isMobileOrTablet ? 'flex' : 'none';
+        }
+
         function resizeCanvas() {
             canvasWidth = canvas.parentElement.clientWidth;
             canvasHeight = canvas.parentElement.clientHeight;
@@ -329,6 +374,7 @@
             canvas.style.height = canvasHeight + 'px';
 
             updateGameLayout();
+            checkDeviceControls();
         }
 
         let score = 0;
@@ -347,7 +393,7 @@
             vx: 0,
             vy: 0,
             speed: 2.8,       
-            jumpForce: -8.5,  // Desktop par default jump speed
+            jumpForce: -8.5,  
             gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
@@ -388,7 +434,6 @@
 
         let keys = { left: false, right: false, down: false };
 
-        // Sound Synthesis Utility
         function playSound(type) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -411,8 +456,8 @@
                     osc.stop(now + 0.15);
                 } else if (type === 'coin') {
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(587.33, now); // D5
-                    osc.frequency.setValueAtTime(880, now + 0.08); // A5
+                    osc.frequency.setValueAtTime(587.33, now); 
+                    osc.frequency.setValueAtTime(880, now + 0.08); 
                     gain.gain.setValueAtTime(0.25, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
                     osc.start(now);
@@ -462,33 +507,19 @@
             btn.addEventListener('mouseleave', handleEnd);
         };
 
-        bindButton('leftBtn', () => keys.left = true, () => keys.left = false);
-        bindButton('rightBtn', () => keys.right = true, () => keys.right = false);
-        // Note: left down button remove kiya gaya hai, rightDownBtn abhi bhi active hai
-        bindButton('rightDownBtn', () => keys.down = true, () => keys.down = false);
-
-        const jumpBtn = document.getElementById('jumpBtn');
-        if (jumpBtn) {
-            const handleJumpAction = (e) => {
-                if (e) e.preventDefault();
-                jumpBtn.classList.add('pressed');
-                setTimeout(() => jumpBtn.classList.remove('pressed'), 150);
-                triggerJump();
-            };
-            jumpBtn.addEventListener('touchstart', handleJumpAction, { passive: false });
-            jumpBtn.addEventListener('mousedown', handleJumpAction);
-        }
+        // Desktop and Mobile button bindings
+        ['leftBtn', 'leftBtnM'].forEach(id => bindButton(id, () => keys.left = true, () => keys.left = false));
+        ['rightBtn', 'rightBtnM'].forEach(id => bindButton(id, () => keys.right = true, () => keys.right = false));
+        ['rightDownBtn', 'rightDownBtnM'].forEach(id => bindButton(id, () => keys.down = true, () => keys.down = false));
 
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
-                // Sirf phone ya tablet (max-width: 1023px) par jump force ko 40% kam kiya gaya hai (-8.5 ka 60% = -5.1)
-                const isMobileOrTablet = window.innerWidth <= 1023;
-                let activeJumpForce = isMobileOrTablet ? (player.jumpForce * 0.6) : player.jumpForce;
+                // Dammi ki jump force ko itna rakha gaya hai taaki character comfortably coin ke upar se jump karke par kar sake (-9.4)
+                let activeJumpForce = -9.4;
 
                 player.vy = activeJumpForce;
                 player.isGrounded = false;
                 playSound('jump');
-                // Create jump dust particles
                 for (let i = 0; i < 5; i++) {
                     particles.push({
                         x: player.x + player.width / 2,
@@ -503,29 +534,45 @@
             }
         }
 
-        const shieldBtn = document.getElementById('shieldBtn');
-        if (shieldBtn) {
-            const activateShield = (e) => {
-                if (e) e.preventDefault();
-                shieldBtn.classList.add('pressed');
-                shieldActive = true;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-                document.getElementById('shieldDisplay').style.color = "#ffaa00";
-            };
-            const deactivateShield = (e) => {
-                if (e) e.preventDefault();
-                shieldBtn.classList.remove('pressed');
-                shieldActive = false;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                document.getElementById('shieldDisplay').style.color = "#d8b4fe";
-            };
-            shieldBtn.addEventListener('touchstart', activateShield, { passive: false });
-            shieldBtn.addEventListener('touchend', deactivateShield, { passive: false });
-            shieldBtn.addEventListener('touchcancel', deactivateShield, { passive: false });
-            shieldBtn.addEventListener('mousedown', activateShield);
-            shieldBtn.addEventListener('mouseup', deactivateShield);
-            shieldBtn.addEventListener('mouseleave', deactivateShield);
-        }
+        ['jumpBtn', 'jumpBtnM'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                const handleJumpAction = (e) => {
+                    if (e) e.preventDefault();
+                    btn.classList.add('pressed');
+                    setTimeout(() => btn.classList.remove('pressed'), 150);
+                    triggerJump();
+                };
+                btn.addEventListener('touchstart', handleJumpAction, { passive: false });
+                btn.addEventListener('mousedown', handleJumpAction);
+            }
+        });
+
+        ['shieldBtn', 'shieldBtnM'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                const activateShield = (e) => {
+                    if (e) e.preventDefault();
+                    btn.classList.add('pressed');
+                    shieldActive = true;
+                    document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
+                    document.getElementById('shieldDisplay').style.color = "#ffaa00";
+                };
+                const deactivateShield = (e) => {
+                    if (e) e.preventDefault();
+                    btn.classList.remove('pressed');
+                    shieldActive = false;
+                    document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+                    document.getElementById('shieldDisplay').style.color = "#d8b4fe";
+                };
+                btn.addEventListener('touchstart', activateShield, { passive: false });
+                btn.addEventListener('touchend', deactivateShield, { passive: false });
+                btn.addEventListener('touchcancel', deactivateShield, { passive: false });
+                btn.addEventListener('mousedown', activateShield);
+                btn.addEventListener('mouseup', deactivateShield);
+                btn.addEventListener('mouseleave', deactivateShield);
+            }
+        });
 
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
@@ -580,7 +627,6 @@
                     score += 1; 
                     playSound('coin');
                     
-                    // Floating text effect
                     floatingTexts.push({
                         text: '+1',
                         x: c.x,
@@ -589,7 +635,6 @@
                         vy: -1
                     });
 
-                    // Sparkle particles
                     for (let i = 0; i < 8; i++) {
                         particles.push({
                             x: c.x,
@@ -692,7 +737,6 @@
 
             document.getElementById('scoreDisplay').innerText = "COINS: " + score;
 
-            // Update particles
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.x += p.vx;
@@ -701,7 +745,6 @@
                 if (p.life <= 0) particles.splice(i, 1);
             }
 
-            // Update floating texts
             for (let i = floatingTexts.length - 1; i >= 0; i--) {
                 let ft = floatingTexts[i];
                 ft.y += ft.vy;
@@ -754,7 +797,6 @@
             ctx.lineWidth = 2.5;
             ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
-            // Draw particles
             particles.forEach(p => {
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
@@ -762,7 +804,6 @@
                 ctx.fill();
             });
 
-            // Draw floating texts
             floatingTexts.forEach(ft => {
                 ctx.save();
                 ctx.globalAlpha = ft.alpha;
@@ -790,7 +831,6 @@
                     ctx.stroke();
                 }
 
-                // Shadow
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
                 ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
@@ -800,7 +840,6 @@
                 let legSwing = ((keys.left || keys.right) && player.isGrounded) ? motionCycle * 3.5 : 0;
                 let armSwing = (!player.isGrounded) ? motionCycle * 3.5 : 0; 
 
-                // 1. Head (Sir)
                 let headRadius = 5;
                 let headX = px + player.width/2;
                 let headY = py + 6;
@@ -814,7 +853,6 @@
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 2. Extra Thin Upper Torso
                 let torsoWidth = 7; 
                 let torsoX = px + (player.width - torsoWidth) / 2;
                 let chestGrad = ctx.createLinearGradient(torsoX, py + 12, torsoX + torsoWidth, py + 12);
@@ -823,16 +861,13 @@
                 ctx.fillStyle = chestGrad;
                 ctx.fillRect(torsoX, py + 12, torsoWidth, 14.5);
 
-                // Belt
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(torsoX - 1, py + 26, torsoWidth + 2, 2.5);
 
-                // 3. White Hands 
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX - 4 + armSwing, py + 14, 2.5, 11);  
                 ctx.fillRect(torsoX + torsoWidth + 1 - armSwing, py + 14, 2.5, 11); 
 
-                // 4. White Legs 
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX + 1 + legSwing || torsoX + 1 + armSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
                 ctx.fillRect(torsoX + torsoWidth - 3.5 - (legSwing || armSwing), py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
