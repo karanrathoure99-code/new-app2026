@@ -16,8 +16,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1f1208 0%, #0d0603 50%, #2b180a 100%);
-            background-attachment: fixed;
+            background: #0d0603;
             color: #ffffff;
             width: 100vw;
             height: 100vh;
@@ -27,41 +26,74 @@
             align-items: center;
         }
 
-        .game-wrapper {
-            width: 100%;
-            height: 100%;
-            max-width: 1280px;
-            max-height: 720px;
+        /* Start Overlay jo Fullscreen aur Landscape lock trigger karega */
+        #startOverlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1f1208 0%, #0d0603 100%);
             display: flex;
             flex-direction: column;
-            padding: 10px;
-            position: relative;
-            transition: transform 0.2s ease;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            text-align: center;
+            padding: 20px;
         }
 
-        /* Phone aur tablet par game layout ko proper fit karne ke liye media query */
-        @media (max-width: 1023px) {
-            .game-wrapper {
-                transform: scale(0.56);
-                width: 178.5%; 
-                height: 178.5%;
-                position: absolute;
-                top: 0;
-                left: 0;
-                justify-content: flex-start;
-                padding: 6px;
-            }
+        #startOverlay h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: #d4a373;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(212,163,115,0.6);
+        }
+
+        #startOverlay p {
+            font-size: 13px;
+            color: #faedcd;
+            margin-bottom: 25px;
+            max-width: 320px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #d4a373 0%, #8c5830 100%);
+            border: 2px solid #ffcc00;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            padding: 12px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(140, 88, 48, 0.6);
+            transition: transform 0.2s;
+        }
+
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Game Container jise perfectly scale kiya jayega */
+        .game-scaler {
+            width: 1280px;
+            height: 720px;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            position: absolute;
+            transform-origin: center center;
+            background: linear-gradient(135deg, #1f1208 0%, #0d0603 50%, #2b180a 100%);
         }
 
         .game-hud {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(50, 28, 10, 0.85);
+            background: rgba(50, 28, 10, 0.9);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(212, 163, 115, 0.4);
-            border-radius: 15px;
-            padding: 8px 20px;
+            border-radius: 12px;
+            padding: 8px 18px;
             margin-bottom: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             z-index: 20;
@@ -69,7 +101,7 @@
 
         .hud-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 900;
             color: #d4a373;
             text-shadow: 0 0 10px rgba(212,163,115,0.6);
@@ -88,7 +120,7 @@
             flex: 1;
             background: rgba(20, 11, 5, 0.95);
             border: 3px solid rgba(140, 88, 48, 0.85);
-            border-radius: 20px;
+            border-radius: 16px;
             position: relative;
             overflow: hidden;
             box-shadow: inset 0 0 40px rgba(140, 88, 48, 0.25), 0 10px 30px rgba(0,0,0,0.8);
@@ -121,27 +153,17 @@
             z-index: 2;
         }
 
-        /* LAPTOP (width >= 1024px) par ye control buttons bilkul hide rahenge */
         .controls-overlay {
-            display: none;
-        }
-
-        /* Sirf PHONE aur TABLET (max-width: 1023px) par buttons game box ke bilkul niche proper 2-column ya balanced row mein set honge */
-        @media (max-width: 1023px) {
-            .controls-overlay {
-                position: relative;
-                bottom: auto;
-                left: auto;
-                margin-top: 8px;
-                padding: 0 4px;
-                pointer-events: auto;
-                background: transparent;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 100%;
-                z-index: 30;
-            }
+            position: relative;
+            margin-top: 8px;
+            padding: 0 4px;
+            pointer-events: auto;
+            background: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            z-index: 30;
         }
 
         .control-group {
@@ -151,14 +173,11 @@
             align-items: center;
         }
 
-        /* Right side group jaisa left/move buttons hai, waise hi horizontal ya proper compact row mein set kiya gaya hai */
-        @media (max-width: 1023px) {
-            .control-group.right-group {
-                display: flex;
-                flex-direction: row;
-                gap: 8px;
-                align-items: center;
-            }
+        .control-group.right-group {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
         }
 
         .ctrl-btn {
@@ -170,8 +189,8 @@
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            width: 62px;
-            height: 62px;
+            width: 60px;
+            height: 60px;
             font-size: 14px;
             border-radius: 14px;
             display: flex;
@@ -181,13 +200,12 @@
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6);
             touch-action: manipulation;
-            position: relative;
         }
 
         .ctrl-btn:active, .ctrl-btn.pressed {
             transform: translateY(2px);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-            background: rgba(140, 88, 48, 0.55);
+            background: rgba(140, 88, 48, 0.65);
             border-color: #d4a373;
         }
 
@@ -196,8 +214,7 @@
             font-weight: 900;
             color: #ffcc00;
             text-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
-            margin-bottom: 1px;
-            letter-spacing: -0.5px;
+            margin-bottom: 2px;
         }
 
         .btn-label {
@@ -211,7 +228,7 @@
             border: 1px solid rgba(255,255,255,0.2);
             color: #faedcd;
             padding: 4px 12px;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 11px;
             cursor: pointer;
         }
@@ -248,9 +265,17 @@
 </head>
 <body>
 
+    <!-- Start Overlay for Fullscreen & Landscape API Trigger -->
+    <div id="startOverlay">
+        <h1>⚡ Z PAJAL ARENA</h1>
+        <p>Tap below to start the game in Fullscreen Landscape Mode!</p>
+        <button class="start-btn" onclick="startGameFullscreen()">START GAME 🚀</button>
+    </div>
+
     <div id="notificationModal">🎉 Gate Unlocked! Transitioning to Level 2...</div>
 
-    <div class="game-wrapper">
+    <!-- Game Scaler Wrapper for Perfect Fit -->
+    <div class="game-scaler" id="gameScaler">
         <div class="game-hud">
             <div class="hud-title">⚡ LEVEL 1: 3D ARENA</div>
             <div class="hud-stats">
@@ -262,10 +287,9 @@
 
         <div class="arena-container">
             <div class="distractor-bg"></div>
-            <canvas id="gameCanvas"></canvas>
+            <canvas id="gameCanvas" width="1200" height="580"></canvas>
         </div>
 
-        <!-- Phone aur Tablet ke liye control buttons box ke BILKUL NICHE (outside arena) -->
         <div class="controls-overlay" id="mobileControls">
             <div class="control-group">
                 <button class="ctrl-btn" id="leftBtnM">◀</button>
@@ -289,47 +313,52 @@
     </div>
 
     <script>
-        function enableFullscreenAndLandscape() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
+        // Fullscreen and Landscape API Handler
+        function startGameFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log(err));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
             }
+
             if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(() => {});
+                screen.orientation.lock('landscape').catch(err => console.log("Orientation lock not supported", err));
             }
-            window.removeEventListener('click', enableFullscreenAndLandscape);
-            window.removeEventListener('touchstart', enableFullscreenAndLandscape);
+
+            document.getElementById('startOverlay').style.display = 'none';
+            resizeGame();
         }
-        window.addEventListener('click', enableFullscreenAndLandscape);
-        window.addEventListener('touchstart', enableFullscreenAndLandscape);
+
+        // Perfect Auto-Scaling Logic for Mobile, Tablet & Laptop
+        function resizeGame() {
+            const scaler = document.getElementById('gameScaler');
+            const targetWidth = 1280;
+            const targetHeight = 720;
+
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            const scaleX = windowWidth / targetWidth;
+            const scaleY = windowHeight / targetHeight;
+            const scale = Math.min(scaleX, scaleY);
+
+            scaler.style.transform = `scale(${scale})`;
+            scaler.style.left = `${(windowWidth - targetWidth * scale) / 2}px`;
+            scaler.style.top = `${(windowHeight - targetHeight * scale) / 2}px`;
+        }
+
+        window.addEventListener('resize', resizeGame);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeGame, 200);
+        });
+        resizeGame();
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let canvasWidth = 800;
-        let canvasHeight = 500;
-
-        function checkDeviceControls() {
-            const isMobileOrTablet = window.innerWidth <= 1023;
-            document.getElementById('mobileControls').style.display = isMobileOrTablet ? 'flex' : 'none';
-        }
-
-        function resizeCanvas() {
-            canvasWidth = canvas.parentElement.clientWidth;
-            canvasHeight = canvas.parentElement.clientHeight;
-
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = canvasWidth * dpr;
-            canvas.height = canvasHeight * dpr;
-            ctx.scale(dpr, dpr);
-            
-            canvas.style.width = canvasWidth + 'px';
-            canvas.style.height = canvasHeight + 'px';
-
-            updateGameLayout();
-            checkDeviceControls();
-        }
+        let canvasWidth = 1200;
+        let canvasHeight = 580;
 
         let score = 0;
         let shieldActive = false;
@@ -340,60 +369,56 @@
         let floatingTexts = [];
 
         let player = {
-            x: 40,
-            y: 100,
-            width: 14.4,      
-            height: 45,       
+            x: 60,
+            y: 200,
+            width: 22,      
+            height: 70,       
             vx: 0,
             vy: 0,
-            speed: 2.8,       
-            jumpForce: -8.5,  
-            gravity: 0.38,    
+            speed: 4.5,       
+            jumpForce: -13,  
+            gravity: 0.55,    
             isGrounded: false,
             animTimer: 0
         };
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 0, y: 0, w: 20, h: 35 };
+        let goal = { x: 0, y: 0, w: 30, h: 55 };
 
         function updateGameLayout() {
-            const surfaceTop = canvasHeight - 40;
-            const surfaceHeight = 40;
+            const surfaceTop = canvasHeight - 60;
+            const surfaceHeight = 60;
 
             platforms = [
                 { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }, 
-                { x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false }
+                { x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 140, h: surfaceHeight, type: 'hiddenTrap', triggered: false }
             ];
 
-            const coinSpacing = (canvasWidth - 120) / 6;
+            const coinSpacing = (canvasWidth - 180) / 6;
             coins = [];
             for (let i = 1; i <= 6; i++) {
                 coins.push({
-                    x: 60 + (i - 1) * coinSpacing,
-                    y: surfaceTop - 25,
+                    x: 90 + (i - 1) * coinSpacing,
+                    y: surfaceTop - 35,
                     collected: false,
-                    hasBomb: false, 
-                    radius: 5,
+                    radius: 8,
                     floatOffset: Math.random() * Math.PI
                 });
             }
 
             goal.y = surfaceTop - goal.h;
-            goal.x = canvasWidth - 55;
+            goal.x = canvasWidth - 80;
         }
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        updateGameLayout();
 
         let keys = { left: false, right: false, down: false };
 
         function playSound(type) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
@@ -436,23 +461,15 @@
                     osc.stop(now + 0.6);
                 }
             } catch (e) {
-                console.log("Audio not allowed or supported", e);
+                console.log("Audio not supported", e);
             }
         }
 
         const bindButton = (id, onStart, onEnd) => {
             const btn = document.getElementById(id);
             if (!btn) return;
-            const handleStart = (e) => {
-                if (e) e.preventDefault();
-                btn.classList.add('pressed');
-                onStart();
-            };
-            const handleEnd = (e) => {
-                if (e) e.preventDefault();
-                btn.classList.remove('pressed');
-                onEnd();
-            };
+            const handleStart = (e) => { if (e) e.preventDefault(); btn.classList.add('pressed'); onStart(); };
+            const handleEnd = (e) => { if (e) e.preventDefault(); btn.classList.remove('pressed'); onEnd(); };
             btn.addEventListener('touchstart', handleStart, { passive: false });
             btn.addEventListener('touchend', handleEnd, { passive: false });
             btn.addEventListener('touchcancel', handleEnd, { passive: false });
@@ -461,25 +478,22 @@
             btn.addEventListener('mouseleave', handleEnd);
         };
 
-        // Mobile button bindings
         bindButton('leftBtnM', () => keys.left = true, () => keys.left = false);
         bindButton('rightBtnM', () => keys.right = true, () => keys.right = false);
         bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
 
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
-                let activeJumpForce = -9.4; // Dammi ki jump force taaki coin ke upar se jump ho sake
-
-                player.vy = activeJumpForce;
+                player.vy = player.jumpForce;
                 player.isGrounded = false;
                 playSound('jump');
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 6; i++) {
                     particles.push({
                         x: player.x + player.width / 2,
                         y: player.y + player.height,
-                        vx: (Math.random() - 0.5) * 2,
-                        vy: -Math.random() * 1.5,
-                        size: Math.random() * 3 + 1,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: -Math.random() * 2,
+                        size: Math.random() * 4 + 1,
                         color: 'rgba(212, 163, 115, 0.7)',
                         life: 25
                     });
@@ -546,19 +560,19 @@
             playSound('blast');
 
             fragments = [
-                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffffff' },
-                { x: player.x + 4, y: player.y + 10, vx: 4, vy: -6, color: '#ffffff' },
-                { x: player.x + 2, y: player.y + 18, vx: -5, vy: 2, color: '#e0e0e0' },
-                { x: player.x + 6, y: player.y + 22, vx: 5, vy: 3, color: '#ffffff' }
+                { x: player.x, y: player.y, vx: -5, vy: -6, color: '#ffffff' },
+                { x: player.x + 6, y: player.y + 15, vx: 5, vy: -7, color: '#ffffff' },
+                { x: player.x + 3, y: player.y + 25, vx: -6, vy: 3, color: '#e0e0e0' },
+                { x: player.x + 9, y: player.y + 35, vx: 6, vy: 4, color: '#ffffff' }
             ];
 
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 25; i++) {
                 particles.push({
                     x: player.x + player.width / 2,
                     y: player.y + player.height / 2,
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: (Math.random() - 0.5) * 8,
-                    size: Math.random() * 5 + 2,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    size: Math.random() * 6 + 2,
                     color: Math.random() > 0.5 ? '#ff9f1c' : '#ffffff',
                     life: 40
                 });
@@ -571,7 +585,7 @@
 
         function checkCoins() {
             coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 30) {
                     c.collected = true;
                     score += 1; 
                     playSound('coin');
@@ -579,18 +593,18 @@
                     floatingTexts.push({
                         text: '+1',
                         x: c.x,
-                        y: c.y - 10,
+                        y: c.y - 12,
                         alpha: 1,
-                        vy: -1
+                        vy: -1.2
                     });
 
                     for (let i = 0; i < 8; i++) {
                         particles.push({
                             x: c.x,
                             y: c.y,
-                            vx: (Math.random() - 0.5) * 5,
-                            vy: (Math.random() - 0.5) * 5,
-                            size: Math.random() * 3 + 1,
+                            vx: (Math.random() - 0.5) * 6,
+                            vy: (Math.random() - 0.5) * 6,
+                            size: Math.random() * 4 + 1,
                             color: '#ffcc00',
                             life: 20
                         });
@@ -602,15 +616,13 @@
         let levelWon = false;
 
         function update() {
-            platforms[0].w = canvasWidth;
-
             let timeFactor = isSlowMo ? 0.25 : 1.0;
 
             if (isExploding) {
                 fragments.forEach(f => {
                     f.x += f.vx * timeFactor;
                     f.y += f.vy * timeFactor;
-                    f.vy += 0.45 * timeFactor; 
+                    f.vy += 0.5 * timeFactor; 
                 });
                 return;
             }
@@ -626,18 +638,15 @@
                 player.animTimer = 0;
             }
 
-            if (!player.isGrounded) {
-                player.animTimer += 0.12; 
-            }
+            if (!player.isGrounded) player.animTimer += 0.12; 
 
             if (keys.down) {
-                player.height = 27; 
+                player.height = 42; 
             } else {
-                player.height = 45; 
+                player.height = 70; 
             }
 
             player.x += player.vx;
-
             if (player.x < 0) player.x = 0;
             if (player.x > canvasWidth - player.width) player.x = canvasWidth - player.width;
 
@@ -648,7 +657,7 @@
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap') {
                     let playerCenterX = player.x + player.width / 2;
-                    if (!p.triggered && playerCenterX >= p.x && playerCenterX <= p.x + p.w && player.y + player.height >= p.y - 5) {
+                    if (!p.triggered && playerCenterX >= p.x && playerCenterX <= p.x + p.w && player.y + player.height >= p.y - 8) {
                         p.triggered = true; 
                         setTimeout(() => triggerExplosion(), 80);
                         return;
@@ -660,7 +669,7 @@
                     player.x + player.width > p.x &&
                     player.x < p.x + p.w &&
                     player.y + player.height >= p.y &&
-                    player.y + player.height - player.vy <= p.y + 12
+                    player.y + player.height - player.vy <= p.y + 15
                 ) {
                     player.y = p.y - player.height;
                     player.vy = 0;
@@ -668,9 +677,7 @@
                 }
             });
 
-            if (player.y > canvasHeight + 100) {
-                triggerExplosion();
-            }
+            if (player.y > canvasHeight + 100) triggerExplosion();
 
             checkCoins();
 
@@ -679,9 +686,7 @@
                 playSound('win');
                 const modal = document.getElementById('notificationModal');
                 modal.classList.add('show');
-                setTimeout(() => {
-                    window.location.reload(); 
-                }, 2200);
+                setTimeout(() => window.location.reload(), 2200);
             }
 
             document.getElementById('scoreDisplay').innerText = "COINS: " + score;
@@ -710,20 +715,20 @@
                 ctx.fillStyle = '#2b180a';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
                 ctx.strokeStyle = '#d4a373';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(p.x + p.w, p.y);
                 ctx.stroke();
             });
 
-            coins.forEach((c, index) => {
+            coins.forEach(c => {
                 if (!c.collected) {
                     c.floatOffset += 0.08;
-                    let floatY = c.y + Math.sin(c.floatOffset) * 3;
+                    let floatY = c.y + Math.sin(c.floatOffset) * 4;
 
                     ctx.beginPath();
-                    ctx.arc(c.x, floatY, c.radius + 1.5, 0, Math.PI * 2);
+                    ctx.arc(c.x, floatY, c.radius + 2, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 204, 0, 0.25)';
                     ctx.fill();
 
@@ -731,19 +736,19 @@
                     ctx.arc(c.x, floatY, c.radius, 0, Math.PI * 2);
                     ctx.fillStyle = '#ffcc00';
                     ctx.fill();
-                    ctx.lineWidth = 1;
+                    ctx.lineWidth = 1.5;
                     ctx.strokeStyle = '#ffffff';
                     ctx.stroke();
                 }
             });
 
             ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
-            ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
+            ctx.fillRect(goal.x - 6, goal.y - 6, goal.w + 12, goal.h + 12);
             
             ctx.fillStyle = '#532d0c';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
             ctx.strokeStyle = '#ff9f1c';
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 3;
             ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
             particles.forEach(p => {
@@ -756,16 +761,16 @@
             floatingTexts.forEach(ft => {
                 ctx.save();
                 ctx.globalAlpha = ft.alpha;
-                ctx.font = 'bold 12px Orbitron, sans-serif';
+                ctx.font = 'bold 16px Orbitron, sans-serif';
                 ctx.fillStyle = '#ffcc00';
-                ctx.fillText(ft.text, ft.x - 8, ft.y);
+                ctx.fillText(ft.text, ft.x - 10, ft.y);
                 ctx.restore();
             });
 
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 4, 4);
+                    ctx.fillRect(f.x, f.y, 6, 6);
                 });
             } else {
                 let px = player.x;
@@ -773,27 +778,28 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 25, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 38, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
+                    ctx.lineWidth = 2;
                     ctx.stroke();
                 }
 
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
-                ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
+                ctx.ellipse(px + player.width/2 + 2, py + player.height + 3, player.width/1.2, 4, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 let motionCycle = Math.sin(player.animTimer * 6);
-                let legSwing = ((keys.left || keys.right) && player.isGrounded) ? motionCycle * 3.5 : 0;
-                let armSwing = (!player.isGrounded) ? motionCycle * 3.5 : 0; 
+                let legSwing = ((keys.left || keys.right) && player.isGrounded) ? motionCycle * 5 : 0;
+                let armSwing = (!player.isGrounded) ? motionCycle * 5 : 0; 
 
-                let headRadius = 5;
+                let headRadius = 8;
                 let headX = px + player.width/2;
-                let headY = py + 6;
+                let headY = py + 10;
                 
-                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
+                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.8, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
                 headGrad.addColorStop(1, '#c0c0c0');
                 
@@ -802,24 +808,24 @@
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                let torsoWidth = 7; 
+                let torsoWidth = 11; 
                 let torsoX = px + (player.width - torsoWidth) / 2;
-                let chestGrad = ctx.createLinearGradient(torsoX, py + 12, torsoX + torsoWidth, py + 12);
+                let chestGrad = ctx.createLinearGradient(torsoX, py + 18, torsoX + torsoWidth, py + 18);
                 chestGrad.addColorStop(0, '#ffffff');
                 chestGrad.addColorStop(1, '#b0b0b0');
                 ctx.fillStyle = chestGrad;
-                ctx.fillRect(torsoX, py + 12, torsoWidth, 14.5);
+                ctx.fillRect(torsoX, py + 18, torsoWidth, 22);
 
                 ctx.fillStyle = '#ffcc00';
-                ctx.fillRect(torsoX - 1, py + 26, torsoWidth + 2, 2.5);
+                ctx.fillRect(torsoX - 1.5, py + 40, torsoWidth + 3, 4);
 
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX - 4 + armSwing, py + 14, 2.5, 11);  
-                ctx.fillRect(torsoX + torsoWidth + 1 - armSwing, py + 14, 2.5, 11); 
+                ctx.fillRect(torsoX - 6 + armSwing, py + 20, 4, 18);  
+                ctx.fillRect(torsoX + torsoWidth + 2 - armSwing, py + 20, 4, 18); 
 
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX + 1 + legSwing || torsoX + 1 + armSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
-                ctx.fillRect(torsoX + torsoWidth - 3.5 - (legSwing || armSwing), py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
+                ctx.fillRect(torsoX + 1.5 + legSwing || torsoX + 1.5 + armSwing, py + 44, 4, player.height === 42 ? 12 : 22); 
+                ctx.fillRect(torsoX + torsoWidth - 5.5 - (legSwing || armSwing), py + 44, 4, player.height === 42 ? 12 : 22); 
             }
         }
 
