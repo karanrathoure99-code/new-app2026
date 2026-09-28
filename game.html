@@ -39,7 +39,6 @@
             transition: transform 0.2s ease;
         }
 
-        /* Phone aur tablet par game layout ko proper fit aur center karne ke liye */
         @media (max-width: 1023px) {
             body {
                 display: flex;
@@ -291,20 +290,27 @@
     </div>
 
     <script>
-        function enableFullscreenAndLandscape() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
+        // Yeh function buttons ko chhod kar page par kahin bhi click/tap karne par fullscreen aur landscape karega
+        function handleScreenFit(e) {
+            // Agar user ne kisi game button ya interactive control par click kiya hai, toh return kar jao
+            if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) {
+                return;
+            }
+
+            if (!document.fullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                }
             }
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('landscape').catch(() => {});
             }
-            window.removeEventListener('click', enableFullscreenAndLandscape);
-            window.removeEventListener('touchstart', enableFullscreenAndLandscape);
         }
-        window.addEventListener('click', enableFullscreenAndLandscape);
-        window.addEventListener('touchstart', enableFullscreenAndLandscape);
+
+        window.addEventListener('click', handleScreenFit);
+        window.addEventListener('touchstart', handleScreenFit);
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
