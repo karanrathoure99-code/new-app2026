@@ -273,25 +273,26 @@
         let score = 0;
         let shieldActive = false;
         let isExploding = false;
+        let isSlowMo = false;
         let fragments = [];
 
         let player = {
             x: 40,
             y: 100,
-            width: 12,        // Increased by 20% (from 10)
-            height: 32.4,     // Increased by 20% (from 27)
+            width: 7,         
+            height: 18,       
             vx: 0,
             vy: 0,
-            speed: 3.15,     
-            jumpForce: -6.65, 
-            gravity: 0.42,
+            speed: 3.2,     
+            jumpForce: -8.2,  
+            gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
         };
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 0, y: 0, w: 22, h: 44 };
+        let goal = { x: 0, y: 0, w: 20, h: 35 };
 
         function updateGameLayout() {
             const surfaceTop = canvasHeight - 40;
@@ -404,26 +405,27 @@
         });
 
         function triggerExplosion() {
-            if (shieldActive) return;
+            if (shieldActive || isExploding) return;
             isExploding = true;
+            isSlowMo = true; // Enable slow-motion effect
             playBlastSound();
 
             fragments = [
                 { x: player.x, y: player.y, vx: -3, vy: -4, color: '#ffffff' },
-                { x: player.x + 3, y: player.y + 6, vx: 3, vy: -5, color: '#00f2fe' },
-                { x: player.x + 2, y: player.y + 9, vx: -4, vy: 1, color: '#ffffff' },
-                { x: player.x + 5, y: player.y + 9, vx: 4, vy: 2, color: '#4facfe' }
+                { x: player.x + 2, y: player.y + 4, vx: 3, vy: -5, color: '#00f2fe' },
+                { x: player.x + 1, y: player.y + 6, vx: -4, vy: 1, color: '#ffffff' },
+                { x: player.x + 3, y: player.y + 6, vx: 4, vy: 2, color: '#4facfe' }
             ];
 
+            // 2-second slow motion period before page reload
             setTimeout(() => {
-                alert("💥 Boom! Blast! Restarting level.");
                 window.location.reload();
-            }, 900);
+            }, 2000);
         }
 
         function checkCoins() {
             coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 20) {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 18) {
                     c.collected = true;
                     if (c.hasBomb) {
                         triggerExplosion();
@@ -437,11 +439,14 @@
         function update() {
             platforms[0].w = canvasWidth;
 
+            // Apply Slow-Motion multiplier (0.25 speed during explosion)
+            let timeFactor = isSlowMo ? 0.25 : 1.0;
+
             if (isExploding) {
                 fragments.forEach(f => {
-                    f.x += f.vx;
-                    f.y += f.vy;
-                    f.vy += 0.45; 
+                    f.x += f.vx * timeFactor;
+                    f.y += f.vy * timeFactor;
+                    f.vy += 0.45 * timeFactor; 
                 });
                 return;
             }
@@ -458,9 +463,9 @@
             }
 
             if (keys.down) {
-                player.height = 20.4; // 20% bigger than crouched size (17 * 1.2)
+                player.height = 11; 
             } else {
-                player.height = 32.4; // 20% bigger than normal size (27 * 1.2)
+                player.height = 18; 
             }
 
             player.x += player.vx;
@@ -544,7 +549,7 @@
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 3, 3);
+                    ctx.fillRect(f.x, f.y, 2.5, 2.5);
                 });
             } else {
                 let px = player.x;
@@ -552,25 +557,25 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 24, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 16, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
                     ctx.stroke();
                 }
 
-                // 3D Shadow/Depth Effect
+                // Shadow
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
-                ctx.ellipse(px + player.width/2 + 2, py + player.height + 2, player.width/1.5, 3, 0, 0, Math.PI * 2);
+                ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.3, 2, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Proportional Head (scaled up)
-                let headRadius = 4.8;
+                // Compact Head
+                let headRadius = 2.8;
                 let headX = px + player.width/2;
-                let headY = py + 4.8;
+                let headY = py + 3;
                 
-                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 1, headX, headY, headRadius);
+                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
                 headGrad.addColorStop(1, '#00f2fe');
                 
@@ -579,52 +584,17 @@
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Upper Body / Chest
+                // Compact Upper Body
                 ctx.fillStyle = '#caf0f8';
-                ctx.fillRect(px + 1, py + 9.6, player.width - 2, 9.6);
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(px + 2, py + 9.6, 2, 9.6);
+                ctx.fillRect(px + 1, py + 6, player.width - 2, 5);
 
-                // Kamar Wala Part (Patla/Slim Waist)
+                // Slim Waist
                 ctx.fillStyle = '#0077b6';
-                ctx.fillRect(px + 3.6, py + 19.2, player.width - 7.2, 4.8);
+                ctx.fillRect(px + 2, py + 11, player.width - 4, 3);
 
-                // Lower Body / Pelvis
+                // Pelvis
                 ctx.fillStyle = '#48cae4';
-                ctx.fillRect(px + 1, py + 24, player.width - 2, 4.8);
-
-                // Upright Stable Limbs
-                let legAnim = Math.sin(player.animTimer) * 2;
-                let isJumping = !player.isGrounded;
-
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2.1;
-                ctx.beginPath();
-
-                if (isJumping) {
-                    ctx.moveTo(px + 1, py + 12);
-                    ctx.lineTo(px - 2, py + 7);
-                    ctx.moveTo(px + player.width - 1, py + 12);
-                    ctx.lineTo(px + player.width + 2, py + 7);
-
-                    ctx.moveTo(px + 2, py + player.height - 4.8);
-                    ctx.lineTo(px + 1, py + player.height);
-                    ctx.moveTo(px + player.width - 2, py + player.height - 4.8);
-                    ctx.lineTo(px + player.width - 1, py + player.height);
-                } else {
-                    ctx.moveTo(px + 1, py + 12);
-                    ctx.lineTo(px - 1, py + 16.8);
-                    ctx.moveTo(px + player.width - 1, py + 12);
-                    ctx.lineTo(px + player.width + 1, py + 16.8);
-
-                    ctx.moveTo(px + 2, py + player.height - 4.8);
-                    ctx.lineTo(px + 2 + legAnim, py + player.height);
-                    ctx.moveTo(px + player.width - 2, py + player.height - 4.8);
-                    ctx.lineTo(px + player.width - 2 - legAnim, py + player.height);
-                }
-
-                ctx.stroke();
+                ctx.fillRect(px + 1, py + 14, player.width - 2, 4);
             }
         }
 
