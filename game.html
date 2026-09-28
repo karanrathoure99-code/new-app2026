@@ -193,15 +193,18 @@
             <canvas id="gameCanvas"></canvas>
 
             <div class="controls-overlay">
-                <div class="control-group">
-                    <button class="ctrl-btn" id="leftBtn">◀</button>
-                    <button class="ctrl-btn" id="rightBtn">▶</button>
-                    <button class="ctrl-btn wide" id="jumpBtn">JUMP/UP</button>
-                </div>
-
+                <!-- Left Side: 2 Extra Buttons (Shield & Collect) -->
                 <div class="control-group">
                     <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(255,170,0,0.25);">SHIELD</button>
                     <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.25);">COLLECT</button>
+                </div>
+
+                <!-- Right Side: Move Left, Move Right, Jump/Up, Down/Lie Down[cite: 6] -->
+                <div class="control-group">
+                    <button class="ctrl-btn" id="leftBtn">◀</button>
+                    <button class="ctrl-btn" id="rightBtn">▶</button>
+                    <button class="ctrl-btn wide" id="jumpBtn">JUMP</button>
+                    <button class="ctrl-btn wide" id="downBtn" style="background: rgba(0,150,255,0.25);">DOWN</button>
                 </div>
             </div>
         </div>
@@ -240,6 +243,7 @@
 
         let score = 0;
         let shieldActive = false;
+        let isLyingDown = false; // Player ne niche letne / jhukne ki state[cite: 6]
         let isExploding = false;
         let fragments = [];
 
@@ -324,10 +328,21 @@
         }
 
         function triggerJump() {
-            if (player.isGrounded && !isExploding) {
+            if (player.isGrounded && !isExploding && !isLyingDown) {
                 player.vy = player.jumpForce;
                 player.isGrounded = false;
             }
+        }
+
+        // Down Button Action (Player lets/lays down)[cite: 6]
+        const downBtn = document.getElementById('downBtn');
+        if (downBtn) {
+            const setDownOn = () => { isLyingDown = true; };
+            const setDownOff = () => { isLyingDown = false; };
+            downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); setDownOn(); });
+            downBtn.addEventListener('touchend', (e) => { e.preventDefault(); setDownOff(); });
+            downBtn.addEventListener('mousedown', setDownOn);
+            downBtn.addEventListener('mouseup', setDownOff);
         }
 
         const shieldBtn = document.getElementById('shieldBtn');
@@ -356,6 +371,7 @@
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+            if (e.key === 'ArrowDown' || e.key === 's') isLyingDown = true;
             if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
                 e.preventDefault();
                 triggerJump();
@@ -365,6 +381,7 @@
         window.addEventListener('keyup', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
             if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+            if (e.key === 'ArrowDown' || e.key === 's') isLyingDown = false;
         });
 
         function triggerExplosion() {
@@ -524,10 +541,18 @@
             } else {
                 let px = player.x;
                 let py = player.y;
+                let pHeight = player.height;
+                let pWidth = player.width;
+
+                // Agar Down button dabaya hai toh player let/jhuk jayega[cite: 6]
+                if (isLyingDown) {
+                    pHeight = 20;
+                    py += 22;
+                }
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + 10.5, py + 21, 30, 0, Math.PI * 2);
+                    ctx.arc(px + 10.5, py + (pHeight/2), 30, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 180, 0, 0.35)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffea75';
@@ -537,25 +562,30 @@
 
                 ctx.fillStyle = '#ffea75';
                 ctx.beginPath();
-                ctx.arc(px + 10.5, py + 6, 6, 0, Math.PI * 2);
+                ctx.arc(px + 10.5, py + (isLyingDown ? 4 : 6), 6, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.fillRect(px + 7.5, py + 13.5, 6, 16.5);
+                if (!isLyingDown) {
+                    ctx.fillRect(px + 7.5, py + 13.5, 6, 16.5);
 
-                ctx.strokeStyle = '#ffea75';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(px + 7.5, py + 16.5);
-                ctx.lineTo(px + 1.5, py + 24);
-                ctx.moveTo(px + 13.5, py + 16.5);
-                ctx.lineTo(px + 19.5, py + 24);
+                    ctx.strokeStyle = '#ffea75';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(px + 7.5, py + 16.5);
+                    ctx.lineTo(px + 1.5, py + 24);
+                    ctx.moveTo(px + 13.5, py + 16.5);
+                    ctx.lineTo(px + 19.5, py + 24);
 
-                let legSwing = Math.sin(player.legAngle) * 6;
-                ctx.moveTo(px + 9, py + 30);
-                ctx.lineTo(px + 6 + legSwing, py + 42);
-                ctx.moveTo(px + 12, py + 30);
-                ctx.lineTo(px + 15 - legSwing, py + 42);
-                ctx.stroke();
+                    let legSwing = Math.sin(player.legAngle) * 6;
+                    ctx.moveTo(px + 9, py + 30);
+                    ctx.lineTo(px + 6 + legSwing, py + 42);
+                    ctx.moveTo(px + 12, py + 30);
+                    ctx.lineTo(px + 15 - legSwing, py + 42);
+                    ctx.stroke();
+                } else {
+                    // Lying down body pose
+                    ctx.fillRect(px + 4, py + 10, 20, 8);
+                }
             }
 
             ctx.restore();
