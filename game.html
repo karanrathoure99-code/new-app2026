@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🤪 Z PAJAL - Level 1 Game Arena</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
@@ -25,6 +25,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        /* Landscape Orientation Enforcement for Phones and Tablets */
+        @media screen and (orientation: portrait) {
+            body::before {
+                content: "⚠️ Kripya apne phone ya tablet ko Landscape mode mein ghumayein! (Please rotate your device)";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(15, 7, 2, 0.95);
+                color: #ffcc00;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 18px;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                z-index: 99999;
+                box-sizing: border-box;
+            }
         }
 
         .game-wrapper {
@@ -206,9 +229,14 @@
             updateGameLayout();
         }
 
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(() => {});
+        // Automatic Landscape Lock API Request
+        function lockLandscape() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
         }
+        window.addEventListener('load', lockLandscape);
+        window.addEventListener('click', lockLandscape, { once: true });
 
         let score = 0;
         let shieldActive = false;
@@ -249,7 +277,6 @@
             ];
 
             goal.y = groundY - 60;
-            // Goal ko bilkul right side ke kinare (edge) se chipka diya gaya hai
             goal.x = canvasWidth - goal.w;
         }
 
