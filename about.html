@@ -1,9 +1,11 @@
+about.html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Premium Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤪 Z PAJAL - About Game</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
@@ -14,95 +16,63 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Landscape Mode & Responsive Fit for All Devices */
-        @media screen and (orientation: portrait) {
-            body::before {
-                content: "Please rotate your device to Landscape Mode 🔄";
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: #050505;
-                color: #fff;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 20px;
-                font-weight: 600;
-                text-align: center;
-                z-index: 99999;
-                padding: 20px;
-            }
-        }
-
         body {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            min-height: 100vh;
             background: #050505;
-            background: linear-gradient(to right, #050505, #0a0a0c, #050505);
-            overflow: hidden;
-            padding: 10px;
+            background: linear-gradient(135deg, #050505, #120c1f, #050505);
+            overflow-x: hidden;
+            padding: 40px 20px;
+            color: #fff;
         }
 
+        /* Animated Background Orbs */
         .orb {
-            position: absolute;
+            position: fixed;
             border-radius: 50%;
-            filter: blur(80px);
+            filter: blur(100px);
             z-index: 0;
-            opacity: 0.4;
             animation: float 10s infinite alternate ease-in-out;
+            pointer-events: none;
         }
         .orb-1 {
-            width: 300px; height: 300px;
-            background: #ff007f;
+            width: 350px; height: 350px;
+            background: rgba(255, 0, 127, 0.15);
             top: -50px; left: -50px;
         }
         .orb-2 {
-            width: 400px; height: 400px;
-            background: #00f0ff;
+            width: 450px; height: 450px;
+            background: rgba(0, 240, 255, 0.15);
             bottom: -100px; right: -50px;
             animation-delay: -3s;
         }
 
         @keyframes float {
             0% { transform: translateY(0px) scale(1); }
-            100% { transform: translateY(50px) scale(1.2); }
+            100% { transform: translateY(40px) scale(1.1); }
         }
 
-        .glass-box {
+        /* Header Title */
+        .header-container {
             position: relative;
             z-index: 10;
-            width: 100%;
-            max-width: 400px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 25px 25px;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        .game-title {
-            font-size: 26px;
+        .header-container h1 {
+            font-size: 38px;
             font-weight: 800;
-            color: #fff;
-            margin-bottom: 20px;
             letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
         .emoji {
-            font-size: 35px;
+            font-size: 45px;
             animation: pulse-light 1.5s infinite alternate;
         }
 
@@ -111,245 +81,155 @@
             100% { opacity: 1; filter: drop-shadow(0 0 25px #ffcc00); transform: scale(1.1); }
         }
 
-        .input-group {
-            margin-bottom: 18px;
-            position: relative;
-            text-align: left;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 18px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .input-group input:focus {
-            border: 2px solid #00f0ff;
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
-        }
-
-        .button-wrapper {
-            position: relative;
-            height: 48px;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #loginBtn {
-            position: absolute;
-            width: 80px;
-            height: 38px;
-            background: linear-gradient(45deg, #ff007f, #7928ca);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: transform 0.25s ease-out, width 0.4s ease, height 0.4s ease, background 0.4s ease, font-size 0.4s ease, box-shadow 0.4s ease;
-            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
-            z-index: 20;
-        }
-
-        #loginBtn.final-state {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #00b09b, #96c93d);
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
             font-size: 16px;
-            box-shadow: 0 5px 20px rgba(0, 255, 128, 0.5);
-            transform: translate(0px, 0px) !important;
+            margin-top: 10px;
         }
 
-        .footer-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Grid for 6 3D Glass Squares */
+        .grid-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 25px;
         }
 
-        .footer-options a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 13px;
+        /* 3D Glass Squares */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: 0 30px 60px rgba(0, 240, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-card h3 {
+            font-size: 20px;
             font-weight: 600;
-            transition: color 0.3s, text-shadow 0.3s;
+            color: #00f0ff;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 10px;
         }
 
-        .footer-options a:hover {
-            color: #00f0ff;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        .glass-card p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* Back Button */
+        .back-btn-container {
+            text-align: center;
+            margin-top: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .back-btn {
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #ff007f, #7928ca);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.7);
         }
     </style>
 </head>
 <body>
 
+    <!-- Background Orbs -->
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-    <div class="glass-box">
-        <div class="game-title">
-            <span class="emoji">🤪</span> Z PAJAL
-        </div>
-        
-        <div class="input-group">
-            <input type="email" id="gmail" placeholder="Enter Gmail" required autocomplete="off">
-        </div>
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Enter Password" required>
-        </div>
-        
-        <div class="button-wrapper">
-            <button id="loginBtn" type="button">START</button>
-        </div>
-
-        <div class="footer-options">
-            <a href="about.html"><span>🛡️</span> About Game</a>
-            <a href="register.html"><span>✨</span> New Account</a>
-        </div>
+    <div class="header-container">
+        <h1><span class="emoji">🤪</span> ABOUT Z PAJAL</h1>
+        <p class="subtitle">Dimag ka dahi karne wale is safar ki poori kahani...</p>
     </div>
 
-    <!-- Firebase Authentication & Database Integration -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <!-- 6 3D Glass Squares Containing Deep Lore & Details -->
+    <div class="grid-container">
+        
+        <!-- Square 1 -->
+        <div class="glass-card">
+            <h3>🎮 1. Game Overview & Concept</h3>
+            <p><strong>🤪 Z PAJAL</strong> koi aam puzzle game nahi hai. Yeh ek aisi virtual duniya hai jahan har ek kadm par aapka dimaag aur patience test kiya jata hai. Is game ko design karne ka sirf ek hi maqsad tha—player ko itna challenge karna ki wo haar na maane balki baar-baar koshish karne par majbur ho jaye. Iska har ek level ek naya psychological trap hai jo aapko sochne par majbur karega.</p>
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCK9njPkGdw91_vGhI0_mRflpXBbz2D_zo",
-            authDomain: "z-pajal.firebaseapp.com",
-            databaseURL: "https://z-pajal-default-rtdb.firebaseio.com",
-            projectId: "z-pajal",
-            storageBucket: "z-pajal.firebasestorage.app",
-            messagingSenderId: "941362119453",
-            appId: "1:941362119453:web:c52140dba1952a389197f4",
-            measurementId: "G-PKKCQ5CT9P"
-        };
+        <!-- Square 2 -->
+        <div class="glass-card">
+            <h3>🔥 2. Extreme Difficulty & Logic</h3>
+            <p>Yahan wahi jeet sakta hai jo traditional thinking ko chhod kar "out of the box" soche. Game ke traps itne unpredictable hain ki seedha rasta hamesha galat sabit hota hai. Aapko har ek button, har ek click, aur har ek movement par dhyan dena hoga. Ek choti si chook aapko seedha starting point par bhej sakti hai.</p>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+        <!-- Square 3 -->
+        <div class="glass-card">
+            <h3>⚡ 3. Zero Loading & Rage System</h3>
+            <p>Hum samajhte hain ki jab player out hota hai, toh gussa aata hai. Isliye Z PAJAL mein <strong>Zero Loading Time</strong> ka concept rakha gaya hai—aap jaise hi marengey, bina kisi delay ke turant dobara start ho jayega. "Bas ek aur baar try karta hoon" wali feeling hi is game ki sabse badi taakat hai jo aapko chhodi nahi degi.</p>
+        </div>
 
-        // Fullscreen API & Landscape Orientation Lock Integration
+        <!-- Square 4 -->
+        <div class="glass-card">
+            <h3>🧠 4. Player Psychology & Addiction</h3>
+            <p>Yeh game sirf entertainment ke liye nahi hai, yeh ek addiction hai. "Near-Miss Effect" (jab aap jeette-jeette reh jaate hain) aur trolls aapke andar ek aisi zidd paida kar dete hain ki jab tak level clear nahi hoga, aap chain se nahi baith sakte. Doston ke beech competition ke liye yeh game sabse best aur khatarnak option hai.</p>
+        </div>
+
+        <!-- Square 5 -->
+        <div class="glass-card">
+            <h3>⚠️ 5. Developer's Warning</h3>
+            <p><strong>Warning:</strong> Agar aapko jaldi gussa aata hai ya aapka phone nazuk hai, toh yeh game aapke liye khatarnak ho sakta hai! Game khelte samay phone todne ya screen par gussa nikalne ki poori zimmedari aapki khud ki hogi. Developer is baat ki koi guarantee nahi leta ki aapka dimag is game ko khelne ke baad shant rahega.</p>
+        </div>
+
+        <!-- Square 6 -->
+        <div class="glass-card">
+            <h3>🏆 6. Future Updates & Survival</h3>
+            <p>Z PAJAL ki yatra yahi khatam nahi hoti. Aage aane wale updates mein aur bhi zyada dimag kharab karne wale levels, hidden traps, aur global leaderboard features add kiye jayenge jahan aap apne doston ko challenge kar sakenge. Kya aap is impossible maze ko poora karke 'Z PAJAL Legend' ban sakte hain?</p>
+        </div>
+
+    </div>
+
+    <div class="back-btn-container">
+        <a href="index.html" class="back-btn">⬅️ Back to Login</a>
+    </div>
+
+    <!-- Fullscreen API Script -->
+    <script>
         function requestFullscreen() {
             const docElement = document.documentElement;
             if (!document.fullscreenElement) {
-                const requestPromise = docElement.requestFullscreen ? docElement.requestFullscreen() :
-                                       docElement.webkitRequestFullscreen ? docElement.webkitRequestFullscreen() :
-                                       docElement.msRequestFullscreen ? docElement.msRequestFullscreen() : null;
-
-                if (requestPromise) {
-                    Promise.resolve(requestPromise).then(() => {
-                        if (screen.orientation && screen.orientation.lock) {
-                            screen.orientation.lock('landscape').catch(() => {});
-                        }
-                    }).catch(() => {});
+                if (docElement.requestFullscreen) {
+                    docElement.requestFullscreen().catch(() => {});
+                } else if (docElement.webkitRequestFullscreen) {
+                    docElement.webkitRequestFullscreen();
                 }
             }
         }
 
         window.addEventListener('click', requestFullscreen, { once: true });
         window.addEventListener('touchstart', requestFullscreen, { once: true });
-
-        const loginBtn = document.getElementById('loginBtn');
-        const gmailInput = document.getElementById('gmail');
-        const passwordInput = document.getElementById('password');
-        
-        let attempts = 0;
-        let isFinalState = false;
-
-        function dodgeAction(e) {
-            if (isFinalState) return;
-
-            if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') return;
-
-            if (attempts < 5) {
-                if (e && (e.type === 'click' || e.type === 'touchstart')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-
-                const moveX = (Math.random() - 0.5) * 220; 
-                const moveY = (Math.random() - 0.5) * 120; 
-                
-                loginBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
-                
-                const taunts = ["MISS!", "OOPS!", "NOPE!", "HAHA!", "SLOW!"];
-                loginBtn.innerHTML = taunts[attempts];
-                
-                attempts++;
-            } else if (attempts === 5) {
-                isFinalState = true;
-                loginBtn.classList.add('final-state');
-                loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
-            }
-        }
-
-        loginBtn.addEventListener('mouseenter', dodgeAction);
-        loginBtn.addEventListener('touchstart', (e) => {
-            if (!isFinalState) {
-                e.preventDefault(); 
-                dodgeAction(e);
-            }
-        }, { passive: false });
-
-        loginBtn.addEventListener('click', async (e) => {
-            if (!isFinalState) {
-                e.preventDefault();
-                dodgeAction(e);
-                return;
-            }
-
-            const email = gmailInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if(email === '' || password === '') {
-                alert("Game rules: Pehle Gmail aur Password fill karo!");
-                return;
-            }
-
-            try {
-                loginBtn.innerHTML = "Logging in...";
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                if (!user.emailVerified) {
-                    alert("⚠️ Pehle apne Gmail (" + email + ") par jaakar verification link par click karein, tabhi game khulegi!");
-                    loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
-                    return;
-                }
-
-                const sessionId = 'session_' + Math.random().toString(36).substring(2) + Date.now();
-                localStorage.setItem('userSessionId', sessionId);
-
-                await set(ref(db, 'users/' + user.uid + '/activeSession'), sessionId);
-
-                alert("🎉 Welcome to 🤪 Z PAJAL! Login successful. Loading Home...");
-                
-                setTimeout(() => {
-                    window.location.href = "home.html";
-                }, 1000);
-
-            } catch (error) {
-                alert("Login Failed: " + error.message);
-                loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
-            }
-        });
     </script>
 
 </body>
