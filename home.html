@@ -394,5 +394,22 @@
             }, 150);
         }
     </script>
+
+    <!-- Fullscreen API Script -->
+    <script>
+        function requestFullscreen() {
+            const docElement = document.documentElement;
+            if (!document.fullscreenElement) {
+                if (docElement.requestFullscreen) {
+                    docElement.requestFullscreen().catch(() => {});
+                } else if (docElement.webkitRequestFullscreen) {
+                    docElement.webkitRequestFullscreen();
+                }
+            }
+        }
+
+        window.addEventListener('click', requestFullscreen, { once: true });
+        window.addEventListener('touchstart', requestFullscreen, { once: true });
+    </script>
 </body>
 </html>
