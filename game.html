@@ -282,9 +282,9 @@
             height: 45,       
             vx: 0,
             vy: 0,
-            speed: 1.1,       
-            jumpForce: -6.0,  
-            gravity: 0.35,  
+            speed: 2.8,       // Badhi hui speed taaki trap ko easily cross kar sake
+            jumpForce: -8.5,  // Badha hua jump force taaki lamba jump ho
+            gravity: 0.38,  
             isGrounded: false,
             animTimer: 0
         };
@@ -299,7 +299,7 @@
 
             platforms = [
                 { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }, 
-                { x: Math.floor(canvasWidth * 0.6), y: surfaceTop, w: 70, h: surfaceHeight, type: 'hiddenTrap', triggered: false }
+                { x: Math.floor(canvasWidth * 0.55), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false }
             ];
 
             const coinSpacing = (canvasWidth - 120) / 6;
@@ -309,7 +309,7 @@
                     x: 60 + (i - 1) * coinSpacing,
                     y: surfaceTop - 25,
                     collected: false,
-                    hasBomb: (i === 4),
+                    hasBomb: false, // Sabhi coins ko safe kar diya gaya hai (bomb remove)
                     radius: 5
                 });
             }
@@ -425,11 +425,7 @@
             coins.forEach(c => {
                 if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
                     c.collected = true;
-                    if (c.hasBomb) {
-                        triggerExplosion();
-                    } else {
-                        score += 1; 
-                    }
+                    score += 1; 
                 }
             });
         }
@@ -450,17 +446,17 @@
 
             if (keys.left) {
                 player.vx = -player.speed;
-                player.animTimer += 0.075; 
+                player.animTimer += 0.12; 
             } else if (keys.right) {
                 player.vx = player.speed;
-                player.animTimer += 0.075;
+                player.animTimer += 0.12;
             } else {
                 player.vx = 0;
                 player.animTimer = 0;
             }
 
             if (!player.isGrounded) {
-                player.animTimer += 0.075; 
+                player.animTimer += 0.12; 
             }
 
             if (keys.down) {
@@ -571,9 +567,10 @@
                 ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Horizontal Swing calculation for limbs (Aage aur Peeche swing)
+                // Animation logic: Chalte samay sirf pair move honge, jump karte samay haath aur pair dono
                 let motionCycle = Math.sin(player.animTimer * 6);
-                let limbSwing = motionCycle * 3.5; 
+                let legSwing = ((keys.left || keys.right) && player.isGrounded) ? motionCycle * 3.5 : 0;
+                let armSwing = (!player.isGrounded) ? motionCycle * 3.5 : 0; // Sirf hawa me (jump par) haath move honge
 
                 // 1. Head (Sir)
                 let headRadius = 5;
@@ -602,15 +599,15 @@
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(torsoX - 1, py + 26, torsoWidth + 2, 2.5);
 
-                // 3. White Hands (Aage aur peeche horizontal offset ke saath)
+                // 3. White Hands (Jump karte samay swing honge, chalte samay stable)
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX - 4 + limbSwing, py + 14, 2.5, 11);  // Left Hand (swings horizontal)
-                ctx.fillRect(torsoX + torsoWidth + 1 - limbSwing, py + 14, 2.5, 11); // Right Hand (swings opposite)
+                ctx.fillRect(torsoX - 4 + armSwing, py + 14, 2.5, 11);  
+                ctx.fillRect(torsoX + torsoWidth + 1 - armSwing, py + 14, 2.5, 11); 
 
-                // 4. White Legs (Aage aur peeche horizontal offset ke saath)
+                // 4. White Legs (Chalte samay aur jump karte samay aage-peeche move honge)
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX + 1 + limbSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); // Left Leg (swings horizontal)
-                ctx.fillRect(torsoX + torsoWidth - 3.5 - limbSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); // Right Leg (swings opposite)
+                ctx.fillRect(torsoX + 1 + legSwing || torsoX + 1 + armSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
+                ctx.fillRect(torsoX + torsoWidth - 3.5 - (legSwing || armSwing), py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
             }
         }
 
