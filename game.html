@@ -16,7 +16,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #3a2205 0%, #150a02 50%, #241403 100%);
+            background: linear-gradient(135deg, #090d16 0%, #030508 50%, #060912 100%);
             background-attachment: fixed;
             color: #ffffff;
             width: 100vw;
@@ -36,7 +36,7 @@
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background: rgba(15, 7, 2, 0.95);
+                background: rgba(3, 5, 8, 0.98);
                 color: #ffcc00;
                 font-family: 'Orbitron', sans-serif;
                 font-size: 18px;
@@ -65,13 +65,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(60, 35, 10, 0.75);
+            background: rgba(10, 16, 30, 0.75);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 180, 50, 0.4);
             border-radius: 15px;
             padding: 8px 20px;
             margin-bottom: 8px;
-            box-shadow: 0 5px 20px rgba(255, 140, 0, 0.2);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
         }
 
         .hud-title {
@@ -93,12 +93,12 @@
 
         .arena-container {
             flex: 1;
-            background: radial-gradient(circle at center, #2c1604 0%, #100701 100%);
-            border: 2px solid rgba(255, 170, 0, 0.5);
+            background: radial-gradient(circle at center, #090d16 0%, #030508 100%);
+            border: 2px solid rgba(255, 170, 0, 0.6);
             border-radius: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 35px rgba(255, 150, 0, 0.2), 0 10px 30px rgba(0,0,0,0.6);
+            box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0,0,0,0.8);
         }
 
         #gameCanvas {
@@ -109,13 +109,14 @@
 
         .controls-overlay {
             position: absolute;
-            bottom: 0;
+            bottom: 12px;
             left: 0;
             width: 100%;
             display: flex;
             justify-content: space-between;
             padding: 15px 25px;
             pointer-events: none;
+            z-index: 10;
         }
 
         @media (min-width: 1024px) {
@@ -132,9 +133,10 @@
         }
 
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 200, 100, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             font-size: 11px;
@@ -146,14 +148,15 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 0 10px rgba(255,255,255,0.05);
             touch-action: manipulation;
         }
 
         .ctrl-btn:active {
             transform: scale(0.92);
-            background: rgba(255, 170, 0, 0.5);
+            background: rgba(255, 170, 0, 0.35);
             border-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255,204,0,0.5);
         }
 
         .ctrl-btn.wide {
@@ -193,18 +196,18 @@
             <canvas id="gameCanvas"></canvas>
 
             <div class="controls-overlay">
-                <!-- Left Side: 2 Extra Buttons (Shield & Collect) -->
-                <div class="control-group">
-                    <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(255,170,0,0.25);">SHIELD</button>
-                    <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.25);">COLLECT</button>
-                </div>
-
-                <!-- Right Side: Move Left, Move Right, Jump/Up, Down/Lie Down -->
+                <!-- Left Side: Back Move Button & Shield -->
                 <div class="control-group">
                     <button class="ctrl-btn" id="leftBtn">◀</button>
+                    <button class="ctrl-btn wide" id="shieldBtn" style="background: rgba(255,170,0,0.15);">SHIELD</button>
+                </div>
+
+                <!-- Right Side: Front Move Button, Collect, Jump, Down -->
+                <div class="control-group">
                     <button class="ctrl-btn" id="rightBtn">▶</button>
+                    <button class="ctrl-btn wide" id="coinBtn" style="background: rgba(255,0,127,0.15);">COLLECT</button>
                     <button class="ctrl-btn wide" id="jumpBtn">JUMP</button>
-                    <button class="ctrl-btn wide" id="downBtn" style="background: rgba(0,150,255,0.25);">DOWN</button>
+                    <button class="ctrl-btn wide" id="downBtn" style="background: rgba(0,150,255,0.15);">DOWN</button>
                 </div>
             </div>
         </div>
@@ -486,7 +489,7 @@
 
             ctx.save();
             let sunGrad = ctx.createRadialGradient(canvasWidth/2, canvasHeight/2, 20, canvasWidth/2, canvasHeight/2, canvasWidth);
-            sunGrad.addColorStop(0, 'rgba(255, 150, 0, 0.08)');
+            sunGrad.addColorStop(0, 'rgba(255, 150, 0, 0.05)');
             sunGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.fillStyle = sunGrad;
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -497,14 +500,14 @@
 
             platforms.forEach(p => {
                 let surfGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
-                surfGrad.addColorStop(0, '#ffc233');
-                surfGrad.addColorStop(0.5, '#e07a14');
-                surfGrad.addColorStop(1, '#804000');
+                surfGrad.addColorStop(0, '#1c2638');
+                surfGrad.addColorStop(0.5, '#0f1724');
+                surfGrad.addColorStop(1, '#05070a');
 
                 ctx.fillStyle = surfGrad;
                 ctx.fillRect(p.x, p.y, p.w, p.h);
 
-                ctx.strokeStyle = '#fff2b3';
+                ctx.strokeStyle = '#ffb700';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
@@ -568,20 +571,21 @@
                     ctx.stroke();
                 }
 
+                // Updated Character Head (Seamless connection directly touching body without gap)
                 ctx.fillStyle = '#ffea75';
                 ctx.beginPath();
-                ctx.arc(px + 10.5, py + (isLyingDown ? 4 : 6), 6, 0, Math.PI * 2);
+                ctx.arc(px + 10.5, py + (isLyingDown ? 6 : 9), 6, 0, Math.PI * 2);
                 ctx.fill();
 
                 if (!isLyingDown) {
-                    ctx.fillRect(px + 7.5, py + 13.5, 6, 16.5);
+                    ctx.fillRect(px + 7.5, py + 15, 6, 15);
 
                     ctx.strokeStyle = '#ffea75';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.moveTo(px + 7.5, py + 16.5);
+                    ctx.moveTo(px + 7.5, py + 18);
                     ctx.lineTo(px + 1.5, py + 24);
-                    ctx.moveTo(px + 13.5, py + 16.5);
+                    ctx.moveTo(px + 13.5, py + 18);
                     ctx.lineTo(px + 19.5, py + 24);
 
                     let legSwing = Math.sin(player.legAngle) * 6;
