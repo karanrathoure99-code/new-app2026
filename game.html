@@ -233,7 +233,6 @@
     </div>
 
     <script>
-        // Fullscreen and Landscape Lock Initialization on First User Interaction
         function enableFullscreenAndLandscape() {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
@@ -279,11 +278,11 @@
         let player = {
             x: 40,
             y: 100,
-            width: 22,        // Restored to original size
-            height: 48,       // Restored to original size
+            width: 28,        // Increased by ~25% from 22
+            height: 60,       // Increased by ~25% from 48
             vx: 0,
             vy: 0,
-            speed: 3.2,     
+            speed: 3.2,      
             jumpForce: -8.5,  
             gravity: 0.38,    
             isGrounded: false,
@@ -412,12 +411,11 @@
 
             fragments = [
                 { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffffff' },
-                { x: player.x + 8, y: player.y + 12, vx: 4, vy: -6, color: '#00f2fe' },
-                { x: player.x + 4, y: player.y + 20, vx: -5, vy: 2, color: '#ffffff' },
-                { x: player.x + 12, y: player.y + 24, vx: 5, vy: 3, color: '#4facfe' }
+                { x: player.x + 8, y: player.y + 12, vx: 4, vy: -6, color: '#ffffff' },
+                { x: player.x + 4, y: player.y + 20, vx: -5, vy: 2, color: '#e0e0e0' },
+                { x: player.x + 12, y: player.y + 24, vx: 5, vy: 3, color: '#ffffff' }
             ];
 
-            // 2-second slow motion period before page reload
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -439,7 +437,6 @@
         function update() {
             platforms[0].w = canvasWidth;
 
-            // Apply Slow-Motion multiplier (0.25 speed during explosion)
             let timeFactor = isSlowMo ? 0.25 : 1.0;
 
             if (isExploding) {
@@ -463,9 +460,9 @@
             }
 
             if (keys.down) {
-                player.height = 30; // Original duck height
+                player.height = 38; // Duck height scaled up
             } else {
-                player.height = 48; // Original standing height
+                player.height = 60; // Standing height scaled up
             }
 
             player.x += player.vx;
@@ -549,7 +546,7 @@
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 4, 4);
+                    ctx.fillRect(f.x, f.y, 5, 5);
                 });
             } else {
                 let px = player.x;
@@ -557,7 +554,7 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 32, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 40, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
@@ -567,39 +564,39 @@
                 // Shadow
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
-                ctx.ellipse(px + player.width/2 + 2, py + player.height + 3, player.width/1.3, 3, 0, 0, Math.PI * 2);
+                ctx.ellipse(px + player.width/2 + 2, py + player.height + 3, player.width/1.3, 3.5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Original Detailed 3D Character Drawing
-                let bounce = Math.sin(player.animTimer) * 2;
-                let headRadius = 7.5;
+                // Detailed White Character Drawing (Scaled Up)
+                let bounce = Math.sin(player.animTimer) * 2.5;
+                let headRadius = 9.5;
                 let headX = px + player.width/2;
-                let headY = py + 9 + (player.height === 30 ? 0 : bounce);
+                let headY = py + 11 + (player.height === 38 ? 0 : bounce);
                 
                 let headGrad = ctx.createRadialGradient(headX - 2, headY - 2, 1, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
-                headGrad.addColorStop(1, '#00f2fe');
+                headGrad.addColorStop(1, '#d0d0d0');
                 
                 ctx.fillStyle = headGrad;
                 ctx.beginPath();
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Upper Torso
-                let chestGrad = ctx.createLinearGradient(px, py + 16, px + player.width, py + 16);
-                chestGrad.addColorStop(0, '#00c6ff');
-                chestGrad.addColorStop(1, '#0072ff');
+                // Upper Torso (White theme)
+                let chestGrad = ctx.createLinearGradient(px, py + 20, px + player.width, py + 20);
+                chestGrad.addColorStop(0, '#ffffff');
+                chestGrad.addColorStop(1, '#b0b0b0');
                 ctx.fillStyle = chestGrad;
-                ctx.fillRect(px + 2, py + 16 + (player.height === 30 ? 0 : bounce), player.width - 4, 14);
+                ctx.fillRect(px + 2, py + 20 + (player.height === 38 ? 0 : bounce), player.width - 4, 18);
 
                 // Belt
                 ctx.fillStyle = '#ffcc00';
-                ctx.fillRect(px + 2, py + 30 + (player.height === 30 ? 0 : bounce), player.width - 4, 3);
+                ctx.fillRect(px + 2, py + 38 + (player.height === 38 ? 0 : bounce), player.width - 4, 4);
 
                 // Legs
-                ctx.fillStyle = '#03045e';
-                ctx.fillRect(px + 3, py + 33 + (player.height === 30 ? 0 : bounce), 5, player.height === 30 ? 12 : 15);
-                ctx.fillRect(px + player.width - 8, py + 33 + (player.height === 30 ? 0 : bounce), 5, player.height === 30 ? 12 : 15);
+                ctx.fillStyle = '#404040';
+                ctx.fillRect(px + 4, py + 42 + (player.height === 38 ? 0 : bounce), 6, player.height === 38 ? 14 : 18);
+                ctx.fillRect(px + player.width - 10, py + 42 + (player.height === 38 ? 0 : bounce), 6, player.height === 38 ? 14 : 18);
             }
         }
 
