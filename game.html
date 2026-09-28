@@ -79,34 +79,24 @@
             box-shadow: inset 0 0 40px rgba(147, 51, 234, 0.25), 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        /* Navu Ane Dhamakedar Background Design (Changed Successfully) */
+        /* Highly Attractive Distractor Background Design */
         .distractor-bg {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.2), transparent 50%),
-                        radial-gradient(circle at 70% 70%, rgba(236, 72, 153, 0.2), transparent 50%),
-                        repeating-linear-gradient(
-                            0deg,
-                            transparent,
-                            transparent 30px,
-                            rgba(147, 51, 234, 0.08) 30px,
-                            rgba(147, 51, 234, 0.08) 32px
-                        ),
-                        repeating-linear-gradient(
-                            90deg,
-                            transparent,
-                            transparent 30px,
-                            rgba(236, 72, 153, 0.08) 30px,
-                            rgba(236, 72, 153, 0.08) 32px
-                        );
-            animation: moveGrid 10s linear infinite;
+            background: radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.15) 0%, rgba(147, 51, 234, 0.1) 40%, transparent 70%),
+                        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 40px, rgba(236, 72, 153, 0.05) 40px, rgba(236, 72, 153, 0.05) 42px),
+                        linear-gradient(45deg, rgba(147, 51, 234, 0.05) 25%, transparent 25%, transparent 75%, rgba(147, 51, 234, 0.05) 75%, rgba(147, 51, 234, 0.05)),
+                        linear-gradient(45deg, rgba(147, 51, 234, 0.05) 25%, transparent 25%, transparent 75%, rgba(147, 51, 234, 0.05) 75%, rgba(147, 51, 234, 0.05));
+            background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
+            background-position: 0 0, 0 0, 0 0, 30px 30px;
+            animation: pulseBg 6s ease-in-out infinite alternate;
             pointer-events: none;
             z-index: 1;
         }
 
-        @keyframes moveGrid {
-            0% { background-position: 0 0, 0 0, 0 0, 0 0; }
-            100% { background-position: 64px 64px, -64px -64px, 0 64px, 64px 0; }
+        @keyframes pulseBg {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.03); }
         }
 
         #gameCanvas {
@@ -273,12 +263,12 @@
         let player = {
             x: 40,
             y: 100,
-            width: 10,       // Size 30% reduction lagabhag
-            height: 27,      // Proportionate height
+            width: 10,       
+            height: 27,      
             vx: 0,
             vy: 0,
-            speed: 3.15,     // Run speed 30% ochi kari (4.5 * 0.7)
-            jumpForce: -6.65, // Jump force 30% ochi kari (-9.5 * 0.7)
+            speed: 3.15,     
+            jumpForce: -6.65, 
             gravity: 0.42,
             isGrounded: false,
             animTimer: 0
@@ -443,10 +433,10 @@
 
             if (keys.left) {
                 player.vx = -player.speed;
-                player.animTimer += 0.25;
+                player.animTimer += 0.2;
             } else if (keys.right) {
                 player.vx = player.speed;
-                player.animTimer += 0.25;
+                player.animTimer += 0.2;
             } else {
                 player.vx = 0;
                 player.animTimer = 0;
@@ -554,7 +544,7 @@
                     ctx.stroke();
                 }
 
-                // --- 3D Character Styling & Patli Kamar (Waist) Adjustment ---
+                // --- 3D Character Styling with Stable Upright Movement ---
                 
                 // 3D Shadow/Depth Effect
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -562,7 +552,7 @@
                 ctx.ellipse(px + player.width/2 + 2, py + player.height + 2, player.width/1.5, 3, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Head (3D Sphere gradient look)
+                // Head
                 let headRadius = 4;
                 let headX = px + player.width/2;
                 let headY = py + 4;
@@ -576,11 +566,10 @@
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Upper Body / Chest (3D Box shading)
+                // Upper Body / Chest
                 ctx.fillStyle = '#d8b4fe';
                 ctx.fillRect(px + 1, py + 8, player.width - 2, 8);
                 
-                // Highlight layer for 3D effect on chest
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(px + 2, py + 8, 2, 8);
 
@@ -592,8 +581,8 @@
                 ctx.fillStyle = '#c084fc';
                 ctx.fillRect(px + 1, py + 20, player.width - 2, 4);
 
-                // Limbs and 3D Legs movement
-                let swing = Math.sin(player.animTimer) * 4;
+                // Upright Stable Limbs
+                let legAnim = Math.sin(player.animTimer) * 2;
                 let isJumping = !player.isGrounded;
 
                 ctx.strokeStyle = '#ffffff';
@@ -602,24 +591,24 @@
 
                 if (isJumping) {
                     ctx.moveTo(px + 1, py + 10);
-                    ctx.lineTo(px - 3, py + 6);
+                    ctx.lineTo(px - 2, py + 6);
                     ctx.moveTo(px + player.width - 1, py + 10);
-                    ctx.lineTo(px + player.width + 3, py + 6);
+                    ctx.lineTo(px + player.width + 2, py + 6);
 
                     ctx.moveTo(px + 2, py + player.height - 4);
-                    ctx.lineTo(px, py + player.height);
+                    ctx.lineTo(px + 1, py + player.height);
                     ctx.moveTo(px + player.width - 2, py + player.height - 4);
-                    ctx.lineTo(px + player.width, py + player.height);
+                    ctx.lineTo(px + player.width - 1, py + player.height);
                 } else {
                     ctx.moveTo(px + 1, py + 10);
-                    ctx.lineTo(px - 2 + (swing * 0.3), py + 14);
+                    ctx.lineTo(px - 1, py + 14);
                     ctx.moveTo(px + player.width - 1, py + 10);
-                    ctx.lineTo(px + player.width + 2 - (swing * 0.3), py + 14);
+                    ctx.lineTo(px + player.width + 1, py + 14);
 
                     ctx.moveTo(px + 2, py + player.height - 4);
-                    ctx.lineTo(px + 1 + swing, py + player.height);
+                    ctx.lineTo(px + 2 + legAnim, py + player.height);
                     ctx.moveTo(px + player.width - 2, py + player.height - 4);
-                    ctx.lineTo(px + player.width - 1 - swing, py + player.height);
+                    ctx.lineTo(px + player.width - 2 - legAnim, py + player.height);
                 }
 
                 ctx.stroke();
