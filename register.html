@@ -224,7 +224,6 @@
             }
 
             // 1. Username Validation Check
-            // Kam se kam 5 alphabets, 2-5 numbers, aur ek special character (!@#$%^&*()_+)
             const lettersMatch = username.match(/[a-zA-Z]/g);
             const numbersMatch = username.match(/[0-9]/g);
             const specialMatch = username.match(/[!@#$%^&*()_+]/g);
@@ -243,7 +242,6 @@
             }
 
             // 2. Password Validation Check
-            // Kam se kam 5 alphabets, 2-5 numbers, aur 1 special character
             const pLetters = password.match(/[a-zA-Z]/g);
             const pNumbers = password.match(/[0-9]/g);
             const pSpecial = password.match(/[!@#$%^&*()_+]/g);
@@ -290,8 +288,7 @@
 
                 alert("🎉 Account successful ban gaya! Humne aapke Gmail (" + email + ") par verification link/OTP bhej diya hai. Email verify karne ke baad aap apne aap game mein enter kar jayenge.");
 
-                // Sign out temporarily so they verify, or auto-login loop logic
-                // Yahan user verify karne ke baad seedha home page par ja sakta hai
+                // Sign out temporarily so they verify
                 await signOut(auth);
                 window.location.href = "index.html";
 
@@ -301,6 +298,23 @@
                 btn.disabled = false;
             }
         }
+    </script>
+
+    <!-- Fullscreen API Script -->
+    <script>
+        function requestFullscreen() {
+            const docElement = document.documentElement;
+            if (!document.fullscreenElement) {
+                if (docElement.requestFullscreen) {
+                    docElement.requestFullscreen().catch(() => {});
+                } else if (docElement.webkitRequestFullscreen) {
+                    docElement.webkitRequestFullscreen();
+                }
+            }
+        }
+
+        window.addEventListener('click', requestFullscreen, { once: true });
+        window.addEventListener('touchstart', requestFullscreen, { once: true });
     </script>
 
 </body>
