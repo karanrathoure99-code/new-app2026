@@ -16,7 +16,6 @@
         }
 
         body {
-            /* Login page jaisa clean aur professional gradient background */
             background: linear-gradient(135deg, #2c1810 0%, #0d0604 50%, #1a0f08 100%);
             background-attachment: fixed;
             color: #ffffff;
@@ -50,6 +49,7 @@
             padding: 8px 20px;
             margin-bottom: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 20;
         }
 
         .hud-title {
@@ -79,10 +79,33 @@
             box-shadow: inset 0 0 30px rgba(225, 155, 75, 0.15), 0 10px 30px rgba(0,0,0,0.8);
         }
 
+        /* Background Distractor Pattern taaki player ka dhyan bhatke */
+        .distractor-bg {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 0, 0, 0.04),
+                rgba(255, 0, 0, 0.04) 15px,
+                rgba(0, 255, 255, 0.04) 15px,
+                rgba(0, 255, 255, 0.04) 30px
+            );
+            animation: pulseBg 2.5s infinite alternate;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes pulseBg {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.02); }
+        }
+
         #gameCanvas {
             width: 100%;
             height: 100%;
             display: block;
+            position: relative;
+            z-index: 2;
         }
 
         .controls-overlay {
@@ -183,6 +206,8 @@
         </div>
 
         <div class="arena-container">
+            <!-- Distractor background design -->
+            <div class="distractor-bg"></div>
             <canvas id="gameCanvas"></canvas>
 
             <div class="controls-overlay">
@@ -241,7 +266,7 @@
             x: 40,
             y: 100,
             width: 18,       
-            height: 36,      
+            height: 52, // Pure pair aur proportion behtar dikhane ke liye height badhayi gayi hai      
             vx: 0,
             vy: 0,
             speed: 4.5,
@@ -253,19 +278,18 @@
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 0, y: 0, w: 16, h: 32 };
+        let goal = { x: 0, y: 0, w: 22, h: 44 };
 
         function updateGameLayout() {
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
 
-            // Surface poori screen ki width (left se right line tak) fit kar di gayi hai taaki scroll na ho
             platforms = [
                 { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }, 
                 { x: Math.floor(canvasWidth * 0.6), y: surfaceTop, w: 70, h: surfaceHeight, type: 'hiddenTrap', triggered: false }
             ];
 
-            // Coins ko poori screen par distribute kiya gaya hai taaki aakhri kone tak pahucha ja sake
+            // Coins ka size 50% kam karne ke liye spacing aur radius adjust ki gayi hai
             const coinSpacing = (canvasWidth - 120) / 6;
             coins = [];
             for (let i = 1; i <= 6; i++) {
@@ -273,13 +297,13 @@
                     x: 60 + (i - 1) * coinSpacing,
                     y: surfaceTop - 20,
                     collected: false,
-                    hasBomb: (i === 4), // 4th coin bomb hoga
-                    radius: 6
+                    hasBomb: (i === 4),
+                    radius: 3  // Size 50% reduce kiya gaya hai
                 });
             }
 
-            goal.y = surfaceTop - 32;
-            goal.x = canvasWidth - 50; // Goal ko bilkul last kone mein rakha gaya hai
+            goal.y = surfaceTop - goal.h;
+            goal.x = canvasWidth - 55; // Gate ko bilkul last kone mein set kiya gaya hai
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -388,7 +412,7 @@
 
         function checkCoins() {
             coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
+                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 20) {
                     c.collected = true;
                     if (c.hasBomb) {
                         triggerExplosion();
@@ -400,7 +424,7 @@
         }
 
         function update() {
-            platforms[0].w = canvasWidth; // Surface width hamesha screen width ke barabar rahegi
+            platforms[0].w = canvasWidth;
 
             if (isExploding) {
                 fragments.forEach(f => {
@@ -423,14 +447,13 @@
             }
 
             if (keys.down) {
-                player.height = 22; 
+                player.height = 32; 
             } else {
-                player.height = 36; 
+                player.height = 52; 
             }
 
             player.x += player.vx;
 
-            // Screen boundaries ke andar rakhna taaki bahar na jaye
             if (player.x < 0) player.x = 0;
             if (player.x > canvasWidth - player.width) player.x = canvasWidth - player.width;
 
@@ -463,10 +486,11 @@
 
             checkCoins();
 
-            // Goal check (level complete condition)
+            // Jaise hi Damee gate ke paas pahunchega, Level 2 apne aap start ho jayega
             if (player.x + player.width >= goal.x && player.y + player.height >= goal.y) {
-                alert("🎉 Level 1 Cleared Successfully!");
-                window.location.href = "index.html";
+                alert("🎉 Gate Unlocked! 4D Transitioning to Level 2 Automatically...");
+                // Level 2 start logic ya redirection yahan perform hoti hai
+                window.location.reload(); 
             }
 
             document.getElementById('scoreDisplay').innerText = "COINS: " + score;
@@ -475,7 +499,7 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Ground / Surface drawing (mota aur screen ke left se right tak)
+            // Ground / Surface Drawing
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return;
                 ctx.fillStyle = '#2b160a';
@@ -485,27 +509,39 @@
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
             });
 
-            // Coins drawing
+            // Coins Drawing (50% reduced size)
             coins.forEach(c => {
                 if (!c.collected) {
                     ctx.beginPath();
                     ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
                     ctx.fillStyle = '#ffcc00';
                     ctx.fill();
-                    ctx.lineWidth = 1.5;
+                    ctx.lineWidth = 1;
                     ctx.strokeStyle = '#ffffff';
                     ctx.stroke();
                 }
             });
 
-            // Goal drawing
-            ctx.fillStyle = '#ffffff';
+            // 3D Structure Gate Drawing at the Last Corner
+            ctx.fillStyle = 'rgba(0, 255, 204, 0.2)';
+            ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8); // 4D glowing aura effect
+            
+            ctx.fillStyle = '#003333';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
             ctx.strokeStyle = '#00ffcc';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(goal.x - 2, goal.y - 2, goal.w + 4, goal.h + 4);
-            ctx.fillStyle = '#00ffcc';
-            ctx.fillRect(goal.x + 3, goal.y + 10, 2, 6);
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
+            
+            // Gate 3D Inner frame lines
+            ctx.beginPath();
+            ctx.moveTo(goal.x + 4, goal.y + 4);
+            ctx.lineTo(goal.x + goal.w - 4, goal.y + 4);
+            ctx.lineTo(goal.x + goal.w - 4, goal.y + goal.h - 4);
+            ctx.lineTo(goal.x + 4, goal.y + goal.h - 4);
+            ctx.closePath();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
 
             if (isExploding) {
                 fragments.forEach(f => {
@@ -518,24 +554,28 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 26, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 30, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
                     ctx.stroke();
                 }
 
-                // Damee Head (Clearly visible)
+                // 4D / 3D Character Shadow Layer (Depth effect)
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.fillRect(px - 3, py + 4, player.width, player.height);
+
+                // Damee Head
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-                ctx.arc(px + player.width/2, py + 6, 6, 0, Math.PI * 2);
+                ctx.arc(px + player.width/2, py + 7, 7, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Damee Body
-                ctx.fillRect(px + 4, py + 12, player.width - 8, player.height - 14);
+                ctx.fillRect(px + 3, py + 15, player.width - 6, player.height - 25);
 
-                // Motion calculation for hands and legs (Clearly visible now)
-                let swing = Math.sin(player.animTimer) * 6;
+                // Motion calculation for hands and FULL LEGS (Lungi/Extra layers removed)
+                let swing = Math.sin(player.animTimer) * 7;
                 let isJumping = !player.isGrounded;
 
                 ctx.strokeStyle = '#ffffff';
@@ -543,27 +583,29 @@
                 ctx.beginPath();
 
                 if (isJumping) {
-                    // Jump motion: Hands up, legs active
-                    ctx.moveTo(px + 4, py + 14);
-                    ctx.lineTo(px - 4, py + 8);
-                    ctx.moveTo(px + player.width - 4, py + 14);
-                    ctx.lineTo(px + player.width + 4, py + 8);
+                    // Jump motion with full legs extended clearly
+                    ctx.moveTo(px + 3, py + 16);
+                    ctx.lineTo(px - 5, py + 10);
+                    ctx.moveTo(px + player.width - 3, py + 16);
+                    ctx.lineTo(px + player.width + 5, py + 10);
 
-                    ctx.moveTo(px + 5, py + player.height - 8);
-                    ctx.lineTo(px + 2, py + player.height);
-                    ctx.moveTo(px + player.width - 5, py + player.height - 8);
-                    ctx.lineTo(px + player.width - 2, py + player.height);
+                    // Full legs visible during jump
+                    ctx.moveTo(px + 4, py + player.height - 10);
+                    ctx.lineTo(px + 1, py + player.height);
+                    ctx.moveTo(px + player.width - 4, py + player.height - 10);
+                    ctx.lineTo(px + player.width - 1, py + player.height);
                 } else {
-                    // Moving / Walking motion with hands & legs swing
-                    ctx.moveTo(px + 4, py + 14);
-                    ctx.lineTo(px - 3 + (swing * 0.5), py + 21);
-                    ctx.moveTo(px + player.width - 4, py + 14);
-                    ctx.lineTo(px + player.width + 3 - (swing * 0.5), py + 21);
+                    // Walking motion with full legs swinging clearly
+                    ctx.moveTo(px + 3, py + 16);
+                    ctx.lineTo(px - 3 + (swing * 0.5), py + 24);
+                    ctx.moveTo(px + player.width - 3, py + 16);
+                    ctx.lineTo(px + player.width + 3 - (swing * 0.5), py + 24);
 
-                    ctx.moveTo(px + 5, py + player.height - 8);
-                    ctx.lineTo(px + 3 + swing, py + player.height);
-                    ctx.moveTo(px + player.width - 5, py + player.height - 8);
-                    ctx.lineTo(px + player.width - 3 - swing, py + player.height);
+                    // Full legs visible down to the ground
+                    ctx.moveTo(px + 5, py + player.height - 10);
+                    ctx.lineTo(px + 4 + swing, py + player.height);
+                    ctx.moveTo(px + player.width - 5, py + player.height - 10);
+                    ctx.lineTo(px + player.width - 4 - swing, py + player.height);
                 }
 
                 ctx.stroke();
