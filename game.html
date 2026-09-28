@@ -16,7 +16,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f051d 0%, #030008 50%, #12031a 100%);
+            background: linear-gradient(135deg, #1f1208 0%, #0d0603 50%, #2b180a 100%);
             background-attachment: fixed;
             color: #ffffff;
             width: 100vw;
@@ -42,9 +42,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(30, 10, 50, 0.85);
+            background: rgba(50, 28, 10, 0.85);
             backdrop-filter: blur(15px);
-            border: 1px solid rgba(147, 51, 234, 0.4);
+            border: 1px solid rgba(212, 163, 115, 0.4);
             border-radius: 15px;
             padding: 8px 20px;
             margin-bottom: 8px;
@@ -56,8 +56,8 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
             font-weight: 900;
-            color: #a855f7;
-            text-shadow: 0 0 10px rgba(168,85,247,0.6);
+            color: #d4a373;
+            text-shadow: 0 0 10px rgba(212,163,115,0.6);
         }
 
         .hud-stats {
@@ -66,27 +66,27 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 13px;
             font-weight: 700;
-            color: #d8b4fe;
+            color: #faedcd;
         }
 
         .arena-container {
             flex: 1;
-            background: rgba(10, 3, 18, 0.95);
-            border: 3px solid rgba(147, 51, 234, 0.85);
+            background: rgba(20, 11, 5, 0.95);
+            border: 3px solid rgba(140, 88, 48, 0.85);
             border-radius: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 40px rgba(147, 51, 234, 0.25), 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: inset 0 0 40px rgba(140, 88, 48, 0.25), 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        /* Highly Attractive Distractor Background Design */
+        /* Highly Attractive Distractor Background Design (Brown Theme) */
         .distractor-bg {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.15) 0%, rgba(147, 51, 234, 0.1) 40%, transparent 70%),
-                        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 40px, rgba(236, 72, 153, 0.05) 40px, rgba(236, 72, 153, 0.05) 42px),
-                        linear-gradient(45deg, rgba(147, 51, 234, 0.05) 25%, transparent 25%, transparent 75%, rgba(147, 51, 234, 0.05) 75%, rgba(147, 51, 234, 0.05)),
-                        linear-gradient(45deg, rgba(147, 51, 234, 0.05) 25%, transparent 25%, transparent 75%, rgba(147, 51, 234, 0.05) 75%, rgba(147, 51, 234, 0.05));
+            background: radial-gradient(circle at 50% 50%, rgba(212, 163, 115, 0.15) 0%, rgba(140, 88, 48, 0.1) 40%, transparent 70%),
+                        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 40px, rgba(212, 163, 115, 0.05) 40px, rgba(212, 163, 115, 0.05) 42px),
+                        linear-gradient(45deg, rgba(140, 88, 48, 0.05) 25%, transparent 25%, transparent 75%, rgba(140, 88, 48, 0.05) 75%, rgba(140, 88, 48, 0.05)),
+                        linear-gradient(45deg, rgba(140, 88, 48, 0.05) 25%, transparent 25%, transparent 75%, rgba(140, 88, 48, 0.05) 75%, rgba(140, 88, 48, 0.05));
             background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
             background-position: 0 0, 0 0, 0 0, 30px 30px;
             animation: pulseBg 6s ease-in-out infinite alternate;
@@ -158,8 +158,8 @@
         .ctrl-btn:active {
             transform: translateY(2px);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-            background: rgba(147, 51, 234, 0.35);
-            border-color: #a855f7;
+            background: rgba(140, 88, 48, 0.35);
+            border-color: #d4a373;
         }
 
         .btn-logo {
@@ -180,7 +180,7 @@
         .back-btn {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
-            color: #d8b4fe;
+            color: #faedcd;
             padding: 4px 12px;
             border-radius: 8px;
             font-size: 11px;
@@ -188,7 +188,7 @@
         }
         .back-btn:hover {
             color: #fff;
-            border-color: #a855f7;
+            border-color: #d4a373;
         }
     </style>
 </head>
@@ -395,9 +395,9 @@
 
             fragments = [
                 { x: player.x, y: player.y, vx: -3, vy: -4, color: '#ffffff' },
-                { x: player.x + 3, y: player.y + 6, vx: 3, vy: -5, color: '#a855f7' },
+                { x: player.x + 3, y: player.y + 6, vx: 3, vy: -5, color: '#00f2fe' },
                 { x: player.x + 2, y: player.y + 9, vx: -4, vy: 1, color: '#ffffff' },
-                { x: player.x + 5, y: player.y + 9, vx: 4, vy: 2, color: '#ec4899' }
+                { x: player.x + 5, y: player.y + 9, vx: 4, vy: 2, color: '#4facfe' }
             ];
 
             setTimeout(() => {
@@ -495,9 +495,9 @@
 
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return;
-                ctx.fillStyle = '#1e0a2e';
+                ctx.fillStyle = '#2b180a';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.strokeStyle = '#a855f7';
+                ctx.strokeStyle = '#d4a373';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
@@ -517,12 +517,12 @@
                 }
             });
 
-            ctx.fillStyle = 'rgba(0, 255, 204, 0.2)';
+            ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
             ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
             
-            ctx.fillStyle = '#003333';
+            ctx.fillStyle = '#532d0c';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-            ctx.strokeStyle = '#00ffcc';
+            ctx.strokeStyle = '#ff9f1c';
             ctx.lineWidth = 2.5;
             ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
@@ -544,7 +544,7 @@
                     ctx.stroke();
                 }
 
-                // --- 3D Character Styling with Stable Upright Movement ---
+                // --- Updated 3D Character Styling (Cyan/Blue Theme) ---
                 
                 // 3D Shadow/Depth Effect
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -559,7 +559,7 @@
                 
                 let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 1, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
-                headGrad.addColorStop(1, '#a855f7');
+                headGrad.addColorStop(1, '#00f2fe');
                 
                 ctx.fillStyle = headGrad;
                 ctx.beginPath();
@@ -567,18 +567,18 @@
                 ctx.fill();
 
                 // Upper Body / Chest
-                ctx.fillStyle = '#d8b4fe';
+                ctx.fillStyle = '#caf0f8';
                 ctx.fillRect(px + 1, py + 8, player.width - 2, 8);
                 
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(px + 2, py + 8, 2, 8);
 
                 // Kamar Wala Part (Patla/Slim Waist)
-                ctx.fillStyle = '#9333ea';
+                ctx.fillStyle = '#0077b6';
                 ctx.fillRect(px + 3, py + 16, player.width - 6, 4);
 
                 // Lower Body / Pelvis
-                ctx.fillStyle = '#c084fc';
+                ctx.fillStyle = '#48cae4';
                 ctx.fillRect(px + 1, py + 20, player.width - 2, 4);
 
                 // Upright Stable Limbs
