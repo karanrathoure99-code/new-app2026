@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🤪 Z PAJAL - Secure Registration</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;800&display=swap');
 
         * {
             margin: 0;
@@ -14,79 +14,57 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Landscape Mode & Responsive Fit for All Devices */
-        @media screen and (orientation: portrait) {
-            body::before {
-                content: "Please rotate your device to Landscape Mode 🔄";
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: #050505;
-                color: #fff;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 20px;
-                font-weight: 600;
-                text-align: center;
-                z-index: 99999;
-                padding: 20px;
-            }
-        }
-
         body {
             width: 100vw;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #050505;
-            background: linear-gradient(to right, #050505, #0a0a0c, #050505);
+            background: #020205;
+            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
             overflow: hidden;
-            padding: 10px;
+            padding: 15px;
         }
 
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px);
+            filter: blur(100px);
             z-index: 0;
-            opacity: 0.4;
-            animation: float 10s infinite alternate ease-in-out;
+            opacity: 0.5;
+            animation: float 12s infinite alternate ease-in-out;
         }
         .orb-1 {
-            width: 300px; height: 300px;
-            background: #ff007f;
-            top: -50px; left: -50px;
+            width: 400px; height: 400px;
+            background: linear-gradient(135deg, #ff007f, #7928ca);
+            top: -100px; left: -100px;
         }
         .orb-2 {
-            width: 400px; height: 400px;
-            background: #00f0ff;
-            bottom: -100px; right: -50px;
-            animation-delay: -3s;
+            width: 500px; height: 500px;
+            background: linear-gradient(135deg, #00f0ff, #0072ff);
+            bottom: -150px; right: -100px;
+            animation-delay: -4s;
         }
 
         @keyframes float {
-            0% { transform: translateY(0px) scale(1); }
-            100% { transform: translateY(50px) scale(1.2); }
+            0% { transform: translateY(0px) scale(1) rotate(0deg); }
+            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
         }
 
+        /* Landscape Horizontal Glass Box */
         .glass-box {
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 420px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 20px 20px;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            max-height: 95vh;
+            max-width: 750px;
+            background: rgba(15, 15, 25, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 25px 35px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            max-height: 92vh;
             overflow-y: auto;
         }
 
@@ -99,23 +77,38 @@
         }
 
         .game-title {
-            font-size: 24px;
-            font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
             color: #fff;
             margin-bottom: 15px;
             letter-spacing: 2px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .emoji {
-            font-size: 30px;
+            font-size: 32px;
+            animation: pulse-light 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-light {
+            0% { opacity: 0.4; filter: drop-shadow(0 0 8px #ff007f); transform: scale(0.95); }
+            100% { opacity: 1; filter: drop-shadow(0 0 20px #00f0ff); transform: scale(1.1); }
+        }
+
+        /* 2-Column Grid Layout for Landscape Efficiency */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 20px;
         }
 
         .input-group {
-            margin-bottom: 12px;
             position: relative;
             text-align: left;
         }
@@ -124,15 +117,15 @@
             display: block;
             font-size: 11px;
             color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             font-weight: 600;
         }
 
         .input-group input {
             width: 100%;
-            padding: 9px 14px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.08);
             border-radius: 10px;
             color: #fff;
             font-size: 13px;
@@ -140,50 +133,67 @@
             transition: all 0.3s ease;
         }
 
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
         .input-group input:focus {
-            border: 2px solid #00f0ff;
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+            border-color: #00f0ff;
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
         .hint {
             font-size: 9px;
             color: rgba(255, 255, 255, 0.4);
-            margin-top: 2px;
+            margin-top: 3px;
+            line-height: 1.2;
+        }
+
+        .full-width {
+            grid-column: span 2;
         }
 
         .register-btn {
             width: 100%;
-            padding: 10px;
-            background: linear-gradient(45deg, #ff007f, #7928ca);
+            padding: 11px;
+            background: linear-gradient(135deg, #ff007f, #7928ca);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 14px;
             font-weight: 800;
             cursor: pointer;
-            margin-top: 5px;
-            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
-            transition: 0.3s;
+            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.4);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            letter-spacing: 1px;
         }
 
         .register-btn:hover {
-            opacity: 0.9;
-            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.7);
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.7);
+        }
+
+        .footer-link-container {
+            text-align: center;
+            margin-top: 12px;
+            grid-column: span 2;
         }
 
         .back-link {
-            margin-top: 12px;
-            display: block;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.75);
             text-decoration: none;
             font-size: 12px;
             font-weight: 600;
-            transition: 0.3s;
+            transition: color 0.3s, text-shadow 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .back-link:hover {
             color: #00f0ff;
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
         }
     </style>
 </head>
@@ -197,31 +207,37 @@
             <span class="emoji">✨</span> CREATE ACCOUNT
         </div>
         
-        <div class="input-group">
-            <label>Username</label>
-            <input type="text" id="username" placeholder="e.g. gamer_123#" autocomplete="off">
-            <div class="hint">Min 5 letters, 2-5 numbers, and 1 special char (!@#$%^&*()_+)</div>
-        </div>
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="e.g. gamer_123#" autocomplete="off">
+                <div class="hint">Min 5 letters, 2-5 numbers, 1 special char</div>
+            </div>
 
-        <div class="input-group">
-            <label>Gmail Address</label>
-            <input type="email" id="regEmail" placeholder="example@gmail.com">
-        </div>
+            <div class="input-group">
+                <label>Gmail Address</label>
+                <input type="email" id="regEmail" placeholder="example@gmail.com">
+            </div>
 
-        <div class="input-group">
-            <label>Create Password</label>
-            <input type="password" id="regPassword" placeholder="Strong password">
-            <div class="hint">Min 5 letters, 2-5 numbers, and 1 special char</div>
-        </div>
+            <div class="input-group">
+                <label>Create Password</label>
+                <input type="password" id="regPassword" placeholder="Strong password">
+                <div class="hint">Min 5 letters, 2-5 numbers, 1 special char</div>
+            </div>
 
-        <div class="input-group">
-            <label>Confirm Password</label>
-            <input type="password" id="confirmPassword" placeholder="Re-enter password">
-        </div>
-        
-        <button type="button" class="register-btn" id="submitBtn" onclick="registerUser()">REGISTER & VERIFY</button>
+            <div class="input-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Re-enter password">
+            </div>
+            
+            <div class="full-width">
+                <button type="button" class="register-btn" id="submitBtn" onclick="registerUser()">REGISTER & VERIFY</button>
+            </div>
 
-        <a href="index.html" class="back-link">⬅️ Back to Login</a>
+            <div class="footer-link-container">
+                <a href="index.html" class="back-link">⬅️ Back to Login</a>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDK & Validation Logic -->
@@ -233,6 +249,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyCK9njPkGdw91_vGhI0_mRflpXBbz2D_zo",
             authDomain: "z-pajal.firebaseapp.com",
+            databaseURL: "https://z-pajal-default-rtdb.firebaseio.com",
             projectId: "z-pajal",
             storageBucket: "z-pajal.firebasestorage.app",
             messagingSenderId: "941362119453",
@@ -319,7 +336,14 @@
                 // Send Email Verification Code / Link
                 await sendEmailVerification(user);
 
-                alert("🎉 Account successful ban gaya! Humne aapke Gmail (" + email + ") par verification link/OTP bhej diya hai. Email verify karne ke baad aap apne aap game mein enter kar jayenge.");
+                // Save Active Session / User Data in DB
+                await set(ref(db, 'users/' + user.uid + '/profile'), {
+                    username: username,
+                    email: email,
+                    createdAt: Date.now()
+                });
+
+                alert("🎉 Account successful ban gaya! Humne aapke Gmail (" + email + ") par verification link bhej diya hai. Email verify karne ke baad aap login kar sakte hain.");
 
                 // Sign out temporarily so they verify
                 await signOut(auth);
@@ -335,25 +359,28 @@
 
     <!-- Fullscreen API & Landscape Orientation Lock Integration -->
     <script>
-        function requestFullscreen() {
+        async function enableLandscapeFullscreen() {
             const docElement = document.documentElement;
-            if (!document.fullscreenElement) {
-                const requestPromise = docElement.requestFullscreen ? docElement.requestFullscreen() :
-                                       docElement.webkitRequestFullscreen ? docElement.webkitRequestFullscreen() :
-                                       docElement.msRequestFullscreen ? docElement.msRequestFullscreen() : null;
-
-                if (requestPromise) {
-                    Promise.resolve(requestPromise).then(() => {
-                        if (screen.orientation && screen.orientation.lock) {
-                            screen.orientation.lock('landscape').catch(() => {});
-                        }
-                    }).catch(() => {});
+            try {
+                if (!document.fullscreenElement) {
+                    if (docElement.requestFullscreen) {
+                        await docElement.requestFullscreen();
+                    } else if (docElement.webkitRequestFullscreen) {
+                        await docElement.webkitRequestFullscreen();
+                    } else if (docElement.msRequestFullscreen) {
+                        await docElement.msRequestFullscreen();
+                    }
                 }
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('landscape');
+                }
+            } catch (err) {
+                // Ignore restrictions
             }
         }
 
-        window.addEventListener('click', requestFullscreen, { once: true });
-        window.addEventListener('touchstart', requestFullscreen, { once: true });
+        window.addEventListener('click', enableLandscapeFullscreen, { once: true });
+        window.addEventListener('touchstart', enableLandscapeFullscreen, { once: true });
     </script>
 
 </body>
