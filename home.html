@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🤪 Z PAJAL - Arcade Home</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
@@ -13,15 +13,39 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        /* Landscape Mode & Responsive Fit Warning for Portrait Screens */
+        @media screen and (orientation: portrait) {
+            body::before {
+                content: "Please rotate your device to Landscape Mode 🔄";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #070514;
+                color: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 20px;
+                font-weight: 600;
+                text-align: center;
+                z-index: 99999;
+                padding: 20px;
+            }
+        }
+
         body {
             background: linear-gradient(135deg, #3d0a3d 0%, #070514 50%, #032b29 100%);
             background-attachment: fixed;
             color: #ffffff;
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            overflow: hidden;
+            padding: 10px;
         }
 
         .dashboard-container {
@@ -30,11 +54,21 @@
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 25px;
-            padding: 30px 25px;
+            padding: 20px 25px;
             width: 100%;
             max-width: 480px;
+            max-height: 95vh;
+            overflow-y: auto;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.05);
             text-align: center;
+        }
+
+        .dashboard-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .dashboard-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
         }
 
         .arcade-badge {
@@ -47,15 +81,15 @@
             letter-spacing: 2px;
             padding: 4px 14px;
             border-radius: 20px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 900;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #ffffff;
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
@@ -65,7 +99,7 @@
             justify-content: space-between;
             align-items: stretch;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .left-profile-wrapper {
@@ -79,7 +113,7 @@
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 0, 127, 0.4);
             border-radius: 50px;
-            padding: 10px 15px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -88,14 +122,14 @@
         }
 
         .avatar-img {
-            width: 38px;
-            height: 38px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             background: linear-gradient(135deg, #ff007f, #00ffcc);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
+            font-size: 16px;
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
@@ -106,24 +140,24 @@
 
         .username {
             font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: #ff007f;
             text-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 110px;
+            max-width: 100px;
         }
 
         .user-tag {
-            font-size: 10px;
+            font-size: 9px;
             color: #8c8cb2;
         }
 
         .level-outside {
-            margin-top: 8px;
-            font-size: 12px;
+            margin-top: 6px;
+            font-size: 11px;
             font-weight: 600;
             color: #00ffcc;
             letter-spacing: 1px;
@@ -135,7 +169,7 @@
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 204, 0, 0.3);
             border-radius: 20px;
-            padding: 12px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -144,13 +178,13 @@
         }
 
         .rank-logo {
-            font-size: 24px;
-            margin-bottom: 3px;
+            font-size: 20px;
+            margin-bottom: 2px;
             filter: drop-shadow(0 0 8px currentColor);
         }
 
         .rank-title-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #8c8cb2;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -158,7 +192,7 @@
 
         .rank {
             font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             text-align: center;
             margin-top: 2px;
@@ -168,24 +202,24 @@
             background: rgba(15, 12, 30, 0.6);
             border: 1px solid rgba(0, 255, 204, 0.25);
             border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
             text-align: left;
             box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.05), 0 8px 20px rgba(0, 0, 0, 0.4);
         }
 
         .info-square-box h3 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             color: #00ffcc;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             letter-spacing: 1px;
         }
 
         .info-line {
-            font-size: 12px;
+            font-size: 11px;
             color: #b0b0d0;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -199,9 +233,9 @@
             background: linear-gradient(135deg, #ff007f, #7928ca);
             color: white;
             border: none;
-            padding: 15px;
+            padding: 12px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             letter-spacing: 1px;
             border-radius: 14px;
@@ -209,7 +243,7 @@
             width: 100%;
             transition: all 0.3s ease;
             box-shadow: 0 5px 20px rgba(255, 0, 127, 0.4);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .play-btn:hover {
@@ -221,9 +255,9 @@
             background: transparent;
             color: #8c8cb2;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px;
+            padding: 9px;
             border-radius: 12px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             width: 100%;
@@ -273,6 +307,7 @@
         <button class="logout-btn" onclick="logoutUser()">LOGOUT SESSION</button>
     </div>
 
+    <!-- Firebase SDK Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -395,15 +430,21 @@
         }
     </script>
 
-    <!-- Fullscreen API Script -->
+    <!-- Fullscreen API & Landscape Orientation Lock Integration -->
     <script>
         function requestFullscreen() {
             const docElement = document.documentElement;
             if (!document.fullscreenElement) {
-                if (docElement.requestFullscreen) {
-                    docElement.requestFullscreen().catch(() => {});
-                } else if (docElement.webkitRequestFullscreen) {
-                    docElement.webkitRequestFullscreen();
+                const requestPromise = docElement.requestFullscreen ? docElement.requestFullscreen() :
+                                       docElement.webkitRequestFullscreen ? docElement.webkitRequestFullscreen() :
+                                       docElement.msRequestFullscreen ? docElement.msRequestFullscreen() : null;
+
+                if (requestPromise) {
+                    Promise.resolve(requestPromise).then(() => {
+                        if (screen.orientation && screen.orientation.lock) {
+                            screen.orientation.lock('landscape').catch(() => {});
+                        }
+                    }).catch(() => {});
                 }
             }
         }
