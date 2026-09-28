@@ -278,8 +278,8 @@
         let player = {
             x: 40,
             y: 100,
-            width: 28,        // Increased by ~25% from 22
-            height: 60,       // Increased by ~25% from 48
+            width: 14,        // Made much slimmer (patla)
+            height: 50,       // Tall and sleek
             vx: 0,
             vy: 0,
             speed: 3.2,      
@@ -411,9 +411,9 @@
 
             fragments = [
                 { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffffff' },
-                { x: player.x + 8, y: player.y + 12, vx: 4, vy: -6, color: '#ffffff' },
-                { x: player.x + 4, y: player.y + 20, vx: -5, vy: 2, color: '#e0e0e0' },
-                { x: player.x + 12, y: player.y + 24, vx: 5, vy: 3, color: '#ffffff' }
+                { x: player.x + 4, y: player.y + 10, vx: 4, vy: -6, color: '#ffffff' },
+                { x: player.x + 2, y: player.y + 18, vx: -5, vy: 2, color: '#e0e0e0' },
+                { x: player.x + 6, y: player.y + 22, vx: 5, vy: 3, color: '#ffffff' }
             ];
 
             setTimeout(() => {
@@ -460,9 +460,9 @@
             }
 
             if (keys.down) {
-                player.height = 38; // Duck height scaled up
+                player.height = 30; // Slim duck height
             } else {
-                player.height = 60; // Standing height scaled up
+                player.height = 50; // Slim standing height
             }
 
             player.x += player.vx;
@@ -546,7 +546,7 @@
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 5, 5);
+                    ctx.fillRect(f.x, f.y, 4, 4);
                 });
             } else {
                 let px = player.x;
@@ -554,7 +554,7 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 40, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 28, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
@@ -564,39 +564,39 @@
                 // Shadow
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
-                ctx.ellipse(px + player.width/2 + 2, py + player.height + 3, player.width/1.3, 3.5, 0, 0, Math.PI * 2);
+                ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Detailed White Character Drawing (Scaled Up)
-                let bounce = Math.sin(player.animTimer) * 2.5;
-                let headRadius = 9.5;
+                // Slim White Character Drawing (Patla)
+                let bounce = Math.sin(player.animTimer) * 2;
+                let headRadius = 5.5;
                 let headX = px + player.width/2;
-                let headY = py + 11 + (player.height === 38 ? 0 : bounce);
+                let headY = py + 7 + (player.height === 30 ? 0 : bounce);
                 
-                let headGrad = ctx.createRadialGradient(headX - 2, headY - 2, 1, headX, headY, headRadius);
+                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
-                headGrad.addColorStop(1, '#d0d0d0');
+                headGrad.addColorStop(1, '#c0c0c0');
                 
                 ctx.fillStyle = headGrad;
                 ctx.beginPath();
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Upper Torso (White theme)
-                let chestGrad = ctx.createLinearGradient(px, py + 20, px + player.width, py + 20);
+                // Slim Upper Torso (White theme)
+                let chestGrad = ctx.createLinearGradient(px, py + 13, px + player.width, py + 13);
                 chestGrad.addColorStop(0, '#ffffff');
                 chestGrad.addColorStop(1, '#b0b0b0');
                 ctx.fillStyle = chestGrad;
-                ctx.fillRect(px + 2, py + 20 + (player.height === 38 ? 0 : bounce), player.width - 4, 18);
+                ctx.fillRect(px + 1, py + 13 + (player.height === 30 ? 0 : bounce), player.width - 2, 16);
 
                 // Belt
                 ctx.fillStyle = '#ffcc00';
-                ctx.fillRect(px + 2, py + 38 + (player.height === 38 ? 0 : bounce), player.width - 4, 4);
+                ctx.fillRect(px + 1, py + 29 + (player.height === 30 ? 0 : bounce), player.width - 2, 2.5);
 
-                // Legs
+                // Slim Legs
                 ctx.fillStyle = '#404040';
-                ctx.fillRect(px + 4, py + 42 + (player.height === 38 ? 0 : bounce), 6, player.height === 38 ? 14 : 18);
-                ctx.fillRect(px + player.width - 10, py + 42 + (player.height === 38 ? 0 : bounce), 6, player.height === 38 ? 14 : 18);
+                ctx.fillRect(px + 2, py + 31.5 + (player.height === 30 ? 0 : bounce), 3.5, player.height === 30 ? 11 : 16);
+                ctx.fillRect(px + player.width - 5.5, py + 31.5 + (player.height === 30 ? 0 : bounce), 3.5, player.height === 30 ? 11 : 16);
             }
         }
 
