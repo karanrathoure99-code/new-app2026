@@ -278,11 +278,11 @@
         let player = {
             x: 40,
             y: 100,
-            width: 14.4,      // Size decreased by 10%
-            height: 45,       // Size decreased by 10%
+            width: 14.4,      
+            height: 45,       
             vx: 0,
             vy: 0,
-            speed: 1.1,       // Motion slowed down by 50%
+            speed: 1.1,       
             jumpForce: -6.0,  
             gravity: 0.35,  
             isGrounded: false,
@@ -448,7 +448,6 @@
                 return;
             }
 
-            // Motion animation timer slowed by 50%
             if (keys.left) {
                 player.vx = -player.speed;
                 player.animTimer += 0.075; 
@@ -465,9 +464,9 @@
             }
 
             if (keys.down) {
-                player.height = 27; // Size decreased by 10%
+                player.height = 27; 
             } else {
-                player.height = 45; // Size decreased by 10%
+                player.height = 45; 
             }
 
             player.x += player.vx;
@@ -559,7 +558,6 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    // Shield size adjusted slightly for smaller player
                     ctx.arc(px + player.width/2, py + player.height/2, 25, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
@@ -573,11 +571,9 @@
                 ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Motion wave calculation for limbs
+                // Horizontal Swing calculation for limbs (Aage aur Peeche swing)
                 let motionCycle = Math.sin(player.animTimer * 6);
-                let limbSwing = motionCycle * 4.5; // Swing amplitude scaled down
-
-                // All dimensions below scaled down by ~10%
+                let limbSwing = motionCycle * 3.5; 
 
                 // 1. Head (Sir)
                 let headRadius = 5;
@@ -606,15 +602,15 @@
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(torsoX - 1, py + 26, torsoWidth + 2, 2.5);
 
-                // 3. White Hands 
+                // 3. White Hands (Aage aur peeche horizontal offset ke saath)
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX - 3.5, py + 13 + limbSwing, 2.5, 11);  // Left Hand
-                ctx.fillRect(torsoX + torsoWidth + 1, py + 13 - limbSwing, 2.5, 11); // Right Hand
+                ctx.fillRect(torsoX - 4 + limbSwing, py + 14, 2.5, 11);  // Left Hand (swings horizontal)
+                ctx.fillRect(torsoX + torsoWidth + 1 - limbSwing, py + 14, 2.5, 11); // Right Hand (swings opposite)
 
-                // 4. White Legs 
+                // 4. White Legs (Aage aur peeche horizontal offset ke saath)
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX + 1, py + 28.5 + limbSwing, 2.5, player.height === 27 ? 8 : 13.5); // Left Leg
-                ctx.fillRect(torsoX + torsoWidth - 3.5, py + 28.5 - limbSwing, 2.5, player.height === 27 ? 8 : 13.5); // Right Leg
+                ctx.fillRect(torsoX + 1 + limbSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); // Left Leg (swings horizontal)
+                ctx.fillRect(torsoX + torsoWidth - 3.5 - limbSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); // Right Leg (swings opposite)
             }
         }
 
