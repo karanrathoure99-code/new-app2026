@@ -39,13 +39,17 @@
             transition: transform 0.2s ease;
         }
 
-        /* Phone par game layout ko 40% chhota (scale 0.6) karne ke liye media query */
-        @media (max-width: 768px) {
+        /* Phone aur tablet par game layout ko proper fit karne ke liye media query */
+        @media (max-width: 1023px) {
             .game-wrapper {
-                transform: scale(0.6);
-                width: 166.66%; 
-                height: 166.66%;
+                transform: scale(0.56);
+                width: 178.5%; 
+                height: 178.5%;
                 position: absolute;
+                top: 0;
+                left: 0;
+                justify-content: flex-start;
+                padding: 6px;
             }
         }
 
@@ -117,50 +121,44 @@
             z-index: 2;
         }
 
-        /* Desktop par controls-overlay arena-container ke andar rahega */
+        /* LAPTOP (width >= 1024px) par ye control buttons bilkul hide rahenge */
         .controls-overlay {
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            pointer-events: none;
-            z-index: 10;
+            display: none;
         }
 
-        @media (min-width: 1024px) {
-            .controls-overlay {
-                display: none;
-            }
-        }
-
-        /* Phone aur tablet (max-width: 1023px) ke liye controls-overlay ko game box ke BILKUL NICHE (outside arena) position kiya gaya hai */
+        /* Sirf PHONE aur TABLET (max-width: 1023px) par buttons game box ke bilkul niche proper 2-column ya balanced row mein set honge */
         @media (max-width: 1023px) {
             .controls-overlay {
                 position: relative;
                 bottom: auto;
                 left: auto;
-                margin-top: 10px;
-                padding: 0 10px;
+                margin-top: 8px;
+                padding: 0 4px;
                 pointer-events: auto;
                 background: transparent;
                 display: flex;
                 justify-content: space-between;
+                align-items: center;
                 width: 100%;
                 z-index: 30;
-            }
-            .game-wrapper {
-                justify-content: flex-start;
             }
         }
 
         .control-group {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             pointer-events: auto;
             align-items: center;
+        }
+
+        /* Right side group jaisa left/move buttons hai, waise hi horizontal ya proper compact row mein set kiya gaya hai */
+        @media (max-width: 1023px) {
+            .control-group.right-group {
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                align-items: center;
+            }
         }
 
         .ctrl-btn {
@@ -171,51 +169,30 @@
             border-bottom: 3px solid rgba(0, 0, 0, 0.3);
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
             font-weight: 700;
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 62px;
+            height: 62px;
+            font-size: 14px;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6);
             touch-action: manipulation;
             position: relative;
         }
 
-        /* Phone aur tablet ke liye sabhi control buttons ka size bada kiya gaya hai (72px) */
-        @media (max-width: 1023px) {
-            .ctrl-btn {
-                width: 72px;
-                height: 72px;
-                font-size: 16px;
-                border-radius: 16px;
-            }
-            .btn-logo {
-                font-size: 13px !important;
-            }
-            .btn-label {
-                font-size: 11px !important;
-            }
-            .control-group.right-group {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 6px;
-            }
-        }
-
         .ctrl-btn:active, .ctrl-btn.pressed {
             transform: translateY(2px);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
             background: rgba(140, 88, 48, 0.55);
             border-color: #d4a373;
         }
 
         .btn-logo {
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 900;
             color: #ffcc00;
             text-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
@@ -224,7 +201,7 @@
         }
 
         .btn-label {
-            font-size: 8px;
+            font-size: 9.5px;
             font-weight: 700;
             line-height: 1;
         }
@@ -286,32 +263,10 @@
         <div class="arena-container">
             <div class="distractor-bg"></div>
             <canvas id="gameCanvas"></canvas>
-
-            <!-- Desktop ke liye control buttons box ke andar (absolute overlay) -->
-            <div class="controls-overlay" id="desktopControls">
-                <div class="control-group">
-                    <button class="ctrl-btn" id="leftBtn">◀</button>
-                    <button class="ctrl-btn" id="rightBtn">▶</button>
-                </div>
-                <div class="control-group right-group">
-                    <button class="ctrl-btn" id="jumpBtn">
-                        <span class="btn-logo">Z</span>
-                        <span class="btn-label">JUMP</span>
-                    </button>
-                    <button class="ctrl-btn" id="rightDownBtn">
-                        <span class="btn-logo">Z</span>
-                        <span class="btn-label">DOWN</span>
-                    </button>
-                    <button class="ctrl-btn" id="shieldBtn" style="background: rgba(255,170,0,0.25);">
-                        <span class="btn-logo" style="color:#ffaa00;">Z</span>
-                        <span class="btn-label">SHLD</span>
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- Phone aur Tablet ke liye control buttons box ke BILKUL NICHE (outside arena) -->
-        <div class="controls-overlay" id="mobileControls" style="display: none;">
+        <div class="controls-overlay" id="mobileControls">
             <div class="control-group">
                 <button class="ctrl-btn" id="leftBtnM">◀</button>
                 <button class="ctrl-btn" id="rightBtnM">▶</button>
@@ -357,7 +312,6 @@
 
         function checkDeviceControls() {
             const isMobileOrTablet = window.innerWidth <= 1023;
-            document.getElementById('desktopControls').style.display = isMobileOrTablet ? 'none' : 'flex';
             document.getElementById('mobileControls').style.display = isMobileOrTablet ? 'flex' : 'none';
         }
 
@@ -507,15 +461,14 @@
             btn.addEventListener('mouseleave', handleEnd);
         };
 
-        // Desktop and Mobile button bindings
-        ['leftBtn', 'leftBtnM'].forEach(id => bindButton(id, () => keys.left = true, () => keys.left = false));
-        ['rightBtn', 'rightBtnM'].forEach(id => bindButton(id, () => keys.right = true, () => keys.right = false));
-        ['rightDownBtn', 'rightDownBtnM'].forEach(id => bindButton(id, () => keys.down = true, () => keys.down = false));
+        // Mobile button bindings
+        bindButton('leftBtnM', () => keys.left = true, () => keys.left = false);
+        bindButton('rightBtnM', () => keys.right = true, () => keys.right = false);
+        bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
 
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
-                // Dammi ki jump force ko itna rakha gaya hai taaki character comfortably coin ke upar se jump karke par kar sake (-9.4)
-                let activeJumpForce = -9.4;
+                let activeJumpForce = -9.4; // Dammi ki jump force taaki coin ke upar se jump ho sake
 
                 player.vy = activeJumpForce;
                 player.isGrounded = false;
@@ -534,45 +487,41 @@
             }
         }
 
-        ['jumpBtn', 'jumpBtnM'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                const handleJumpAction = (e) => {
-                    if (e) e.preventDefault();
-                    btn.classList.add('pressed');
-                    setTimeout(() => btn.classList.remove('pressed'), 150);
-                    triggerJump();
-                };
-                btn.addEventListener('touchstart', handleJumpAction, { passive: false });
-                btn.addEventListener('mousedown', handleJumpAction);
-            }
-        });
+        const jumpBtnM = document.getElementById('jumpBtnM');
+        if (jumpBtnM) {
+            const handleJumpAction = (e) => {
+                if (e) e.preventDefault();
+                jumpBtnM.classList.add('pressed');
+                setTimeout(() => jumpBtnM.classList.remove('pressed'), 150);
+                triggerJump();
+            };
+            jumpBtnM.addEventListener('touchstart', handleJumpAction, { passive: false });
+            jumpBtnM.addEventListener('mousedown', handleJumpAction);
+        }
 
-        ['shieldBtn', 'shieldBtnM'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                const activateShield = (e) => {
-                    if (e) e.preventDefault();
-                    btn.classList.add('pressed');
-                    shieldActive = true;
-                    document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-                    document.getElementById('shieldDisplay').style.color = "#ffaa00";
-                };
-                const deactivateShield = (e) => {
-                    if (e) e.preventDefault();
-                    btn.classList.remove('pressed');
-                    shieldActive = false;
-                    document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                    document.getElementById('shieldDisplay').style.color = "#d8b4fe";
-                };
-                btn.addEventListener('touchstart', activateShield, { passive: false });
-                btn.addEventListener('touchend', deactivateShield, { passive: false });
-                btn.addEventListener('touchcancel', deactivateShield, { passive: false });
-                btn.addEventListener('mousedown', activateShield);
-                btn.addEventListener('mouseup', deactivateShield);
-                btn.addEventListener('mouseleave', deactivateShield);
-            }
-        });
+        const shieldBtnM = document.getElementById('shieldBtnM');
+        if (shieldBtnM) {
+            const activateShield = (e) => {
+                if (e) e.preventDefault();
+                shieldBtnM.classList.add('pressed');
+                shieldActive = true;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
+                document.getElementById('shieldDisplay').style.color = "#ffaa00";
+            };
+            const deactivateShield = (e) => {
+                if (e) e.preventDefault();
+                shieldBtnM.classList.remove('pressed');
+                shieldActive = false;
+                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
+                document.getElementById('shieldDisplay').style.color = "#d8b4fe";
+            };
+            shieldBtnM.addEventListener('touchstart', activateShield, { passive: false });
+            shieldBtnM.addEventListener('touchend', deactivateShield, { passive: false });
+            shieldBtnM.addEventListener('touchcancel', deactivateShield, { passive: false });
+            shieldBtnM.addEventListener('mousedown', activateShield);
+            shieldBtnM.addEventListener('mouseup', deactivateShield);
+            shieldBtnM.addEventListener('mouseleave', deactivateShield);
+        }
 
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
