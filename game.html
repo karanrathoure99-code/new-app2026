@@ -71,11 +71,12 @@
         .arena-container {
             flex: 1;
             background: rgba(30, 18, 8, 0.85);
-            border: 2px solid rgba(225, 155, 75, 0.4);
+            /* Outline thodi aur dark aur thick kar di gayi hai */
+            border: 3px solid rgba(180, 100, 30, 0.9);
             border-radius: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 25px rgba(225, 155, 75, 0.1), 0 10px 30px rgba(0,0,0,0.6);
+            box-shadow: inset 0 0 25px rgba(225, 155, 75, 0.1), 0 10px 30px rgba(0,0,0,0.8);
         }
 
         #gameCanvas {
@@ -239,15 +240,15 @@
         let player = {
             x: 50,
             y: 100,
-            width: 17,       // 25% bada size (pehle 14 tha)
-            height: 35,      // 25% bada size (pehle 28 tha)
+            width: 17,       
+            height: 35,      
             vx: 0,
             vy: 0,
             speed: 3.5,
             jumpForce: -9,
             gravity: 0.42,
             isGrounded: false,
-            legAngle: 0
+            animTimer: 0
         };
 
         let platforms = [];
@@ -255,25 +256,28 @@
         let goal = { x: 1060, y: 0, w: 14, h: 32 };
 
         function updateGameLayout() {
-            const groundY = canvasHeight - 50;
+            // Surface ko box ke niche ki line tak mota aur lamba kar diya gaya hai
+            const surfaceTop = canvasHeight - 35;
+            const surfaceHeight = 35;
 
             platforms = [
-                { x: 0, y: groundY, w: 1200, h: 6, type: 'ground' }, // Surface lamba kiya box ke according
-                { x: 720, y: groundY, w: 80, h: 6, type: 'hiddenTrap', triggered: false }, 
-                { x: 800, y: groundY, w: 400, h: 6, type: 'ground' }
+                { x: 0, y: surfaceTop, w: 1500, h: surfaceHeight, type: 'ground' }, 
+                { x: 720, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false }, 
+                { x: 800, y: surfaceTop, w: 700, h: surfaceHeight, type: 'ground' }
             ];
 
+            // Coin size damee ke according set kiya gaya hai
             coins = [
-                { x: 160, y: groundY - 26, collected: false, hasBomb: false, radius: 4.5 },
-                { x: 300, y: groundY - 26, collected: false, hasBomb: false, radius: 4.5 },
-                { x: 450, y: groundY - 26, collected: false, hasBomb: false, radius: 4.5 },
-                { x: 590, y: groundY - 26, collected: false, hasBomb: true, radius: 4.5 },   
-                { x: 750, y: groundY - 26, collected: false, hasBomb: false, radius: 4.5 },
-                { x: 920, y: groundY - 26, collected: false, hasBomb: false, radius: 4.5 }
+                { x: 160, y: surfaceTop - 18, collected: false, hasBomb: false, radius: 5.5 },
+                { x: 300, y: surfaceTop - 18, collected: false, hasBomb: false, radius: 5.5 },
+                { x: 450, y: surfaceTop - 18, collected: false, hasBomb: false, radius: 5.5 },
+                { x: 590, y: surfaceTop - 18, collected: false, hasBomb: true, radius: 5.5 },   
+                { x: 750, y: surfaceTop - 18, collected: false, hasBomb: false, radius: 5.5 },
+                { x: 920, y: surfaceTop - 18, collected: false, hasBomb: false, radius: 5.5 }
             ];
 
-            goal.y = groundY - 32;
-            goal.x = 1060;
+            goal.y = surfaceTop - 32;
+            goal.x = 1160;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -406,19 +410,19 @@
 
             if (keys.left) {
                 player.vx = -player.speed;
-                player.legAngle += 0.22;
+                player.animTimer += 0.2;
             } else if (keys.right) {
                 player.vx = player.speed;
-                player.legAngle += 0.22;
+                player.animTimer += 0.2;
             } else {
                 player.vx = 0;
-                player.legAngle = 0;
+                player.animTimer = 0;
             }
 
             if (keys.down) {
-                player.height = 22; // Crouch height scaled up
+                player.height = 22; 
             } else {
-                player.height = 35; // Normal height scaled up
+                player.height = 35; 
             }
 
             player.x += player.vx;
@@ -468,12 +472,13 @@
             ctx.save();
             ctx.translate(-cameraX, 0);
 
+            // Ground / Surface drawing (mota aur box ke lines tak aligned)
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return;
-                ctx.fillStyle = '#4e311a';
+                ctx.fillStyle = '#3a2211';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.strokeStyle = '#e19b4b';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#b4641e';
+                ctx.lineWidth = 2;
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
             });
 
@@ -515,27 +520,47 @@
                     ctx.stroke();
                 }
 
-                // Scaled Player Drawing
+                // Damee Head
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(px + player.width/2, py + 5, 5, 0, Math.PI * 2);
                 ctx.fill();
 
+                // Damee Body
                 ctx.fillRect(px + 4, py + 11, player.width - 8, player.height - 12);
 
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(px + 4, py + 13);
-                ctx.lineTo(px - 2, py + 19);
-                ctx.moveTo(px + player.width - 4, py + 13);
-                ctx.lineTo(px + player.width + 2, py + 19);
+                // Motion calculation for hands and legs
+                let swing = Math.sin(player.animTimer) * 6;
+                let isJumping = !player.isGrounded;
 
-                let legSwing = Math.sin(player.legAngle) * 5;
-                ctx.moveTo(px + 5, py + player.height - 9);
-                ctx.lineTo(px + 3 + legSwing, py + player.height);
-                ctx.moveTo(px + player.width - 5, py + player.height - 9);
-                ctx.lineTo(px + player.width - 3 - legSwing, py + player.height);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                if (isJumping) {
+                    // Jump motion: Hands up, legs folded/animated
+                    ctx.moveTo(px + 4, py + 13);
+                    ctx.lineTo(px - 3, py + 8);
+                    ctx.moveTo(px + player.width - 4, py + 13);
+                    ctx.lineTo(px + player.width + 3, py + 8);
+
+                    ctx.moveTo(px + 5, py + player.height - 9);
+                    ctx.lineTo(px + 2, py + player.height - 2);
+                    ctx.moveTo(px + player.width - 5, py + player.height - 9);
+                    ctx.lineTo(px + player.width - 2, py + player.height - 2);
+                } else {
+                    // Normal / Walking motion with hands and legs swing
+                    ctx.moveTo(px + 4, py + 13);
+                    ctx.lineTo(px - 2 + (swing * 0.5), py + 19);
+                    ctx.moveTo(px + player.width - 4, py + 13);
+                    ctx.lineTo(px + player.width + 2 - (swing * 0.5), py + 19);
+
+                    ctx.moveTo(px + 5, py + player.height - 9);
+                    ctx.lineTo(px + 3 + swing, py + player.height);
+                    ctx.moveTo(px + player.width - 5, py + player.height - 9);
+                    ctx.lineTo(px + player.width - 3 - swing, py + player.height);
+                }
+
                 ctx.stroke();
             }
 
@@ -554,7 +579,6 @@
             window.location.href = "index.html";
         }
 
-        // Landscape Orientation & Fullscreen Lock Setup
         window.addEventListener('load', () => {
             const requestFullScreen = () => {
                 const elem = document.documentElement;
@@ -566,7 +590,6 @@
                     elem.msRequestFullscreen();
                 }
                 
-                // Try locking screen orientation to landscape if supported
                 if (screen.orientation && screen.orientation.lock) {
                     screen.orientation.lock('landscape').catch(err => console.log("Orientation lock not supported/allowed", err));
                 }
