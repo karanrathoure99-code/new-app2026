@@ -165,6 +165,28 @@
             position: relative;
         }
 
+        /* Phone aur tablet (max-width: 1023px) ke liye sabhi control buttons ka size 50% bada kiya gaya hai (48px -> 72px) aur font-size adjust ki gayi hai */
+        @media (max-width: 1023px) {
+            .ctrl-btn {
+                width: 72px;
+                height: 72px;
+                font-size: 16px;
+                border-radius: 16px;
+            }
+            .btn-logo {
+                font-size: 13px !important;
+            }
+            .btn-label {
+                font-size: 11px !important;
+            }
+            /* Right side buttons ko bade box ke niche position karne ke liye column direction aur gap */
+            .control-group.right-group {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+            }
+        }
+
         .ctrl-btn:active, .ctrl-btn.pressed {
             transform: translateY(2px);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
@@ -247,13 +269,14 @@
             <canvas id="gameCanvas"></canvas>
 
             <div class="controls-overlay">
+                <!-- Left side: down button remove kar diya gaya hai, sirf left aur right buttons rahenge -->
                 <div class="control-group">
                     <button class="ctrl-btn" id="leftBtn">◀</button>
                     <button class="ctrl-btn" id="rightBtn">▶</button>
-                    <button class="ctrl-btn" id="downBtn">▼</button>
                 </div>
 
-                <div class="control-group">
+                <!-- Right side: buttons bade box ke niche stack kiye gaye hain -->
+                <div class="control-group right-group">
                     <button class="ctrl-btn" id="jumpBtn">
                         <span class="btn-logo">Z</span>
                         <span class="btn-label">JUMP</span>
@@ -324,7 +347,7 @@
             vx: 0,
             vy: 0,
             speed: 2.8,       
-            jumpForce: -8.5,  
+            jumpForce: -8.5,  // Desktop par default jump speed
             gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
@@ -441,7 +464,7 @@
 
         bindButton('leftBtn', () => keys.left = true, () => keys.left = false);
         bindButton('rightBtn', () => keys.right = true, () => keys.right = false);
-        bindButton('downBtn', () => keys.down = true, () => keys.down = false);
+        // Note: left down button remove kiya gaya hai, rightDownBtn abhi bhi active hai
         bindButton('rightDownBtn', () => keys.down = true, () => keys.down = false);
 
         const jumpBtn = document.getElementById('jumpBtn');
@@ -458,7 +481,11 @@
 
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
-                player.vy = player.jumpForce;
+                // Sirf phone ya tablet (max-width: 1023px) par jump force ko 40% kam kiya gaya hai (-8.5 ka 60% = -5.1)
+                const isMobileOrTablet = window.innerWidth <= 1023;
+                let activeJumpForce = isMobileOrTablet ? (player.jumpForce * 0.6) : player.jumpForce;
+
+                player.vy = activeJumpForce;
                 player.isGrounded = false;
                 playSound('jump');
                 // Create jump dust particles
