@@ -16,7 +16,6 @@
         }
 
         body {
-            /* 20% Lighter Background while keeping original color theme */
             background: linear-gradient(135deg, #42280e 0%, #1c0e05 50%, #2b1906 100%);
             background-attachment: fixed;
             color: #ffffff;
@@ -110,7 +109,6 @@
             align-items: center;
         }
 
-        /* 3D Glass Effect 80% Transparent (rgba with alpha ~0.2) */
         .ctrl-btn {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
@@ -141,7 +139,6 @@
             border-color: #ffaa00;
         }
 
-        /* Small Logo inside buttons to make them compact and styled like back/front buttons */
         .btn-logo {
             font-size: 9px;
             font-weight: 900;
@@ -188,14 +185,12 @@
             <canvas id="gameCanvas"></canvas>
 
             <div class="controls-overlay">
-                <!-- Left Side: Back/Front (Left/Right) & Down Move Buttons with 3D glass effect -->
                 <div class="control-group">
                     <button class="ctrl-btn" id="leftBtn">◀</button>
                     <button class="ctrl-btn" id="rightBtn">▶</button>
                     <button class="ctrl-btn" id="downBtn">▼</button>
                 </div>
 
-                <!-- Right Side: Jump, Down, Shield Buttons with small logo inside -->
                 <div class="control-group">
                     <button class="ctrl-btn" id="jumpBtn">
                         <span class="btn-logo">Z</span>
@@ -244,8 +239,8 @@
         let player = {
             x: 50,
             y: 100,
-            width: 14,
-            height: 28,
+            width: 17,       // 25% bada size (pehle 14 tha)
+            height: 35,      // 25% bada size (pehle 28 tha)
             vx: 0,
             vy: 0,
             speed: 3.5,
@@ -262,14 +257,12 @@
         function updateGameLayout() {
             const groundY = canvasHeight - 50;
 
-            // Surface length matched to big box width & thickness aligned precisely with bottom box line
             platforms = [
-                { x: 0, y: groundY, w: 720, h: 6, type: 'ground' },
+                { x: 0, y: groundY, w: 1200, h: 6, type: 'ground' }, // Surface lamba kiya box ke according
                 { x: 720, y: groundY, w: 80, h: 6, type: 'hiddenTrap', triggered: false }, 
-                { x: 800, y: groundY, w: 300, h: 6, type: 'ground' }
+                { x: 800, y: groundY, w: 400, h: 6, type: 'ground' }
             ];
 
-            // Coin size adjusted proportionally to dame (player) size & placement
             coins = [
                 { x: 160, y: groundY - 26, collected: false, hasBomb: false, radius: 4.5 },
                 { x: 300, y: groundY - 26, collected: false, hasBomb: false, radius: 4.5 },
@@ -422,11 +415,10 @@
                 player.legAngle = 0;
             }
 
-            // Down button / key action: make dame (player) bow / crouch (reduce height)
             if (keys.down) {
-                player.height = 18;
+                player.height = 22; // Crouch height scaled up
             } else {
-                player.height = 28;
+                player.height = 35; // Normal height scaled up
             }
 
             player.x += player.vx;
@@ -516,33 +508,34 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + 7, py + player.height/2, 20, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 24, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
                     ctx.stroke();
                 }
 
+                // Scaled Player Drawing
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-                ctx.arc(px + 7, py + 4, 4, 0, Math.PI * 2);
+                ctx.arc(px + player.width/2, py + 5, 5, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.fillRect(px + 5, py + 9, 4, player.height - 10);
+                ctx.fillRect(px + 4, py + 11, player.width - 8, player.height - 12);
 
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
-                ctx.moveTo(px + 5, py + 11);
-                ctx.lineTo(px + 1, py + 16);
-                ctx.moveTo(px + 9, py + 11);
-                ctx.lineTo(px + 13, py + 16);
+                ctx.moveTo(px + 4, py + 13);
+                ctx.lineTo(px - 2, py + 19);
+                ctx.moveTo(px + player.width - 4, py + 13);
+                ctx.lineTo(px + player.width + 2, py + 19);
 
-                let legSwing = Math.sin(player.legAngle) * 4;
-                ctx.moveTo(px + 6, py + player.height - 8);
-                ctx.lineTo(px + 4 + legSwing, py + player.height);
-                ctx.moveTo(px + 8, py + player.height - 8);
-                ctx.lineTo(px + 10 - legSwing, py + player.height);
+                let legSwing = Math.sin(player.legAngle) * 5;
+                ctx.moveTo(px + 5, py + player.height - 9);
+                ctx.lineTo(px + 3 + legSwing, py + player.height);
+                ctx.moveTo(px + player.width - 5, py + player.height - 9);
+                ctx.lineTo(px + player.width - 3 - legSwing, py + player.height);
                 ctx.stroke();
             }
 
@@ -561,7 +554,7 @@
             window.location.href = "index.html";
         }
 
-        // Full Screen API Auto-Fit Integration
+        // Landscape Orientation & Fullscreen Lock Setup
         window.addEventListener('load', () => {
             const requestFullScreen = () => {
                 const elem = document.documentElement;
@@ -571,6 +564,11 @@
                     elem.webkitRequestFullscreen();
                 } else if (elem.msRequestFullscreen) {
                     elem.msRequestFullscreen();
+                }
+                
+                // Try locking screen orientation to landscape if supported
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(err => console.log("Orientation lock not supported/allowed", err));
                 }
             };
             window.addEventListener('click', requestFullScreen, { once: true });
