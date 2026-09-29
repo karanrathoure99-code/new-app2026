@@ -1,9 +1,13 @@
+<!-- ======================================================== -->
+<!-- 🎮 YEH "game.html" (MAIN GAMEPLAY WALI FILE) HAI 🎮      -->
+<!-- ISME GAME KA ACTUAL GAMEPLAY, JUMP AUR LOGIC AAYEGA!     -->
+<!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Level 1 & 2</title>
+    <title>🤪 Z PAJAL - Gameplay</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -342,8 +346,9 @@
             checkDeviceControls();
         }
 
-        // === LOCAL STORAGE SAVE SYSTEM ===
-        // Agar pehli baar aaya hai toh Level 1, warna saved level.
+        // ==========================================
+        // YAHAN PAR localStorage ADD KIYA GAYA HAI 
+        // ==========================================
         let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
         
         let isDoorOpen = true; 
@@ -381,6 +386,7 @@
             const surfaceHeight = 40;
             const coinSpacing = (canvasWidth - 120) / 6;
 
+            // Upar Header update hoga
             document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎𝙀 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl " + currentLevel + "⚡";
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
 
@@ -737,7 +743,10 @@
                         setTimeout(() => {
                             modal.classList.remove('show');
                             currentLevel = 2;
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', 2); // Save Level
+                            // ===================================
+                            // LEVEL SAVE YAHAN HOTA HAI 
+                            // ===================================
+                            localStorage.setItem('saveLevel_TumseNaHoPayga', 2); 
                             levelWon = false;
                             player.x = 40;
                             player.y = 100;
@@ -749,7 +758,7 @@
                         modal.innerText = "🏆 YOU BEAT LEVEL 2! GG!";
                         modal.classList.add('show');
                         setTimeout(() => {
-                            // Game complete hone ke baad level 1 par reset karna
+                            // Game complete hone ke baad level 1 par reset karna (Agar zaroorat ho toh hatwa lena)
                             localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
                             window.location.reload(); 
                         }, 3000);
