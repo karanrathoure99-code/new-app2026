@@ -314,7 +314,8 @@
             <div class="info-line">🏆 <b>Goal:</b> Reach Grand Master status</div>
         </div>
 
-        <button class="play-btn" onclick="startGame()">🚀 PLAY GAME - LEVEL 1</button>
+        <!-- Yahan id="playGameBtn" add kiya gaya hai -->
+        <button class="play-btn" id="playGameBtn" onclick="startGame()">🚀 PLAY GAME - LEVEL 1</button>
         <button class="logout-btn" onclick="logoutUser()">LOGOUT SESSION</button>
     </div>
 
@@ -338,6 +339,12 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // ==== Real-time Level Tracker yahan se shuru hota hai ====
+        let currentSavedLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        document.getElementById('displayLevel').innerText = "LEVEL: " + currentSavedLevel;
+        document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME - LEVEL " + currentSavedLevel;
+        // ==========================================================
 
         function playTechSound() {
             try {
@@ -414,9 +421,14 @@
                     finalUsername = user.displayName || (user.email ? user.email.split('@')[0] : "Player");
                 }
 
+                // Match LocalStorage level with Firebase (Jo bada ho wo use karo)
+                let actualUserLevel = Math.max(currentSavedLevel, userLevel);
+
                 document.getElementById('displayUsername').innerText = finalUsername;
-                document.getElementById('displayLevel').innerText = "LEVEL: " + userLevel;
-                updateRankInfo(userLevel);
+                document.getElementById('displayLevel').innerText = "LEVEL: " + actualUserLevel;
+                document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME - LEVEL " + actualUserLevel;
+                
+                updateRankInfo(actualUserLevel);
 
                 playBoyWelcomeVoice(finalUsername);
             } else {
@@ -436,7 +448,8 @@
         window.startGame = function() {
             playTechSound();
             setTimeout(() => {
-                window.location.href = "game.html?level=1";
+                // Yahan se ?level=1 hata diya gaya hai
+                window.location.href = "game.html";
             }, 150);
         }
     </script>
