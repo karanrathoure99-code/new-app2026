@@ -1,3 +1,6 @@
+<!-- ======================================================== -->
+<!-- 🎮 YEH "game.html" (MAIN GAMEPLAY WALI FILE) HAI 🎮      -->
+<!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,6 +169,7 @@
         .ctrl-btn {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1.5px solid rgba(255, 255, 255, 0.4);
             border-bottom: 3px solid rgba(0, 0, 0, 0.3);
             color: #ffffff;
@@ -280,7 +284,7 @@
                     <span class="btn-label">DOWN</span>
                 </button>
                 <button class="ctrl-btn" id="shieldBtnM" style="background: rgba(255,170,0,0.25);">
-                    <span class="btn-logo" style="color:#ffaa00;">Z</span>
+                    <span class="btn-logo" style="color:#ffaa00;">X</span>
                     <span class="btn-label">SHLD</span>
                 </button>
             </div>
@@ -325,9 +329,9 @@
             updateGameLayout();
         }
 
-        // ==========================================
-        // YAHAN PAR localStorage ADD KIYA GAYA HAI 
-        // ==========================================
+        // ==========================
+        // GAME STATE & LOCAL STORAGE
+        // ==========================
         let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
         
         let isDoorOpen = true; 
@@ -350,39 +354,59 @@
         let coins = [];
         let goal = { x: 0, y: 0, w: 20, h: 35 };
         
-        // LEVEL 3 TRAP
+        // TRAP VARIABLES
         let fallingTrap = { active: false, triggered: false, destroyed: false, x: 0, y: -200, w: 50, h: 60, vy: 16 };
 
-        // === MAP GENERATION (Level 1, 2, 3) ===
+        // === MAP GENERATION (Level 1 to 5) ===
         function updateGameLayout() {
             score = 0; 
             const surfaceTop = canvasHeight - 40;
             const coinSpacing = (canvasWidth - 120) / 6;
 
-            document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎𝙀 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl " + currentLevel + "⚡";
+            document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎ேக 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl " + currentLevel + "⚡";
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
 
-            platforms = [{ x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' }];
             fallingTrap = { active: false, triggered: false, destroyed: false, x: 0, y: -200, w: 50, h: 60, vy: 16 };
 
             if (currentLevel === 1) {
+                platforms = [{ x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' }];
                 platforms.push({ x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: 40, type: 'hiddenTrap', triggered: false });
                 isDoorOpen = true; 
             } 
             else if (currentLevel === 2) {
+                platforms = [{ x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' }];
                 let lastCoinX = 60 + 5 * coinSpacing;
                 platforms.push({ x: Math.floor(lastCoinX) - 30, y: surfaceTop, w: 90, h: 40, type: 'hiddenTrap', triggered: false });
                 isDoorOpen = false; 
             }
             else if (currentLevel === 3) {
-                // Shield trap activate in update() function
+                platforms = [{ x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' }];
                 isDoorOpen = false; 
+            }
+            else if (currentLevel === 4) {
+                platforms = [
+                    { x: 0, y: surfaceTop, w: canvasWidth * 0.45, h: 40, type: 'ground' }, 
+                    { x: canvasWidth * 0.55, y: surfaceTop, w: canvasWidth * 0.45, h: 40, type: 'ground' }, 
+                    { x: canvasWidth * 0.45 - 20, y: surfaceTop - 70, w: 40, h: 40, type: 'trollBlock', visible: false }
+                ];
+                isDoorOpen = false;
+            }
+            else if (currentLevel === 5) {
+                platforms = [
+                    { x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' },
+                    { x: canvasWidth * 0.25, y: surfaceTop - 300, w: canvasWidth * 0.5, h: 268, type: 'deathCeiling', triggered: false, visible: false } 
+                ];
+                isDoorOpen = false;
             }
 
             coins = [];
             for (let i = 1; i <= 6; i++) {
+                let coinX = 60 + (i - 1) * coinSpacing;
+                if (currentLevel === 5 && i > 1 && i < 6) {
+                    coinX = canvasWidth * 0.25 + 50 + (i - 2) * ((canvasWidth * 0.5 - 100) / 3);
+                }
                 coins.push({
-                    x: 60 + (i - 1) * coinSpacing, y: surfaceTop - 25,
+                    x: coinX, y: surfaceTop - 25,
                     collected: false, radius: 5, floatOffset: Math.random() * Math.PI
                 });
             }
@@ -427,6 +451,7 @@
             } catch (e) {}
         }
 
+        // === CONTROLS ===
         const bindButton = (id, onStart, onEnd) => {
             const btn = document.getElementById(id);
             if (!btn) return;
@@ -482,19 +507,32 @@
             shieldBtnM.addEventListener('mouseleave', deactivateShield);
         }
 
+        // ==========================
+        // KEYBOARD BINDINGS (FIXED X AND SHIFT FOR SHIELD)
+        // ==========================
         window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') { e.preventDefault(); triggerJump(); }
-            if (e.key === 'Shift') { shieldActive = true; document.getElementById('shieldDisplay').innerText = "SHIELD: ON"; document.getElementById('shieldDisplay').style.color = "#ffaa00"; }
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') { e.preventDefault(); triggerJump(); }
+            
+            if (e.key === 'Shift' || e.key === 'x' || e.key === 'X') { 
+                shieldActive = true; 
+                document.getElementById('shieldDisplay').innerText = "SHIELD: ON"; 
+                document.getElementById('shieldDisplay').style.color = "#ffaa00"; 
+            }
         });
 
         window.addEventListener('keyup', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
-            if (e.key === 'Shift') { shieldActive = false; document.getElementById('shieldDisplay').innerText = "SHIELD: OFF"; document.getElementById('shieldDisplay').style.color = "#faedcd"; }
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = false;
+            
+            if (e.key === 'Shift' || e.key === 'x' || e.key === 'X') { 
+                shieldActive = false; 
+                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF"; 
+                document.getElementById('shieldDisplay').style.color = "#faedcd"; 
+            }
         });
 
         function triggerExplosion() {
@@ -530,7 +568,7 @@
                     c.collected = true; score += 1; playSound('coin');
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
 
-                    if ((currentLevel === 2 || currentLevel === 3) && coins.every(coin => coin.collected)) {
+                    if ((currentLevel >= 2) && coins.every(coin => coin.collected)) {
                         isDoorOpen = true; 
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x-30, y: player.y-20, alpha: 1, vy: -1 });
                     }
@@ -554,6 +592,7 @@
             else if (keys.right) { player.vx = player.speed; player.animTimer += 0.12; } 
             else { player.vx = 0; player.animTimer = 0; }
             if (!player.isGrounded) player.animTimer += 0.12; 
+            
             player.height = keys.down ? 27 : 45; 
 
             player.x += player.vx;
@@ -564,65 +603,81 @@
             player.y += player.vy;
             player.isGrounded = false;
 
-            // Platform Logic
+            // =========================
+            // PLATFORM & COLLISION LOGIC
+            // =========================
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap') {
                     let pCX = player.x + player.width/2;
                     if (!p.triggered && pCX >= p.x && pCX <= p.x+p.w && player.y+player.height >= p.y-5) {
-                        p.triggered = true; setTimeout(() => triggerExplosion(), 80); return;
+                        
+                        // SHIELD LOGIC FOR LEVEL 1 & 2 HIDDEN TRAPS
+                        if (shieldActive) {
+                            // Agar player ne shield on ki hai, toh blast nahi hoga, balki bach jayega!
+                            floatingTexts.push({ text: 'TRAP BLOCKED!', x: player.x-30, y: player.y-20, alpha: 1, vy: -1.5 });
+                            p.triggered = true; // Trap deactivate ho gaya
+                            playSound('coin'); 
+                        } else {
+                            // Bina shield ke gaya toh BAM!
+                            p.triggered = true; setTimeout(() => triggerExplosion(), 80); return;
+                        }
                     }
                     if (p.triggered) return; 
                 }
-                if (player.x+player.width > p.x && player.x < p.x+p.w && player.y+player.height >= p.y && player.y+player.height-player.vy <= p.y+12) {
-                    player.y = p.y - player.height; player.vy = 0; player.isGrounded = true;
+
+                if (p.type === 'trollBlock') {
+                    if (!p.visible && player.vy < 0 && 
+                        player.x + player.width > p.x && player.x < p.x + p.w && 
+                        player.y <= p.y + p.h && player.y - player.vy >= p.y + p.h) {
+                        player.y = p.y + p.h; player.vy = 2; p.visible = true; 
+                        playSound('blast'); floatingTexts.push({ text: 'TROLL!', x: p.x-5, y: p.y-10, alpha: 1, vy: -0.5 });
+                    }
+                }
+
+                // LEVEL 5: INVISIBLE LASER CEILING
+                if (p.type === 'deathCeiling') {
+                    if (player.x + player.width > p.x + 5 && player.x < p.x + p.w - 5 && 
+                        player.y < p.y + p.h && player.y + player.height > p.y) {
+                        if (!isExploding) {
+                            p.visible = true; 
+                            triggerExplosion();
+                            floatingTexts.push({ text: 'CROUCH! 👇', x: player.x-30, y: player.y-30, alpha: 1, vy: -0.5 });
+                        }
+                    }
+                    return; 
+                }
+
+                if (p.type !== 'trollBlock' || p.visible) {
+                    if (player.x+player.width > p.x && player.x < p.x+p.w && player.y+player.height >= p.y && player.y+player.height-player.vy <= p.y+12) {
+                        player.y = p.y - player.height; player.vy = 0; player.isGrounded = true;
+                    }
                 }
             });
 
             if (player.y > canvasHeight + 100) triggerExplosion();
+            
             checkCoins();
 
-            // ======================================
-            // LEVEL 3: AASMAN SE AAFAT (SHIELD TRAP)
-            // ======================================
             if (currentLevel === 3) {
                 let triggerX = 60 + 3 * ((canvasWidth - 120) / 6); 
                 if (!fallingTrap.triggered && player.x > triggerX - 40) {
-                    fallingTrap.triggered = true;
-                    fallingTrap.active = true;
-                    fallingTrap.x = player.x - 10; 
+                    fallingTrap.triggered = true; fallingTrap.active = true; fallingTrap.x = player.x - 10; 
                 }
 
                 if (fallingTrap.active) {
                     fallingTrap.y += fallingTrap.vy; 
-                    
-                    if (
-                        player.x < fallingTrap.x + fallingTrap.w &&
-                        player.x + player.width > fallingTrap.x &&
-                        player.y < fallingTrap.y + fallingTrap.h &&
-                        player.y + player.height > fallingTrap.y
-                    ) {
+                    if (player.x < fallingTrap.x + fallingTrap.w && player.x + player.width > fallingTrap.x &&
+                        player.y < fallingTrap.y + fallingTrap.h && player.y + player.height > fallingTrap.y) {
+                        
                         if (shieldActive) {
-                            fallingTrap.active = false;
-                            fallingTrap.destroyed = true;
-                            playSound('blast'); 
+                            fallingTrap.active = false; fallingTrap.destroyed = true; playSound('blast'); 
                             floatingTexts.push({ text: 'BLOCKED!', x: player.x - 20, y: player.y - 20, alpha: 1, vy: -1.5 });
-                            for (let i = 0; i < 15; i++) {
-                                particles.push({
-                                    x: fallingTrap.x + fallingTrap.w/2, y: fallingTrap.y + fallingTrap.h,
-                                    vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
-                                    size: Math.random()*5+2, color: '#808080', life: 30
-                                });
-                            }
+                            for (let i = 0; i < 15; i++) particles.push({ x: fallingTrap.x + fallingTrap.w/2, y: fallingTrap.y + fallingTrap.h, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, size: Math.random()*5+2, color: '#808080', life: 30 });
                         } else {
-                            fallingTrap.active = false;
-                            triggerExplosion();
+                            fallingTrap.active = false; triggerExplosion(); 
                         }
                     }
-
-                    if (fallingTrap.y + fallingTrap.h >= platforms[0].y) {
-                        fallingTrap.active = false;
-                        fallingTrap.destroyed = true;
-                    }
+                    if (fallingTrap.y + fallingTrap.h >= canvasHeight) { fallingTrap.active = false; fallingTrap.destroyed = true; }
                 }
             }
 
@@ -636,7 +691,7 @@
                     levelWon = true; playSound('win');
                     const modal = document.getElementById('notificationModal');
                     
-                    if (currentLevel < 3) {
+                    if (currentLevel < 5) { 
                         modal.innerText = "🎉 Level " + currentLevel + " Cleared! Next Level...";
                         modal.classList.add('show');
                         setTimeout(() => {
@@ -647,13 +702,12 @@
                             updateGameLayout();
                         }, 2200);
                     } else {
-                        modal.innerText = "🏆 YOU BEAT ALL 3 LEVELS! GG!";
+                        modal.innerText = "🏆 YOU BEAT ALL 5 LEVELS! GG!";
                         modal.classList.add('show');
                         setTimeout(() => {
-                            // Agar game reset karna ho next aane par
                             localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
                             window.location.href = "index.html"; 
-                        }, 3000);
+                        }, 4000);
                     }
                 }
             }
@@ -664,14 +718,39 @@
             for (let i=floatingTexts.length-1; i>=0; i--) { let ft = floatingTexts[i]; ft.y+=ft.vy; ft.alpha-=0.03; if(ft.alpha<=0) floatingTexts.splice(i,1); }
         }
 
+        // ==========================
+        // DRAW GRAPHICS
+        // ==========================
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return; 
-                ctx.fillStyle = '#2b180a'; ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.strokeStyle = '#d4a373'; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x+p.w, p.y); ctx.stroke();
+                if (p.type === 'trollBlock' && !p.visible) return; 
+                
+                if (p.type === 'deathCeiling') {
+                    if (p.visible) {
+                        ctx.fillStyle = '#111111'; 
+                        ctx.fillRect(p.x, p.y, p.w, p.h);
+                        ctx.shadowBlur = 15;
+                        ctx.shadowColor = "red";
+                        ctx.fillStyle = '#ff0000'; 
+                        ctx.fillRect(p.x, p.y + p.h - 5, p.w, 10); 
+                        ctx.shadowBlur = 0; 
+                        ctx.fillStyle = '#ffcc00'; ctx.font = 'bold 16px Orbitron';
+                        ctx.fillText('⚠️ HOLD DOWN TO CROUCH ⚠️', p.x + p.w/2 - 130, p.y + p.h - 20);
+                    }
+                } else {
+                    ctx.fillStyle = (p.type === 'trollBlock') ? '#4a4a4a' : '#2b180a'; 
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                    ctx.strokeStyle = '#d4a373'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x+p.w, p.y); ctx.stroke();
+                }
+
+                if (p.type === 'trollBlock' && p.visible) {
+                    ctx.fillStyle = '#ffffff'; ctx.font = '22px Arial';
+                    ctx.fillText('😜', p.x + 8, p.y + 30);
+                }
             });
 
             coins.forEach(c => {
@@ -683,19 +762,12 @@
                 }
             });
 
-            // Draw Falling Trap (Level 3)
             if (currentLevel === 3 && fallingTrap.active && !fallingTrap.destroyed) {
-                ctx.fillStyle = '#4a4a4a'; 
-                ctx.fillRect(fallingTrap.x, fallingTrap.y, fallingTrap.w, fallingTrap.h);
-                ctx.strokeStyle = '#ff0000';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(fallingTrap.x, fallingTrap.y, fallingTrap.w, fallingTrap.h);
-                ctx.fillStyle = '#ff0000';
-                ctx.font = 'bold 22px Arial';
-                ctx.fillText('⚠️', fallingTrap.x + 9, fallingTrap.y + 38);
+                ctx.fillStyle = '#4a4a4a'; ctx.fillRect(fallingTrap.x, fallingTrap.y, fallingTrap.w, fallingTrap.h);
+                ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 3; ctx.strokeRect(fallingTrap.x, fallingTrap.y, fallingTrap.w, fallingTrap.h);
+                ctx.fillStyle = '#ff0000'; ctx.font = 'bold 22px Arial'; ctx.fillText('⚠️', fallingTrap.x + 9, fallingTrap.y + 38);
             }
 
-            // Draw Door
             if (isDoorOpen) {
                 ctx.fillStyle = 'rgba(255, 159, 28, 0.25)'; ctx.fillRect(goal.x-4, goal.y-4, goal.w+8, goal.h+8);
                 ctx.fillStyle = '#532d0c'; ctx.fillRect(goal.x, goal.y, goal.w, goal.h); ctx.strokeStyle = '#ff9f1c';
@@ -707,9 +779,7 @@
             ctx.lineWidth = 2.5; ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
             particles.forEach(p => { ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); });
-            floatingTexts.forEach(ft => {
-                ctx.save(); ctx.globalAlpha = ft.alpha; ctx.font = 'bold 12px Orbitron, sans-serif'; ctx.fillStyle = '#ffcc00'; ctx.fillText(ft.text, ft.x-8, ft.y); ctx.restore();
-            });
+            floatingTexts.forEach(ft => { ctx.save(); ctx.globalAlpha = ft.alpha; ctx.font = 'bold 12px Orbitron, sans-serif'; ctx.fillStyle = '#ffcc00'; ctx.fillText(ft.text, ft.x-8, ft.y); ctx.restore(); });
 
             if (isExploding) {
                 fragments.forEach(f => { ctx.fillStyle = f.color; ctx.fillRect(f.x, f.y, 4, 4); });
