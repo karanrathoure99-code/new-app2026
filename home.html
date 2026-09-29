@@ -297,13 +297,13 @@
                         <div class="user-tag">Rage Gamer</div>
                     </div>
                 </div>
-                <div class="level-outside" id="displayLevel">LEVEL: 1</div>
+                <div class="level-outside" id="displayLevel">LEVEL: ...</div>
             </div>
 
             <div class="right-rank-wrapper">
                 <div class="rank-logo" id="displayRankLogo">🛡️</div>
                 <div class="rank-title-label">Current Rank</div>
-                <div class="rank" id="displayRank">Silver</div>
+                <div class="rank" id="displayRank">Loading</div>
             </div>
         </div>
 
@@ -314,7 +314,8 @@
             <div class="info-line">🏆 <b>Goal:</b> Reach Grand Master status</div>
         </div>
 
-        <button class="play-btn" onclick="startGame()">🚀 PLAY GAME - LEVEL 1</button>
+        <!-- Yaha id="playGameBtn" lagaya hai taaki text change ho sake -->
+        <button class="play-btn" id="playGameBtn" onclick="startGame()">🚀 PLAY GAME - LEVEL 1</button>
         <button class="logout-btn" onclick="logoutUser()">LOGOUT SESSION</button>
     </div>
 
@@ -338,6 +339,11 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // Page load hote hi turant Local Storage se level check karo
+        let currentSavedLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        document.getElementById('displayLevel').innerText = "LEVEL: " + currentSavedLevel;
+        document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME - LEVEL " + currentSavedLevel;
 
         function playTechSound() {
             try {
@@ -398,14 +404,14 @@
                 const uid = user.uid;
                 const userRef = ref(db, 'users/' + uid);
                 let finalUsername = "Player";
-                let userLevel = 1;
+                let dbLevel = 1;
 
                 try {
                     const snapshot = await get(userRef);
                     if (snapshot.exists()) {
                         const userData = snapshot.val();
                         finalUsername = userData.username || userData.name || user.displayName || (user.email ? user.email.split('@')[0] : "Player");
-                        userLevel = userData.level || 1;
+                        dbLevel = userData.level || 1;
                     } else {
                         finalUsername = user.displayName || (user.email ? user.email.split('@')[0] : "Gamer");
                     }
@@ -414,9 +420,14 @@
                     finalUsername = user.displayName || (user.email ? user.email.split('@')[0] : "Player");
                 }
 
+                // Match LocalStorage level with Firebase (Jo bada ho wo use karo)
+                let actualUserLevel = Math.max(currentSavedLevel, dbLevel);
+
                 document.getElementById('displayUsername').innerText = finalUsername;
-                document.getElementById('displayLevel').innerText = "LEVEL: " + userLevel;
-                updateRankInfo(userLevel);
+                document.getElementById('displayLevel').innerText = "LEVEL: " + actualUserLevel;
+                document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME - LEVEL " + actualUserLevel;
+                
+                updateRankInfo(actualUserLevel);
 
                 playBoyWelcomeVoice(finalUsername);
             } else {
@@ -436,7 +447,8 @@
         window.startGame = function() {
             playTechSound();
             setTimeout(() => {
-                window.location.href = "game.html?level=1";
+                // Yaha '?level=1' hata diya gaya hai, kyunki game apni progress khud local storage se pakad lega.
+                window.location.href = "game.html";
             }, 150);
         }
     </script>
