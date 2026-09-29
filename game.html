@@ -169,6 +169,7 @@
         .ctrl-btn {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1.5px solid rgba(255, 255, 255, 0.4);
             border-bottom: 3px solid rgba(0, 0, 0, 0.3);
             color: #ffffff;
@@ -702,33 +703,37 @@
                 }
             }
 
-            // === DOOR/GOAL COLLISION ===
+            // === DOOR/GOAL COLLISION === (UPDATE: ANDAR JAANE PAR HI LEVEL UP)
             if (player.x + player.width >= goal.x && player.y + player.height >= goal.y) {
                 if (!isDoorOpen) {
+                    // Darwaza band hai toh ruk jao
                     player.x = goal.x - player.width - 2; 
                     if (Math.random() < 0.05) floatingTexts.push({ text: 'LOCKED!', x: player.x-10, y: player.y-10, alpha: 1, vy: -0.5 });
                 } 
                 else if (!levelWon) {
-                    levelWon = true; playSound('win');
-                    const modal = document.getElementById('notificationModal');
-                    
-                    if (currentLevel < 5) { 
-                        modal.innerText = "🎉 Level " + currentLevel + " Cleared! Next Level...";
-                        modal.classList.add('show');
-                        setTimeout(() => {
-                            modal.classList.remove('show');
-                            currentLevel++;
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', currentLevel);
-                            levelWon = false; player.x = 40; player.y = 100; player.vx = 0; player.vy = 0;
-                            updateGameLayout();
-                        }, 2200);
-                    } else {
-                        modal.innerText = "🏆 YOU BEAT ALL 5 LEVELS! GG!";
-                        modal.classList.add('show');
-                        setTimeout(() => {
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
-                            window.location.href = "index.html"; 
-                        }, 4000);
+                    // Darwaza khula hai! Andar jaane par Level Up
+                    if (player.x > goal.x + 2) { 
+                        levelWon = true; playSound('win');
+                        const modal = document.getElementById('notificationModal');
+                        
+                        if (currentLevel < 5) { 
+                            modal.innerText = "🎉 Level " + currentLevel + " Cleared! Next Level...";
+                            modal.classList.add('show');
+                            setTimeout(() => {
+                                modal.classList.remove('show');
+                                currentLevel++;
+                                localStorage.setItem('saveLevel_TumseNaHoPayga', currentLevel);
+                                levelWon = false; player.x = 40; player.y = 100; player.vx = 0; player.vy = 0;
+                                updateGameLayout();
+                            }, 2200);
+                        } else {
+                            modal.innerText = "🏆 YOU BEAT ALL 5 LEVELS! GG!";
+                            modal.classList.add('show');
+                            setTimeout(() => {
+                                localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
+                                window.location.href = "index.html"; 
+                            }, 4000);
+                        }
                     }
                 }
             }
