@@ -169,7 +169,6 @@
         .ctrl-btn {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border: 1.5px solid rgba(255, 255, 255, 0.4);
             border-bottom: 3px solid rgba(0, 0, 0, 0.3);
             color: #ffffff;
@@ -354,8 +353,8 @@
         let coins = [];
         let goal = { x: 0, y: 0, w: 20, h: 35 };
         
-        // TRAP VARIABLES
-        let fallingTrap = { active: false, triggered: false, destroyed: false, x: 0, y: -200, w: 50, h: 60, vy: 16 };
+        // TRAP VARIABLES (Level 3 speed increased to 35 for INSTANT DEATH)
+        let fallingTrap = { active: false, triggered: false, destroyed: false, x: 0, y: -200, w: 50, h: 60, vy: 35 };
 
         // === MAP GENERATION (Level 1 to 5) ===
         function updateGameLayout() {
@@ -363,10 +362,10 @@
             const surfaceTop = canvasHeight - 40;
             const coinSpacing = (canvasWidth - 120) / 6;
 
-            document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎ேக 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl " + currentLevel + "⚡";
+            document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎𝙀 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl " + currentLevel + "⚡";
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
 
-            fallingTrap = { active: false, triggered: false, destroyed: false, x: 0, y: -200, w: 50, h: 60, vy: 16 };
+            fallingTrap = { active: false, triggered: false, destroyed: false, x: 0, y: -200, w: 50, h: 60, vy: 35 };
 
             if (currentLevel === 1) {
                 platforms = [{ x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' }];
@@ -377,26 +376,31 @@
                 platforms = [{ x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' }];
                 let lastCoinX = 60 + 5 * coinSpacing;
                 platforms.push({ x: Math.floor(lastCoinX) - 30, y: surfaceTop, w: 90, h: 40, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = false; 
+                isDoorOpen = false; // Only Level 2 requires coins
             }
             else if (currentLevel === 3) {
                 platforms = [{ x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' }];
-                isDoorOpen = false; 
+                isDoorOpen = true; // Gate open by default!
             }
             else if (currentLevel === 4) {
+                // LEVEL 4: THE HIDDEN PIT TRAP
+                let lastCoinX = 60 + 5 * coinSpacing;
                 platforms = [
-                    { x: 0, y: surfaceTop, w: canvasWidth * 0.45, h: 40, type: 'ground' }, 
-                    { x: canvasWidth * 0.55, y: surfaceTop, w: canvasWidth * 0.45, h: 40, type: 'ground' }, 
-                    { x: canvasWidth * 0.45 - 20, y: surfaceTop - 70, w: 40, h: 40, type: 'trollBlock', visible: false }
+                    { x: 0, y: surfaceTop, w: lastCoinX - 40, h: 40, type: 'ground' }, // Main Floor
+                    { x: lastCoinX - 40, y: surfaceTop, w: 150, h: 40, type: 'fakeGround', visible: true }, // Nakli Zameen!
+                    { x: lastCoinX + 110, y: surfaceTop, w: canvasWidth - (lastCoinX + 110), h: 40, type: 'ground' }, // Exit Floor
+                    { x: lastCoinX - 40, y: surfaceTop + 85, w: 150, h: 40, type: 'ground' } // Gadda (Pit Floor)
                 ];
-                isDoorOpen = false;
+                // And an invisible block when they try to jump out
+                platforms.push({ x: lastCoinX + 70, y: surfaceTop - 45, w: 45, h: 45, type: 'trollBlock', visible: false });
+                isDoorOpen = true; // Gate open by default!
             }
             else if (currentLevel === 5) {
                 platforms = [
                     { x: 0, y: surfaceTop, w: canvasWidth, h: 40, type: 'ground' },
                     { x: canvasWidth * 0.25, y: surfaceTop - 300, w: canvasWidth * 0.5, h: 268, type: 'deathCeiling', triggered: false, visible: false } 
                 ];
-                isDoorOpen = false;
+                isDoorOpen = true; // Gate open by default!
             }
 
             coins = [];
@@ -508,14 +512,13 @@
         }
 
         // ==========================
-        // KEYBOARD BINDINGS (FIXED X AND SHIFT FOR SHIELD)
+        // KEYBOARD BINDINGS
         // ==========================
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
             if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
             if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') { e.preventDefault(); triggerJump(); }
-            
             if (e.key === 'Shift' || e.key === 'x' || e.key === 'X') { 
                 shieldActive = true; 
                 document.getElementById('shieldDisplay').innerText = "SHIELD: ON"; 
@@ -527,7 +530,6 @@
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
             if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = false;
-            
             if (e.key === 'Shift' || e.key === 'x' || e.key === 'X') { 
                 shieldActive = false; 
                 document.getElementById('shieldDisplay').innerText = "SHIELD: OFF"; 
@@ -568,7 +570,8 @@
                     c.collected = true; score += 1; playSound('coin');
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
 
-                    if ((currentLevel >= 2) && coins.every(coin => coin.collected)) {
+                    // LEVEL 2 COIN CHECK FOR GATE UNLOCK
+                    if ((currentLevel === 2) && coins.every(coin => coin.collected)) {
                         isDoorOpen = true; 
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x-30, y: player.y-20, alpha: 1, vy: -1 });
                     }
@@ -607,24 +610,23 @@
             // PLATFORM & COLLISION LOGIC
             // =========================
             platforms.forEach(p => {
+                
+                // HIDDEN TRAP (Level 1 & 2)
                 if (p.type === 'hiddenTrap') {
                     let pCX = player.x + player.width/2;
                     if (!p.triggered && pCX >= p.x && pCX <= p.x+p.w && player.y+player.height >= p.y-5) {
-                        
-                        // SHIELD LOGIC FOR LEVEL 1 & 2 HIDDEN TRAPS
                         if (shieldActive) {
-                            // Agar player ne shield on ki hai, toh blast nahi hoga, balki bach jayega!
                             floatingTexts.push({ text: 'TRAP BLOCKED!', x: player.x-30, y: player.y-20, alpha: 1, vy: -1.5 });
-                            p.triggered = true; // Trap deactivate ho gaya
+                            p.triggered = true; 
                             playSound('coin'); 
                         } else {
-                            // Bina shield ke gaya toh BAM!
                             p.triggered = true; setTimeout(() => triggerExplosion(), 80); return;
                         }
                     }
                     if (p.triggered) return; 
                 }
 
+                // TROLL BLOCK (Level 4 Jump Trap)
                 if (p.type === 'trollBlock') {
                     if (!p.visible && player.vy < 0 && 
                         player.x + player.width > p.x && player.x < p.x + p.w && 
@@ -634,7 +636,7 @@
                     }
                 }
 
-                // LEVEL 5: INVISIBLE LASER CEILING
+                // DEATH CEILING (Level 5 Lasers)
                 if (p.type === 'deathCeiling') {
                     if (player.x + player.width > p.x + 5 && player.x < p.x + p.w - 5 && 
                         player.y < p.y + p.h && player.y + player.height > p.y) {
@@ -647,17 +649,36 @@
                     return; 
                 }
 
-                if (p.type !== 'trollBlock' || p.visible) {
+                // FAKE GROUND (Level 4 Pit Trap)
+                if (p.type === 'fakeGround') {
+                    if (p.visible && player.x+player.width > p.x && player.x < p.x+p.w && player.y+player.height >= p.y && player.y+player.height-player.vy <= p.y+12) {
+                        p.visible = false; // Zameen gayab!
+                        playSound('blast');
+                        floatingTexts.push({ text: 'GADDHA! 😂', x: p.x + 30, y: p.y - 20, alpha: 1, vy: -1 });
+                        for (let i = 0; i < 15; i++) {
+                            particles.push({
+                                x: player.x + player.width/2 + (Math.random()-0.5)*40, y: p.y,
+                                vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8,
+                                size: Math.random()*5+2, color: '#4a2511', life: 30
+                            });
+                        }
+                    }
+                }
+
+                // NORMAL SOLID GROUND LOGIC
+                if (p.type === 'ground' || p.type === 'hiddenTrap' || (p.type === 'fakeGround' && p.visible) || (p.type === 'trollBlock' && p.visible)) {
                     if (player.x+player.width > p.x && player.x < p.x+p.w && player.y+player.height >= p.y && player.y+player.height-player.vy <= p.y+12) {
                         player.y = p.y - player.height; player.vy = 0; player.isGrounded = true;
                     }
                 }
             });
 
-            if (player.y > canvasHeight + 100) triggerExplosion();
+            // PIT FALL DEATH LIMIT
+            if (player.y > canvasHeight + 150) triggerExplosion();
             
             checkCoins();
 
+            // LEVEL 3: AASMAN SE AAFAT (SHIELD TRAP)
             if (currentLevel === 3) {
                 let triggerX = 60 + 3 * ((canvasWidth - 120) / 6); 
                 if (!fallingTrap.triggered && player.x > triggerX - 40) {
@@ -727,6 +748,7 @@
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return; 
                 if (p.type === 'trollBlock' && !p.visible) return; 
+                if (p.type === 'fakeGround' && !p.visible) return; // Fake zameen gayab
                 
                 if (p.type === 'deathCeiling') {
                     if (p.visible) {
