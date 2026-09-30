@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🔥 YEH "game2.html" (WORLD 2: LEVEL 6+) HAI 🔥           -->
+<!-- 🔥 YEH "game2.html" (WORLD 2: LEVEL 6+) HAI 🔥          -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -196,11 +196,6 @@
             border-radius: 8px;
             font-size: 11px;
             cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
         }
 
         #notificationModal {
@@ -240,12 +235,7 @@
                 <span id="scoreDisplay">COINS: 0/6</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
             </div>
-            
-            <!-- ADDED BACK BUTTON SECTION HERE -->
-            <div style="display: flex; gap: 8px;">
-                <button class="back-btn" onclick="goBackLevel()" title="Previous Level">◀ BACK</button>
-                <button class="back-btn" onclick="goHome()">HOME</button>
-            </div>
+            <button class="back-btn" onclick="goHome()">HOME</button>
         </div>
 
         <div class="arena-container">
@@ -291,15 +281,10 @@
             updateGameLayout();
         }
 
-        // ==========================================
-        // NEW LEVEL SAVING LOGIC ADDED HERE
-        // ==========================================
-        let maxSavedLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 6;
-        if (maxSavedLevel < 6) maxSavedLevel = 6; 
-        
-        // currentLevel wo level hai jo player abhi khel raha hai
-        let currentLevel = maxSavedLevel; 
-        
+        // World 2 starts from Level 6
+        let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 6;
+        if (currentLevel < 6) currentLevel = 6; // Agar pehle ka ho toh 6 se shuru kare
+
         let isDoorOpen = true; 
         let score = 0;
         let shieldActive = false;
@@ -310,7 +295,7 @@
         let floatingTexts = [];
 
         let player = {
-            x: 40, y: 100, width: 14.4, height: 45,        
+            x: 40, y: 100, width: 14.4, height: 45,       
             vx: 0, vy: 0, speed: 2.8, jumpForce: -8.5, gravity: 0.38,    
             isGrounded: false, animTimer: 0
         };
@@ -328,8 +313,9 @@
             document.getElementById('levelTitle').innerText = "🔥『 WORLD 2: INFERNO 』- Lvl " + currentLevel + "🔥";
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
 
-            // LEVEL 6: THE RUNNING DOOR
+            // LEVEL 6: THE RUNNING DOOR (Door bhaagta hai!)
             platforms = [{ x: 0, y: surfaceTop, w: canvasWidth - 120, h: 40, type: 'ground' }];
+            // Ek aakhiri khai darwaze ke theek aage
             isDoorOpen = true;
 
             coins = [];
@@ -348,6 +334,7 @@
 
         let keys = { left: false, right: false, down: false };
 
+        // Sound System
         function playSound(type) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -481,22 +468,22 @@
                 }
             });
 
+            // LEVEL 6 TROLL: DOOR BHAAGTA HAI!
             if (currentLevel === 6 && player.x > goal.x - 120) {
-                goal.x += 3.5;
+                goal.x += 3.5; // Door bhaagne lagta hai
                 if (Math.random() < 0.05) floatingTexts.push({ text: 'RUK JAO! 🏃💨', x: goal.x - 20, y: goal.y - 15, alpha: 1, vy: -0.5 });
             }
 
             if (player.y > canvasHeight + 100) triggerExplosion();
 
+            // Coins
             coins.forEach(c => {
                 if (!c.collected && Math.hypot((player.x+player.width/2)-c.x, (player.y+player.height/2)-c.y) < 22) {
                     c.collected = true; score += 1; playSound('coin');
                 }
             });
 
-            // ==========================================
-            // WIN LEVEL LOGIC UPDATED
-            // ==========================================
+            // Door Goal (Andar jaane par)
             if (player.x + player.width >= goal.x && player.y + player.height >= goal.y) {
                 if (player.x > goal.x + 2 && !levelWon) {
                     levelWon = true; playSound('win');
@@ -506,13 +493,7 @@
                     setTimeout(() => {
                         modal.classList.remove('show');
                         currentLevel++;
-                        
-                        // YEH CHECK KAREGA KI KYA HUMNE NAYA RECORD BANYA HAI? 
-                        if (currentLevel > maxSavedLevel) {
-                            maxSavedLevel = currentLevel;
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', maxSavedLevel);
-                        }
-
+                        localStorage.setItem('saveLevel_TumseNaHoPayga', currentLevel);
                         levelWon = false; player.x = 40; player.y = 100;
                         updateGameLayout();
                     }, 2200);
@@ -527,12 +508,14 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
+            // Lava Platforms
             platforms.forEach(p => {
                 ctx.fillStyle = '#400808'; ctx.fillRect(p.x, p.y, p.w, p.h);
                 ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x+p.w, p.y); ctx.stroke();
             });
 
+            // Coins
             coins.forEach(c => {
                 if (!c.collected) {
                     c.floatOffset += 0.08; let floatY = c.y + Math.sin(c.floatOffset) * 3;
@@ -540,6 +523,7 @@
                 }
             });
 
+            // Door
             ctx.fillStyle = '#800000'; ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
             ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 2.5; ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
@@ -565,28 +549,6 @@
 
         function loop() { update(); draw(); requestAnimationFrame(loop); }
         loop();
-
-        // ==========================================
-        // NEW BACK LEVEL FUNCTION
-        // ==========================================
-        function goBackLevel() {
-            if (currentLevel > 6) { // Level 6 se niche nahi jayega (kyuki ye World 2 hai)
-                currentLevel--;
-                levelWon = false;
-                isExploding = false;
-                player.x = 40; 
-                player.y = 100;
-                player.vx = 0; 
-                player.vy = 0;
-                updateGameLayout();
-            } else {
-                // Agar level 6 par hi back dabaya
-                const modal = document.getElementById('notificationModal');
-                modal.innerText = "Minimum Level Reached!";
-                modal.classList.add('show');
-                setTimeout(() => modal.classList.remove('show'), 1500);
-            }
-        }
 
         function goHome() { window.location.href = "index.html"; }
     </script>
