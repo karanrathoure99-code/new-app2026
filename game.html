@@ -1,556 +1,261 @@
-<!-- ======================================================== -->
-<!-- 🔥 YEH "game2.html" (WORLD 2: LEVEL 6+) HAI 🔥          -->
-<!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔥 Z PAJAL - World 2 (Lvl 6+)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>🤪 Z PAJAL - About Game</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;800&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
-        /* Naya Red Lava World Theme */
         body {
-            background: linear-gradient(135deg, #2a0505 0%, #0d0202 50%, #400505 100%);
-            background-attachment: fixed;
-            color: #ffffff;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            background: #020205;
+            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
+            overflow-x: hidden;
+            padding: 30px 20px;
+            color: #fff;
+        }
+
+        /* Animated Background Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            animation: float 12s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(121, 40, 202, 0.2));
+            top: -100px; left: -100px;
+        }
+        .orb-2 {
+            width: 500px; height: 500px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 114, 255, 0.2));
+            bottom: -150px; right: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1) rotate(0deg); }
+            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
+        }
+
+        /* Header Title */
+        .header-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-container h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 15px;
         }
 
-        .game-wrapper {
-            width: 100%;
-            height: 100%;
-            max-width: 1280px;
-            max-height: 720px;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
+        .emoji {
+            font-size: 40px;
+            animation: pulse-light 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-light {
+            0% { opacity: 0.4; filter: drop-shadow(0 0 8px #ff007f); transform: scale(0.95); }
+            100% { opacity: 1; filter: drop-shadow(0 0 20px #00f0ff); transform: scale(1.1); }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+            margin-top: 8px;
+        }
+
+        /* Grid for 6 3D Glass Squares (Optimized for Landscape Widescreen) */
+        .grid-container {
             position: relative;
-            transition: transform 0.2s ease;
+            z-index: 10;
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
 
-        @media (max-width: 1023px) {
-            body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            .game-wrapper {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) scale(var(--scale-factor, 0.65));
-                width: 1280px;
-                height: 720px;
-                justify-content: flex-start;
-                padding: 10px;
-                transform-origin: center center;
+        @media (max-width: 1024px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        .game-hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(60, 10, 10, 0.85);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 75, 75, 0.4);
-            border-radius: 15px;
-            padding: 8px 20px;
-            margin-bottom: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.7);
-            z-index: 20;
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .hud-title {
+        /* 3D Glass Squares */
+        .glass-card {
+            background: rgba(15, 15, 25, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 30px 60px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .glass-card h3 {
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
-            font-weight: 900;
-            color: #ff4d4d;
-            text-shadow: 0 0 10px rgba(255, 77, 77, 0.7);
-        }
-
-        .hud-stats {
-            display: flex;
-            gap: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
             font-weight: 700;
-            color: #ffcccc;
-        }
-
-        .arena-container {
-            flex: 1;
-            background: rgba(25, 4, 4, 0.95);
-            border: 3px solid rgba(200, 40, 40, 0.85);
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 40px rgba(255, 0, 0, 0.25), 0 10px 30px rgba(0,0,0,0.8);
-        }
-
-        .distractor-bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 68, 68, 0.15) 0%, rgba(150, 20, 20, 0.1) 40%, transparent 70%);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        #gameCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            position: relative;
-            z-index: 2;
-        }
-
-        .controls-overlay {
-            display: none;
-        }
-
-        @media (max-width: 1023px) {
-            .controls-overlay {
-                position: relative;
-                margin-top: 8px;
-                padding: 0 4px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 100%;
-                z-index: 30;
-            }
-        }
-
-        .control-group {
+            color: #00f0ff;
+            margin-bottom: 12px;
             display: flex;
+            align-items: center;
             gap: 10px;
-            align-items: center;
+            letter-spacing: 1px;
         }
 
-        .control-group.right-group {
-            display: flex;
-            flex-direction: row;
-            gap: 8px;
-            align-items: center;
+        .glass-card p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.75);
         }
 
-        .ctrl-btn {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
-            border-bottom: 3px solid rgba(0, 0, 0, 0.4);
-            color: #ffffff;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            width: 62px;
-            height: 62px;
-            font-size: 14px;
-            border-radius: 14px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .ctrl-btn:active, .ctrl-btn.pressed {
-            transform: translateY(2px);
-            background: rgba(200, 40, 40, 0.6);
-            border-color: #ff6666;
-        }
-
-        .btn-logo {
-            font-size: 11px;
-            font-weight: 900;
-            color: #ffcc00;
-            margin-bottom: 1px;
-        }
-
-        .btn-label {
-            font-size: 9.5px;
-            font-weight: 700;
-            line-height: 1;
+        /* Back Button */
+        .back-btn-container {
+            text-align: center;
+            margin-top: 30px;
+            position: relative;
+            z-index: 10;
         }
 
         .back-btn {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #ffcccc;
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            cursor: pointer;
+            padding: 12px 35px;
+            background: linear-gradient(135deg, #ff007f, #7928ca);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.4);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+            letter-spacing: 1px;
         }
 
-        #notificationModal {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: rgba(50, 10, 10, 0.95);
-            border: 2px solid #ff4d4d;
-            padding: 16px 28px;
-            border-radius: 14px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
-            color: #ffcc00;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
-        #notificationModal.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.7);
         }
     </style>
 </head>
 <body>
 
-    <div id="notificationModal">🔥 Level Cleared!</div>
+    <!-- Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-    <div class="game-wrapper">
-        <div class="game-hud">
-            <div class="hud-title" id="levelTitle">🔥『 WORLD 2: INFERNO 』- Lvl 6🔥</div>
-            <div class="hud-stats">
-                <span id="scoreDisplay">COINS: 0/6</span>
-                <span id="shieldDisplay">SHIELD: OFF</span>
-            </div>
-            <button class="back-btn" onclick="goHome()">HOME</button>
-        </div>
-
-        <div class="arena-container">
-            <div class="distractor-bg"></div>
-            <canvas id="gameCanvas"></canvas>
-        </div>
-
-        <div class="controls-overlay" id="mobileControls">
-            <div class="control-group">
-                <button class="ctrl-btn" id="leftBtnM">◀</button>
-                <button class="ctrl-btn" id="rightBtnM">▶</button>
-            </div>
-            <div class="control-group right-group">
-                <button class="ctrl-btn" id="jumpBtnM"><span class="btn-logo">Z</span><span class="btn-label">JUMP</span></button>
-                <button class="ctrl-btn" id="rightDownBtnM"><span class="btn-logo">Z</span><span class="btn-label">DOWN</span></button>
-                <button class="ctrl-btn" id="shieldBtnM" style="background: rgba(255,68,68,0.3);"><span class="btn-logo" style="color:#ff4444;">X</span><span class="btn-label">SHLD</span></button>
-            </div>
-        </div>
+    <div class="header-container">
+        <h1><span class="emoji">🤪</span> ABOUT Z PAJAL</h1>
+        <p class="subtitle">Dimag ka dahi karne wale is safar ki poori kahani...</p>
     </div>
 
+    <!-- 6 3D Glass Squares Containing Deep Lore & Details -->
+    <div class="grid-container">
+        
+        <!-- Square 1 -->
+        <div class="glass-card">
+            <h3>🎮 1. Overview</h3>
+            <p><strong>🤪 Z PAJAL</strong> koi aam puzzle game nahi hai. Yeh ek aisi virtual duniya hai jahan har ek kadm par aapka dimaag aur patience test kiya jata hai. Is game ko design karne ka sirf ek hi maqsad tha—player ko itna challenge karna ki wo haar na maane balki baar-baar koshish kare.</p>
+        </div>
+
+        <!-- Square 2 -->
+        <div class="glass-card">
+            <h3>🔥 2. Extreme Logic</h3>
+            <p>Yahan wahi jeet sakta hai jo traditional thinking ko chhod kar "out of the box" soche. Game ke traps itne unpredictable hain ki seedha rasta hamesha galat sabit hota hai. Aapko har ek button aur movement par dhyan dena hoga, warna starting point par pahunch jaoge.</p>
+        </div>
+
+        <!-- Square 3 -->
+        <div class="glass-card">
+            <h3>⚡ 3. Zero Loading</h3>
+            <p>Hum samajhte hain ki jab player out hota hai, toh gussa aata hai. Isliye Z PAJAL mein <strong>Zero Loading Time</strong> ka concept rakha gaya hai—aap jaise hi marengey, bina kisi delay ke turant dobara start ho jayega. "Bas ek aur baar try karta hoon" wali feeling hi sabse badi taakat hai.</p>
+        </div>
+
+        <!-- Square 4 -->
+        <div class="glass-card">
+            <h3>🧠 4. Player Addiction</h3>
+            <p>Yeh game sirf entertainment ke liye nahi hai, yeh ek addiction hai. "Near-Miss Effect" (jab aap jeette-jeette reh jaate hain) aapke andar ek aisi zidd paida kar karta hai ki jab tak level clear na ho, chain nahi milta. Doston ke beech competition ke liye yeh best option hai.</p>
+        </div>
+
+        <!-- Square 5 -->
+        <div class="glass-card">
+            <h3>⚠️ 5. Warning</h3>
+            <p><strong>Warning:</strong> Agar aapko jaldi gussa aata hai ya aapka phone nazuk hai, toh yeh game aapke liye khatarnak ho sakta hai! Game khelte samay phone todne ya screen par gussa nikalne ki poori zimmedari aapki khud ki hogi. Developer koi guarantee nahi leta.</p>
+        </div>
+
+        <!-- Square 6 -->
+        <div class="glass-card">
+            <h3>🏆 6. Future Updates</h3>
+            <p>Z PAJAL ki yatra yahi khatam nahi hoti. Aage aane wale updates mein aur bhi zyada dimag kharab karne wale levels, hidden traps, aur global leaderboard features add kiye jayenge jahan aap apne doston ko challenge kar sakenge. Kya aap legend ban sakte hain?</p>
+        </div>
+
+    </div>
+
+    <div class="back-btn-container">
+        <a href="index.html" class="back-btn">⬅️ BACK TO LOGIN</a>
+    </div>
+
+    <!-- Fullscreen API & Landscape Orientation Lock Script -->
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let canvasWidth = 1280;
-        let canvasHeight = 520;
-
-        function resizeCanvas() {
-            if (window.innerWidth <= 1023) {
-                const scaleX = window.innerWidth / 1280;
-                const scaleY = window.innerHeight / 720;
-                const scale = Math.min(scaleX, scaleY) * 0.95;
-                document.documentElement.style.setProperty('--scale-factor', scale);
-                document.getElementById('mobileControls').style.display = 'flex';
-            } else {
-                document.getElementById('mobileControls').style.display = 'none';
-            }
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = canvasWidth * dpr;
-            canvas.height = canvasHeight * dpr;
-            ctx.scale(dpr, dpr);
-            canvas.style.width = canvasWidth + 'px';
-            canvas.style.height = canvasHeight + 'px';
-            updateGameLayout();
-        }
-
-        // World 2 starts from Level 6
-        let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 6;
-        if (currentLevel < 6) currentLevel = 6; // Agar pehle ka ho toh 6 se shuru kare
-
-        let isDoorOpen = true; 
-        let score = 0;
-        let shieldActive = false;
-        let isExploding = false;
-        let isSlowMo = false;
-        let fragments = [];
-        let particles = [];
-        let floatingTexts = [];
-
-        let player = {
-            x: 40, y: 100, width: 14.4, height: 45,       
-            vx: 0, vy: 0, speed: 2.8, jumpForce: -8.5, gravity: 0.38,    
-            isGrounded: false, animTimer: 0
-        };
-
-        let platforms = [];
-        let coins = [];
-        let goal = { x: 0, y: 0, w: 20, h: 35 };
-
-        // === MAP GENERATION (Level 6+) ===
-        function updateGameLayout() {
-            score = 0; 
-            const surfaceTop = canvasHeight - 40;
-            const coinSpacing = (canvasWidth - 120) / 6;
-
-            document.getElementById('levelTitle').innerText = "🔥『 WORLD 2: INFERNO 』- Lvl " + currentLevel + "🔥";
-            document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
-
-            // LEVEL 6: THE RUNNING DOOR (Door bhaagta hai!)
-            platforms = [{ x: 0, y: surfaceTop, w: canvasWidth - 120, h: 40, type: 'ground' }];
-            // Ek aakhiri khai darwaze ke theek aage
-            isDoorOpen = true;
-
-            coins = [];
-            for (let i = 1; i <= 6; i++) {
-                coins.push({
-                    x: 60 + (i - 1) * coinSpacing, y: surfaceTop - 25,
-                    collected: false, radius: 5, floatOffset: Math.random() * Math.PI
-                });
-            }
-            goal.y = surfaceTop - goal.h;
-            goal.x = canvasWidth - 180;
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        let keys = { left: false, right: false, down: false };
-
-        // Sound System
-        function playSound(type) {
+        async function enableLandscapeFullscreen() {
+            const docElement = document.documentElement;
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
-
-                if (type === 'jump') {
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.exponentialRampToValueAtTime(350, now + 0.15);
-                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                    osc.start(now); osc.stop(now + 0.15);
-                } else if (type === 'coin') {
-                    osc.type = 'triangle'; osc.frequency.setValueAtTime(587.33, now); osc.frequency.setValueAtTime(880, now + 0.08); 
-                    gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now); osc.stop(now + 0.25);
-                } else if (type === 'blast') {
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(140, now); osc.frequency.exponentialRampToValueAtTime(15, now + 0.5);
-                    gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    osc.start(now); osc.stop(now + 0.5);
-                } else if (type === 'win') {
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); osc.frequency.setValueAtTime(880, now + 0.3);
-                    gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-                    osc.start(now); osc.stop(now + 0.6);
+                if (!document.fullscreenElement) {
+                    if (docElement.requestFullscreen) {
+                        await docElement.requestFullscreen();
+                    } else if (docElement.webkitRequestFullscreen) {
+                        await docElement.webkitRequestFullscreen();
+                    } else if (docElement.msRequestFullscreen) {
+                        await docElement.msRequestFullscreen();
+                    }
                 }
-            } catch (e) {}
-        }
-
-        const bindButton = (id, onStart, onEnd) => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            const handleStart = (e) => { if(e)e.preventDefault(); btn.classList.add('pressed'); onStart(); };
-            const handleEnd = (e) => { if(e)e.preventDefault(); btn.classList.remove('pressed'); onEnd(); };
-            btn.addEventListener('touchstart', handleStart, { passive: false });
-            btn.addEventListener('touchend', handleEnd, { passive: false });
-            btn.addEventListener('mousedown', handleStart);
-            btn.addEventListener('mouseup', handleEnd);
-            btn.addEventListener('mouseleave', handleEnd);
-        };
-
-        bindButton('leftBtnM', () => keys.left = true, () => keys.left = false);
-        bindButton('rightBtnM', () => keys.right = true, () => keys.right = false);
-        bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
-
-        function triggerJump() {
-            if (player.isGrounded && !isExploding) {
-                player.vy = -9.4; player.isGrounded = false;
-                playSound('jump');
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('landscape');
+                }
+            } catch (err) {
+                // Ignore restrictions
             }
         }
 
-        const jumpBtnM = document.getElementById('jumpBtnM');
-        if (jumpBtnM) {
-            const handleJump = (e) => { if(e)e.preventDefault(); jumpBtnM.classList.add('pressed'); setTimeout(()=>jumpBtnM.classList.remove('pressed'),150); triggerJump(); };
-            jumpBtnM.addEventListener('touchstart', handleJump, { passive: false });
-            jumpBtnM.addEventListener('mousedown', handleJump);
-        }
-
-        const shieldBtnM = document.getElementById('shieldBtnM');
-        if (shieldBtnM) {
-            const act = (e) => { if(e)e.preventDefault(); shieldBtnM.classList.add('pressed'); shieldActive = true; document.getElementById('shieldDisplay').innerText = "SHIELD: ON"; document.getElementById('shieldDisplay').style.color = "#ff4444"; };
-            const deact = (e) => { if(e)e.preventDefault(); shieldBtnM.classList.remove('pressed'); shieldActive = false; document.getElementById('shieldDisplay').innerText = "SHIELD: OFF"; document.getElementById('shieldDisplay').style.color = "#ffcccc"; };
-            shieldBtnM.addEventListener('touchstart', act, { passive: false });
-            shieldBtnM.addEventListener('touchend', deact, { passive: false });
-            shieldBtnM.addEventListener('mousedown', act);
-            shieldBtnM.addEventListener('mouseup', deact);
-        }
-
-        window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') { e.preventDefault(); triggerJump(); }
-            if (e.key === 'Shift' || e.key === 'x') { shieldActive = true; document.getElementById('shieldDisplay').innerText = "SHIELD: ON"; document.getElementById('shieldDisplay').style.color = "#ff4444"; }
-        });
-
-        window.addEventListener('keyup', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
-            if (e.key === 'Shift' || e.key === 'x') { shieldActive = false; document.getElementById('shieldDisplay').innerText = "SHIELD: OFF"; document.getElementById('shieldDisplay').style.color = "#ffcccc"; }
-        });
-
-        function triggerExplosion() {
-            if (isExploding) return;
-            isExploding = true; isSlowMo = true;
-            playSound('blast');
-
-            fragments = [
-                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ff4d4d' },
-                { x: player.x+4, y: player.y+10, vx: 4, vy: -6, color: '#ffffff' },
-                { x: player.x+2, y: player.y+18, vx: -5, vy: 2, color: '#ff9900' },
-                { x: player.x+6, y: player.y+22, vx: 5, vy: 3, color: '#ffffff' }
-            ];
-
-            setTimeout(() => {
-                isExploding = false; isSlowMo = false;
-                player.x = 40; player.y = 100; player.vx = 0; player.vy = 0;
-                updateGameLayout();
-            }, 2000);
-        }
-
-        let levelWon = false;
-
-        function update() {
-            let timeFactor = isSlowMo ? 0.25 : 1.0;
-            if (isExploding) {
-                fragments.forEach(f => { f.x += f.vx*timeFactor; f.y += f.vy*timeFactor; f.vy += 0.45*timeFactor; });
-                return;
-            }
-
-            if (keys.left) { player.vx = -player.speed; player.animTimer += 0.12; } 
-            else if (keys.right) { player.vx = player.speed; player.animTimer += 0.12; } 
-            else { player.vx = 0; player.animTimer = 0; }
-            if (!player.isGrounded) player.animTimer += 0.12; 
-
-            player.height = keys.down ? 27 : 45; 
-            player.x += player.vx;
-            if (player.x < 0) player.x = 0;
-            if (player.x > canvasWidth - player.width) player.x = canvasWidth - player.width;
-
-            player.vy += player.gravity;
-            player.y += player.vy;
-            player.isGrounded = false;
-
-            platforms.forEach(p => {
-                if (player.x+player.width > p.x && player.x < p.x+p.w && player.y+player.height >= p.y && player.y+player.height-player.vy <= p.y+12) {
-                    player.y = p.y - player.height; player.vy = 0; player.isGrounded = true;
-                }
-            });
-
-            // LEVEL 6 TROLL: DOOR BHAAGTA HAI!
-            if (currentLevel === 6 && player.x > goal.x - 120) {
-                goal.x += 3.5; // Door bhaagne lagta hai
-                if (Math.random() < 0.05) floatingTexts.push({ text: 'RUK JAO! 🏃💨', x: goal.x - 20, y: goal.y - 15, alpha: 1, vy: -0.5 });
-            }
-
-            if (player.y > canvasHeight + 100) triggerExplosion();
-
-            // Coins
-            coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x+player.width/2)-c.x, (player.y+player.height/2)-c.y) < 22) {
-                    c.collected = true; score += 1; playSound('coin');
-                }
-            });
-
-            // Door Goal (Andar jaane par)
-            if (player.x + player.width >= goal.x && player.y + player.height >= goal.y) {
-                if (player.x > goal.x + 2 && !levelWon) {
-                    levelWon = true; playSound('win');
-                    const modal = document.getElementById('notificationModal');
-                    modal.innerText = "🔥 Level " + currentLevel + " Cleared!";
-                    modal.classList.add('show');
-                    setTimeout(() => {
-                        modal.classList.remove('show');
-                        currentLevel++;
-                        localStorage.setItem('saveLevel_TumseNaHoPayga', currentLevel);
-                        levelWon = false; player.x = 40; player.y = 100;
-                        updateGameLayout();
-                    }, 2200);
-                }
-            }
-
-            document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
-
-            for (let i=floatingTexts.length-1; i>=0; i--) { let ft = floatingTexts[i]; ft.y+=ft.vy; ft.alpha-=0.03; if(ft.alpha<=0) floatingTexts.splice(i,1); }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-            // Lava Platforms
-            platforms.forEach(p => {
-                ctx.fillStyle = '#400808'; ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x+p.w, p.y); ctx.stroke();
-            });
-
-            // Coins
-            coins.forEach(c => {
-                if (!c.collected) {
-                    c.floatOffset += 0.08; let floatY = c.y + Math.sin(c.floatOffset) * 3;
-                    ctx.beginPath(); ctx.arc(c.x, floatY, c.radius, 0, Math.PI*2); ctx.fillStyle = '#ffcc00'; ctx.fill();
-                }
-            });
-
-            // Door
-            ctx.fillStyle = '#800000'; ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-            ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 2.5; ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
-
-            floatingTexts.forEach(ft => {
-                ctx.save(); ctx.globalAlpha = ft.alpha; ctx.font = 'bold 12px Orbitron'; ctx.fillStyle = '#ffcc00'; ctx.fillText(ft.text, ft.x, ft.y); ctx.restore();
-            });
-
-            if (isExploding) {
-                fragments.forEach(f => { ctx.fillStyle = f.color; ctx.fillRect(f.x, f.y, 4, 4); });
-            } else {
-                let px = player.x, py = player.y;
-                if (shieldActive) {
-                    ctx.beginPath(); ctx.arc(px+player.width/2, py+player.height/2, 26, 0, Math.PI*2);
-                    ctx.fillStyle = 'rgba(255, 68, 68, 0.3)'; ctx.fill(); ctx.strokeStyle = '#ff4444'; ctx.stroke();
-                }
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath(); ctx.arc(px+player.width/2, py+6, 5, 0, Math.PI*2); ctx.fill();
-                ctx.fillRect(px+(player.width-7)/2, py+12, 7, 14.5);
-                ctx.fillRect(px+2, py+27, 3, player.height===27?8:14);
-                ctx.fillRect(px+8, py+27, 3, player.height===27?8:14);
-            }
-        }
-
-        function loop() { update(); draw(); requestAnimationFrame(loop); }
-        loop();
-
-        function goHome() { window.location.href = "index.html"; }
+        window.addEventListener('click', enableLandscapeFullscreen, { once: true });
+        window.addEventListener('touchstart', enableLandscapeFullscreen, { once: true });
     </script>
+
 </body>
 </html>
