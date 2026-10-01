@@ -423,7 +423,6 @@
                 player.x = 40;
                 player.y = 100;
 
-                // Level 1: Only 4 coins
                 let spacing = (canvasWidth - 150) / 4;
                 for (let i = 1; i <= 4; i++) {
                     coins.push({
@@ -456,7 +455,6 @@
                 }
             }
             else if (currentLevel === 3) {
-                // Level 3: 2 surfaces and 3 coins between them, 1 coin has boom
                 let sY = surfaceTop - 90;
                 platforms.push({ x: 300, y: sY, w: 250, h: 16, type: 'secondSurface' });
                 platforms.push({ x: 700, y: sY, w: 250, h: 16, type: 'secondSurface' });
@@ -465,7 +463,6 @@
                 player.x = 50;
                 player.y = surfaceTop - 130;
 
-                // 3 coins placed between/on surfaces, middle one has boom
                 let cXs = [425, 600, 825];
                 for (let i = 0; i < 3; i++) {
                     coins.push({
@@ -473,14 +470,13 @@
                         y: sY - 25,
                         collected: false,
                         radius: 5,
-                        isBoom: (i === 1), // 1 coin mein boom
+                        isBoom: (i === 1), 
                         floatOffset: Math.random() * Math.PI
                     });
                 }
             }
             else if (currentLevel === 4) {
-                // Level 4: Lower surfaces, 1st and 6th coins removed (so 4 coins total: indices 2,3,4,5 from original 6)
-                let sY = surfaceTop - 65; // much lower surface
+                let sY = surfaceTop - 65; 
                 platforms.push({ x: 350, y: sY, w: 550, h: 16, type: 'secondSurface' });
 
                 isDoorOpen = false;
@@ -488,7 +484,6 @@
                 player.y = surfaceTop - 100;
 
                 let coinSpacing = (canvasWidth - 120) / 6;
-                // Original 6 coins indices: 0, 1, 2, 3, 4, 5. Remove 1st (0) and 6th (5), leaving 1,2,3,4 (which correspond to i=2,3,4,5)
                 let keptIndices = [1, 2, 3, 4];
                 keptIndices.forEach((idx, index) => {
                     coins.push({
@@ -496,7 +491,7 @@
                         y: sY - 25,
                         collected: false,
                         radius: 5,
-                        isBoom: (index > 0), // Only 1st of these 4 is safe, rest have boom!
+                        isBoom: (index > 0), 
                         floatOffset: Math.random() * Math.PI
                     });
                 });
@@ -715,7 +710,6 @@
         });
 
         function triggerExplosion() {
-            // Level 1: Shield not working. Level 2: Shield proper work. Level 3: Shield not working.
             if (currentLevel !== 1 && currentLevel !== 3 && shieldActive) return;
             if (isExploding) return;
             
@@ -751,7 +745,12 @@
 
         function checkCoins() {
             coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
+                // Modified boomcoin check to trigger instantly on close touch/collision proximity
+                let dx = (player.x + player.width/2) - c.x;
+                let dy = (player.y + player.height/2) - c.y;
+                let dist = Math.hypot(dx, dy);
+
+                if (!c.collected && dist < (c.isBoom ? 20 : 22)) {
                     c.collected = true;
 
                     if (c.isBoom) {
@@ -782,7 +781,6 @@
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                     } 
                     else if (currentLevel === 4 && score >= 1) {
-                        // Level 4: 1 coin collect karte hi gate open
                         isDoorOpen = true;
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                     }
@@ -879,14 +877,13 @@
 
             checkCoins();
 
-            // === LEVEL 4 TROLL MECHANIC: Gate height becomes higher than player for 3 seconds when near ===
             if (currentLevel === 4) {
                 let distToGoal = Math.abs((player.x + player.width/2) - goal.x);
                 if (distToGoal < 150 && !goal.trollActive && goal.trollTimer === 0) {
                     goal.trollActive = true;
-                    goal.y = (canvasHeight - 40) - 120; // Move gate way above player height
+                    goal.y = (canvasHeight - 40) - 120; 
                     setTimeout(() => {
-                        goal.y = (canvasHeight - 40) - goal.baseH; // Back to normal after 3 seconds
+                        goal.y = (canvasHeight - 40) - goal.baseH; 
                         goal.trollActive = false;
                     }, 3000);
                 }
@@ -895,7 +892,8 @@
             let maxCoins = coins.length;
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + maxCoins;
 
-            let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
+            // Updated check to allow entry inside the gate fully
+            let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x + 2 && player.x + player.width / 2 <= goal.x + goal.w - 2);
 
             if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
                 if (!isDoorOpen) {
@@ -1046,13 +1044,13 @@
                 ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // === RESTORED MOVEMENT LEG & ARM ANIMATION ===
+                // === MODIFIED ANIMATION SO ONLY LEGS MOVE DURING WALKING ===
                 let motionCycle = Math.sin(player.animTimer * 6);
                 let legSwing = ((keys.left || keys.right) && player.isGrounded) ? motionCycle * 3.5 : 0;
                 
                 let isJumpingOrAirborne = !player.isGrounded;
                 let jumpStretch = isJumpingOrAirborne ? -2 : 0;
-                let armSwing = isJumpingOrAirborne ? Math.sin(player.animTimer * 10) * 4 : motionCycle * 3.5; 
+                let armSwing = isJumpingOrAirborne ? Math.sin(player.animTimer * 10) * 4 : 0; // Arms stay stable on ground, move when jumping
 
                 let headRadius = 4.5;
                 let headX = px + player.width/2;
