@@ -360,8 +360,8 @@
         let player = {
             x: 40,
             y: 100,
-            width: 14.4,     
-            height: 45,        
+            width: 13.0,     // Dami size 10% chhota kiya gaya hai (14.4 se 13.0)
+            height: 40.5,    // Dami size 10% chhota kiya gaya hai (45 se 40.5)
             vx: 0,
             vy: 0,
             speed: 2.8,        
@@ -570,7 +570,6 @@
         });
 
         function triggerExplosion() {
-            // Level 1 par shield kaam nahi karegi (damage hoga), Level 2 par shield kaam karegi
             if (currentLevel !== 1 && shieldActive) return;
             if (isExploding) return;
             
@@ -670,9 +669,9 @@
             }
 
             if (keys.down) {
-                player.height = 27; 
+                player.height = 24.3; 
             } else {
-                player.height = 45; 
+                player.height = 40.5; 
             }
 
             player.x += player.vx;
@@ -713,7 +712,10 @@
 
             checkCoins();
 
-            if (player.x + player.width >= goal.x && player.y + player.height >= goal.y) {
+            // === UPDATED DOOR/GOAL LOGIC (Gate ke andar jaane par aur age na ja paane par level complete) ===
+            let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
+
+            if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
                 if (!isDoorOpen) {
                     player.x = goal.x - player.width - 2; 
                     if (Math.random() < 0.05) { 
@@ -727,7 +729,7 @@
                     const modal = document.getElementById('notificationModal');
                     
                     if (currentLevel === 1) {
-                        modal.innerText = "🎉 Level 1 Cleared! Transitioning to Level 2...";
+                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level 1 Cleared!";
                         modal.classList.add('show');
                         setTimeout(() => {
                             modal.classList.remove('show');
@@ -739,16 +741,19 @@
                             player.vx = 0;
                             player.vy = 0;
                             updateGameLayout();
-                        }, 2200);
+                        }, 2000); // exactly 2 seconds delay
                     } else if (currentLevel === 2) {
-                        modal.innerText = "🏆 YOU BEAT LEVEL 2! GG!";
+                        modal.innerText = "🏆 Yeto ashan tha! 🤪 Level 2 Cleared! GG!";
                         modal.classList.add('show');
                         setTimeout(() => {
                             localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
                             window.location.reload(); 
-                        }, 3000);
+                        }, 2000); // exactly 2 seconds delay
                     }
                 }
+            } else if (!isDoorOpen && player.x + player.width >= goal.x) {
+                // Player ko gate ke aage jaane se rokna jab lock ho
+                player.x = goal.x - player.width;
             }
 
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
@@ -849,7 +854,7 @@
 
                 if (shieldActive) {
                     ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 25, 0, Math.PI * 2);
+                    ctx.arc(px + player.width/2, py + player.height/2, 23, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
                     ctx.fill();
                     ctx.strokeStyle = '#ffaa00';
@@ -863,11 +868,16 @@
 
                 let motionCycle = Math.sin(player.animTimer * 6);
                 let legSwing = ((keys.left || keys.right) && player.isGrounded) ? motionCycle * 3.5 : 0;
-                let armSwing = (!player.isGrounded) ? motionCycle * 3.5 : 0; 
+                
+                // === NEW JUMP ANIMATION CHANGER LOGIC ===
+                // Jump ya हवा में hone par player thoda stretch hoga aur arms pose badlenge
+                let isJumpingOrAirborne = !player.isGrounded;
+                let jumpStretch = isJumpingOrAirborne ? -2 : 0;
+                let armSwing = isJumpingOrAirborne ? Math.sin(player.animTimer * 10) * 4 : motionCycle * 3.5; 
 
-                let headRadius = 5;
+                let headRadius = 4.5; // Slightly reduced for 10% smaller size
                 let headX = px + player.width/2;
-                let headY = py + 6;
+                let headY = py + 5 + jumpStretch;
                 
                 let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
@@ -878,24 +888,25 @@
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
-                let torsoWidth = 7; 
+                let torsoWidth = 6.3; // 10% smaller 
                 let torsoX = px + (player.width - torsoWidth) / 2;
-                let chestGrad = ctx.createLinearGradient(torsoX, py + 12, torsoX + torsoWidth, py + 12);
+                let chestGrad = ctx.createLinearGradient(torsoX, py + 10 + jumpStretch, torsoX + torsoWidth, py + 10 + jumpStretch);
                 chestGrad.addColorStop(0, '#ffffff');
                 chestGrad.addColorStop(1, '#b0b0b0');
                 ctx.fillStyle = chestGrad;
-                ctx.fillRect(torsoX, py + 12, torsoWidth, 14.5);
+                ctx.fillRect(torsoX, py + 10 + jumpStretch, torsoWidth, 13);
 
                 ctx.fillStyle = '#ffcc00';
-                ctx.fillRect(torsoX - 1, py + 26, torsoWidth + 2, 2.5);
+                ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
 
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX - 4 + armSwing, py + 14, 2.5, 11);  
-                ctx.fillRect(torsoX + torsoWidth + 1 - armSwing, py + 14, 2.5, 11); 
+                ctx.fillRect(torsoX - 3.5 + armSwing, py + 12 + jumpStretch, 2.2, 10);  
+                ctx.fillRect(torsoX + torsoWidth + 0.8 - armSwing, py + 12 + jumpStretch, 2.2, 10); 
 
+                let legHeight = player.height === 24.3 ? 7 : 12;
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX + 1 + legSwing || torsoX + 1 + armSwing, py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
-                ctx.fillRect(torsoX + torsoWidth - 3.5 - (legSwing || armSwing), py + 28.5, 2.5, player.height === 27 ? 8 : 13.5); 
+                ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
+                ctx.fillRect(torsoX + torsoWidth - 3 - legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
             }
         }
 
