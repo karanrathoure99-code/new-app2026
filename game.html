@@ -91,6 +91,7 @@
             font-size: 13px;
             font-weight: 700;
             color: #faedcd;
+            align-items: center;
         }
 
         .arena-container {
@@ -212,18 +213,72 @@
             line-height: 1;
         }
 
-        .back-btn {
+        .back-btn, .level-select-btn {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
             color: #faedcd;
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 8px;
             font-size: 11px;
             cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
         }
-        .back-btn:hover {
+        .back-btn:hover, .level-select-btn:hover {
             color: #fff;
             border-color: #d4a373;
+            background: rgba(212, 163, 115, 0.2);
+        }
+
+        /* Level Selector Modal */
+        #levelSelectorModal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(31, 18, 8, 0.95);
+            border: 2px solid #d4a373;
+            padding: 20px;
+            border-radius: 15px;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            z-index: 150;
+            display: none;
+            width: 320px;
+        }
+        #levelSelectorModal.show {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .lvl-box {
+            background: rgba(212, 163, 115, 0.2);
+            border: 1px solid #d4a373;
+            color: #ffcc00;
+            padding: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .lvl-box:hover {
+            background: #d4a373;
+            color: #1f1208;
+        }
+        .close-modal {
+            margin-top: 15px;
+            background: #8c5830;
+            color: #fff;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
         }
 
         #notificationModal {
@@ -256,10 +311,19 @@
 
     <div id="notificationModal">🎉 Level Cleared!</div>
 
+    <!-- LEVEL SELECTOR MODAL -->
+    <div id="levelSelectorModal">
+        <h3 style="color:#d4a373; font-size:15px; margin-bottom:5px;">SELECT LEVEL</h3>
+        <p style="font-size:10px; color:#faedcd;">Choose any unlocked level to practice:</p>
+        <div class="level-grid" id="levelGridContainer"></div>
+        <button class="close-modal" onclick="toggleLevelModal(false)">CLOSE</button>
+    </div>
+
     <div class="game-wrapper">
         <div class="game-hud">
             <div class="hud-title" id="levelTitle">⚡ LEVEL 1 ⚡</div>
             <div class="hud-stats">
+                <button class="level-select-btn" onclick="openLevelModal()">LEVELS</button>
                 <span id="scoreDisplay">COINS: 0/6</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
             </div>
@@ -295,7 +359,7 @@
 
     <script>
         function handleScreenFit(e) {
-            if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) {
+            if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud') || e.target.closest('#levelSelectorModal')) {
                 return;
             }
             if (!document.fullscreenElement) {
@@ -346,7 +410,10 @@
             checkDeviceControls();
         }
 
-        let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        // Real progress tracking save (Actual highest unlocked level)
+        let maxUnlockedLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        // Temporary session level for playing back levels without disturbing real progress count
+        let currentLevel = maxUnlockedLevel;
         
         let isDoorOpen = true; 
         let score = 0;
@@ -414,10 +481,9 @@
                 player.y = 100;
             }
             else if (currentLevel === 3) {
-                // Level 3: 4 small equal-distance surfaces placed at a low height for easy jumping
                 let sWidth = 80;
                 let sHeight = 16;
-                let sY = surfaceTop - 75; // Neeche ki taraf itna ki player easily chad sake
+                let sY = surfaceTop - 75;
                 
                 platforms.push({ x: 220, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
                 platforms.push({ x: 480, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
@@ -461,6 +527,43 @@
 
             goal.y = surfaceTop - goal.h;
             goal.x = canvasWidth - 55;
+        }
+
+        // LEVEL SELECTOR MODAL FUNCTIONS
+        function openLevelModal() {
+            maxUnlockedLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+            const container = document.getElementById('levelGridContainer');
+            container.innerHTML = '';
+            
+            // 5 levels tak available options dikhana
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'lvl-box';
+                btn.innerText = i;
+                if (i <= maxUnlockedLevel) {
+                    btn.onclick = () => selectLevel(i);
+                } else {
+                    btn.style.opacity = '0.4';
+                    btn.style.cursor = 'not-allowed';
+                    btn.title = "Locked Level";
+                }
+                container.appendChild(btn);
+            }
+            document.getElementById('levelSelectorModal').classList.add('show');
+        }
+
+        function toggleLevelModal(show) {
+            const modal = document.getElementById('levelSelectorModal');
+            if (show) modal.classList.add('show');
+            else modal.classList.remove('show');
+        }
+
+        function selectLevel(lvl) {
+            currentLevel = lvl;
+            toggleLevelModal(false);
+            player.vx = 0;
+            player.vy = 0;
+            updateGameLayout();
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -635,7 +738,6 @@
         });
 
         function triggerExplosion() {
-            // === LEVEL 3 PAR SHIELD KAAM NAHI KAREGI (Bypass shieldActive if currentLevel === 3) ===
             if (currentLevel !== 3 && shieldActive) return;
             if (isExploding) return;
             
@@ -804,47 +906,24 @@
                     
                     const modal = document.getElementById('notificationModal');
                     
-                    if (currentLevel === 1) {
-                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level 1 Cleared!";
+                    if (currentLevel < 5) {
+                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level " + currentLevel + " Cleared!";
                         modal.classList.add('show');
+                        
+                        // Save actual progression safely
+                        let nextLvl = currentLevel + 1;
+                        let savedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+                        if (nextLvl > savedMax) {
+                            localStorage.setItem('saveLevel_TumseNaHoPayga', nextLvl);
+                        }
+
                         setTimeout(() => {
                             modal.classList.remove('show');
-                            currentLevel = 2;
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', 2); 
+                            currentLevel = nextLvl;
                             levelWon = false;
                             updateGameLayout();
                         }, 2000);
-                    } else if (currentLevel === 2) {
-                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level 2 Cleared!";
-                        modal.classList.add('show');
-                        setTimeout(() => {
-                            modal.classList.remove('show');
-                            currentLevel = 3;
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', 3); 
-                            levelWon = false;
-                            updateGameLayout();
-                        }, 2000);
-                    } else if (currentLevel === 3) {
-                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level 3 Cleared!";
-                        modal.classList.add('show');
-                        setTimeout(() => {
-                            modal.classList.remove('show');
-                            currentLevel = 4;
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', 4); 
-                            levelWon = false;
-                            updateGameLayout();
-                        }, 2000);
-                    } else if (currentLevel === 4) {
-                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level 4 Cleared!";
-                        modal.classList.add('show');
-                        setTimeout(() => {
-                            modal.classList.remove('show');
-                            currentLevel = 5;
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', 5); 
-                            levelWon = false;
-                            updateGameLayout();
-                        }, 2000);
-                    } else if (currentLevel === 5) {
+                    } else {
                         modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game2.html...";
                         modal.classList.add('show');
                         setTimeout(() => {
