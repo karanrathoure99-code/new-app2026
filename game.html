@@ -346,9 +346,6 @@
             checkDeviceControls();
         }
 
-        // ==========================================
-        // YAHAN PAR localStorage ADD KIYA GAYA HAI 
-        // ==========================================
         let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
         
         let isDoorOpen = true; 
@@ -363,11 +360,11 @@
         let player = {
             x: 40,
             y: 100,
-            width: 14.4,      
-            height: 45,       
+            width: 14.4,     
+            height: 45,        
             vx: 0,
             vy: 0,
-            speed: 2.8,       
+            speed: 2.8,        
             jumpForce: -8.5,  
             gravity: 0.38,    
             isGrounded: false,
@@ -378,33 +375,28 @@
         let coins = [];
         let goal = { x: 0, y: 0, w: 20, h: 35 };
 
-        // === MAP GENERATION ===
         function updateGameLayout() {
-            score = 0; // Reset score jab bhi marte hain ya naya level aata hai
+            score = 0;
             
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
             const coinSpacing = (canvasWidth - 120) / 6;
 
-            // Upar Header update hoga
             document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎𝙀 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl " + currentLevel + "⚡";
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
 
-            // Main Zameen (Floor)
             platforms = [
                 { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }
             ];
 
             if (currentLevel === 1) {
-                // LEVEL 1: Trap 3rd Coin ke area mein (Original)
                 platforms.push({ x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = true; // Gate khula hua hai
+                isDoorOpen = true; 
             } 
             else if (currentLevel === 2) {
-                // LEVEL 2: Trap Last Coin (6th) ke neeche 
                 let lastCoinX = 60 + 5 * coinSpacing;
                 platforms.push({ x: Math.floor(lastCoinX) - 30, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = false; // Gate shuru mein LOCK hai
+                isDoorOpen = false; 
             }
 
             coins = [];
@@ -427,7 +419,6 @@
 
         let keys = { left: false, right: false, down: false };
 
-        // === ORIGINAL SOUNDS ===
         function playSound(type) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -579,7 +570,10 @@
         });
 
         function triggerExplosion() {
-            if (shieldActive || isExploding) return;
+            // Level 1 par shield kaam nahi karegi (damage hoga), Level 2 par shield kaam karegi
+            if (currentLevel !== 1 && shieldActive) return;
+            if (isExploding) return;
+            
             isExploding = true;
             isSlowMo = true;
             playSound('blast');
@@ -603,7 +597,6 @@
                 });
             }
 
-            // Marne par player ko usi level mein dobara zinda karna
             setTimeout(() => {
                 isExploding = false;
                 isSlowMo = false;
@@ -624,11 +617,10 @@
                     
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
 
-                    // === LEVEL 2 GATE UNLOCK LOGIC ===
                     if (currentLevel === 2) {
                         let allCollected = coins.every(coin => coin.collected);
                         if (allCollected) {
-                            isDoorOpen = true; // Sare coins mil gaye, Darwaza khul gaya!
+                            isDoorOpen = true; 
                             floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                         }
                     }
@@ -721,17 +713,14 @@
 
             checkCoins();
 
-            // === DOOR/GOAL COLLISION ===
             if (player.x + player.width >= goal.x && player.y + player.height >= goal.y) {
                 if (!isDoorOpen) {
-                    // Agar door lock hai (Level 2 mein)
                     player.x = goal.x - player.width - 2; 
                     if (Math.random() < 0.05) { 
                         floatingTexts.push({ text: 'LOCKED!', x: player.x - 10, y: player.y - 10, alpha: 1, vy: -0.5 });
                     }
                 } 
                 else if (!levelWon) {
-                    // Agar door khula hai toh jeet gaya
                     levelWon = true;
                     playSound('win');
                     
@@ -743,9 +732,6 @@
                         setTimeout(() => {
                             modal.classList.remove('show');
                             currentLevel = 2;
-                            // ===================================
-                            // LEVEL SAVE YAHAN HOTA HAI 
-                            // ===================================
                             localStorage.setItem('saveLevel_TumseNaHoPayga', 2); 
                             levelWon = false;
                             player.x = 40;
@@ -758,7 +744,6 @@
                         modal.innerText = "🏆 YOU BEAT LEVEL 2! GG!";
                         modal.classList.add('show');
                         setTimeout(() => {
-                            // Game complete hone ke baad level 1 par reset karna (Agar zaroorat ho toh hatwa lena)
                             localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
                             window.location.reload(); 
                         }, 3000);
@@ -819,7 +804,6 @@
                 }
             });
 
-            // === DRAW DOOR ===
             if (isDoorOpen) {
                 ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
                 ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
@@ -832,7 +816,6 @@
                 ctx.fillStyle = '#4a0000';
                 ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
                 ctx.strokeStyle = '#ff0000';
-                // Lock symbol
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(goal.x + goal.w/2 - 2, goal.y + goal.h/2 - 2, 4, 4);
             }
