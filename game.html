@@ -108,6 +108,8 @@
             position: relative;
             overflow: hidden;
             box-shadow: inset 0 0 40px rgba(140, 88, 48, 0.25), 0 10px 30px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
         }
 
         .distractor-bg {
@@ -135,6 +137,7 @@
             display: block;
             position: relative;
             z-index: 2;
+            flex: 1;
         }
 
         .controls-overlay {
@@ -143,12 +146,12 @@
 
         @media (max-width: 1023px) {
             .controls-overlay {
-                position: relative;
-                bottom: auto;
-                left: auto;
-                margin-top: 8px;
-                padding: 0 4px;
-                pointer-events: auto;
+                position: absolute;
+                bottom: 12px;
+                left: 0;
+                right: 0;
+                padding: 0 16px;
+                pointer-events: none;
                 background: transparent;
                 display: flex;
                 justify-content: space-between;
@@ -183,10 +186,10 @@
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            width: 62px;
-            height: 62px;
-            font-size: 14px;
-            border-radius: 14px;
+            width: 54px;
+            height: 54px;
+            font-size: 13px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -205,7 +208,7 @@
         }
 
         .btn-logo {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 900;
             color: #ffcc00;
             text-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
@@ -214,12 +217,12 @@
         }
 
         .btn-label {
-            font-size: 9.5px;
+            font-size: 9px;
             font-weight: 700;
             line-height: 1;
         }
 
-        .back-btn, .prev-lvl-btn {
+        .back-btn, .prev-lvl-btn, .restart-lvl-btn {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
             color: #faedcd;
@@ -229,7 +232,7 @@
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
         }
-        .back-btn:hover, .prev-lvl-btn:hover {
+        .back-btn:hover, .prev-lvl-btn:hover, .restart-lvl-btn:hover {
             color: #fff;
             border-color: #d4a373;
             background: rgba(212, 163, 115, 0.2);
@@ -267,13 +270,12 @@
 
     <div class="game-wrapper">
         <div class="game-hud">
-            <div class="hud-title" id="levelTitle">⚡ LEVEL 1 ⚡</div>
+            <div class="hud-title" id="levelTitle">⚡ DON'T STOP! 🚀 Lvl - 1 🔥 ⚡</div>
             <div class="hud-stats">
-                <span id="scoreDisplay">COINS: 0/4</span>
-                <span id="shieldDisplay">SHIELD: OFF</span>
             </div>
             <div class="hud-right-group">
                 <button class="prev-lvl-btn" onclick="goToPrevLevel()">◀ BACK</button>
+                <button class="restart-lvl-btn" onclick="restartLevel()">RESTART</button>
                 <button class="back-btn" onclick="goHome()">QUIT</button>
             </div>
         </div>
@@ -281,26 +283,22 @@
         <div class="arena-container">
             <div class="distractor-bg"></div>
             <canvas id="gameCanvas"></canvas>
-        </div>
 
-        <div class="controls-overlay" id="mobileControls">
-            <div class="control-group">
-                <button class="ctrl-btn" id="leftBtnM">◀</button>
-                <button class="ctrl-btn" id="rightBtnM">▶</button>
-            </div>
-            <div class="control-group right-group">
-                <button class="ctrl-btn" id="jumpBtnM">
-                    <span class="btn-logo">Z</span>
-                    <span class="btn-label">JUMP</span>
-                </button>
-                <button class="ctrl-btn" id="rightDownBtnM">
-                    <span class="btn-logo">Z</span>
-                    <span class="btn-label">DOWN</span>
-                </button>
-                <button class="ctrl-btn" id="shieldBtnM" style="background: rgba(255,170,0,0.25);">
-                    <span class="btn-logo" style="color:#ffaa00;">Z</span>
-                    <span class="btn-label">SHLD</span>
-                </button>
+            <div class="controls-overlay" id="mobileControls">
+                <div class="control-group">
+                    <button class="ctrl-btn" id="leftBtnM">◀</button>
+                    <button class="ctrl-btn" id="rightBtnM">▶</button>
+                </div>
+                <div class="control-group right-group">
+                    <button class="ctrl-btn" id="jumpBtnM">
+                        <span class="btn-logo">Z</span>
+                        <span class="btn-label">JUMP</span>
+                    </button>
+                    <button class="ctrl-btn" id="rightDownBtnM">
+                        <span class="btn-logo">Z</span>
+                        <span class="btn-label">DOWN</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -329,7 +327,7 @@
         const ctx = canvas.getContext('2d');
 
         let canvasWidth = 1280;
-        let canvasHeight = 520;
+        let canvasHeight = 460;
 
         function checkDeviceControls() {
             const isMobileOrTablet = window.innerWidth <= 1023;
@@ -344,7 +342,7 @@
                 document.documentElement.style.setProperty('--scale-factor', scale);
             }
             canvasWidth = 1280;
-            canvasHeight = 520;
+            canvasHeight = 460;
 
             const dpr = window.devicePixelRatio || 1;
             canvas.width = canvasWidth * dpr;
@@ -362,13 +360,13 @@
         let currentLevel = maxUnlockedLevel;
         
         let isDoorOpen = true; 
-        let score = 0;
-        let shieldActive = false;
         let isExploding = false;
         let isSlowMo = false;
         let fragments = [];
         let particles = [];
         let floatingTexts = [];
+        let flowerBombs = [];
+        let bombTimer = 0;
 
         let player = {
             x: 40,
@@ -385,148 +383,72 @@
         };
 
         let platforms = [];
-        let coins = [];
         let goal = { x: 0, y: 0, w: 24, h: 42, baseH: 42, trollActive: false, trollTimer: 0 };
 
         function updateGameLayout() {
-            score = 0;
-            
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
 
             if (currentLevel === 1) {
-                document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎𝙀 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl 1 ⚡";
-                document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/4";
+                document.getElementById('levelTitle').innerText = "⚡ DON'T STOP! 🚀 Lvl - 1 🔥 ⚡";
             } else if (currentLevel === 2) {
-                document.getElementById('levelTitle').innerText = "⚡『 𝙏𝙐𝙈𝙎𝙀 𝙉𝘼 𝙃𝙊 𝙋𝘼𝙔𝙂𝘼 』- Lvl 2 ⚡";
-                document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
+                document.getElementById('levelTitle').innerText = "⚡ LEVEL 2 ⚡";
             } else if (currentLevel === 3) {
-                document.getElementById('levelTitle').innerText = "⚡ 3 COINS BETWEEN SURFACES - Lvl 3 ⚡";
-                document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/4";
+                document.getElementById('levelTitle').innerText = "⚡ LEVEL 3 ⚡";
             } else if (currentLevel === 4) {
-                document.getElementById('levelTitle').innerText = "⚡ TRICKY LEVEL 4 ⚡";
-                document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/4";
+                document.getElementById('levelTitle').innerText = "⚡ LEVEL 4 ⚡";
             } else if (currentLevel === 5) {
-                document.getElementById('levelTitle').innerText = "⚡ THE ULTIMATE TEST - Lvl 5 ⚡";
-                document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/6";
+                document.getElementById('levelTitle').innerText = "⚡ LEVEL 5 ⚡";
             }
 
             platforms = [
                 { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }
             ];
 
-            coins = [];
-
             if (currentLevel === 1) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
                 isDoorOpen = true;
                 player.x = 40;
                 player.y = 100;
-
-                let spacing = (canvasWidth - 150) / 4;
-                for (let i = 1; i <= 4; i++) {
-                    coins.push({
-                        x: 80 + (i - 1) * spacing,
-                        y: surfaceTop - 25,
-                        collected: false,
-                        radius: 5,
-                        isBoom: false, // Level 1 coins are purely safe normal coins
-                        floatOffset: Math.random() * Math.PI
-                    });
-                }
+                flowerBombs = [];
+                bombTimer = 0;
             } 
             else if (currentLevel === 2) {
-                let coinSpacing = (canvasWidth - 120) / 6;
-                let lastCoinX = 60 + 5 * coinSpacing;
-                platforms.push({ x: Math.floor(lastCoinX) - 30, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = false;
+                isDoorOpen = true;
                 player.x = 40;
                 player.y = 100;
-
-                for (let i = 1; i <= 6; i++) {
-                    coins.push({
-                        x: 60 + (i - 1) * coinSpacing,
-                        y: surfaceTop - 25,
-                        collected: false,
-                        radius: 5,
-                        isBoom: false,
-                        floatOffset: Math.random() * Math.PI
-                    });
-                }
             }
             else if (currentLevel === 3) {
-                let sY = surfaceTop - 65; 
-                
+                let sY = surfaceTop - 65;  
                 platforms.push({ x: 300, y: sY, w: 180, h: 16, type: 'secondSurface' });
                 platforms.push({ x: 550, y: sY, w: 180, h: 16, type: 'secondSurface' });
                 platforms.push({ x: 800, y: sY, w: 180, h: 16, type: 'secondSurface' });
 
-                isDoorOpen = false;
+                isDoorOpen = true;
                 player.x = 50;
                 player.y = surfaceTop - 130;
-
-                let cXs = [200, 400, 670, 950];
-                for (let i = 0; i < 4; i++) {
-                    coins.push({
-                        x: cXs[i],
-                        y: (i % 2 === 1) ? sY - 25 : surfaceTop - 25,
-                        collected: false,
-                        radius: 5,
-                        isBoom: (i === 1 || i === 2), 
-                        floatOffset: Math.random() * Math.PI
-                    });
-                }
             }
             else if (currentLevel === 4) {
-                let sY = (surfaceTop - 65) * 1.05; 
+                let sY = (surfaceTop - 65) * 1.05;  
                 platforms.push({ x: 300, y: sY, w: 600, h: 16, type: 'secondSurface' });
 
-                isDoorOpen = false;
+                isDoorOpen = true;
                 player.x = 40;
                 player.y = surfaceTop - 100;
-
-                let coinCoords = [
-                    { x: 450, y: sY - 25, boom: true },
-                    { x: 750, y: sY - 25, boom: false },
-                    { x: 200, y: surfaceTop - 25, boom: true },
-                    { x: 1050, y: surfaceTop - 25, boom: true }
-                ];
-                coinCoords.forEach(c => {
-                    coins.push({
-                        x: c.x,
-                        y: c.y,
-                        collected: false,
-                        radius: 5,
-                        isBoom: c.boom,
-                        floatOffset: Math.random() * Math.PI
-                    });
-                });
             }
             else if (currentLevel === 5) {
-                let sY = surfaceTop - 180; 
+                let sY = surfaceTop - 180;  
                 platforms.push({ x: Math.floor(canvasWidth * 0.2), y: sY, w: 120, h: 18, type: 'secondSurface' });
                 platforms.push({ x: Math.floor(canvasWidth * 0.5), y: sY, w: 120, h: 18, type: 'secondSurface' });
                 platforms.push({ x: Math.floor(canvasWidth * 0.8), y: sY, w: 120, h: 18, type: 'secondSurface' });
-                isDoorOpen = false;
+                isDoorOpen = true;
                 player.x = 40;
                 player.y = 100;
-
-                let coinSpacing = (canvasWidth - 120) / 6;
-                for (let i = 1; i <= 6; i++) {
-                    coins.push({
-                        x: 60 + (i - 1) * coinSpacing,
-                        y: surfaceTop - 25,
-                        collected: false,
-                        radius: 5,
-                        isBoom: [0, 1, 3].includes(i - 1),
-                        floatOffset: Math.random() * Math.PI
-                    });
-                }
             }
 
             goal.y = surfaceTop - goal.h;
             goal.baseH = goal.h;
-            goal.x = canvasWidth - goal.w - 32;
+            // Gate ko bilkul right boundary/box ke corner se chipka diya hai
+            goal.x = canvasWidth - goal.w - 3;
             goal.trollActive = false;
             goal.trollTimer = 0;
         }
@@ -543,6 +465,14 @@
                 modal.classList.add('show');
                 setTimeout(() => modal.classList.remove('show'), 1500);
             }
+        }
+
+        function restartLevel() {
+            player.vx = 0;
+            player.vy = 0;
+            isExploding = false;
+            isSlowMo = false;
+            updateGameLayout();
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -571,7 +501,7 @@
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                gain.connect(audioCtx.destination); जैसे 
                 const now = audioCtx.currentTime;
 
                 if (type === 'jump') {
@@ -582,14 +512,6 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                     osc.start(now);
                     osc.stop(now + 0.15);
-                } else if (type === 'coin') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(587.33, now); 
-                    osc.frequency.setValueAtTime(880, now + 0.08); 
-                    gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
                 } else if (type === 'blast') {
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(140, now);
@@ -674,31 +596,6 @@
             jumpBtnM.addEventListener('mousedown', handleJumpAction);
         }
 
-        const shieldBtnM = document.getElementById('shieldBtnM');
-        if (shieldBtnM) {
-            const activateShield = (e) => {
-                if (e) e.preventDefault();
-                initAudio();
-                shieldBtnM.classList.add('pressed');
-                shieldActive = true;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-                document.getElementById('shieldDisplay').style.color = "#ffaa00";
-            };
-            const deactivateShield = (e) => {
-                if (e) e.preventDefault();
-                shieldBtnM.classList.remove('pressed');
-                shieldActive = false;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                document.getElementById('shieldDisplay').style.color = "#d8b4fe";
-            };
-            shieldBtnM.addEventListener('touchstart', activateShield, { passive: false });
-            shieldBtnM.addEventListener('touchend', deactivateShield, { passive: false });
-            shieldBtnM.addEventListener('touchcancel', deactivateShield, { passive: false });
-            shieldBtnM.addEventListener('mousedown', activateShield);
-            shieldBtnM.addEventListener('mouseup', deactivateShield);
-            shieldBtnM.addEventListener('mouseleave', deactivateShield);
-        }
-
         window.addEventListener('keydown', e => {
             initAudio();
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
@@ -717,7 +614,6 @@
         });
 
         function triggerExplosion() {
-            if (currentLevel !== 1 && currentLevel !== 3 && shieldActive) return;
             if (isExploding) return;
             
             isExploding = true;
@@ -750,67 +646,6 @@
             }, 2000);
         }
 
-        function checkCoins() {
-            coins.forEach(c => {
-                let dx = (player.x + player.width/2) - c.x;
-                let dy = (player.y + player.height/2) - c.y;
-                let dist = Math.hypot(dx, dy);
-
-                // Extremely tight collision range (dist < 10) so it only registers when directly touched
-                if (!c.collected && dist < 10) {
-                    c.collected = true;
-
-                    if (c.isBoom) {
-                        playSound('blast');
-                        triggerExplosion();
-                        return;
-                    }
-
-                    score += 1; 
-                    playSound('coin');
-                    
-                    let maxCoins = coins.length;
-                    document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + maxCoins;
-                    floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
-
-                    if (currentLevel === 1 && score >= 4) {
-                        isDoorOpen = true;
-                    }
-                    else if (currentLevel === 2) {
-                        let allCollected = coins.every(coin => coin.collected);
-                        if (allCollected) {
-                            isDoorOpen = true; 
-                            floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                        }
-                    }
-                    else if (currentLevel === 3 && score >= 3) {
-                        isDoorOpen = true; 
-                        floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                    } 
-                    else if (currentLevel === 4 && score >= 2) {
-                        isDoorOpen = true;
-                        floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                    }
-                    else if (currentLevel === 5 && score >= 6) {
-                        isDoorOpen = true; 
-                        floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                    }
-
-                    for (let i = 0; i < 8; i++) {
-                        particles.push({
-                            x: c.x,
-                            y: c.y,
-                            vx: (Math.random() - 0.5) * 5,
-                            vy: (Math.random() - 0.5) * 5,
-                            size: Math.random() * 3 + 1,
-                            color: '#ffcc00',
-                            life: 20
-                        });
-                    }
-                }
-            });
-        }
-
         let levelWon = false;
 
         function update() {
@@ -824,6 +659,8 @@
                 });
                 return;
             }
+
+            let isMoving = keys.left || keys.right || keys.down;
 
             if (keys.left) {
                 player.vx = -player.speed;
@@ -840,10 +677,14 @@
                 player.animTimer += 0.12; 
             }
 
+            let previousBottom = player.y + player.height;
             if (keys.down) {
                 player.height = 24.3; 
             } else {
                 player.height = 40.5; 
+            }
+            if (player.isGrounded) {
+                player.y = previousBottom - player.height;
             }
 
             player.x += player.vx;
@@ -856,16 +697,6 @@
 
             player.isGrounded = false;
             platforms.forEach(p => {
-                if (p.type === 'hiddenTrap') {
-                    let playerCenterX = player.x + player.width / 2;
-                    if (!p.triggered && playerCenterX >= p.x && playerCenterX <= p.x + p.w && player.y + player.height >= p.y - 5) {
-                        p.triggered = true; 
-                        setTimeout(() => triggerExplosion(), 80);
-                        return;
-                    }
-                    if (p.triggered) return; 
-                }
-
                 if (
                     player.x + player.width > p.x &&
                     player.x < p.x + p.w &&
@@ -882,40 +713,50 @@
                 triggerExplosion();
             }
 
-            checkCoins();
+            // Level 1 Flower Bomb Logic (Player ke pehle move se shuru aur gate ke paas aane par band)
+            if (currentLevel === 1) {
+                let distToGoal = goal.x - (player.x + player.width/2);
+                if (isMoving && distToGoal > 80) {
+                    bombTimer++;
+                    if (bombTimer > 35) { // Har kuch frames me flower bomb spawn hoga
+                        bombTimer = 0;
+                        flowerBombs.push({
+                            x: player.x + (Math.random() - 0.5) * 40, // Player ko target karte hue uper se
+                            y: -20,
+                            vy: 3.5, // Fast speed taaki player par turant gire
+                            radius: 8
+                        });
+                    }
+                }
 
-            if (currentLevel === 4) {
-                let distToGoal = Math.abs((player.x + player.width/2) - goal.x);
-                if (distToGoal < 150 && !goal.trollActive && goal.trollTimer === 0) {
-                    goal.trollActive = true;
-                    goal.y = (canvasHeight - 40) - 120; 
-                    setTimeout(() => {
-                        goal.y = (canvasHeight - 40) - goal.baseH; 
-                        goal.trollActive = false;
-                    }, 3000);
+                for (let i = flowerBombs.length - 1; i >= 0; i--) {
+                    let fb = flowerBombs.get ? flowerBombs[i] : flowerBombs[i];
+                    fb.y += fb.vy;
+
+                    // Surface ya ground par aate hi blast aur player check
+                    let surfaceTop = canvasHeight - 40;
+                    if (fb.y >= surfaceTop - 10) {
+                        // Agar player blast point ke paas hai toh explosion trigger hoga
+                        let hitDist = Math.abs((player.x + player.width/2) - fb.x);
+                        if (hitDist < 25) {
+                            triggerExplosion();
+                        }
+                        flowerBombs.splice(i, 1);
+                    }
                 }
             }
-
-            let maxCoins = coins.length;
-            document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + maxCoins;
 
             let playerInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
 
             if (playerInsideGoal && player.y + player.height >= goal.y) {
-                if (!isDoorOpen) {
-                    player.x = goal.x - player.width - 2; 
-                    if (Math.random() < 0.05) { 
-                        floatingTexts.push({ text: 'LOCKED!', x: player.x - 10, y: player.y - 10, alpha: 1, vy: -0.5 });
-                    }
-                } 
-                else if (!levelWon) {
+                if (!levelWon) {
                     levelWon = true;
                     playSound('win');
                     
                     const modal = document.getElementById('notificationModal');
                     
                     if (currentLevel < 5) {
-                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level " + currentLevel + " Cleared!";
+                        modal.innerText = "🎉 Level " + currentLevel + " Cleared!";
                         modal.classList.add('show');
                         
                         let nextLvl = currentLevel + 1;
@@ -931,15 +772,13 @@
                             updateGameLayout();
                         }, 2000);
                     } else {
-                        modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game2.html...";
+                        modal.innerText = "🏆 LEVEL 5 COMPLETED! Opening game2.html...";
                         modal.classList.add('show');
                         setTimeout(() => {
                             window.location.href = "game2.html"; 
                         }, 2000);
                     }
                 }
-            } else if (!isDoorOpen && player.x + player.width >= goal.x) {
-                player.x = goal.x - player.width;
             }
 
             for (let i = particles.length - 1; i >= 0; i--) {
@@ -949,20 +788,12 @@
                 p.life--;
                 if (p.life <= 0) particles.splice(i, 1);
             }
-
-            for (let i = floatingTexts.length - 1; i >= 0; i--) {
-                let ft = floatingTexts[i];
-                ft.y += ft.vy;
-                ft.alpha -= 0.03;
-                if (ft.alpha <= 0) floatingTexts.splice(i, 1);
-            }
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             platforms.forEach(p => {
-                if (p.type === 'hiddenTrap' && p.triggered) return; 
                 ctx.fillStyle = '#2b180a';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
                 ctx.strokeStyle = '#d4a373';
@@ -973,41 +804,37 @@
                 ctx.stroke();
             });
 
-            coins.forEach((c) => {
-                if (!c.collected) {
-                    c.floatOffset += 0.08;
-                    let floatY = c.y + Math.sin(c.floatOffset) * 3;
-
+            // Flower Bombs Draw (Theme matching flower-bomb structure 🌸💣)
+            if (currentLevel === 1) {
+                flowerBombs.forEach(fb => {
+                    ctx.save();
+                    ctx.translate(fb.x, fb.y);
+                    // Flower petals
+                    ctx.fillStyle = '#ff9f1c';
+                    for (let i = 0; i < 5; i++) {
+                        ctx.rotate((Math.PI * 2) / 5);
+                        ctx.beginPath();
+                        ctx.arc(0, -6, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Bomb center core
+                    ctx.fillStyle = '#2b180a';
                     ctx.beginPath();
-                    ctx.arc(c.x, floatY, c.radius + 1.5, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 204, 0, 0.25)';
+                    ctx.arc(0, 0, 5, 0, Math.PI * 2);
                     ctx.fill();
-
-                    ctx.beginPath();
-                    ctx.arc(c.x, floatY, c.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ffcc00';
-                    ctx.fill();
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = '#ffffff';
+                    ctx.strokeStyle = '#d4a373';
+                    ctx.lineWidth = 1.5;
                     ctx.stroke();
-                }
-            });
-
-            if (isDoorOpen) {
-                ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
-                ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
-                ctx.fillStyle = '#532d0c';
-                ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-                ctx.strokeStyle = '#ff9f1c';
-            } else {
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-                ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
-                ctx.fillStyle = '#4a0000';
-                ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-                ctx.strokeStyle = '#ff0000';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(goal.x + goal.w/2 - 2, goal.y + goal.h/2 - 2, 4, 4);
+                    ctx.restore();
+                });
             }
+
+            // Gate (Bilkul corner se chipka hua)
+            ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
+            ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
+            ctx.fillStyle = '#532d0c';
+            ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+            ctx.strokeStyle = '#ff9f1c';
             ctx.lineWidth = 2.5;
             ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
@@ -1018,15 +845,6 @@
                 ctx.fill();
             });
 
-            floatingTexts.forEach(ft => {
-                ctx.save();
-                ctx.globalAlpha = ft.alpha;
-                ctx.font = 'bold 12px Orbitron, sans-serif';
-                ctx.fillStyle = '#ffcc00';
-                ctx.fillText(ft.text, ft.x - 8, ft.y);
-                ctx.restore();
-            });
-
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
@@ -1035,15 +853,6 @@
             } else {
                 let px = player.x;
                 let py = player.y;
-
-                if (shieldActive) {
-                    ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 23, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
-                    ctx.fill();
-                    ctx.strokeStyle = '#ffaa00';
-                    ctx.stroke();
-                }
 
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.beginPath();
