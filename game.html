@@ -389,7 +389,7 @@
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 0, y: 0, w: 20, h: 35 };
+        let goal = { x: 0, y: 0, w: 25, h: 35 };
 
         function updateGameLayout() {
             score = 0;
@@ -475,8 +475,8 @@
             }
 
             goal.y = surfaceTop - goal.h;
-            // Goal ko bilkul right side border/corner se chipka diya hai
-            goal.x = canvasWidth - goal.w;
+            // Goal ko thoda andar set kiya hai taaki fullscreen par bilkul proper aur clearly dikhe
+            goal.x = canvasWidth - goal.w - 40;
         }
 
         function goToPrevLevel() {
