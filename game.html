@@ -378,7 +378,7 @@
             vx: 0,
             vy: 0,
             speed: 2.8,        
-            jumpForce: -7.225,  // 15% reduced jump force
+            jumpForce: -7.225,  
             gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
@@ -455,7 +455,6 @@
                 }
             }
             else if (currentLevel === 3) {
-                // Level 3: Upper surfaces at jumpable height (-65)
                 let sY = surfaceTop - 65; 
                 
                 platforms.push({ x: 300, y: sY, w: 180, h: 16, type: 'secondSurface' });
@@ -527,8 +526,7 @@
 
             goal.y = surfaceTop - goal.h;
             goal.baseH = goal.h;
-            // Goal/Gate positioned right at the extreme corner edge so 100% visible and Dami steps inside it
-            goal.x = canvasWidth - goal.w - 2;
+            goal.x = canvasWidth - goal.w - 32;
             goal.trollActive = false;
             goal.trollTimer = 0;
         }
@@ -758,7 +756,8 @@
                 let dy = (player.y + player.height/2) - c.y;
                 let dist = Math.hypot(dx, dy);
 
-                if (!c.collected && dist < 22) {
+                // Exact precise touch check across all levels (dist < 12)
+                if (!c.collected && dist < 12) {
                     c.collected = true;
 
                     if (c.isBoom) {
@@ -900,7 +899,6 @@
             let maxCoins = coins.length;
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + maxCoins;
 
-            // Dami fully steps inside the gate area
             let playerInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
 
             if (playerInsideGoal && player.y + player.height >= goal.y) {
