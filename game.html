@@ -111,7 +111,7 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
 
         .distractor-bg {
@@ -135,7 +135,7 @@
 
         #gameCanvas {
             width: 100%;
-            height: 440px;
+            height: 430px;
             display: block;
             position: relative;
             z-index: 2;
@@ -151,8 +151,8 @@
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                margin-top: 5px;
-                padding: 0 15px;
+                margin-top: 4px;
+                padding: 0 8px;
                 pointer-events: auto;
                 background: transparent;
                 display: flex;
@@ -164,7 +164,7 @@
 
         .control-group {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             pointer-events: auto;
             align-items: center;
         }
@@ -179,48 +179,49 @@
         }
 
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
-            border-bottom: 3px solid rgba(0, 0, 0, 0.3);
-            color: #ffffff;
+            /* 85% transparent look */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-bottom: 3px solid rgba(0, 0, 0, 0.15);
+            color: rgba(255, 255, 255, 0.3);
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            width: 48px;
-            height: 48px;
-            font-size: 12px;
+            /* Bade buttons size */
+            width: 75px;
+            height: 55px;
+            font-size: 14px;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
             touch-action: manipulation;
             position: relative;
         }
 
         .ctrl-btn:active, .ctrl-btn.pressed {
             transform: translateY(2px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-            background: rgba(140, 88, 48, 0.55);
-            border-color: #d4a373;
+            background: rgba(140, 88, 48, 0.2);
+            border-color: rgba(212, 163, 115, 0.4);
         }
 
         .btn-logo {
-            font-size: 9.5px;
+            font-size: 11px;
             font-weight: 900;
-            color: #ffcc00;
-            text-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
+            color: rgba(255, 204, 0, 0.35);
             margin-bottom: 1px;
             letter-spacing: -0.5px;
         }
 
         .btn-label {
-            font-size: 8.5px;
+            font-size: 10px;
             font-weight: 700;
             line-height: 1;
+            color: rgba(255, 255, 255, 0.3);
         }
 
         .back-btn, .prev-lvl-btn {
@@ -300,8 +301,8 @@
                         <span class="btn-logo">Z</span>
                         <span class="btn-label">DOWN</span>
                     </button>
-                    <button class="ctrl-btn" id="shieldBtnM" style="background: rgba(255,170,0,0.25);">
-                        <span class="btn-logo" style="color:#ffaa00;">Z</span>
+                    <button class="ctrl-btn" id="shieldBtnM">
+                        <span class="btn-logo">Z</span>
                         <span class="btn-label">SHLD</span>
                     </button>
                 </div>
@@ -333,7 +334,7 @@
         const ctx = canvas.getContext('2d');
 
         let canvasWidth = 1280;
-        let canvasHeight = 440;
+        let canvasHeight = 430;
 
         function checkDeviceControls() {
             const isMobileOrTablet = window.innerWidth <= 1023;
@@ -348,7 +349,7 @@
                 document.documentElement.style.setProperty('--scale-factor', scale);
             }
             canvasWidth = 1280;
-            canvasHeight = 440;
+            canvasHeight = 430;
 
             const dpr = window.devicePixelRatio || 1;
             canvas.width = canvasWidth * dpr;
@@ -431,7 +432,6 @@
             else if (currentLevel === 3) {
                 let sWidth = 80;
                 let sHeight = 16;
-                // Second surface ki height ko kam (niche) kar diya hai taaki easily jump karke chad sake
                 let sY = surfaceTop - 50;
                 
                 platforms.push({ x: 220, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
