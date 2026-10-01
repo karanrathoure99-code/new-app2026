@@ -409,15 +409,24 @@
             else if (currentLevel === 2) {
                 let lastCoinX = 60 + 5 * coinSpacing;
                 platforms.push({ x: Math.floor(lastCoinX) - 30, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = false; // Level 2 mein gate shuru me lock rahega
+                isDoorOpen = false;
                 player.x = 40;
                 player.y = 100;
             }
             else if (currentLevel === 3) {
-                platforms.push({ x: 30, y: surfaceTop - 130, w: 220, h: 18, type: 'secondSurface' });
+                // Level 3: 4 small equal-distance surfaces placed at a low height for easy jumping
+                let sWidth = 80;
+                let sHeight = 16;
+                let sY = surfaceTop - 75; // Neeche ki taraf itna ki player easily chad sake
+                
+                platforms.push({ x: 220, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
+                platforms.push({ x: 480, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
+                platforms.push({ x: 740, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
+                platforms.push({ x: 1000, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
+
                 isDoorOpen = false;
                 player.x = 50;
-                player.y = surfaceTop - 170;
+                player.y = surfaceTop - 110;
             }
             else if (currentLevel === 4) {
                 platforms.push({ x: Math.floor(canvasWidth * 0.3), y: surfaceTop - 110, w: 120, h: 18, type: 'secondSurface' });
@@ -626,7 +635,8 @@
         });
 
         function triggerExplosion() {
-            if (currentLevel !== 1 && currentLevel !== 3 && currentLevel !== 4 && currentLevel !== 5 && shieldActive) return;
+            // === LEVEL 3 PAR SHIELD KAAM NAHI KAREGI (Bypass shieldActive if currentLevel === 3) ===
+            if (currentLevel !== 3 && shieldActive) return;
             if (isExploding) return;
             
             isExploding = true;
@@ -675,7 +685,6 @@
                     
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
 
-                    // === LEVEL 2 GATE UNLOCK LOGIC (Sare coins collect hone par gate open) ===
                     if (currentLevel === 2) {
                         let allCollected = coins.every(coin => coin.collected);
                         if (allCollected) {
@@ -957,12 +966,10 @@
                 ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                let motionCycle = Math.sin(player.animTimer * 6);
-                let legSwing = ((keys.left || keys.right) && player.isGrounded) ? motionCycle * 3.5 : 0;
-                
+                let legSwing = 0;
                 let isJumpingOrAirborne = !player.isGrounded;
                 let jumpStretch = isJumpingOrAirborne ? -2 : 0;
-                let armSwing = isJumpingOrAirborne ? Math.sin(player.animTimer * 10) * 4 : motionCycle * 3.5; 
+                let armSwing = 0; 
 
                 let headRadius = 4.5;
                 let headX = px + player.width/2;
