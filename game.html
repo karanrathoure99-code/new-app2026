@@ -430,7 +430,7 @@
                         y: surfaceTop - 25,
                         collected: false,
                         radius: 5,
-                        isBoom: false,
+                        isBoom: false, // Level 1 coins are purely safe normal coins
                         floatOffset: Math.random() * Math.PI
                     });
                 }
@@ -756,8 +756,8 @@
                 let dy = (player.y + player.height/2) - c.y;
                 let dist = Math.hypot(dx, dy);
 
-                // Exact precise touch check across all levels (dist < 12)
-                if (!c.collected && dist < 12) {
+                // Extremely tight collision range (dist < 10) so it only registers when directly touched
+                if (!c.collected && dist < 10) {
                     c.collected = true;
 
                     if (c.isBoom) {
