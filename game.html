@@ -111,7 +111,7 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         .distractor-bg {
@@ -135,7 +135,7 @@
 
         #gameCanvas {
             width: 100%;
-            height: 430px;
+            height: 410px;
             display: block;
             position: relative;
             z-index: 2;
@@ -151,8 +151,8 @@
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                margin-top: 4px;
-                padding: 0 8px;
+                margin-top: 2px;
+                padding: 0 4px;
                 pointer-events: auto;
                 background: transparent;
                 display: flex;
@@ -164,7 +164,7 @@
 
         .control-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             pointer-events: auto;
             align-items: center;
         }
@@ -173,25 +173,23 @@
             .control-group.right-group {
                 display: flex;
                 flex-direction: row;
-                gap: 8px;
+                gap: 6px;
                 align-items: center;
             }
         }
 
         .ctrl-btn {
-            /* 85% transparent look */
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             border: 1.5px solid rgba(255, 255, 255, 0.15);
-            border-bottom: 3px solid rgba(0, 0, 0, 0.15);
-            color: rgba(255, 255, 255, 0.3);
+            border-bottom: 3px solid rgba(0, 0, 0, 0.2);
+            color: rgba(255, 255, 255, 0.4);
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            /* Bade buttons size */
-            width: 75px;
-            height: 55px;
-            font-size: 14px;
+            width: 95px;
+            height: 70px;
+            font-size: 15px;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
@@ -205,23 +203,23 @@
 
         .ctrl-btn:active, .ctrl-btn.pressed {
             transform: translateY(2px);
-            background: rgba(140, 88, 48, 0.2);
-            border-color: rgba(212, 163, 115, 0.4);
+            background: rgba(140, 88, 48, 0.25);
+            border-color: rgba(212, 163, 115, 0.5);
         }
 
         .btn-logo {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 900;
-            color: rgba(255, 204, 0, 0.35);
-            margin-bottom: 1px;
+            color: rgba(255, 204, 0, 0.45);
+            margin-bottom: 2px;
             letter-spacing: -0.5px;
         }
 
         .btn-label {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             line-height: 1;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.4);
         }
 
         .back-btn, .prev-lvl-btn {
@@ -334,7 +332,7 @@
         const ctx = canvas.getContext('2d');
 
         let canvasWidth = 1280;
-        let canvasHeight = 430;
+        let canvasHeight = 410;
 
         function checkDeviceControls() {
             const isMobileOrTablet = window.innerWidth <= 1023;
@@ -349,7 +347,7 @@
                 document.documentElement.style.setProperty('--scale-factor', scale);
             }
             canvasWidth = 1280;
-            canvasHeight = 430;
+            canvasHeight = 410;
 
             const dpr = window.devicePixelRatio || 1;
             canvas.width = canvasWidth * dpr;
@@ -777,17 +775,17 @@
 
             if (keys.left) {
                 player.vx = -player.speed;
-                player.animTimer += 0.12; 
+                player.animTimer += 0.15; 
             } else if (keys.right) {
                 player.vx = player.speed;
-                player.animTimer += 0.12;
+                player.animTimer += 0.15;
             } else {
                 player.vx = 0;
                 player.animTimer = 0;
             }
 
             if (!player.isGrounded) {
-                player.animTimer += 0.12; 
+                player.animTimer += 0.15; 
             }
 
             if (keys.down) {
@@ -988,10 +986,11 @@
                 ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                let legSwing = 0;
+                // Player leg and arm swing animation restored here
+                let legSwing = Math.sin(player.animTimer) * 3.5;
                 let isJumpingOrAirborne = !player.isGrounded;
                 let jumpStretch = isJumpingOrAirborne ? -2 : 0;
-                let armSwing = 0; 
+                let armSwing = Math.sin(player.animTimer) * 3; 
 
                 let headRadius = 4.5;
                 let headX = px + player.width/2;
