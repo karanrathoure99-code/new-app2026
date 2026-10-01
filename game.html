@@ -409,7 +409,7 @@
             else if (currentLevel === 2) {
                 let lastCoinX = 60 + 5 * coinSpacing;
                 platforms.push({ x: Math.floor(lastCoinX) - 30, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = false;
+                isDoorOpen = false; // Level 2 mein gate shuru me lock rahega
                 player.x = 40;
                 player.y = 100;
             }
@@ -675,10 +675,19 @@
                     
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
 
-                    if (currentLevel === 3 && score >= 2) {
+                    // === LEVEL 2 GATE UNLOCK LOGIC (Sare coins collect hone par gate open) ===
+                    if (currentLevel === 2) {
+                        let allCollected = coins.every(coin => coin.collected);
+                        if (allCollected) {
+                            isDoorOpen = true; 
+                            floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
+                        }
+                    }
+                    else if (currentLevel === 3 && score >= 2) {
                         isDoorOpen = true; 
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                    } else if ((currentLevel === 4 || currentLevel === 5) && score >= 6) {
+                    } 
+                    else if ((currentLevel === 4 || currentLevel === 5) && score >= 6) {
                         isDoorOpen = true; 
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                     }
