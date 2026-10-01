@@ -147,10 +147,10 @@
         @media (max-width: 1023px) {
             .controls-overlay {
                 position: absolute;
-                bottom: 4px;
-                left: 10px;
-                right: 10px;
-                padding: 4px 8px;
+                bottom: 2px;
+                left: 8px;
+                right: 8px;
+                padding: 2px 4px;
                 pointer-events: none;
                 background: transparent;
                 display: flex;
@@ -185,8 +185,8 @@
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            width: 48px;
-            height: 48px;
+            width: 46px;
+            height: 46px;
             font-size: 12px;
             border-radius: 10px;
             display: flex;
@@ -216,7 +216,7 @@
         }
 
         .btn-label {
-            font-size: 8.5px;
+            font-size: 8px;
             font-weight: 700;
             line-height: 1;
         }
@@ -366,6 +366,13 @@
         let floatingTexts = [];
         let flowerBombs = [];
         let bombTimer = 0;
+        
+        // Badal (Clouds) setup
+        let clouds = [
+            { x: 150, y: 50, speed: 0.3, size: 45 },
+            { x: 500, y: 80, speed: 0.2, size: 60 },
+            { x: 900, y: 40, speed: 0.4, size: 50 }
+        ];
 
         let player = {
             x: 40,
@@ -446,7 +453,6 @@
 
             goal.y = surfaceTop - goal.h;
             goal.baseH = goal.h;
-            // Gate ko bilkul right box ke edge par set kiya hai taaki proper dikhe
             goal.x = canvasWidth - goal.w;
             goal.trollActive = false;
             goal.trollTimer = 0;
@@ -712,17 +718,24 @@
                 triggerExplosion();
             }
 
-            // Level 1 Flower Bomb Logic: Tej speed (`vy = 6.5`) aur jahan player ruka/chala wahin target
+            // Update Clouds
+            clouds.forEach(c => {
+                c.x += c.speed;
+                if (c.x > canvasWidth + 50) c.x = -50;
+            });
+
+            // Level 1 Flower Bomb Logic: 100% faster speed (`vy = 13`) aur player ke aage-peeche randomly girne ka feature
             if (currentLevel === 1) {
                 let distToGoal = goal.x - (player.x + player.width/2);
                 if (isMoving && distToGoal > 70) {
                     bombTimer++;
-                    if (bombTimer > 25) { 
+                    if (bombTimer > 18) { 
                         bombTimer = 0;
+                        let offset = (Math.random() - 0.5) * 80; // Player ke aage ya peeche thoda random offset
                         flowerBombs.push({
-                            x: player.x + player.width / 2, // Seedha player ki exact position par
+                            x: player.x + player.width / 2 + offset,
                             y: -20,
-                            vy: 6.5, // Aur zyada fast speed
+                            vy: 13.0, // 100% fast speed
                             radius: 8
                         });
                     }
@@ -789,6 +802,16 @@
 
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Draw Clouds (Badal)
+            clouds.forEach(c => {
+                ctx.fillStyle = 'rgba(212, 163, 115, 0.15)';
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.size * 0.6, 0, Math.PI * 2);
+                ctx.arc(c.x + c.size * 0.4, c.y - c.size * 0.2, c.size * 0.5, 0, Math.PI * 2);
+                ctx.arc(c.x + c.size * 0.8, c.y, c.size * 0.55, 0, Math.PI * 2);
+                ctx.fill();
+            });
 
             platforms.forEach(p => {
                 ctx.fillStyle = '#2b180a';
