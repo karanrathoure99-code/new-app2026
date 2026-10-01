@@ -147,16 +147,15 @@
         @media (max-width: 1023px) {
             .controls-overlay {
                 position: absolute;
-                bottom: 12px;
-                left: 0;
-                right: 0;
-                padding: 0 16px;
+                bottom: 4px;
+                left: 10px;
+                right: 10px;
+                padding: 4px 8px;
                 pointer-events: none;
                 background: transparent;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                width: 100%;
                 z-index: 30;
             }
         }
@@ -186,10 +185,10 @@
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            width: 54px;
-            height: 54px;
-            font-size: 13px;
-            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            font-size: 12px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -208,7 +207,7 @@
         }
 
         .btn-logo {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 900;
             color: #ffcc00;
             text-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
@@ -217,7 +216,7 @@
         }
 
         .btn-label {
-            font-size: 9px;
+            font-size: 8.5px;
             font-weight: 700;
             line-height: 1;
         }
@@ -383,7 +382,7 @@
         };
 
         let platforms = [];
-        let goal = { x: 0, y: 0, w: 24, h: 42, baseH: 42, trollActive: false, trollTimer: 0 };
+        let goal = { x: 0, y: 0, w: 28, h: 46, baseH: 46, trollActive: false, trollTimer: 0 };
 
         function updateGameLayout() {
             const surfaceTop = canvasHeight - 40;
@@ -447,8 +446,8 @@
 
             goal.y = surfaceTop - goal.h;
             goal.baseH = goal.h;
-            // Gate ko bilkul right boundary/box ke corner se chipka diya hai
-            goal.x = canvasWidth - goal.w - 3;
+            // Gate ko bilkul right box ke edge par set kiya hai taaki proper dikhe
+            goal.x = canvasWidth - goal.w;
             goal.trollActive = false;
             goal.trollTimer = 0;
         }
@@ -501,7 +500,7 @@
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
-                gain.connect(audioCtx.destination); जैसे 
+                gain.connect(audioCtx.destination);
                 const now = audioCtx.currentTime;
 
                 if (type === 'jump') {
@@ -713,30 +712,28 @@
                 triggerExplosion();
             }
 
-            // Level 1 Flower Bomb Logic (Player ke pehle move se shuru aur gate ke paas aane par band)
+            // Level 1 Flower Bomb Logic: Tej speed (`vy = 6.5`) aur jahan player ruka/chala wahin target
             if (currentLevel === 1) {
                 let distToGoal = goal.x - (player.x + player.width/2);
-                if (isMoving && distToGoal > 80) {
+                if (isMoving && distToGoal > 70) {
                     bombTimer++;
-                    if (bombTimer > 35) { // Har kuch frames me flower bomb spawn hoga
+                    if (bombTimer > 25) { 
                         bombTimer = 0;
                         flowerBombs.push({
-                            x: player.x + (Math.random() - 0.5) * 40, // Player ko target karte hue uper se
+                            x: player.x + player.width / 2, // Seedha player ki exact position par
                             y: -20,
-                            vy: 3.5, // Fast speed taaki player par turant gire
+                            vy: 6.5, // Aur zyada fast speed
                             radius: 8
                         });
                     }
                 }
 
                 for (let i = flowerBombs.length - 1; i >= 0; i--) {
-                    let fb = flowerBombs.get ? flowerBombs[i] : flowerBombs[i];
+                    let fb = flowerBombs[i];
                     fb.y += fb.vy;
 
-                    // Surface ya ground par aate hi blast aur player check
                     let surfaceTop = canvasHeight - 40;
                     if (fb.y >= surfaceTop - 10) {
-                        // Agar player blast point ke paas hai toh explosion trigger hoga
                         let hitDist = Math.abs((player.x + player.width/2) - fb.x);
                         if (hitDist < 25) {
                             triggerExplosion();
@@ -746,7 +743,7 @@
                 }
             }
 
-            let playerInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
+            let playerInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w + 10);
 
             if (playerInsideGoal && player.y + player.height >= goal.y) {
                 if (!levelWon) {
@@ -809,7 +806,6 @@
                 flowerBombs.forEach(fb => {
                     ctx.save();
                     ctx.translate(fb.x, fb.y);
-                    // Flower petals
                     ctx.fillStyle = '#ff9f1c';
                     for (let i = 0; i < 5; i++) {
                         ctx.rotate((Math.PI * 2) / 5);
@@ -817,7 +813,6 @@
                         ctx.arc(0, -6, 5, 0, Math.PI * 2);
                         ctx.fill();
                     }
-                    // Bomb center core
                     ctx.fillStyle = '#2b180a';
                     ctx.beginPath();
                     ctx.arc(0, 0, 5, 0, Math.PI * 2);
@@ -829,13 +824,13 @@
                 });
             }
 
-            // Gate (Bilkul corner se chipka hua)
-            ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
-            ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
+            // Gate Proper Visibility & Corner Alignment
+            ctx.fillStyle = 'rgba(255, 159, 28, 0.3)';
+            ctx.fillRect(goal.x - 2, goal.y - 2, goal.w + 4, goal.h + 4);
             ctx.fillStyle = '#532d0c';
             ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-            ctx.strokeStyle = '#ff9f1c';
-            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#ffcc00';
+            ctx.lineWidth = 3;
             ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
 
             particles.forEach(p => {
