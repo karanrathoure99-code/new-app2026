@@ -309,6 +309,9 @@
     </div>
 
     <script>
+        const currentPageFile = window.location.pathname.split("/").pop() || "game.html";
+        localStorage.setItem('lastActiveFile', currentPageFile);
+
         function handleScreenFit(e) {
             if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) {
                 return;
@@ -388,11 +391,16 @@
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 0, y: 0, w: 28, h: 36 };
+        
+        // Gate ko bada aur saaf banaya gaya hai
+        let goal = { x: 0, y: 0, w: 42, h: 56 };
 
         function updateGameLayout() {
             score = 0;
             
+            localStorage.setItem('saveLevel_TumseNaHoPayga', currentLevel);
+            localStorage.setItem('lastActiveFile', currentPageFile);
+
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
 
@@ -485,8 +493,8 @@
             }
 
             goal.y = surfaceTop - goal.h;
-            // Border ki side se bilkul 100% joint
-            goal.x = canvasWidth - goal.w;
+            // Gate ko thoda andar rakha gaya hai taaki border ke andar clear aur proper dikhe
+            goal.x = canvasWidth - goal.w - 12;
         }
 
         function goToPrevLevel() {
@@ -806,8 +814,10 @@
 
             player.x += player.vx;
 
+            // Player gate ke aage ya bahar nahi ja sakta (Solid Wall check)
+            let maxRightLimit = goal.x + goal.w - player.width;
             if (player.x < 0) player.x = 0;
-            if (player.x > canvasWidth - player.width) player.x = canvasWidth - player.width;
+            if (player.x > maxRightLimit) player.x = maxRightLimit;
 
             player.vy += player.gravity;
             player.y += player.vy;
@@ -842,16 +852,20 @@
 
             checkCoins();
 
-            let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x);
+            // Gate Collision & Win check
+            let playerCenter = player.x + player.width / 2;
+            let touchesGate = (player.x + player.width >= goal.x && player.x <= goal.x + goal.w);
 
-            if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
+            if (touchesGate && player.y + player.height >= goal.y) {
                 if (!isDoorOpen) {
+                    // Agar door lock hai toh player ko gate ke bahar rok do
                     player.x = goal.x - player.width - 1; 
                     if (Math.random() < 0.05) { 
                         floatingTexts.push({ text: 'LOCKED!', x: player.x - 10, y: player.y - 10, alpha: 1, vy: -0.5 });
                     }
                 } 
-                else if (!levelWon) {
+                else if (playerCenter >= goal.x + 8 && !levelWon) {
+                    // Gate open hai aur player gate ke andar enter hua -> Win
                     levelWon = true;
                     playSound('win');
                     
@@ -862,10 +876,8 @@
                         modal.classList.add('show');
                         
                         let nextLvl = currentLevel + 1;
-                        let savedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
-                        if (nextLvl > savedMax) {
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', nextLvl);
-                        }
+                        localStorage.setItem('saveLevel_TumseNaHoPayga', nextLvl);
+                        localStorage.setItem('lastActiveFile', 'game.html');
 
                         setTimeout(() => {
                             modal.classList.remove('show');
@@ -876,13 +888,15 @@
                     } else {
                         modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game2.html...";
                         modal.classList.add('show');
+                        
+                        localStorage.setItem('lastActiveFile', 'game2.html');
+                        localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
+
                         setTimeout(() => {
                             window.location.href = "game2.html"; 
                         }, 2000);
                     }
                 }
-            } else if (!isDoorOpen && player.x + player.width >= goal.x) {
-                player.x = goal.x - player.width;
             }
 
             let maxCoinsDisplay = (currentLevel === 2) ? 6 : 4;
@@ -939,28 +953,97 @@
                 }
             });
 
-            // Gate draw logic - Bilkul right border ke sath flush/joint
-            let doorX = canvasWidth - goal.w;
+            // =======================================================
+            // 🚪 CLEAR, HIGH VISIBILITY GATE (INSIDE ARENA BOX)
+            // =======================================================
+            let doorX = goal.x;
+            let doorY = goal.y;
             let doorW = goal.w;
+            let doorH = goal.h;
 
             if (isDoorOpen) {
-                ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
-                ctx.fillRect(doorX - 4, goal.y - 4, doorW + 4, goal.h + 8);
-                ctx.fillStyle = '#532d0c';
-                ctx.fillRect(doorX, goal.y, doorW, goal.h);
-                ctx.strokeStyle = '#ff9f1c';
-                ctx.lineWidth = 2.5;
-                ctx.strokeRect(doorX, goal.y, doorW, goal.h);
+                // Neon glow background
+                ctx.fillStyle = 'rgba(0, 255, 170, 0.25)';
+                ctx.fillRect(doorX - 5, doorY - 5, doorW + 10, doorH + 10);
+
+                // Door Portal Body
+                let openGrad = ctx.createLinearGradient(doorX, doorY, doorX + doorW, doorY);
+                openGrad.addColorStop(0, '#00e676');
+                openGrad.addColorStop(1, '#004d40');
+                ctx.fillStyle = openGrad;
+                ctx.fillRect(doorX, doorY, doorW, doorH);
+
+                // Door Arch / Pillars inside
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(doorX + 5, doorY + 5, doorW - 10, doorH - 5);
+
+                // Portal Arrow
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(doorX + 12, doorY + doorH/2 - 8);
+                ctx.lineTo(doorX + doorW - 14, doorY + doorH/2);
+                ctx.lineTo(doorX + 12, doorY + doorH/2 + 8);
+                ctx.stroke();
+
+                // High Contrast Border
+                ctx.strokeStyle = '#00ffcc';
+                ctx.lineWidth = 3.5;
+                ctx.strokeRect(doorX, doorY, doorW, doorH);
+
+                // Text Indicator
+                ctx.font = '900 10px Orbitron, sans-serif';
+                ctx.fillStyle = '#00ffcc';
+                ctx.fillText('OPEN', doorX + 4, doorY - 7);
             } else {
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
-                ctx.fillRect(doorX - 4, goal.y - 4, doorW + 4, goal.h + 8);
-                ctx.fillStyle = '#4a0000';
-                ctx.fillRect(doorX, goal.y, doorW, goal.h);
-                ctx.strokeStyle = '#ff0000';
+                // Red Glow
+                ctx.fillStyle = 'rgba(255, 23, 68, 0.3)';
+                ctx.fillRect(doorX - 5, doorY - 5, doorW + 10, doorH + 10);
+
+                // Door Locked Body
+                let lockGrad = ctx.createLinearGradient(doorX, doorY, doorX + doorW, doorY);
+                lockGrad.addColorStop(0, '#d50000');
+                lockGrad.addColorStop(1, '#3b0000');
+                ctx.fillStyle = lockGrad;
+                ctx.fillRect(doorX, doorY, doorW, doorH);
+
+                // Metal Grille / Cross Security Bars
+                ctx.strokeStyle = '#ff80ab';
                 ctx.lineWidth = 2.5;
-                ctx.strokeRect(doorX, goal.y, doorW, goal.h);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(doorX + doorW/2 - 2, goal.y + goal.h/2 - 2, 4, 4);
+                ctx.beginPath();
+                ctx.moveTo(doorX + 4, doorY + 4);
+                ctx.lineTo(doorX + doorW - 4, doorY + doorH - 4);
+                ctx.moveTo(doorX + doorW - 4, doorY + 4);
+                ctx.lineTo(doorX + 4, doorY + doorH - 4);
+                ctx.stroke();
+
+                // Padlock Center
+                let lX = doorX + doorW / 2 - 6;
+                let lY = doorY + doorH / 2 - 4;
+                
+                // Shackle
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(lX + 6, lY - 2, 5, Math.PI, 0);
+                ctx.stroke();
+
+                // Body
+                ctx.fillStyle = '#ffeb3b';
+                ctx.fillRect(lX, lY, 12, 10);
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(lX + 4.5, lY + 3, 3, 4);
+
+                // High Contrast Border
+                ctx.strokeStyle = '#ff1744';
+                ctx.lineWidth = 3.5;
+                ctx.strokeRect(doorX, doorY, doorW, doorH);
+
+                // Text Indicator
+                ctx.font = '900 10px Orbitron, sans-serif';
+                ctx.fillStyle = '#ff1744';
+                ctx.fillText('LOCK', doorX + 5, doorY - 7);
             }
 
             particles.forEach(p => {
@@ -1030,10 +1113,12 @@
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
 
+                // Arms still
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX - 3.5, py + 12 + jumpStretch, 2.2, 10);  
                 ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12 + jumpStretch, 2.2, 10); 
 
+                // Only legs move
                 let legHeight = player.height === 24.3 ? 7 : 12;
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
