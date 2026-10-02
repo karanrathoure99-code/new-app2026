@@ -308,6 +308,9 @@
     </div>
 
     <script>
+        const currentPageFile = window.location.pathname.split("/").pop() || "game2.html";
+        localStorage.setItem('lastActiveFile', currentPageFile);
+
         function handleScreenFit(e) {
             if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) {
                 return;
@@ -360,7 +363,12 @@
             checkDeviceControls();
         }
 
-        let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga_Part2')) || 6;
+        // 🌟 Highest unlocked level fetch karein (default: 6)
+        let maxUnlockedLevel = parseInt(localStorage.getItem('maxUnlocked_TumseNaHoPayga_Part2')) || 
+                               parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga_Part2')) || 6;
+        
+        // Hamesha highest reached level se start hoga
+        let currentLevel = maxUnlockedLevel;
         
         let isDoorOpen = false; 
         let score = 0;
@@ -378,9 +386,9 @@
             height: 40.5,    
             vx: 0,
             vy: 0,
-            speed: 2.8,        
-            jumpForce: -8.5,  
-            gravity: 0.38,    
+            speed: 5.6,        
+            jumpForce: -6.6,  
+            gravity: 0.60,    
             isGrounded: false,
             animTimer: 0
         };
@@ -391,11 +399,18 @@
 
         function updateGameLayout() {
             score = 0;
+
+            // Sirf aage badhne par highest level save hoga
+            if (currentLevel > maxUnlockedLevel) {
+                maxUnlockedLevel = currentLevel;
+            }
+            localStorage.setItem('maxUnlocked_TumseNaHoPayga_Part2', maxUnlockedLevel);
+            localStorage.setItem('saveLevel_TumseNaHoPayga_Part2', maxUnlockedLevel);
+            localStorage.setItem('lastActiveFile', currentPageFile);
             
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
 
-            // Level Titles from 6 to 15
             const levelTitles = {
                 6: "⚡『 🪙 DANGER ZONE 』- Lvl 6 ⚡",
                 7: "🎯『 💎 TRAP MASTER 』- Lvl 7 ⚡",
@@ -418,7 +433,6 @@
                 { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }
             ];
 
-            // Advanced & Unique Traps for Levels 6 to 15
             if (currentLevel === 6) {
                 platforms.push({ x: 300, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
                 platforms.push({ x: 800, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
@@ -437,7 +451,6 @@
                 platforms.push({ x: 550, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
                 platforms.push({ x: 850, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
             } else {
-                // Levels 11 to 15 custom second surfaces & complex hidden traps
                 let sWidth = 80;
                 let sHeight = 16;
                 let sY = surfaceTop - (45 + (currentLevel % 3) * 10);
@@ -458,7 +471,6 @@
             let usableWidth = canvasWidth - startMargin - endMargin;
             let coinSpacing = totalCoinsInLevel > 1 ? usableWidth / (totalCoinsInLevel - 1) : 0;
 
-            // Dynamic Boom/Trap coins configuration per level
             let boomMap = {
                 6: [1],
                 7: [0, 2],
@@ -489,6 +501,7 @@
             goal.x = canvasWidth - goal.w - 40;
         }
 
+        // ◀ BACK button dabane par sirf screen level piche hoga, unlocked progress safe rahegi
         function goToPrevLevel() {
             if (currentLevel > 6) {
                 currentLevel--;
@@ -496,7 +509,7 @@
                 player.vy = 0;
                 updateGameLayout();
             } else {
-                window.location.href = "game.html"; // Wapas pichle game part par jane ke liye
+                window.location.href = "game.html"; // Wapas pichle part par jane ke liye
             }
         }
 
@@ -845,10 +858,13 @@
                         modal.classList.add('show');
                         
                         let nextLvl = currentLevel + 1;
-                        let savedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga_Part2')) || 6;
-                        if (nextLvl > savedMax) {
-                            localStorage.setItem('saveLevel_TumseNaHoPayga_Part2', nextLvl);
+                        
+                        // 🌟 Highest level unlocked record update karein
+                        if (nextLvl > maxUnlockedLevel) {
+                            maxUnlockedLevel = nextLvl;
                         }
+                        localStorage.setItem('maxUnlocked_TumseNaHoPayga_Part2', maxUnlockedLevel);
+                        localStorage.setItem('saveLevel_TumseNaHoPayga_Part2', maxUnlockedLevel);
 
                         setTimeout(() => {
                             modal.classList.remove('show');
