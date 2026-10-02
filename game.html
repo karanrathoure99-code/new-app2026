@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Ego Trap - 10 Steps Puzzle</title>
+  <title>The Ego Trap - Ghost Trail Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,8 +12,8 @@
       user-select: none;
     }
     body {
-      background: #0f111a;
-      color: #e0e0e0;
+      background: #0d1117;
+      color: #c9d1d9;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
       flex-direction: column;
@@ -24,103 +24,137 @@
     }
     .hud {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .title {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       letter-spacing: 1px;
+      color: #f0f6fc;
       margin-bottom: 6px;
-      color: #ffffff;
     }
     .rules {
-      font-size: 14px;
-      color: #9aa0a6;
+      font-size: 13px;
+      color: #8b949e;
       margin-bottom: 12px;
     }
     .counter-box {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
-      background: #1a1e2e;
-      border: 1px solid #2e354f;
-      padding: 8px 18px;
-      border-radius: 8px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      padding: 6px 16px;
+      border-radius: 6px;
       display: inline-block;
-      color: #64b5f6;
+      color: #58a6ff;
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(5, 65px);
       grid-template-rows: repeat(5, 65px);
       gap: 8px;
-      background: #171b26;
+      background: #161b22;
       padding: 12px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border-radius: 10px;
+      border: 1px solid #30363d;
     }
     .tile {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      font-weight: bold;
-      border-radius: 8px;
-      background: #252c3d;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 6px;
+      background: #21262d;
       cursor: pointer;
-      transition: all 0.15s ease;
-      color: #8892b0;
+      position: relative;
+      transition: background 0.15s ease, transform 0.1s ease;
+      color: #8b949e;
     }
     .tile.valid-move:hover {
-      background: #36415d;
-      transform: scale(1.05);
+      background: #30363d;
+      transform: scale(1.04);
     }
     .tile.player {
-      background: #2196f3 !important;
-      color: white;
-      box-shadow: 0 0 15px rgba(33, 150, 243, 0.6);
+      background: #1f6feb !important;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(31, 111, 235, 0.8);
     }
     .tile.burned {
-      background: #3b1d28 !important;
-      border: 1px dashed #d32f2f;
-      cursor: not-allowed;
+      background: #28151b !important;
+      border: 1px dashed #da3633;
+      color: #da3633;
+    }
+    /* Ghost Trail Style jab fail ho */
+    .tile.ghost {
+      background: #241822 !important;
+      border: 1px solid #f85149;
+      color: #ff7b72;
+    }
+    .step-badge {
+      font-size: 11px;
+      opacity: 0.85;
+      font-weight: 500;
     }
     .tile.goal {
-      border: 2px solid #00e676;
-      color: #00e676;
+      border: 2px solid #238636;
+      color: #2ea043;
     }
     .tile.coin {
-      background: #332b1a;
-      border: 1px solid #ffd54f;
-      color: #ffd54f;
+      background: #2a2415;
+      border: 1px solid #d29922;
+      color: #e3b341;
     }
-    .status-msg {
-      margin-top: 18px;
-      height: 24px;
-      font-weight: 600;
-      font-size: 15px;
+    .fail-card {
+      margin-top: 16px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      text-align: center;
+      max-width: 360px;
+      min-height: 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .fail-card .cause {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f85149;
+      margin-bottom: 4px;
+    }
+    .fail-card .mirror {
+      font-size: 12px;
+      color: #8b949e;
+    }
+    .fail-card.success .cause {
+      color: #2ea043;
     }
     .restart-btn {
-      margin-top: 14px;
-      background: #2e384d;
-      color: #fff;
-      border: none;
-      padding: 10px 22px;
-      font-size: 14px;
+      margin-top: 12px;
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      padding: 8px 18px;
+      font-size: 13px;
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.2s;
     }
     .restart-btn:hover {
-      background: #3f4d6b;
+      background: #30363d;
+      color: #f0f6fc;
     }
   </style>
 </head>
 <body>
 
   <div class="hud">
-    <div class="title">THE ETIQUETTE LOCK</div>
-    <div class="rules">Reach Exit [E] in <b>EXACTLY 10 STEPS</b>. Don't step on visited tiles.</div>
+    <div class="title">THE EGO TRAP : GHOST TRAIL</div>
+    <div class="rules">Reach Exit [E] in <b>EXACTLY 10 STEPS</b>. No retreading.</div>
     <div class="counter-box">
       Steps: <span id="step-count">0</span> / 10
     </div>
@@ -128,37 +162,40 @@
 
   <div class="grid" id="grid"></div>
 
-  <div class="status-msg" id="status-msg"></div>
-  <button class="restart-btn" onclick="initGame()">Restart Level (Press R)</button>
+  <div class="fail-card" id="fail-card">
+    <div class="cause" id="fail-cause">Path Clear</div>
+    <div class="mirror" id="fail-mirror">Arrow keys or click adjacent tiles to move.</div>
+  </div>
+
+  <button class="restart-btn" onclick="initGame()">Instant Restart [R]</button>
 
   <script>
     const GRID_SIZE = 5;
     const TARGET_STEPS = 10;
     const START_POS = { r: 0, c: 0 };
     const GOAL_POS = { r: 4, c: 4 };
-    const COIN_POS = { r: 1, c: 3 }; // Greed bait
+    const COIN_POS = { r: 1, c: 3 };
 
     let playerPos = { ...START_POS };
     let steps = 0;
-    let visited = new Set();
+    let pathHistory = []; // Tracks exact order of tiles: [{r, c, step}]
     let gameOver = false;
 
     const gridEl = document.getElementById("grid");
     const stepCountEl = document.getElementById("step-count");
-    const statusMsgEl = document.getElementById("status-msg");
-
-    function coordKey(r, c) {
-      return `${r},${c}`;
-    }
+    const failCauseEl = document.getElementById("fail-cause");
+    const failMirrorEl = document.getElementById("fail-mirror");
+    const failCardEl = document.getElementById("fail-card");
 
     function initGame() {
       playerPos = { ...START_POS };
       steps = 0;
-      visited = new Set();
-      visited.add(coordKey(START_POS.r, START_POS.c));
+      pathHistory = [{ r: START_POS.r, c: START_POS.c, step: 0 }];
       gameOver = false;
-      statusMsgEl.textContent = "";
-      statusMsgEl.style.color = "#e0e0e0";
+      failCardEl.className = "fail-card";
+      failCauseEl.textContent = "Path Active";
+      failCauseEl.style.color = "#58a6ff";
+      failMirrorEl.textContent = "Arrow keys or click to navigate.";
       stepCountEl.textContent = steps;
       renderGrid();
     }
@@ -169,8 +206,11 @@
       return (dr === 1 && dc === 0) || (dr === 0 && dc === 1);
     }
 
+    function hasVisited(r, c) {
+      return pathHistory.some(p => p.r === r && p.c === c);
+    }
+
     function checkDeadlock() {
-      // Check if player has any adjacent unvisited tile left
       const neighbors = [
         { r: playerPos.r + 1, c: playerPos.c },
         { r: playerPos.r - 1, c: playerPos.c },
@@ -178,78 +218,100 @@
         { r: playerPos.r, c: playerPos.c - 1 }
       ];
 
-      const movesLeft = neighbors.some(n => 
+      return !neighbors.some(n => 
         n.r >= 0 && n.r < GRID_SIZE && 
         n.c >= 0 && n.c < GRID_SIZE && 
-        !visited.has(coordKey(n.r, n.c))
+        !hasVisited(n.r, n.c)
       );
+    }
 
-      return !movesLeft;
+    function triggerFail(cause, realityCheck) {
+      gameOver = true;
+      failCardEl.className = "fail-card";
+      failCauseEl.textContent = cause;
+      failCauseEl.style.color = "#f85149";
+      failMirrorEl.textContent = realityCheck;
+      renderGrid(true); // render with Ghost Trail active
+    }
+
+    function triggerSuccess() {
+      gameOver = true;
+      failCardEl.className = "fail-card success";
+      failCauseEl.textContent = "Unlocked with Perfection";
+      failCauseEl.style.color = "#2ea043";
+      failMirrorEl.textContent = "You maintained discipline and calculated every step.";
+      renderGrid(false);
     }
 
     function onTileClick(r, c) {
       if (gameOver) return;
 
-      const key = coordKey(r, c);
+      if (!isAdjacent(playerPos.r, playerPos.c, r, c)) return;
 
-      // Rule: Must be adjacent and not already visited
-      if (!isAdjacent(playerPos.r, playerPos.c, r, c)) {
+      if (hasVisited(r, c)) {
+        triggerFail(
+          "Stepped On Your Own Footprint",
+          `Look at tile (${r+1}, ${c+1}). You burned that bridge yourself.`
+        );
         return;
       }
 
-      if (visited.has(key)) {
-        statusMsgEl.textContent = "Tile already broken! Can't step here.";
-        statusMsgEl.style.color = "#ff5252";
-        return;
-      }
-
-      // Valid move
       steps++;
       playerPos = { r, c };
-      visited.add(key);
+      pathHistory.push({ r, c, step: steps });
       stepCountEl.textContent = steps;
 
-      // Win / Loss evaluation
+      // Check Outcome
       if (r === GOAL_POS.r && c === GOAL_POS.c) {
-        gameOver = true;
         if (steps === TARGET_STEPS) {
-          statusMsgEl.textContent = "Perfect! Door Unlocked.";
-          statusMsgEl.style.color = "#00e676";
+          triggerSuccess();
+        } else if (steps < TARGET_STEPS) {
+          triggerFail(
+            `Rushed! Took ${steps} Steps, Needed ${TARGET_STEPS}`,
+            "You ran straight for the exit without planning the required detour."
+          );
         } else {
-          statusMsgEl.textContent = `Door locked! Exactly ${TARGET_STEPS} steps needed (You took ${steps}).`;
-          statusMsgEl.style.color = "#ff5252";
+          triggerFail(
+            `Greed Overload! Took ${steps} Steps`,
+            "You wandered around collecting bait and exhausted your move limit."
+          );
         }
-      } else if (steps > TARGET_STEPS) {
-        gameOver = true;
-        statusMsgEl.textContent = `Overstepped! Limit was ${TARGET_STEPS} steps.`;
-        statusMsgEl.style.color = "#ff5252";
+      } else if (steps >= TARGET_STEPS) {
+        triggerFail(
+          "Ran Out of Steps",
+          `You hit ${TARGET_STEPS} steps before even touching the exit door.`
+        );
       } else if (checkDeadlock()) {
-        gameOver = true;
-        statusMsgEl.textContent = "Trapped in your own footsteps! No way out.";
-        statusMsgEl.style.color = "#ff5252";
+        triggerFail(
+          "Cornered By Your Own Ego",
+          "Every surrounding tile was visited by you earlier. No exit left."
+        );
+      } else {
+        renderGrid(false);
       }
-
-      renderGrid();
     }
 
-    function renderGrid() {
+    function renderGrid(showGhost = false) {
       gridEl.innerHTML = "";
       for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
           const tile = document.createElement("div");
           tile.classList.add("tile");
-          const key = coordKey(r, c);
 
           const isPlayer = r === playerPos.r && c === playerPos.c;
           const isGoal = r === GOAL_POS.r && c === GOAL_POS.c;
           const isCoin = r === COIN_POS.r && c === COIN_POS.c;
-          const isBurned = visited.has(key) && !isPlayer;
-          const canMove = !gameOver && isAdjacent(playerPos.r, playerPos.c, r, c) && !visited.has(key);
+          const historyEntry = pathHistory.find(p => p.r === r && p.c === c);
+          const isVisited = !!historyEntry && !isPlayer;
+          const canMove = !gameOver && isAdjacent(playerPos.r, playerPos.c, r, c) && !hasVisited(r, c);
 
           if (isPlayer) {
             tile.classList.add("player");
-            tile.textContent = "P";
-          } else if (isBurned) {
+            tile.innerHTML = `P<span class="step-badge">#${steps}</span>`;
+          } else if (showGhost && isVisited) {
+            tile.classList.add("ghost");
+            tile.innerHTML = `✕<span class="step-badge">#${historyEntry.step}</span>`;
+          } else if (isVisited) {
             tile.classList.add("burned");
             tile.textContent = "✕";
           } else if (isGoal) {
@@ -276,18 +338,16 @@
         return;
       }
 
-      // Arrow keys navigation
-      let targetR = playerPos.r;
-      let targetC = playerPos.c;
-
-      if (e.key === "ArrowUp") targetR--;
-      else if (e.key === "ArrowDown") targetR++;
-      else if (e.key === "ArrowLeft") targetC--;
-      else if (e.key === "ArrowRight") targetC++;
+      let tr = playerPos.r;
+      let tc = playerPos.c;
+      if (e.key === "ArrowUp") tr--;
+      else if (e.key === "ArrowDown") tr++;
+      else if (e.key === "ArrowLeft") tc--;
+      else if (e.key === "ArrowRight") tc++;
       else return;
 
-      if (targetR >= 0 && targetR < GRID_SIZE && targetC >= 0 && targetC < GRID_SIZE) {
-        onTileClick(targetR, targetC);
+      if (tr >= 0 && tr < GRID_SIZE && tc >= 0 && tc < GRID_SIZE) {
+        onTileClick(tr, tc);
       }
     });
 
