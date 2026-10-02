@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🎮 YEH "game2.html" (LEVEL 6 TO 15 GAMEPLAY FILE) HAI 🎮 -->
+<!-- 🎮 YEH "game2.html" (LEVEL 6 TO 15 TROLL REDESIGN) HAI 🎮 -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -363,11 +363,9 @@
             checkDeviceControls();
         }
 
-        // 🌟 Highest unlocked level fetch karein (default: 6)
         let maxUnlockedLevel = parseInt(localStorage.getItem('maxUnlocked_TumseNaHoPayga_Part2')) || 
                                parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga_Part2')) || 6;
         
-        // Hamesha highest reached level se start hoga
         let currentLevel = maxUnlockedLevel;
         
         let isDoorOpen = false; 
@@ -386,9 +384,9 @@
             height: 40.5,    
             vx: 0,
             vy: 0,
-            speed: 6.5,        
-            jumpForce: -4.0,  
-            gravity: 0.60,    
+            speed: 2.8,        
+            jumpForce: -8.5,  
+            gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
         };
@@ -400,7 +398,6 @@
         function updateGameLayout() {
             score = 0;
 
-            // Sirf aage badhne par highest level save hoga
             if (currentLevel > maxUnlockedLevel) {
                 maxUnlockedLevel = currentLevel;
             }
@@ -412,19 +409,19 @@
             const surfaceHeight = 40;
 
             const levelTitles = {
-                6: "⚡『 🪙 DANGER ZONE 』- Lvl 6 ⚡",
-                7: "🎯『 💎 TRAP MASTER 』- Lvl 7 ⚡",
-                8: "🚀『 💰 SHIELD REQUIRED 』- Lvl 8 ⚡",
-                9: "🔥『 🏆 SURVIVAL TEST 』- Lvl 9 ⚡",
-                10: "👑『 ✨ THE HARD CORE 』- Lvl 10 ⚡",
-                11: "⚡『 🪙 ELITE MAZE 』- Lvl 11 ⚡",
-                12: "🎯『 💎 HEAVY TRAPS 』- Lvl 12 ⚡",
-                13: "🚀『 💰 TRICKY PATHS 』- Lvl 13 ⚡",
-                14: "🔥『 🏆 ALMOST THERE 』- Lvl 14 ⚡",
-                15: "👑『 ✨ ULTIMATE BOSS 』- Lvl 15 ⚡"
+                6: "⚡『 🏃 JUMP OR DIE 』- Lvl 6 ⚡",
+                7: "🎯『 🧱 FAKE BRICKS TROLL 』- Lvl 7 ⚡",
+                8: "🚀『 💣 MINEFIELD CARPET 』- Lvl 8 ⚡",
+                9: "🔥『 🪜 STAIRWAY TO HEAVEN? 』- Lvl 9 ⚡",
+                10: "👑『 🕳 HOLE IN ONE 』- Lvl 10 ⚡",
+                11: "⚡『 🧗 ELEVATED AGONY 』- Lvl 11 ⚡",
+                12: "🎯『 🔒 GATE KEEPER'S PRANK 』- Lvl 12 ⚡",
+                13: "🚀『 💀 DOUBLE TROUBLE 』- Lvl 13 ⚡",
+                14: "🔥『 🎯 BLIND LEAP OF FAITH 』- Lvl 14 ⚡",
+                15: "👑『 👹 THE TROLL GOD (FINAL) 』- Lvl 15 ⚡"
             };
 
-            document.getElementById('levelTitle').innerText = levelTitles[currentLevel] || `⚡『 🪙 COLLECT MOSTLY COIN 』- Lvl ${currentLevel} ⚡`;
+            document.getElementById('levelTitle').innerText = levelTitles[currentLevel] || `⚡『 🪙 TROLL ARENA 』- Lvl ${currentLevel} ⚡`;
 
             let totalCoinsInLevel = 4;
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + totalCoinsInLevel;
@@ -433,32 +430,80 @@
                 { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }
             ];
 
+            // ==========================================
+            // 😈 UNIQUE TROLL DESIGNS FOR LEVELS 6 TO 15
+            // ==========================================
             if (currentLevel === 6) {
+                // Trap 1: Jump Landing Trap (seedhe coin ke theek neeche)
+                platforms.push({ x: 260, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 740, y: surfaceTop, w: 100, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 7) {
+                // Troll: Floating platforms jo dikhte safe hain, lekin landing ke baad zameen trap hai
+                platforms.push({ x: 320, y: surfaceTop - 60, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 440, y: surfaceTop, w: 140, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 760, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 880, y: surfaceTop, w: 120, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 8) {
+                // Troll: Minefield - ground par har thodi doori par continuous chote hidden traps
+                platforms.push({ x: 180, y: surfaceTop, w: 60, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 420, y: surfaceTop, w: 75, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 680, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 920, y: surfaceTop, w: 70, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 9) {
+                // Troll: Seedhi (Stairs) banayi hai, lekin upar chadh kar aage koodne par trap
+                platforms.push({ x: 200, y: surfaceTop - 40, w: 70, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 340, y: surfaceTop - 75, w: 70, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 480, y: surfaceTop - 110, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 600, y: surfaceTop, w: 160, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 860, y: surfaceTop - 50, w: 90, h: 16, type: 'secondSurface' });
+            } 
+            else if (currentLevel === 10) {
+                // Troll: Center gap trap - Center mein bada hidden trap jahan player jump karta hai
+                platforms.push({ x: 280, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 500, y: surfaceTop, w: 220, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 840, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 11) {
+                // Troll: Narrow roofs - floating surface se jump karna padega warna zameen par trap
+                platforms.push({ x: 180, y: surfaceTop - 65, w: 85, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 380, y: surfaceTop, w: 160, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 620, y: surfaceTop - 75, w: 85, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 820, y: surfaceTop, w: 150, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 12) {
+                // Troll: Gate Keeper Trap - Gate ke theek samne hidden trap!
                 platforms.push({ x: 300, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                platforms.push({ x: 800, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-            } else if (currentLevel === 7) {
-                platforms.push({ x: 450, y: surfaceTop, w: 100, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                platforms.push({ x: 950, y: surfaceTop, w: 100, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-            } else if (currentLevel === 8) {
-                platforms.push({ x: 200, y: surfaceTop, w: 70, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                platforms.push({ x: 600, y: surfaceTop, w: 70, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                platforms.push({ x: 1000, y: surfaceTop, w: 70, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-            } else if (currentLevel === 9) {
-                platforms.push({ x: 350, y: surfaceTop, w: 120, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                platforms.push({ x: 750, y: surfaceTop, w: 120, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-            } else if (currentLevel === 10) {
-                platforms.push({ x: 250, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                platforms.push({ x: 550, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                platforms.push({ x: 850, y: surfaceTop, w: 80, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-            } else {
-                let sWidth = 80;
-                let sHeight = 16;
-                let sY = surfaceTop - (45 + (currentLevel % 3) * 10);
-                
-                platforms.push({ x: 250, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
-                platforms.push({ x: 600, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
-                platforms.push({ x: 950, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
-                platforms.push({ x: 450, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 650, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: canvasWidth - 140, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 13) {
+                // Troll: Alternate jumping surfaces aur dono side hidden traps
+                platforms.push({ x: 220, y: surfaceTop - 50, w: 75, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 360, y: surfaceTop, w: 110, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 540, y: surfaceTop - 75, w: 75, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 700, y: surfaceTop, w: 120, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 890, y: surfaceTop - 55, w: 75, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 1020, y: surfaceTop, w: 85, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 14) {
+                // Troll: High tower leap - bohot oonchi platforms aur ground par wide traps
+                platforms.push({ x: 260, y: surfaceTop - 85, w: 100, h: 18, type: 'secondSurface' });
+                platforms.push({ x: 420, y: surfaceTop, w: 180, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 680, y: surfaceTop - 95, w: 100, h: 18, type: 'secondSurface' });
+                platforms.push({ x: 850, y: surfaceTop, w: 170, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+            } 
+            else if (currentLevel === 15) {
+                // Troll: Boss Level - Zameen par chalna lagbhag impossible, upper islands se hi jaana hoga
+                platforms.push({ x: 140, y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 260, y: surfaceTop - 60, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 400, y: surfaceTop, w: 180, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 560, y: surfaceTop - 80, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 720, y: surfaceTop, w: 180, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
+                platforms.push({ x: 880, y: surfaceTop - 60, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 1040, y: surfaceTop, w: 120, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
             }
 
             isDoorOpen = false;
@@ -471,25 +516,33 @@
             let usableWidth = canvasWidth - startMargin - endMargin;
             let coinSpacing = totalCoinsInLevel > 1 ? usableWidth / (totalCoinsInLevel - 1) : 0;
 
+            // Har level par kaunsa coin BOOM/TRAP hoga (0-indexed: 0=Pehla, 1=Dusra, 2=Teesra, 3=Chautha)
             let boomMap = {
-                6: [1],
-                7: [0, 2],
-                8: [1, 3],
-                9: [0, 1, 2],
-                10: [2, 3],
-                11: [0, 3],
-                12: [1, 2],
-                13: [0, 2],
-                14: [1, 3],
-                15: [0, 1, 2, 3]
+                6: [1],         // Dusra coin trap
+                7: [0, 2],      // Pehla aur teesra trap
+                8: [1, 3],      // Dusra aur aakhri trap
+                9: [2],         // Teesra coin fake/boom
+                10: [0, 1],     // Pehle do coin traps (peeche se lena hoga)
+                11: [1, 2],     // Beech ke dono coins boom
+                12: [3],        // Gate ke paas wala aakhri coin boom trap
+                13: [0, 2],     // Trick alternate
+                14: [1, 3],     // Jump over traps
+                15: [0, 2]      // Boss coins
             };
-            let boomIndices = boomMap[currentLevel] || [0, 2];
+            let boomIndices = boomMap[currentLevel] || [1];
 
             for (let i = 1; i <= totalCoinsInLevel; i++) {
                 let hasBoom = boomIndices.includes(i - 1);
+                
+                // Level 9, 11, 14 par coins ko floating platforms ke upar set kiya gaya hai
+                let coinY = surfaceTop - 25;
+                if ((currentLevel === 9 || currentLevel === 11 || currentLevel === 14 || currentLevel === 15) && (i === 2 || i === 3)) {
+                    coinY = surfaceTop - 95;
+                }
+
                 coins.push({
                     x: startMargin + (i - 1) * coinSpacing,
-                    y: surfaceTop - 25,
+                    y: coinY,
                     collected: false,
                     radius: 5,
                     isBoom: hasBoom,
@@ -501,7 +554,6 @@
             goal.x = canvasWidth - goal.w - 40;
         }
 
-        // ◀ BACK button dabane par sirf screen level piche hoga, unlocked progress safe rahegi
         function goToPrevLevel() {
             if (currentLevel > 6) {
                 currentLevel--;
@@ -509,7 +561,7 @@
                 player.vy = 0;
                 updateGameLayout();
             } else {
-                window.location.href = "game.html"; // Wapas pichle part par jane ke liye
+                window.location.href = "game.html";
             }
         }
 
@@ -744,8 +796,9 @@
                     
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
 
-                    let maxCoins = 4;
-                    if (score >= maxCoins) {
+                    // Saare safe coins collect hone par gate khulega
+                    let safeCoinsTotal = coins.filter(coin => !coin.isBoom).length;
+                    if (score >= safeCoinsTotal) {
                         isDoorOpen = true; 
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                     }
@@ -859,7 +912,6 @@
                         
                         let nextLvl = currentLevel + 1;
                         
-                        // 🌟 Highest level unlocked record update karein
                         if (nextLvl > maxUnlockedLevel) {
                             maxUnlockedLevel = nextLvl;
                         }
@@ -884,7 +936,8 @@
                 player.x = goal.x - player.width;
             }
 
-            document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/4";
+            let safeCoinsCount = coins.filter(coin => !coin.isBoom).length;
+            document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + safeCoinsCount;
 
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
