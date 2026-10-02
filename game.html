@@ -1,966 +1,297 @@
-<!-- ======================================================== -->
-<!-- 🎮 YEH "game.html" (MAIN GAMEPLAY WALI FILE) HAI 🎮      -->
-<!-- ISME GAME KA ACTUAL GAMEPLAY, JUMP AUR LOGIC AAYEGA!     -->
-<!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Gameplay</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        body {
-            background: #020205;
-            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
-            color: #ffffff;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        /* Glowing Floating Background Orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: 0;
-            opacity: 0.45;
-            animation: float 12s infinite alternate ease-in-out;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px; height: 400px;
-            background: linear-gradient(135deg, #ff007f, #7928ca);
-            top: -100px; left: -100px;
-        }
-        .orb-2 {
-            width: 500px; height: 500px;
-            background: linear-gradient(135deg, #00f0ff, #0072ff);
-            bottom: -150px; right: -100px;
-            animation-delay: -4s;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) scale(1) rotate(0deg); }
-            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
-        }
-
-        .game-wrapper {
-            width: 100%;
-            height: 100%;
-            max-width: 1280px;
-            max-height: 720px;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            position: relative;
-            z-index: 10;
-            transition: transform 0.2s ease;
-        }
-
-        @media (max-width: 1023px) {
-            body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            .game-wrapper {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) scale(var(--scale-factor, 0.65));
-                width: 1280px;
-                height: 720px;
-                justify-content: flex-start;
-                padding: 10px;
-                transform-origin: center center;
-            }
-        }
-
-        .game-hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(15, 15, 25, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 15px;
-            padding: 8px 20px;
-            margin-bottom: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            z-index: 20;
-        }
-
-        .hud-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            font-weight: 900;
-            color: #00f0ff;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
-            letter-spacing: 1px;
-        }
-
-        .hud-right-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .arena-container {
-            flex: 1;
-            background: rgba(8, 9, 18, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1.5px solid rgba(0, 240, 255, 0.25);
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 35px rgba(0, 240, 255, 0.08), 0 20px 40px rgba(0, 0, 0, 0.85);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding-bottom: 8px;
-        }
-
-        .distractor-bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.08) 0%, rgba(121, 40, 202, 0.05) 45%, transparent 75%),
-                        linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            animation: pulseBg 6s ease-in-out infinite alternate;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        @keyframes pulseBg {
-            0% { opacity: 0.6; transform: scale(1); }
-            100% { opacity: 0.9; transform: scale(1.02); }
-        }
-
-        #gameCanvas {
-            width: 100%;
-            height: 410px;
-            display: block;
-            position: relative;
-            z-index: 2;
-        }
-
-        .controls-overlay {
-            display: none;
-        }
-
-        @media (max-width: 1023px) {
-            .controls-overlay {
-                position: relative;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                margin-top: 2px;
-                padding: 0 4px;
-                pointer-events: auto;
-                background: transparent;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                z-index: 30;
-            }
-        }
-
-        .control-group {
-            display: flex;
-            gap: 6px;
-            pointer-events: auto;
-            align-items: center;
-        }
-
-        @media (max-width: 1023px) {
-            .control-group.right-group {
-                display: flex;
-                flex-direction: row;
-                gap: 6px;
-                align-items: center;
-            }
-        }
-
-        .ctrl-btn {
-            background: rgba(15, 15, 25, 0.65);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 240, 255, 0.25);
-            border-bottom: 3px solid rgba(0, 0, 0, 0.5);
-            color: rgba(255, 255, 255, 0.8);
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            width: 95px;
-            height: 70px;
-            font-size: 15px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            touch-action: manipulation;
-            position: relative;
-            transition: all 0.15s ease;
-        }
-
-        .ctrl-btn:active, .ctrl-btn.pressed {
-            transform: translateY(2px);
-            background: rgba(0, 240, 255, 0.2);
-            border-color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-        }
-
-        .btn-logo {
-            font-size: 12px;
-            font-weight: 900;
-            color: #00ffcc;
-            margin-bottom: 2px;
-            letter-spacing: -0.5px;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
-        }
-
-        .btn-label {
-            font-size: 11px;
-            font-weight: 700;
-            line-height: 1;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .back-btn, .fullscreen-hud-btn {
-            background: transparent;
-            color: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: 'Orbitron', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        .fullscreen-hud-btn {
-            border-color: rgba(0, 240, 255, 0.3);
-            color: #00f0ff;
-        }
-
-        .fullscreen-hud-btn:hover {
-            color: #ffffff;
-            border-color: #00f0ff;
-            background: rgba(0, 240, 255, 0.15);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-        }
-
-        .back-btn:hover {
-            color: #ffffff;
-            border-color: #ff007f;
-            background: rgba(255, 0, 127, 0.15);
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
-        }
-
-        #notificationModal {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: rgba(15, 15, 25, 0.95);
-            backdrop-filter: blur(15px);
-            border: 2px solid #00f0ff;
-            padding: 16px 28px;
-            border-radius: 14px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
-            color: #00ffcc;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 240, 255, 0.3);
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #notificationModal.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Ego Trap - 10 Steps Puzzle</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background: #0f111a;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .hud {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      color: #ffffff;
+    }
+    .rules {
+      font-size: 14px;
+      color: #9aa0a6;
+      margin-bottom: 12px;
+    }
+    .counter-box {
+      font-size: 20px;
+      font-weight: bold;
+      background: #1a1e2e;
+      border: 1px solid #2e354f;
+      padding: 8px 18px;
+      border-radius: 8px;
+      display: inline-block;
+      color: #64b5f6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 65px);
+      grid-template-rows: repeat(5, 65px);
+      gap: 8px;
+      background: #171b26;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .tile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 8px;
+      background: #252c3d;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: #8892b0;
+    }
+    .tile.valid-move:hover {
+      background: #36415d;
+      transform: scale(1.05);
+    }
+    .tile.player {
+      background: #2196f3 !important;
+      color: white;
+      box-shadow: 0 0 15px rgba(33, 150, 243, 0.6);
+    }
+    .tile.burned {
+      background: #3b1d28 !important;
+      border: 1px dashed #d32f2f;
+      cursor: not-allowed;
+    }
+    .tile.goal {
+      border: 2px solid #00e676;
+      color: #00e676;
+    }
+    .tile.coin {
+      background: #332b1a;
+      border: 1px solid #ffd54f;
+      color: #ffd54f;
+    }
+    .status-msg {
+      margin-top: 18px;
+      height: 24px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .restart-btn {
+      margin-top: 14px;
+      background: #2e384d;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .restart-btn:hover {
+      background: #3f4d6b;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
-    <div id="notificationModal">🎉 Level Cleared!</div>
-
-    <div class="game-wrapper">
-        <div class="game-hud">
-            <div class="hud-title" id="levelTitle">⚡『 💥 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 1 ⚡</div>
-            <div class="hud-right-group">
-                <button class="fullscreen-hud-btn" id="fsToggleBtn" onclick="toggleFullScreen(event)">⛶ FULLSCREEN</button>
-                <button class="back-btn" onclick="goHome()">QUIT</button>
-            </div>
-        </div>
-
-        <div class="arena-container">
-            <div class="distractor-bg"></div>
-            <canvas id="gameCanvas"></canvas>
-
-            <div class="controls-overlay" id="mobileControls">
-                <div class="control-group">
-                    <button class="ctrl-btn" id="leftBtnM">◀</button>
-                    <button class="ctrl-btn" id="rightBtnM">▶</button>
-                </div>
-                <div class="control-group right-group">
-                    <button class="ctrl-btn" id="jumpBtnM">
-                        <span class="btn-logo">Z</span>
-                        <span class="btn-label">JUMP</span>
-                    </button>
-                    <button class="ctrl-btn" id="rightDownBtnM">
-                        <span class="btn-logo">Z</span>
-                        <span class="btn-label">DOWN</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+  <div class="hud">
+    <div class="title">THE ETIQUETTE LOCK</div>
+    <div class="rules">Reach Exit [E] in <b>EXACTLY 10 STEPS</b>. Don't step on visited tiles.</div>
+    <div class="counter-box">
+      Steps: <span id="step-count">0</span> / 10
     </div>
+  </div>
 
-    <script>
-        const currentPageFile = window.location.pathname.split("/").pop() || "game.html";
+  <div class="grid" id="grid"></div>
 
-        function getFullscreenElement() {
-            return document.fullscreenElement || 
-                   document.webkitFullscreenElement || 
-                   document.mozFullScreenElement || 
-                   document.msFullscreenElement || null;
+  <div class="status-msg" id="status-msg"></div>
+  <button class="restart-btn" onclick="initGame()">Restart Level (Press R)</button>
+
+  <script>
+    const GRID_SIZE = 5;
+    const TARGET_STEPS = 10;
+    const START_POS = { r: 0, c: 0 };
+    const GOAL_POS = { r: 4, c: 4 };
+    const COIN_POS = { r: 1, c: 3 }; // Greed bait
+
+    let playerPos = { ...START_POS };
+    let steps = 0;
+    let visited = new Set();
+    let gameOver = false;
+
+    const gridEl = document.getElementById("grid");
+    const stepCountEl = document.getElementById("step-count");
+    const statusMsgEl = document.getElementById("status-msg");
+
+    function coordKey(r, c) {
+      return `${r},${c}`;
+    }
+
+    function initGame() {
+      playerPos = { ...START_POS };
+      steps = 0;
+      visited = new Set();
+      visited.add(coordKey(START_POS.r, START_POS.c));
+      gameOver = false;
+      statusMsgEl.textContent = "";
+      statusMsgEl.style.color = "#e0e0e0";
+      stepCountEl.textContent = steps;
+      renderGrid();
+    }
+
+    function isAdjacent(r1, c1, r2, c2) {
+      const dr = Math.abs(r1 - r2);
+      const dc = Math.abs(c1 - c2);
+      return (dr === 1 && dc === 0) || (dr === 0 && dc === 1);
+    }
+
+    function checkDeadlock() {
+      // Check if player has any adjacent unvisited tile left
+      const neighbors = [
+        { r: playerPos.r + 1, c: playerPos.c },
+        { r: playerPos.r - 1, c: playerPos.c },
+        { r: playerPos.r, c: playerPos.c + 1 },
+        { r: playerPos.r, c: playerPos.c - 1 }
+      ];
+
+      const movesLeft = neighbors.some(n => 
+        n.r >= 0 && n.r < GRID_SIZE && 
+        n.c >= 0 && n.c < GRID_SIZE && 
+        !visited.has(coordKey(n.r, n.c))
+      );
+
+      return !movesLeft;
+    }
+
+    function onTileClick(r, c) {
+      if (gameOver) return;
+
+      const key = coordKey(r, c);
+
+      // Rule: Must be adjacent and not already visited
+      if (!isAdjacent(playerPos.r, playerPos.c, r, c)) {
+        return;
+      }
+
+      if (visited.has(key)) {
+        statusMsgEl.textContent = "Tile already broken! Can't step here.";
+        statusMsgEl.style.color = "#ff5252";
+        return;
+      }
+
+      // Valid move
+      steps++;
+      playerPos = { r, c };
+      visited.add(key);
+      stepCountEl.textContent = steps;
+
+      // Win / Loss evaluation
+      if (r === GOAL_POS.r && c === GOAL_POS.c) {
+        gameOver = true;
+        if (steps === TARGET_STEPS) {
+          statusMsgEl.textContent = "Perfect! Door Unlocked.";
+          statusMsgEl.style.color = "#00e676";
+        } else {
+          statusMsgEl.textContent = `Door locked! Exactly ${TARGET_STEPS} steps needed (You took ${steps}).`;
+          statusMsgEl.style.color = "#ff5252";
         }
+      } else if (steps > TARGET_STEPS) {
+        gameOver = true;
+        statusMsgEl.textContent = `Overstepped! Limit was ${TARGET_STEPS} steps.`;
+        statusMsgEl.style.color = "#ff5252";
+      } else if (checkDeadlock()) {
+        gameOver = true;
+        statusMsgEl.textContent = "Trapped in your own footsteps! No way out.";
+        statusMsgEl.style.color = "#ff5252";
+      }
 
-        async function requestFullScreen(elem) {
-            const target = elem || document.documentElement;
-            try {
-                if (target.requestFullscreen) {
-                    await target.requestFullscreen();
-                } else if (target.webkitRequestFullscreen) {
-                    await target.webkitRequestFullscreen();
-                } else if (target.mozRequestFullScreen) {
-                    await target.mozRequestFullScreen();
-                } else if (target.msRequestFullscreen) {
-                    await target.msRequestFullscreen();
-                }
-            } catch (err) {}
+      renderGrid();
+    }
 
-            if (screen.orientation && screen.orientation.lock) {
-                try {
-                    await screen.orientation.lock('landscape');
-                } catch (e) {}
-            }
+    function renderGrid() {
+      gridEl.innerHTML = "";
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const tile = document.createElement("div");
+          tile.classList.add("tile");
+          const key = coordKey(r, c);
+
+          const isPlayer = r === playerPos.r && c === playerPos.c;
+          const isGoal = r === GOAL_POS.r && c === GOAL_POS.c;
+          const isCoin = r === COIN_POS.r && c === COIN_POS.c;
+          const isBurned = visited.has(key) && !isPlayer;
+          const canMove = !gameOver && isAdjacent(playerPos.r, playerPos.c, r, c) && !visited.has(key);
+
+          if (isPlayer) {
+            tile.classList.add("player");
+            tile.textContent = "P";
+          } else if (isBurned) {
+            tile.classList.add("burned");
+            tile.textContent = "✕";
+          } else if (isGoal) {
+            tile.classList.add("goal");
+            tile.textContent = "EXIT";
+          } else if (isCoin) {
+            tile.classList.add("coin");
+            tile.textContent = "★";
+          }
+
+          if (canMove) {
+            tile.classList.add("valid-move");
+          }
+
+          tile.addEventListener("click", () => onTileClick(r, c));
+          gridEl.appendChild(tile);
         }
-
-        async function exitFullScreen() {
-            try {
-                if (document.exitFullscreen) {
-                    await document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    await document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    await document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    await document.msExitFullscreen();
-                }
-            } catch (err) {}
-        }
-
-        function toggleFullScreen(e) {
-            if (e) e.stopPropagation();
-            if (!getFullscreenElement()) {
-                requestFullScreen(document.documentElement);
-            } else {
-                exitFullScreen();
-            }
-        }
-
-        function updateFullscreenButtonState() {
-            const fsBtn = document.getElementById('fsToggleBtn');
-            if (!fsBtn) return;
-            if (getFullscreenElement()) {
-                fsBtn.innerText = "✖ EXIT FS";
-            } else {
-                fsBtn.innerText = "⛶ FULLSCREEN";
-            }
-            resizeCanvas();
-        }
-
-        document.addEventListener('fullscreenchange', updateFullscreenButtonState);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenButtonState);
-        document.addEventListener('mozfullscreenchange', updateFullscreenButtonState);
-        document.addEventListener('MSFullscreenChange', updateFullscreenButtonState);
-
-        function handleUserInteractionFullscreen(e) {
-            if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) {
-                return;
-            }
-            if (!getFullscreenElement()) {
-                requestFullScreen(document.documentElement);
-            }
-        }
-
-        window.addEventListener('click', handleUserInteractionFullscreen);
-        window.addEventListener('touchstart', handleUserInteractionFullscreen, { passive: true });
-
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        let canvasWidth = 1280;
-        let canvasHeight = 410;
-
-        function checkDeviceControls() {
-            const isMobileOrTablet = window.innerWidth <= 1023;
-            document.getElementById('mobileControls').style.display = isMobileOrTablet ? 'flex' : 'none';
-        }
-
-        function resizeCanvas() {
-            if (window.innerWidth <= 1023) {
-                const scaleX = window.innerWidth / 1280;
-                const scaleY = window.innerHeight / 720;
-                const scale = Math.min(scaleX, scaleY) * 0.95;
-                document.documentElement.style.setProperty('--scale-factor', scale);
-            }
-            canvasWidth = 1280;
-            canvasHeight = 410;
-
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = canvasWidth * dpr;
-            canvas.height = canvasHeight * dpr;
-            ctx.scale(dpr, dpr);
-            
-            canvas.style.width = canvasWidth + 'px';
-            canvas.style.height = canvasHeight + 'px';
-
-            updateGameLayout();
-            checkDeviceControls();
-        }
-
-        let isDoorOpen = true; 
-        let isExploding = false;
-        let isSlowMo = false;
-        let fragments = [];
-        let particles = [];
-        let floatingTexts = [];
-
-        const STAND_HEIGHT = 40.5;
-        const CROUCH_HEIGHT = 24.0;
-
-        let player = {
-            x: 40,
-            y: 100,
-            width: 14.0,     
-            height: STAND_HEIGHT,    
-            vx: 0,
-            vy: 0,
-            speed: 4.8,          
-            jumpForce: -8.8,      
-            gravity: 0.42,        
-            isGrounded: false,
-            isCrouching: false,
-            animTimer: 0
-        };
-
-        let platforms = [];
-        let goal = { x: 0, y: 0, w: 38, h: 54 };
-
-        function updateGameLayout() {
-            const surfaceTop = canvasHeight - 40;
-            const surfaceHeight = 40;
-
-            document.getElementById('levelTitle').innerText = "⚡『 💥 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 1 ⚡";
-
-            platforms = [
-                { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }
-            ];
-
-            isDoorOpen = true;
-            player.x = 40;
-            player.y = surfaceTop - STAND_HEIGHT;
-            player.vx = 0;
-            player.vy = 0;
-
-            goal.y = surfaceTop - goal.h;
-            goal.x = canvasWidth - goal.w - 14;
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        let keys = { left: false, right: false, down: false };
-
-        let audioCtx = null;
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-        window.addEventListener('click', initAudio);
-        window.addEventListener('touchstart', initAudio);
-        window.addEventListener('keydown', initAudio);
-
-        function playSound(type) {
-            try {
-                initAudio();
-                if (!audioCtx) return;
-
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
-
-                if (type === 'jump') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.exponentialRampToValueAtTime(440, now + 0.12);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-                    osc.start(now);
-                    osc.stop(now + 0.12);
-                } else if (type === 'blast') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(140, now);
-                    osc.frequency.exponentialRampToValueAtTime(15, now + 0.5);
-                    gain.gain.setValueAtTime(0.6, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    osc.start(now);
-                    osc.stop(now + 0.5);
-                } else if (type === 'win') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.setValueAtTime(659.25, now + 0.1);
-                    osc.frequency.setValueAtTime(783.99, now + 0.2);
-                    osc.frequency.setValueAtTime(1046.50, now + 0.3);
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-                    osc.start(now);
-                    osc.stop(now + 0.6);
-                }
-            } catch (e) {}
-        }
-
-        const bindButton = (id, onStart, onEnd) => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            const handleStart = (e) => {
-                if (e) e.preventDefault();
-                initAudio();
-                btn.classList.add('pressed');
-                onStart();
-            };
-            const handleEnd = (e) => {
-                if (e) e.preventDefault();
-                btn.classList.remove('pressed');
-                onEnd();
-            };
-            btn.addEventListener('touchstart', handleStart, { passive: false });
-            btn.addEventListener('touchend', handleEnd, { passive: false });
-            btn.addEventListener('touchcancel', handleEnd, { passive: false });
-            btn.addEventListener('mousedown', handleStart);
-            btn.addEventListener('mouseup', handleEnd);
-            btn.addEventListener('mouseleave', handleEnd);
-        };
-
-        bindButton('leftBtnM', () => keys.left = true, () => keys.left = false);
-        bindButton('rightBtnM', () => keys.right = true, () => keys.right = false);
-        bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
-
-        function triggerJump() {
-            if (player.isGrounded && !isExploding && !player.isCrouching) {
-                player.vy = player.jumpForce;
-                player.isGrounded = false;
-                playSound('jump');
-                for (let i = 0; i < 6; i++) {
-                    particles.push({
-                        x: player.x + player.width / 2,
-                        y: player.y + player.height,
-                        vx: (Math.random() - 0.5) * 3,
-                        vy: -Math.random() * 2,
-                        size: Math.random() * 3 + 1,
-                        color: 'rgba(0, 240, 255, 0.8)',
-                        life: 25
-                    });
-                }
-            }
-        }
-
-        const jumpBtnM = document.getElementById('jumpBtnM');
-        if (jumpBtnM) {
-            const handleJumpAction = (e) => {
-                if (e) e.preventDefault();
-                initAudio();
-                jumpBtnM.classList.add('pressed');
-                setTimeout(() => jumpBtnM.classList.remove('pressed'), 150);
-                triggerJump();
-            };
-            jumpBtnM.addEventListener('touchstart', handleJumpAction, { passive: false });
-            jumpBtnM.addEventListener('mousedown', handleJumpAction);
-        }
-
-        window.addEventListener('keydown', e => {
-            initAudio();
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
-                e.preventDefault();
-                triggerJump();
-            }
-            if (e.key === 'f' || e.key === 'F') {
-                toggleFullScreen();
-            }
-        });
-
-        window.addEventListener('keyup', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
-        });
-
-        function triggerExplosion() {
-            if (isExploding) return;
-            
-            isExploding = true;
-            isSlowMo = true;
-            playSound('blast');
-
-            fragments = [
-                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#00f0ff' },
-                { x: player.x + 4, y: player.y + 10, vx: 4, vy: -6, color: '#ff007f' },
-                { x: player.x + 2, y: player.y + 18, vx: -5, vy: 2, color: '#7928ca' },
-                { x: player.x + 6, y: player.y + 22, vx: 5, vy: 3, color: '#00ffcc' }
-            ];
-
-            for (let i = 0; i < 25; i++) {
-                particles.push({
-                    x: player.x + player.width / 2,
-                    y: player.y + player.height / 2,
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: (Math.random() - 0.5) * 8,
-                    size: Math.random() * 5 + 2,
-                    color: Math.random() > 0.5 ? '#ff007f' : '#00f0ff',
-                    life: 40
-                });
-            }
-
-            setTimeout(() => {
-                isExploding = false;
-                isSlowMo = false;
-                updateGameLayout();
-            }, 2000);
-        }
-
-        let levelWon = false;
-
-        function update() {
-            let timeFactor = isSlowMo ? 0.25 : 1.0;
-
-            if (isExploding) {
-                fragments.forEach(f => {
-                    f.x += f.vx * timeFactor;
-                    f.y += f.vy * timeFactor;
-                    f.vy += 0.45 * timeFactor; 
-                });
-                return;
-            }
-
-            let currentBottom = player.y + player.height;
-            let wantsCrouch = keys.down;
-
-            if (wantsCrouch && !player.isCrouching) {
-                player.isCrouching = true;
-                player.height = CROUCH_HEIGHT;
-                player.y = currentBottom - CROUCH_HEIGHT;
-            } else if (!wantsCrouch && player.isCrouching) {
-                player.isCrouching = false;
-                player.height = STAND_HEIGHT;
-                player.y = currentBottom - STAND_HEIGHT;
-            }
-
-            let activeSpeed = player.isCrouching ? (player.speed * 0.55) : player.speed;
-
-            // 🦵 Fast walking legs animation speed (0.38)
-            if (keys.left) {
-                player.vx = -activeSpeed;
-                player.animTimer += 0.38; 
-            } else if (keys.right) {
-                player.vx = activeSpeed;
-                player.animTimer += 0.38;
-            } else {
-                player.vx = 0;
-                player.animTimer = 0;
-            }
-
-            if (!player.isGrounded) {
-                player.animTimer += 0.38; 
-            }
-
-            player.x += player.vx;
-
-            let maxRightLimit = goal.x + goal.w - player.width - 2;
-            if (player.x < 0) player.x = 0;
-            if (player.x > maxRightLimit) player.x = maxRightLimit;
-
-            player.vy += player.gravity;
-            player.y += player.vy;
-
-            player.isGrounded = false;
-            platforms.forEach(p => {
-                if (
-                    player.x + player.width > p.x &&
-                    player.x < p.x + p.w &&
-                    player.y + player.height >= p.y &&
-                    player.y + player.height - player.vy <= p.y + 14
-                ) {
-                    player.y = p.y - player.height;
-                    player.vy = 0;
-                    player.isGrounded = true;
-                }
-            });
-
-            if (player.y > canvasHeight + 100) {
-                triggerExplosion();
-            }
-
-            let playerCenter = player.x + player.width / 2;
-            let touchesGate = (player.x + player.width >= goal.x && player.x <= goal.x + goal.w);
-
-            if (touchesGate && player.y + player.height >= goal.y) {
-                if (playerCenter >= goal.x + 8 && !levelWon) {
-                    levelWon = true;
-                    playSound('win');
-                    
-                    const modal = document.getElementById('notificationModal');
-                    modal.innerText = "🎉 Level 1 Cleared! Loading Next Chapter...";
-                    modal.classList.add('show');
-
-                    let nextLevel = 2;
-                    let highestUnlocked = parseInt(localStorage.getItem('maxUnlocked_TumseNaHoPayga')) || 1;
-                    if (nextLevel > highestUnlocked) {
-                        localStorage.setItem('maxUnlocked_TumseNaHoPayga', nextLevel);
-                    }
-                    localStorage.setItem('saveLevel_TumseNaHoPayga', nextLevel);
-                    localStorage.setItem('lastActiveFile', 'game2.html');
-
-                    setTimeout(() => {
-                        window.location.href = "game2.html";
-                    }, 2000);
-                }
-            }
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life--;
-                if (p.life <= 0) particles.splice(i, 1);
-            }
-
-            for (let i = floatingTexts.length - 1; i >= 0; i--) {
-                let ft = floatingTexts[i];
-                ft.y += ft.vy;
-                ft.alpha -= 0.03;
-                if (ft.alpha <= 0) floatingTexts.splice(i, 1);
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-            // Ground
-            platforms.forEach(p => {
-                let platGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
-                platGrad.addColorStop(0, '#101426');
-                platGrad.addColorStop(1, '#05070d');
-                ctx.fillStyle = platGrad;
-                ctx.fillRect(p.x, p.y, p.w, p.h);
-
-                ctx.strokeStyle = '#00f0ff';
-                ctx.shadowColor = '#00f0ff';
-                ctx.shadowBlur = 8;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x + p.w, p.y);
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-            });
-
-            // Portal Gate
-            let gx = goal.x;
-            let gy = goal.y;
-            let gw = goal.w;
-            let gh = goal.h;
-
-            let auraGrad = ctx.createRadialGradient(gx + gw/2, gy + gh/2, 5, gx + gw/2, gy + gh/2, gw);
-            auraGrad.addColorStop(0, 'rgba(0, 240, 255, 0.5)');
-            auraGrad.addColorStop(0.7, 'rgba(121, 40, 202, 0.2)');
-            auraGrad.addColorStop(1, 'transparent');
-            ctx.fillStyle = auraGrad;
-            ctx.fillRect(gx - 8, gy - 8, gw + 16, gh + 14);
-
-            let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
-            portalGrad.addColorStop(0, '#0a0d1e');
-            portalGrad.addColorStop(0.5, '#7928ca');
-            portalGrad.addColorStop(1, '#ff007f');
-            ctx.fillStyle = portalGrad;
-            ctx.fillRect(gx, gy, gw, gh);
-
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.ellipse(gx + gw/2, gy + gh/2, gw/3.2, gh/3, 0, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(gx + 10, gy + gh/2);
-            ctx.lineTo(gx + gw - 12, gy + gh/2);
-            ctx.moveTo(gx + gw - 18, gy + gh/2 - 6);
-            ctx.lineTo(gx + gw - 12, gy + gh/2);
-            ctx.lineTo(gx + gw - 18, gy + gh/2 + 6);
-            ctx.stroke();
-
-            ctx.strokeStyle = '#00f0ff';
-            ctx.shadowColor = '#00f0ff';
-            ctx.shadowBlur = 10;
-            ctx.lineWidth = 2;
-            ctx.strokeRect(gx, gy, gw, gh);
-            ctx.shadowBlur = 0;
-
-            ctx.font = '900 10px Orbitron, sans-serif';
-            ctx.fillStyle = '#00f0ff';
-            ctx.fillText('ENTER', gx + 1, gy - 7);
-
-            particles.forEach(p => {
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            if (isExploding) {
-                fragments.forEach(f => {
-                    ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 4, 4);
-                });
-            } else {
-                let px = player.x;
-                let py = player.y;
-
-                // Character Shadow
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-                ctx.beginPath();
-                ctx.ellipse(px + player.width/2, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Dynamic walking & running leg swing
-                let legSwing = (player.vx !== 0 || !player.isGrounded) ? Math.sin(player.animTimer) * 4.5 : 0;
-                let armSwing = (player.vx !== 0 || !player.isGrounded) ? Math.cos(player.animTimer) * 3.0 : 0;
-                let isJumpingOrAirborne = !player.isGrounded;
-                let jumpStretch = isJumpingOrAirborne ? -2 : 0;
-
-                let isCrouched = player.isCrouching;
-
-                // Head
-                let headRadius = 4.2;
-                let headX = px + player.width / 2;
-                let headY = isCrouched ? (py + 4.5) : (py + 4.5 + jumpStretch);
-
-                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
-                headGrad.addColorStop(0, '#ffffff');
-                headGrad.addColorStop(1, '#00f0ff');
-                
-                ctx.fillStyle = headGrad;
-                ctx.beginPath();
-                ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Torso
-                let torsoWidth = 6.4;
-                let torsoX = px + (player.width - torsoWidth) / 2;
-                let torsoY = isCrouched ? (py + 9.5) : (py + 9.5 + jumpStretch);
-                let torsoHeight = isCrouched ? 7.5 : 13.5;
-
-                let chestGrad = ctx.createLinearGradient(torsoX, torsoY, torsoX + torsoWidth, torsoY);
-                chestGrad.addColorStop(0, '#ff007f');
-                chestGrad.addColorStop(1, '#7928ca');
-                ctx.fillStyle = chestGrad;
-                ctx.fillRect(torsoX, torsoY, torsoWidth, torsoHeight);
-
-                // Belt
-                ctx.fillStyle = '#00ffcc';
-                ctx.fillRect(torsoX - 1, torsoY + torsoHeight - 1, torsoWidth + 2, 2);
-
-                // Arms - Sync with movement
-                let armHeight = isCrouched ? 6.5 : 9.5;
-                ctx.fillStyle = '#00f0ff';
-                if (isCrouched) {
-                    ctx.fillRect(torsoX - 3.2, torsoY + 1, 2.2, armHeight);
-                    ctx.fillRect(torsoX + torsoWidth + 1.0, torsoY + 1, 2.2, armHeight);
-                } else {
-                    ctx.fillRect(torsoX - 3.2, torsoY + 1 + armSwing, 2.2, armHeight);
-                    ctx.fillRect(torsoX + torsoWidth + 1.0, torsoY + 1 - armSwing, 2.2, armHeight);
-                }
-
-                // Legs
-                let legStartY = torsoY + torsoHeight + 1;
-                ctx.fillStyle = '#ffffff';
-
-                if (isCrouched) {
-                    // Crouched sitting legs
-                    ctx.fillRect(torsoX - 2.5, legStartY, 5.0, 3.2);
-                    ctx.fillRect(torsoX - 2.5, legStartY + 3, 2.4, 3.5);
-
-                    ctx.fillRect(torsoX + 3.0, legStartY, 5.0, 3.2);
-                    ctx.fillRect(torsoX + 5.6, legStartY + 3, 2.4, 3.5);
-                } else {
-                    // Standing / Fast stepping legs
-                    let legHeight = 12.0;
-                    ctx.fillRect(torsoX + 0.8 + legSwing, legStartY, 2.2, legHeight);
-                    ctx.fillRect(torsoX + torsoWidth - 3 - legSwing, legStartY, 2.2, legHeight);
-                }
-            }
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        loop();
-
-        function goHome() {
-            window.location.href = "index.html";
-        }
-    </script>
+      }
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "r" || e.key === "R") {
+        initGame();
+        return;
+      }
+
+      // Arrow keys navigation
+      let targetR = playerPos.r;
+      let targetC = playerPos.c;
+
+      if (e.key === "ArrowUp") targetR--;
+      else if (e.key === "ArrowDown") targetR++;
+      else if (e.key === "ArrowLeft") targetC--;
+      else if (e.key === "ArrowRight") targetC++;
+      else return;
+
+      if (targetR >= 0 && targetR < GRID_SIZE && targetC >= 0 && targetC < GRID_SIZE) {
+        onTileClick(targetR, targetC);
+      }
+    });
+
+    initGame();
+  </script>
 </body>
 </html>
