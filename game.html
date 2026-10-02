@@ -364,7 +364,12 @@
             checkDeviceControls();
         }
 
-        let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        // 🌟 Highest unlocked level fetch karein (purani save keys ka bhi fallback)
+        let maxUnlockedLevel = parseInt(localStorage.getItem('maxUnlocked_TumseNaHoPayga')) || 
+                               parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        
+        // Hamesha highest unlocked level se shuru ho
+        let currentLevel = maxUnlockedLevel;
         
         let isDoorOpen = true; 
         let score = 0;
@@ -375,7 +380,6 @@
         let particles = [];
         let floatingTexts = [];
 
-        // ⚡ PLAYER STATS UPDATED: Sirf speed ko 2.8 kiya gaya hai
         let player = {
             x: 40,
             y: 100,
@@ -397,7 +401,12 @@
         function updateGameLayout() {
             score = 0;
             
-            localStorage.setItem('saveLevel_TumseNaHoPayga', currentLevel);
+            // Sirf tab level badhayein jab player aage ke level par jaye
+            if (currentLevel > maxUnlockedLevel) {
+                maxUnlockedLevel = currentLevel;
+            }
+            localStorage.setItem('maxUnlocked_TumseNaHoPayga', maxUnlockedLevel);
+            localStorage.setItem('saveLevel_TumseNaHoPayga', maxUnlockedLevel);
             localStorage.setItem('lastActiveFile', currentPageFile);
 
             const surfaceTop = canvasHeight - 40;
@@ -495,6 +504,7 @@
             goal.x = canvasWidth - goal.w - 14;
         }
 
+        // ◀ BACK button dabane par sirf screen level piche hoga, unlocked progress safe rahegi
         function goToPrevLevel() {
             if (currentLevel > 1) {
                 currentLevel--;
@@ -870,7 +880,13 @@
                         modal.classList.add('show');
                         
                         let nextLvl = currentLevel + 1;
-                        localStorage.setItem('saveLevel_TumseNaHoPayga', nextLvl);
+                        
+                        // 🌟 Highest progress update karein
+                        if (nextLvl > maxUnlockedLevel) {
+                            maxUnlockedLevel = nextLvl;
+                        }
+                        localStorage.setItem('maxUnlocked_TumseNaHoPayga', maxUnlockedLevel);
+                        localStorage.setItem('saveLevel_TumseNaHoPayga', maxUnlockedLevel);
                         localStorage.setItem('lastActiveFile', 'game.html');
 
                         setTimeout(() => {
@@ -884,7 +900,9 @@
                         modal.classList.add('show');
                         
                         localStorage.setItem('lastActiveFile', 'game2.html');
+                        // Next game file ke liye Level 1 set
                         localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
+                        localStorage.setItem('maxUnlocked_TumseNaHoPayga', 1);
 
                         setTimeout(() => {
                             window.location.href = "game2.html"; 
@@ -1123,12 +1141,12 @@
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
 
-                // Hath (Arms) still rahenge
+                // Arms
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX - 3.5, py + 12 + jumpStretch, 2.2, 10);  
                 ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12 + jumpStretch, 2.2, 10); 
 
-                // Pair chalenge
+                // Legs
                 let legHeight = player.height === 24.3 ? 7 : 12;
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
