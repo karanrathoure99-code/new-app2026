@@ -222,7 +222,7 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        .back-btn, .prev-lvl-btn {
+        .back-btn {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
             color: #faedcd;
@@ -232,7 +232,7 @@
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
         }
-        .back-btn:hover, .prev-lvl-btn:hover {
+        .back-btn:hover {
             color: #fff;
             border-color: #d4a373;
             background: rgba(212, 163, 115, 0.2);
@@ -270,13 +270,12 @@
 
     <div class="game-wrapper">
         <div class="game-hud">
-            <div class="hud-title" id="levelTitle">⚡ LEVEL 1 ⚡</div>
+            <div class="hud-title" id="levelTitle">⚡『 💥 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 1 ⚡</div>
             <div class="hud-stats">
                 <span id="scoreDisplay">COINS: 0/4</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
             </div>
             <div class="hud-right-group">
-                <button class="prev-lvl-btn" onclick="goToPrevLevel()">◀ BACK</button>
                 <button class="back-btn" onclick="goHome()">QUIT</button>
             </div>
         </div>
@@ -364,13 +363,7 @@
             checkDeviceControls();
         }
 
-        // 🌟 Highest unlocked level fetch karein (purani save keys ka bhi fallback)
-        let maxUnlockedLevel = parseInt(localStorage.getItem('maxUnlocked_TumseNaHoPayga')) || 
-                               parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
-        
-        // Hamesha highest unlocked level se shuru ho
-        let currentLevel = maxUnlockedLevel;
-        
+        const currentLevel = 1;
         let isDoorOpen = true; 
         let score = 0;
         let shieldActive = false;
@@ -400,78 +393,22 @@
 
         function updateGameLayout() {
             score = 0;
-            
-            // Sirf tab level badhayein jab player aage ke level par jaye
-            if (currentLevel > maxUnlockedLevel) {
-                maxUnlockedLevel = currentLevel;
-            }
-            localStorage.setItem('maxUnlocked_TumseNaHoPayga', maxUnlockedLevel);
-            localStorage.setItem('saveLevel_TumseNaHoPayga', maxUnlockedLevel);
-            localStorage.setItem('lastActiveFile', currentPageFile);
-
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
 
-            if (currentLevel === 1) {
-                document.getElementById('levelTitle').innerText = "⚡『 💥 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 1 ⚡";
-            } else if (currentLevel === 2) {
-                document.getElementById('levelTitle').innerText = "🎯『 💎 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 2 ⚡";
-            } else if (currentLevel === 3) {
-                document.getElementById('levelTitle').innerText = "🚀『 💰 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 3 ⚡";
-            } else if (currentLevel === 4) {
-                document.getElementById('levelTitle').innerText = "🔥『 🏆 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 4 ⚡";
-            } else if (currentLevel === 5) {
-                document.getElementById('levelTitle').innerText = "👑『 ✨𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼!! 』- Lvl 5 ⚡";
-            }
+            document.getElementById('levelTitle').innerText = "⚡『 💥 𝙔𝙀𝙃 𝙏𝙊𝙃 𝘽𝘼𝙃𝙐𝙏 𝘼𝘼𝙎𝘼𝙉 𝙏𝙃𝘼! 』- Lvl 1 ⚡";
 
-            let totalCoinsInLevel = (currentLevel === 2) ? 6 : 4;
+            let totalCoinsInLevel = 4;
             document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + totalCoinsInLevel;
 
             platforms = [
-                { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' }
+                { x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' },
+                { x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false }
             ];
 
-            if (currentLevel === 1) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = true;
-                player.x = 40;
-                player.y = 100;
-            } 
-            else if (currentLevel === 2) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.7), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-                isDoorOpen = false;
-                player.x = 40;
-                player.y = 100;
-            }
-            else if (currentLevel === 3) {
-                let sWidth = 80;
-                let sHeight = 16;
-                let sY = surfaceTop - 50;
-                
-                platforms.push({ x: 220, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
-                platforms.push({ x: 480, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
-                platforms.push({ x: 740, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
-                platforms.push({ x: 1000, y: sY, w: sWidth, h: sHeight, type: 'secondSurface' });
-
-                isDoorOpen = false;
-                player.x = 50;
-                player.y = surfaceTop - 90;
-            }
-            else if (currentLevel === 4) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.3), y: surfaceTop - 55, w: 120, h: 18, type: 'secondSurface' });
-                platforms.push({ x: Math.floor(canvasWidth * 0.65), y: surfaceTop - 65, w: 120, h: 18, type: 'secondSurface' });
-                isDoorOpen = false;
-                player.x = 40;
-                player.y = 100;
-            }
-            else if (currentLevel === 5) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.2), y: surfaceTop - 50, w: 100, h: 18, type: 'secondSurface' });
-                platforms.push({ x: Math.floor(canvasWidth * 0.5), y: surfaceTop - 65, w: 100, h: 18, type: 'secondSurface' });
-                platforms.push({ x: Math.floor(canvasWidth * 0.8), y: surfaceTop - 55, w: 100, h: 18, type: 'secondSurface' });
-                isDoorOpen = true;
-                player.x = 40;
-                player.y = 100;
-            }
+            isDoorOpen = true;
+            player.x = 40;
+            player.y = 100;
 
             coins = [];
             let startMargin = 160; 
@@ -479,44 +416,19 @@
             let usableWidth = canvasWidth - startMargin - endMargin;
             let coinSpacing = totalCoinsInLevel > 1 ? usableWidth / (totalCoinsInLevel - 1) : 0;
 
-            let boomIndices = [];
-            if (currentLevel === 3) {
-                boomIndices = [1, 2];
-            } else if (currentLevel === 4) {
-                boomIndices = [0, 1, 3];
-            } else if (currentLevel === 5) {
-                boomIndices = [1, 2];
-            }
-
             for (let i = 1; i <= totalCoinsInLevel; i++) {
-                let hasBoom = boomIndices.includes(i - 1);
                 coins.push({
                     x: startMargin + (i - 1) * coinSpacing,
                     y: surfaceTop - 25,
                     collected: false,
                     radius: 5,
-                    isBoom: hasBoom,
+                    isBoom: false,
                     floatOffset: Math.random() * Math.PI
                 });
             }
 
             goal.y = surfaceTop - goal.h;
             goal.x = canvasWidth - goal.w - 14;
-        }
-
-        // ◀ BACK button dabane par sirf screen level piche hoga, unlocked progress safe rahegi
-        function goToPrevLevel() {
-            if (currentLevel > 1) {
-                currentLevel--;
-                player.vx = 0;
-                player.vy = 0;
-                updateGameLayout();
-            } else {
-                const modal = document.getElementById('notificationModal');
-                modal.innerText = "⚠ Yeh pehla level hai!";
-                modal.classList.add('show');
-                setTimeout(() => modal.classList.remove('show'), 1500);
-            }
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -701,8 +613,7 @@
         });
 
         function triggerExplosion() {
-            if (currentLevel !== 3 && currentLevel !== 4 && currentLevel !== 5 && shieldActive) return;
-            if (isExploding) return;
+            if (shieldActive || isExploding) return;
             
             isExploding = true;
             isSlowMo = true;
@@ -738,37 +649,9 @@
             coins.forEach(c => {
                 if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
                     c.collected = true;
-
-                    if (c.isBoom) {
-                        playSound('blast');
-                        triggerExplosion();
-                        return;
-                    }
-
                     score += 1; 
                     playSound('coin');
-                    
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
-
-                    if (currentLevel === 2) {
-                        let allCollected = coins.every(coin => coin.collected);
-                        if (allCollected) {
-                            isDoorOpen = true; 
-                            floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                        }
-                    }
-                    else if (currentLevel === 3 && score >= 2) {
-                        isDoorOpen = true; 
-                        floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                    } 
-                    else if (currentLevel === 4 && score >= 1) {
-                        isDoorOpen = true; 
-                        floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                    }
-                    else if (currentLevel === 5 && score >= 1) {
-                        isDoorOpen = false;
-                        floatingTexts.push({ text: 'GATE LOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
-                    }
 
                     for (let i = 0; i < 8; i++) {
                         particles.push({
@@ -865,54 +748,24 @@
             if (touchesGate && player.y + player.height >= goal.y) {
                 if (!isDoorOpen) {
                     player.x = goal.x - player.width - 1; 
-                    if (Math.random() < 0.05) { 
-                        floatingTexts.push({ text: 'LOCKED!', x: player.x - 10, y: player.y - 10, alpha: 1, vy: -0.5 });
-                    }
                 } 
                 else if (playerCenter >= goal.x + 8 && !levelWon) {
                     levelWon = true;
                     playSound('win');
                     
                     const modal = document.getElementById('notificationModal');
-                    
-                    if (currentLevel < 5) {
-                        modal.innerText = "🎉 Yeto ashan tha! 🤪 Level " + currentLevel + " Cleared!";
-                        modal.classList.add('show');
-                        
-                        let nextLvl = currentLevel + 1;
-                        
-                        // 🌟 Highest progress update karein
-                        if (nextLvl > maxUnlockedLevel) {
-                            maxUnlockedLevel = nextLvl;
-                        }
-                        localStorage.setItem('maxUnlocked_TumseNaHoPayga', maxUnlockedLevel);
-                        localStorage.setItem('saveLevel_TumseNaHoPayga', maxUnlockedLevel);
-                        localStorage.setItem('lastActiveFile', 'game.html');
+                    modal.innerText = "🎉 Level 1 Cleared!";
+                    modal.classList.add('show');
 
-                        setTimeout(() => {
-                            modal.classList.remove('show');
-                            currentLevel = nextLvl;
-                            levelWon = false;
-                            updateGameLayout();
-                        }, 2000);
-                    } else {
-                        modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game2.html...";
-                        modal.classList.add('show');
-                        
-                        localStorage.setItem('lastActiveFile', 'game2.html');
-                        // Next game file ke liye Level 1 set
-                        localStorage.setItem('saveLevel_TumseNaHoPayga', 1);
-                        localStorage.setItem('maxUnlocked_TumseNaHoPayga', 1);
-
-                        setTimeout(() => {
-                            window.location.href = "game2.html"; 
-                        }, 2000);
-                    }
+                    setTimeout(() => {
+                        modal.classList.remove('show');
+                        levelWon = false;
+                        updateGameLayout();
+                    }, 2000);
                 }
             }
 
-            let maxCoinsDisplay = (currentLevel === 2) ? 6 : 4;
-            document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/" + maxCoinsDisplay;
+            document.getElementById('scoreDisplay').innerText = "COINS: " + score + "/4";
 
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
@@ -1016,62 +869,6 @@
                 ctx.font = '900 10px Orbitron, sans-serif';
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillText('ENTER', gx + 1, gy - 7);
-            } else {
-                let warnGrad = ctx.createRadialGradient(gx + gw/2, gy + gh/2, 5, gx + gw/2, gy + gh/2, gw);
-                warnGrad.addColorStop(0, 'rgba(180, 50, 10, 0.35)');
-                warnGrad.addColorStop(1, 'transparent');
-                ctx.fillStyle = warnGrad;
-                ctx.fillRect(gx - 6, gy - 6, gw + 12, gh + 12);
-
-                let metalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy);
-                metalGrad.addColorStop(0, '#1a0e05');
-                metalGrad.addColorStop(0.5, '#2e190b');
-                metalGrad.addColorStop(1, '#150b04');
-                ctx.fillStyle = metalGrad;
-                ctx.fillRect(gx, gy, gw, gh);
-
-                ctx.strokeStyle = 'rgba(140, 88, 48, 0.7)';
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.moveTo(gx + 3, gy + 3);
-                ctx.lineTo(gx + gw - 3, gy + gh - 3);
-                ctx.moveTo(gx + gw - 3, gy + 3);
-                ctx.lineTo(gx + 3, gy + gh - 3);
-                ctx.stroke();
-
-                ctx.fillStyle = '#3a200e';
-                ctx.fillRect(gx + 4, gy + gh/2 - 7, gw - 8, 14);
-                ctx.strokeStyle = '#8c5830';
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(gx + 4, gy + gh/2 - 7, gw - 8, 14);
-
-                let lx = gx + gw/2 - 5;
-                let ly = gy + gh/2 - 4;
-                
-                ctx.strokeStyle = '#d4a373';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(lx + 5, ly - 2, 4, Math.PI, 0);
-                ctx.stroke();
-
-                ctx.fillStyle = '#ffaa00';
-                ctx.fillRect(lx, ly, 10, 8);
-                ctx.fillStyle = '#1f1208';
-                ctx.fillRect(lx + 3.5, ly + 2.5, 3, 3);
-
-                ctx.strokeStyle = '#8c5830';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(gx, gy, gw, gh);
-
-                ctx.fillStyle = '#d4a373';
-                ctx.fillRect(gx + 2, gy + 2, 2.5, 2.5);
-                ctx.fillRect(gx + gw - 4.5, gy + 2, 2.5, 2.5);
-                ctx.fillRect(gx + 2, gy + gh - 4.5, 2.5, 2.5);
-                ctx.fillRect(gx + gw - 4.5, gy + gh - 4.5, 2.5, 2.5);
-
-                ctx.font = '900 10px Orbitron, sans-serif';
-                ctx.fillStyle = '#d4a373';
-                ctx.fillText('LOCKED', gx - 3, gy - 7);
             }
 
             particles.forEach(p => {
