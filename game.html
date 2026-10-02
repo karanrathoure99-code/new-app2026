@@ -375,6 +375,7 @@
         let particles = [];
         let floatingTexts = [];
 
+        // ⚡ PLAYER STATS UPDATED: Speed badha di (4.2), jump 30% kam (-6.6)
         let player = {
             x: 40,
             y: 100,
@@ -382,8 +383,8 @@
             height: 40.5,    
             vx: 0,
             vy: 0,
-            speed: 2.8,        
-            jumpForce: -8.5,  
+            speed: 4.2,        
+            jumpForce: -6.6,  
             gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
@@ -391,8 +392,6 @@
 
         let platforms = [];
         let coins = [];
-        
-        // Gate Dimensions
         let goal = { x: 0, y: 0, w: 38, h: 54 };
 
         function updateGameLayout() {
@@ -493,7 +492,6 @@
             }
 
             goal.y = surfaceTop - goal.h;
-            // Box ke andar acche se set position
             goal.x = canvasWidth - goal.w - 14;
         }
 
@@ -505,7 +503,7 @@
                 updateGameLayout();
             } else {
                 const modal = document.getElementById('notificationModal');
-                modal.innerText = "⚠️ Yeh pehla level hai!";
+                modal.innerText = "⚠️️ Yeh pehla level hai!";
                 modal.classList.add('show');
                 setTimeout(() => modal.classList.remove('show'), 1500);
             }
@@ -606,9 +604,10 @@
         bindButton('rightBtnM', () => keys.right = true, () => keys.right = false);
         bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
 
+        // ⚡ Jump Force updated: -9.4 se 30% kam karke -6.6 kar diya gaya
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
-                let activeJumpForce = -9.4; 
+                let activeJumpForce = -6.6; 
 
                 player.vy = activeJumpForce;
                 player.isGrounded = false;
@@ -793,17 +792,17 @@
 
             if (keys.left) {
                 player.vx = -player.speed;
-                player.animTimer += 0.18; 
+                player.animTimer += 0.22; 
             } else if (keys.right) {
                 player.vx = player.speed;
-                player.animTimer += 0.18;
+                player.animTimer += 0.22;
             } else {
                 player.vx = 0;
                 player.animTimer = 0;
             }
 
             if (!player.isGrounded) {
-                player.animTimer += 0.18; 
+                player.animTimer += 0.22; 
             }
 
             if (keys.down) {
@@ -814,7 +813,6 @@
 
             player.x += player.vx;
 
-            // Player gate ke aage ya paar nahi nikal sakta
             let maxRightLimit = goal.x + goal.w - player.width - 2;
             if (player.x < 0) player.x = 0;
             if (player.x > maxRightLimit) player.x = maxRightLimit;
@@ -950,16 +948,13 @@
                 }
             });
 
-            // ==============================================================
-            // 🚪 THEMED SCI-FI PORTAL GATE (DARK AMBER & GOLD METALLIC)
-            // ==============================================================
+            // 🚪 THEMED SCI-FI PORTAL GATE
             let gx = goal.x;
             let gy = goal.y;
             let gw = goal.w;
             let gh = goal.h;
 
             if (isDoorOpen) {
-                // 1. Soft Amber/Golden Energy Aura
                 let auraGrad = ctx.createRadialGradient(gx + gw/2, gy + gh/2, 5, gx + gw/2, gy + gh/2, gw);
                 auraGrad.addColorStop(0, 'rgba(255, 170, 0, 0.45)');
                 auraGrad.addColorStop(0.7, 'rgba(212, 163, 115, 0.2)');
@@ -967,7 +962,6 @@
                 ctx.fillStyle = auraGrad;
                 ctx.fillRect(gx - 8, gy - 8, gw + 16, gh + 14);
 
-                // 2. Portal Void (Deep Dark Bronze-Gold Interior)
                 let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
                 portalGrad.addColorStop(0, '#2b180a');
                 portalGrad.addColorStop(0.5, '#4a2800');
@@ -975,7 +969,6 @@
                 ctx.fillStyle = portalGrad;
                 ctx.fillRect(gx, gy, gw, gh);
 
-                // 3. Inner Energy Rings
                 ctx.strokeStyle = 'rgba(255, 230, 160, 0.6)';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
@@ -992,12 +985,10 @@
                 ctx.lineTo(gx + gw - 18, gy + gh/2 + 6);
                 ctx.stroke();
 
-                // 4. Heavy Bronze-Gold Framed Arch
                 ctx.strokeStyle = '#d4a373';
                 ctx.lineWidth = 3;
                 ctx.strokeRect(gx, gy, gw, gh);
 
-                // Corner Tech Braces
                 ctx.strokeStyle = '#ffcc00';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(gx - 1, gy - 1, 6, 6);
@@ -1005,19 +996,16 @@
                 ctx.strokeRect(gx - 1, gy + gh - 5, 6, 6);
                 ctx.strokeRect(gx + gw - 5, gy + gh - 5, 6, 6);
 
-                // 5. HUD Themed Status Text
                 ctx.font = '900 10px Orbitron, sans-serif';
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillText('ENTER', gx + 1, gy - 7);
             } else {
-                // 1. Deep Burnt Red-Amber Ambient Warning
                 let warnGrad = ctx.createRadialGradient(gx + gw/2, gy + gh/2, 5, gx + gw/2, gy + gh/2, gw);
                 warnGrad.addColorStop(0, 'rgba(180, 50, 10, 0.35)');
                 warnGrad.addColorStop(1, 'transparent');
                 ctx.fillStyle = warnGrad;
                 ctx.fillRect(gx - 6, gy - 6, gw + 12, gh + 12);
 
-                // 2. Heavy Blast Door Metal Plate (Dark Wood-Metal Theme)
                 let metalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy);
                 metalGrad.addColorStop(0, '#1a0e05');
                 metalGrad.addColorStop(0.5, '#2e190b');
@@ -1025,7 +1013,6 @@
                 ctx.fillStyle = metalGrad;
                 ctx.fillRect(gx, gy, gw, gh);
 
-                // 3. Reinforced Crossed Metal Beams (Theme Amber Colored)
                 ctx.strokeStyle = 'rgba(140, 88, 48, 0.7)';
                 ctx.lineWidth = 2.5;
                 ctx.beginPath();
@@ -1035,43 +1022,36 @@
                 ctx.lineTo(gx + 3, gy + gh - 3);
                 ctx.stroke();
 
-                // Horizontal Security Clamp
                 ctx.fillStyle = '#3a200e';
                 ctx.fillRect(gx + 4, gy + gh/2 - 7, gw - 8, 14);
                 ctx.strokeStyle = '#8c5830';
                 ctx.lineWidth = 1.5;
                 ctx.strokeRect(gx + 4, gy + gh/2 - 7, gw - 8, 14);
 
-                // 4. Center Golden Lock Icon
                 let lx = gx + gw/2 - 5;
                 let ly = gy + gh/2 - 4;
                 
-                // Shackle
                 ctx.strokeStyle = '#d4a373';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.arc(lx + 5, ly - 2, 4, Math.PI, 0);
                 ctx.stroke();
 
-                // Core Lock Body
                 ctx.fillStyle = '#ffaa00';
                 ctx.fillRect(lx, ly, 10, 8);
                 ctx.fillStyle = '#1f1208';
                 ctx.fillRect(lx + 3.5, ly + 2.5, 3, 3);
 
-                // 5. Outer Armor Frame
                 ctx.strokeStyle = '#8c5830';
                 ctx.lineWidth = 3;
                 ctx.strokeRect(gx, gy, gw, gh);
 
-                // Rivets / Bolts
                 ctx.fillStyle = '#d4a373';
                 ctx.fillRect(gx + 2, gy + 2, 2.5, 2.5);
                 ctx.fillRect(gx + gw - 4.5, gy + 2, 2.5, 2.5);
                 ctx.fillRect(gx + 2, gy + gh - 4.5, 2.5, 2.5);
                 ctx.fillRect(gx + gw - 4.5, gy + gh - 4.5, 2.5, 2.5);
 
-                // Status text
                 ctx.font = '900 10px Orbitron, sans-serif';
                 ctx.fillStyle = '#d4a373';
                 ctx.fillText('LOCKED', gx - 3, gy - 7);
@@ -1144,12 +1124,12 @@
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
 
-                // Arms still
+                // Hath (Arms) still rahenge
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX - 3.5, py + 12 + jumpStretch, 2.2, 10);  
                 ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12 + jumpStretch, 2.2, 10); 
 
-                // Only legs move
+                // Pair chalenge
                 let legHeight = player.height === 24.3 ? 7 : 12;
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
