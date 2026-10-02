@@ -1,357 +1,966 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Ego Trap - Ghost Trail Edition</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Echo Duel: Paradox Room</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@600;800;900&display=swap');
+
     body {
-      background: #0d1117;
-      color: #c9d1d9;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      background-color: #07090e;
+      color: #e2e8f0;
+      touch-action: manipulation;
+      overflow-x: hidden;
     }
-    .hud {
-      text-align: center;
-      margin-bottom: 16px;
+
+    .font-hud {
+      font-family: 'Orbitron', sans-serif;
     }
-    .title {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #f0f6fc;
-      margin-bottom: 6px;
+
+    /* Glow utilities */
+    .glow-cyan {
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.45);
     }
-    .rules {
-      font-size: 13px;
-      color: #8b949e;
-      margin-bottom: 12px;
+    .glow-magenta {
+      box-shadow: 0 0 15px rgba(236, 72, 153, 0.45);
     }
-    .counter-box {
-      font-size: 18px;
-      font-weight: bold;
-      background: #161b22;
-      border: 1px solid #30363d;
-      padding: 6px 16px;
-      border-radius: 6px;
-      display: inline-block;
-      color: #58a6ff;
+    .glow-emerald {
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.55);
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(5, 65px);
-      grid-template-rows: repeat(5, 65px);
-      gap: 8px;
-      background: #161b22;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #30363d;
+
+    /* Scanline overlay effect */
+    .crt-overlay::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0.6;
     }
-    .tile {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 6px;
-      background: #21262d;
-      cursor: pointer;
-      position: relative;
-      transition: background 0.15s ease, transform 0.1s ease;
-      color: #8b949e;
-    }
-    .tile.valid-move:hover {
-      background: #30363d;
-      transform: scale(1.04);
-    }
-    .tile.player {
-      background: #1f6feb !important;
-      color: #ffffff;
-      box-shadow: 0 0 12px rgba(31, 111, 235, 0.8);
-    }
-    .tile.burned {
-      background: #28151b !important;
-      border: 1px dashed #da3633;
-      color: #da3633;
-    }
-    /* Ghost Trail Style jab fail ho */
-    .tile.ghost {
-      background: #241822 !important;
-      border: 1px solid #f85149;
-      color: #ff7b72;
-    }
-    .step-badge {
-      font-size: 11px;
-      opacity: 0.85;
-      font-weight: 500;
-    }
-    .tile.goal {
-      border: 2px solid #238636;
-      color: #2ea043;
-    }
-    .tile.coin {
-      background: #2a2415;
-      border: 1px solid #d29922;
-      color: #e3b341;
-    }
-    .fail-card {
-      margin-top: 16px;
-      padding: 12px 18px;
-      border-radius: 8px;
-      background: #161b22;
-      border: 1px solid #30363d;
-      text-align: center;
-      max-width: 360px;
-      min-height: 70px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    .fail-card .cause {
-      font-size: 14px;
-      font-weight: 700;
-      color: #f85149;
-      margin-bottom: 4px;
-    }
-    .fail-card .mirror {
-      font-size: 12px;
-      color: #8b949e;
-    }
-    .fail-card.success .cause {
-      color: #2ea043;
-    }
-    .restart-btn {
-      margin-top: 12px;
-      background: #21262d;
-      color: #c9d1d9;
-      border: 1px solid #30363d;
-      padding: 8px 18px;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .restart-btn:hover {
-      background: #30363d;
-      color: #f0f6fc;
+
+    /* Key press button styles */
+    .key-cap {
+      background: #1e293b;
+      border: 1px solid #334155;
+      box-shadow: 0 2px 0 #0f172a;
     }
   </style>
 </head>
-<body>
+<body class="flex flex-col items-center justify-center min-h-screen p-2 select-none">
 
-  <div class="hud">
-    <div class="title">THE EGO TRAP : GHOST TRAIL</div>
-    <div class="rules">Reach Exit [E] in <b>EXACTLY 10 STEPS</b>. No retreading.</div>
-    <div class="counter-box">
-      Steps: <span id="step-count">0</span> / 10
+  <header class="w-full max-w-2xl flex flex-col sm:flex-row items-center justify-between mb-2 px-2 gap-2 text-center sm:text-left">
+    <div>
+      <h1 class="font-hud text-xl sm:text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-fuchsia-500">
+        ECHO DUEL
+      </h1>
+      <p class="text-xs text-slate-400 tracking-wider font-semibold">PARADOX PROTOCOL // APNE PAST SE LADAI</p>
     </div>
-  </div>
+    
+    <div class="flex items-center gap-3">
+      <div class="px-3 py-1 bg-slate-900/90 border border-slate-700/80 rounded-lg text-xs font-hud">
+        <span class="text-slate-400">SECTOR:</span>
+        <span id="level-indicator" class="text-cyan-400 font-bold ml-1">01 / 03</span>
+      </div>
+      <button id="btn-audio" class="px-2.5 py-1 bg-slate-800 border border-slate-700 text-xs rounded hover:bg-slate-700 transition flex items-center gap-1.5 text-slate-300">
+        <span id="audio-icon">🔊</span> AUDIO
+      </button>
+    </div>
+  </header>
 
-  <div class="grid" id="grid"></div>
+  <main class="relative w-full max-w-2xl flex flex-col items-center">
+    <div class="relative w-full aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl crt-overlay">
+      <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
-  <div class="fail-card" id="fail-card">
-    <div class="cause" id="fail-cause">Path Clear</div>
-    <div class="mirror" id="fail-mirror">Arrow keys or click adjacent tiles to move.</div>
-  </div>
+      <!-- Dynamic Game Info Overlay (Phase & Timer) -->
+      <div class="absolute top-3 left-3 right-3 flex justify-between items-center z-10 pointer-events-none">
+        <div id="phase-badge" class="px-3 py-1 rounded-md text-xs font-black tracking-widest border transition-all duration-300 bg-cyan-950/80 text-cyan-300 border-cyan-500/50 glow-cyan">
+          PHASE 1: RECORD PAST
+        </div>
 
-  <button class="restart-btn" onclick="initGame()">Instant Restart [R]</button>
+        <div class="flex items-center gap-2 bg-slate-950/85 px-3 py-1 rounded-md border border-slate-800">
+          <span class="text-[11px] text-slate-400 font-bold tracking-wider">LOOP:</span>
+          <span id="timer-display" class="font-hud font-bold text-sm text-yellow-400">7.0s</span>
+        </div>
+      </div>
+
+      <!-- Action Prompt Banner (Mid screen hints) -->
+      <div id="instruction-pill" class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-900/90 border border-slate-700/70 text-slate-200 backdrop-blur-sm text-center shadow-lg whitespace-nowrap">
+        Walk to <span class="text-fuchsia-400 font-bold">Button A</span> & stand on it. [SPACE] to lock timeline.
+      </div>
+
+      <!-- Reality Check Modal / Fail Screen -->
+      <div id="fail-modal" class="absolute inset-0 z-30 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center transition-all opacity-0 pointer-events-none duration-200">
+        <div class="max-w-md w-full border border-red-500/60 bg-red-950/30 rounded-xl p-5 glow-magenta">
+          <div class="font-hud text-red-400 text-lg font-black tracking-widest mb-1 flex items-center justify-center gap-2">
+            <span>⚠️</span> TIME PARADOX DETECTED
+          </div>
+          <div id="fail-title" class="text-sm font-bold text-slate-200 mt-2">
+            You crashed into your past ghost!
+          </div>
+          <p id="fail-reason" class="text-xs text-red-300/90 mt-2 border-t border-red-900/50 pt-2 leading-relaxed">
+            "Your past self was erratic 3.4 seconds ago. You gave your current self zero space to pass."
+          </p>
+
+          <div class="mt-4 flex gap-3 justify-center">
+            <button id="btn-quick-restart" class="px-5 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold tracking-wider uppercase transition shadow-lg shadow-red-900/40">
+              Retry Loop [R]
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Victory Modal -->
+      <div id="win-modal" class="absolute inset-0 z-30 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="max-w-md w-full border border-emerald-500/60 bg-emerald-950/30 rounded-xl p-6 glow-emerald">
+          <div class="font-hud text-emerald-400 text-xl font-black tracking-widest mb-1">
+            PARADOX RESOLVED
+          </div>
+          <p id="win-desc" class="text-xs text-emerald-200 mt-2">
+            Disciplined planning synchronized both timelines simultaneously. Exit achieved!
+          </p>
+          <div class="mt-5 flex gap-3 justify-center">
+            <button id="btn-next-level" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold rounded-lg text-xs tracking-wider uppercase transition shadow-lg shadow-emerald-900/40">
+              Advance Sector [Enter]
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+      <div class="flex items-center gap-2 flex-wrap justify-center">
+        <span class="flex items-center gap-1"><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">W</kbd><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">A</kbd><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">S</kbd><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">D</kbd> or <span class="text-slate-300">Arrows</span> Move</span>
+        <span class="text-slate-600">|</span>
+        <span class="flex items-center gap-1"><kbd class="key-cap px-2 py-0.5 rounded text-[11px] text-slate-300">SPACE</kbd> Lock Timeline</span>
+        <span class="text-slate-600">|</span>
+        <span class="flex items-center gap-1"><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">R</kbd> Instant Reset</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-reset" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-md font-semibold transition active:scale-95">
+          Restart Loop (R)
+        </button>
+      </div>
+    </div>
+
+    <!-- On-screen D-Pad for Mobile Devices -->
+    <div class="w-full flex md:hidden items-center justify-between mt-3 px-4">
+      <div class="grid grid-cols-3 gap-1.5 w-32">
+        <div></div>
+        <button id="btn-up" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">▲</button>
+        <div></div>
+        <button id="btn-left" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">◀</button>
+        <button id="btn-down" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">▼</button>
+        <button id="btn-right" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">▶</button>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <button id="btn-touch-action" class="px-5 py-3 bg-cyan-700 active:bg-cyan-600 text-white rounded-xl text-xs font-bold font-hud tracking-wider shadow">
+          LOCK TIMELINE (SPACE)
+        </button>
+      </div>
+    </div>
+  </main>
 
   <script>
-    const GRID_SIZE = 5;
-    const TARGET_STEPS = 10;
-    const START_POS = { r: 0, c: 0 };
-    const GOAL_POS = { r: 4, c: 4 };
-    const COIN_POS = { r: 1, c: 3 };
-
-    let playerPos = { ...START_POS };
-    let steps = 0;
-    let pathHistory = []; // Tracks exact order of tiles: [{r, c, step}]
-    let gameOver = false;
-
-    const gridEl = document.getElementById("grid");
-    const stepCountEl = document.getElementById("step-count");
-    const failCauseEl = document.getElementById("fail-cause");
-    const failMirrorEl = document.getElementById("fail-mirror");
-    const failCardEl = document.getElementById("fail-card");
-
-    function initGame() {
-      playerPos = { ...START_POS };
-      steps = 0;
-      pathHistory = [{ r: START_POS.r, c: START_POS.c, step: 0 }];
-      gameOver = false;
-      failCardEl.className = "fail-card";
-      failCauseEl.textContent = "Path Active";
-      failCauseEl.style.color = "#58a6ff";
-      failMirrorEl.textContent = "Arrow keys or click to navigate.";
-      stepCountEl.textContent = steps;
-      renderGrid();
-    }
-
-    function isAdjacent(r1, c1, r2, c2) {
-      const dr = Math.abs(r1 - r2);
-      const dc = Math.abs(c1 - c2);
-      return (dr === 1 && dc === 0) || (dr === 0 && dc === 1);
-    }
-
-    function hasVisited(r, c) {
-      return pathHistory.some(p => p.r === r && p.c === c);
-    }
-
-    function checkDeadlock() {
-      const neighbors = [
-        { r: playerPos.r + 1, c: playerPos.c },
-        { r: playerPos.r - 1, c: playerPos.c },
-        { r: playerPos.r, c: playerPos.c + 1 },
-        { r: playerPos.r, c: playerPos.c - 1 }
-      ];
-
-      return !neighbors.some(n => 
-        n.r >= 0 && n.r < GRID_SIZE && 
-        n.c >= 0 && n.c < GRID_SIZE && 
-        !hasVisited(n.r, n.c)
-      );
-    }
-
-    function triggerFail(cause, realityCheck) {
-      gameOver = true;
-      failCardEl.className = "fail-card";
-      failCauseEl.textContent = cause;
-      failCauseEl.style.color = "#f85149";
-      failMirrorEl.textContent = realityCheck;
-      renderGrid(true); // render with Ghost Trail active
-    }
-
-    function triggerSuccess() {
-      gameOver = true;
-      failCardEl.className = "fail-card success";
-      failCauseEl.textContent = "Unlocked with Perfection";
-      failCauseEl.style.color = "#2ea043";
-      failMirrorEl.textContent = "You maintained discipline and calculated every step.";
-      renderGrid(false);
-    }
-
-    function onTileClick(r, c) {
-      if (gameOver) return;
-
-      if (!isAdjacent(playerPos.r, playerPos.c, r, c)) return;
-
-      if (hasVisited(r, c)) {
-        triggerFail(
-          "Stepped On Your Own Footprint",
-          `Look at tile (${r+1}, ${c+1}). You burned that bridge yourself.`
-        );
-        return;
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
       }
 
-      steps++;
-      playerPos = { r, c };
-      pathHistory.push({ r, c, step: steps });
-      stepCountEl.textContent = steps;
-
-      // Check Outcome
-      if (r === GOAL_POS.r && c === GOAL_POS.c) {
-        if (steps === TARGET_STEPS) {
-          triggerSuccess();
-        } else if (steps < TARGET_STEPS) {
-          triggerFail(
-            `Rushed! Took ${steps} Steps, Needed ${TARGET_STEPS}`,
-            "You ran straight for the exit without planning the required detour."
-          );
-        } else {
-          triggerFail(
-            `Greed Overload! Took ${steps} Steps`,
-            "You wandered around collecting bait and exhausted your move limit."
-          );
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
         }
-      } else if (steps >= TARGET_STEPS) {
-        triggerFail(
-          "Ran Out of Steps",
-          `You hit ${TARGET_STEPS} steps before even touching the exit door.`
-        );
-      } else if (checkDeadlock()) {
-        triggerFail(
-          "Cornered By Your Own Ego",
-          "Every surrounding tile was visited by you earlier. No exit left."
-        );
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playStep() {
+        if (this.muted || !this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140 + Math.random() * 40, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+      }
+
+      playButtonPress() {
+        if (this.muted || !this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(640, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.12);
+      }
+
+      playParadoxAlert() {
+        if (this.muted || !this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(80, this.ctx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.005, this.ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.35);
+      }
+
+      playDoorOpen() {
+        if (this.muted || !this.ctx) return;
+        const chord = [330, 440, 550, 660];
+        chord.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
+          gain.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.06);
+          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.4);
+        });
+      }
+
+      playWin() {
+        if (this.muted || !this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + i * 0.09);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.09 + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + i * 0.09);
+          osc.stop(this.ctx.currentTime + i * 0.09 + 0.35);
+        });
+      }
+    }
+
+    const sound = new SoundEngine();
+  </script>
+
+  <script>
+    const CANVAS_WIDTH = 800;
+    const CANVAS_HEIGHT = 600;
+    const MAX_TIME = 7.0; // Seconds per timeline phase
+    const PLAYER_RADIUS = 15;
+    const PLAYER_SPEED = 210; // px/sec
+
+    // Sector Level Blueprints
+    const LEVELS = [
+      {
+        id: 1,
+        title: "Sector 1: Baseline Paradox",
+        brief: "Touch Button A in Phase 1. Touch Button B while Echo holds A in Phase 2.",
+        startPos: { x: 400, y: 510 },
+        exitDoor: { x: 350, y: 15, w: 100, h: 20 },
+        buttonA: { x: 170, y: 300, r: 28, label: "A (ECHO)" },
+        buttonB: { x: 630, y: 300, r: 28, label: "B (YOU)" },
+        walls: [
+          // Outer perimeter
+          { x: 20, y: 35, w: 760, h: 10 },
+          { x: 20, y: 555, w: 760, h: 10 },
+          { x: 20, y: 35, w: 10, h: 530 },
+          { x: 770, y: 35, w: 10, h: 530 },
+        ],
+        doorExitBarrier: { x: 350, y: 35, w: 100, h: 10 }
+      },
+      {
+        id: 2,
+        title: "Sector 2: The Bottleneck",
+        brief: "A tight corridor divides the room. If your past self walks in the middle, you trap yourself!",
+        startPos: { x: 400, y: 520 },
+        exitDoor: { x: 350, y: 15, w: 100, h: 20 },
+        buttonA: { x: 150, y: 180, r: 28, label: "A (ECHO)" },
+        buttonB: { x: 650, y: 180, r: 28, label: "B (YOU)" },
+        walls: [
+          // Outer bounds
+          { x: 20, y: 35, w: 760, h: 10 },
+          { x: 20, y: 555, w: 760, h: 10 },
+          { x: 20, y: 35, w: 10, h: 530 },
+          { x: 770, y: 35, w: 10, h: 530 },
+          // Choke pillars leaving a strict dual highway
+          { x: 100, y: 330, w: 230, h: 20 },
+          { x: 470, y: 330, w: 230, h: 20 },
+          { x: 375, y: 220, w: 50, h: 240 } // Center divider
+        ],
+        doorExitBarrier: { x: 350, y: 35, w: 100, h: 10 }
+      },
+      {
+        id: 3,
+        title: "Sector 3: The Crossfire",
+        brief: "Buttons are diagonally swapped. Tight timing. Any hesitation creates an unavoidable crash.",
+        startPos: { x: 400, y: 510 },
+        exitDoor: { x: 350, y: 15, w: 100, h: 20 },
+        buttonA: { x: 640, y: 170, r: 26, label: "A (ECHO)" },
+        buttonB: { x: 160, y: 170, r: 26, label: "B (YOU)" },
+        walls: [
+          { x: 20, y: 35, w: 760, h: 10 },
+          { x: 20, y: 555, w: 760, h: 10 },
+          { x: 20, y: 35, w: 10, h: 530 },
+          { x: 770, y: 35, w: 10, h: 530 },
+          // Center obstacle requiring intentional curved paths
+          { x: 320, y: 240, w: 160, h: 110 },
+          { x: 130, y: 370, w: 140, h: 15 },
+          { x: 530, y: 370, w: 140, h: 15 },
+        ],
+        doorExitBarrier: { x: 350, y: 35, w: 100, h: 10 }
+      }
+    ];
+  </script>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+
+    // UI Element references
+    const levelIndEl = document.getElementById('level-indicator');
+    const phaseBadgeEl = document.getElementById('phase-badge');
+    const timerDisplayEl = document.getElementById('timer-display');
+    const instructionPillEl = document.getElementById('instruction-pill');
+    const failModal = document.getElementById('fail-modal');
+    const failTitleEl = document.getElementById('fail-title');
+    const failReasonEl = document.getElementById('fail-reason');
+    const winModal = document.getElementById('win-modal');
+    const btnNextLevel = document.getElementById('btn-next-level');
+    const btnQuickRestart = document.getElementById('btn-quick-restart');
+    const btnAudio = document.getElementById('btn-audio');
+    const audioIcon = document.getElementById('audio-icon');
+
+    // Input States
+    const keys = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+
+    let currentLevelIndex = 0;
+    let currentPhase = 1; // 1 = Recording player path, 2 = Playing alongside Echo
+    let timeElapsed = 0;
+    let isGameOver = false;
+    let isLevelWon = false;
+    let doorUnlocked = false;
+
+    // Collision & Freeze state for dramatic paradox analysis
+    let paradoxFreezePoint = null;
+
+    // Movement History Frame: { time, x, y, onBtnA }
+    let recordedFrames = [];
+
+    // Live Player state
+    let player = {
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      radius: PLAYER_RADIUS,
+      color: '#06b6d4',
+      onButtonA: false,
+      onButtonB: false
+    };
+
+    // Echo Ghost state (Phase 2)
+    let echo = {
+      x: 0,
+      y: 0,
+      radius: PLAYER_RADIUS,
+      active: false,
+      onButtonA: false
+    };
+
+    // Sparks & Particle effects
+    let particles = [];
+
+    function spawnSparks(x, y, color = '#ef4444', count = 25) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 40 + Math.random() * 180;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1.0,
+          decay: 1.5 + Math.random() * 2.0,
+          color,
+          size: 2 + Math.random() * 3
+        });
+      }
+    }
+
+    function setupLevel(index) {
+      currentLevelIndex = index;
+      const lvl = LEVELS[currentLevelIndex];
+      levelIndEl.textContent = `0${lvl.id} / 0${LEVELS.length}`;
+
+      currentPhase = 1;
+      timeElapsed = 0;
+      isGameOver = false;
+      isLevelWon = false;
+      doorUnlocked = false;
+      paradoxFreezePoint = null;
+      recordedFrames = [];
+      particles = [];
+
+      player.x = lvl.startPos.x;
+      player.y = lvl.startPos.y;
+      player.vx = 0;
+      player.vy = 0;
+      player.onButtonA = false;
+      player.onButtonB = false;
+
+      echo.active = false;
+      echo.x = lvl.startPos.x;
+      echo.y = lvl.startPos.y;
+      echo.onButtonA = false;
+
+      // Update HUD
+      updatePhaseHUD();
+      instructionPillEl.innerHTML = `Phase 1: Walk to <span class="text-fuchsia-400 font-bold">Button A</span> and hold it! Press [SPACE] to lock.`;
+      failModal.classList.add('opacity-0', 'pointer-events-none');
+      winModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function updatePhaseHUD() {
+      if (currentPhase === 1) {
+        phaseBadgeEl.className = "px-3 py-1 rounded-md text-xs font-black tracking-widest border transition-all duration-300 bg-cyan-950/80 text-cyan-300 border-cyan-500/50 glow-cyan";
+        phaseBadgeEl.textContent = "PHASE 1: RECORD PAST";
       } else {
-        renderGrid(false);
+        phaseBadgeEl.className = "px-3 py-1 rounded-md text-xs font-black tracking-widest border transition-all duration-300 bg-fuchsia-950/90 text-fuchsia-300 border-fuchsia-500/60 glow-magenta";
+        phaseBadgeEl.textContent = "PHASE 2: DUEL THE ECHO";
       }
     }
 
-    function renderGrid(showGhost = false) {
-      gridEl.innerHTML = "";
-      for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-          const tile = document.createElement("div");
-          tile.classList.add("tile");
+    function commitPhase1() {
+      if (currentPhase !== 1 || isGameOver) return;
+      sound.init();
+      sound.playButtonPress();
 
-          const isPlayer = r === playerPos.r && c === playerPos.c;
-          const isGoal = r === GOAL_POS.r && c === GOAL_POS.c;
-          const isCoin = r === COIN_POS.r && c === COIN_POS.c;
-          const historyEntry = pathHistory.find(p => p.r === r && p.c === c);
-          const isVisited = !!historyEntry && !isPlayer;
-          const canMove = !gameOver && isAdjacent(playerPos.r, playerPos.c, r, c) && !hasVisited(r, c);
+      const lvl = LEVELS[currentLevelIndex];
+      // Check if player even touched Button A during Phase 1
+      const visitedBtnA = recordedFrames.some(f => f.onBtnA);
 
-          if (isPlayer) {
-            tile.classList.add("player");
-            tile.innerHTML = `P<span class="step-badge">#${steps}</span>`;
-          } else if (showGhost && isVisited) {
-            tile.classList.add("ghost");
-            tile.innerHTML = `✕<span class="step-badge">#${historyEntry.step}</span>`;
-          } else if (isVisited) {
-            tile.classList.add("burned");
-            tile.textContent = "✕";
-          } else if (isGoal) {
-            tile.classList.add("goal");
-            tile.textContent = "EXIT";
-          } else if (isCoin) {
-            tile.classList.add("coin");
-            tile.textContent = "★";
-          }
-
-          if (canMove) {
-            tile.classList.add("valid-move");
-          }
-
-          tile.addEventListener("click", () => onTileClick(r, c));
-          gridEl.appendChild(tile);
-        }
-      }
-    }
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "r" || e.key === "R") {
-        initGame();
+      if (!visitedBtnA) {
+        triggerParadox(
+          "Unfulfilled Objective in Past Self",
+          "Your past self never stood on Button A. There is nothing to unlock in Phase 2!",
+          player.x, player.y
+        );
         return;
       }
 
-      let tr = playerPos.r;
-      let tc = playerPos.c;
-      if (e.key === "ArrowUp") tr--;
-      else if (e.key === "ArrowDown") tr++;
-      else if (e.key === "ArrowLeft") tc--;
-      else if (e.key === "ArrowRight") tc++;
-      else return;
+      // Switch to Phase 2
+      currentPhase = 2;
+      timeElapsed = 0;
+      player.x = lvl.startPos.x;
+      player.y = lvl.startPos.y;
+      player.vx = 0;
+      player.vy = 0;
+      echo.active = true;
+      echo.x = lvl.startPos.x;
+      echo.y = lvl.startPos.y;
 
-      if (tr >= 0 && tr < GRID_SIZE && tc >= 0 && tc < GRID_SIZE) {
-        onTileClick(tr, tc);
+      updatePhaseHUD();
+      instructionPillEl.innerHTML = `Phase 2: Sprint to <span class="text-cyan-400 font-bold">Button B</span>! Do NOT touch your past Echo!`;
+    }
+
+    function triggerParadox(title, realityQuote, freezeX, freezeY) {
+      if (isGameOver) return;
+      isGameOver = true;
+      sound.playParadoxAlert();
+
+      paradoxFreezePoint = { x: freezeX, y: freezeY };
+      spawnSparks(freezeX, freezeY, '#ef4444', 35);
+
+      failTitleEl.textContent = title;
+      failReasonEl.innerHTML = `"${realityQuote}"`;
+
+      failModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function triggerWin() {
+      if (isGameOver || isLevelWon) return;
+      isLevelWon = true;
+      sound.playWin();
+
+      winModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+  </script>
+
+  <script>
+    function checkWallCollision(newX, newY, radius, walls) {
+      for (const wall of walls) {
+        // Nearest point on rect to circle
+        const closestX = Math.max(wall.x, Math.min(newX, wall.x + wall.w));
+        const closestY = Math.max(wall.y, Math.min(newY, wall.y + wall.h));
+        const dx = newX - closestX;
+        const dy = newY - closestY;
+        if ((dx * dx + dy * dy) < (radius * radius)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function isInsideCircle(x, y, cx, cy, radius) {
+      const dx = x - cx;
+      const dy = y - cy;
+      return (dx * dx + dy * dy) <= (radius * radius);
+    }
+
+    function update(dt) {
+      if (isGameOver || isLevelWon) {
+        // Update particles only
+        particles.forEach(p => {
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.life -= p.decay * dt;
+        });
+        particles = particles.filter(p => p.life > 0);
+        return;
+      }
+
+      timeElapsed += dt;
+      timerDisplayEl.textContent = `${Math.max(0, MAX_TIME - timeElapsed).toFixed(1)}s`;
+
+      const lvl = LEVELS[currentLevelIndex];
+
+      // Time run-out check
+      if (timeElapsed >= MAX_TIME) {
+        if (currentPhase === 1) {
+          commitPhase1();
+          return;
+        } else {
+          triggerParadox(
+            "Temporal Window Expired",
+            `Loop exceeded ${MAX_TIME}s. Your past self ran out of timeline before synchronization.`,
+            player.x, player.y
+          );
+          return;
+        }
+      }
+
+      // Input calculation
+      let moveX = 0;
+      let moveY = 0;
+      if (keys.up) moveY -= 1;
+      if (keys.down) moveY += 1;
+      if (keys.left) moveX -= 1;
+      if (keys.right) moveX += 1;
+
+      // Normalize diagonal speed
+      if (moveX !== 0 && moveY !== 0) {
+        const invLen = 1 / Math.sqrt(2);
+        moveX *= invLen;
+        moveY *= invLen;
+      }
+
+      if (moveX !== 0 || moveY !== 0) {
+        if (Math.random() < 0.25) sound.playStep();
+      }
+
+      // Compute walls with active exit gate barrier
+      const currentWalls = [...lvl.walls];
+      if (!doorUnlocked) {
+        currentWalls.push(lvl.doorExitBarrier);
+      }
+
+      // Move player with wall sliding
+      const nextX = player.x + moveX * PLAYER_SPEED * dt;
+      const nextY = player.y + moveY * PLAYER_SPEED * dt;
+
+      if (!checkWallCollision(nextX, player.y, player.radius, currentWalls)) {
+        player.x = nextX;
+      }
+      if (!checkWallCollision(player.x, nextY, player.radius, currentWalls)) {
+        player.y = nextY;
+      }
+
+      // Button checks for Player
+      player.onButtonA = isInsideCircle(player.x, player.y, lvl.buttonA.x, lvl.buttonA.y, lvl.buttonA.r);
+      player.onButtonB = isInsideCircle(player.x, player.y, lvl.buttonB.x, lvl.buttonB.y, lvl.buttonB.r);
+
+      // Phase 1: Record player history
+      if (currentPhase === 1) {
+        recordedFrames.push({
+          time: timeElapsed,
+          x: player.x,
+          y: player.y,
+          onBtnA: player.onButtonA
+        });
+      }
+
+      // Phase 2: Replay Echo & Check Collisions
+      if (currentPhase === 2) {
+        // Interpolate Echo from recorded frames
+        const frameIdx = recordedFrames.findIndex(f => f.time >= timeElapsed);
+        if (frameIdx !== -1) {
+          const targetFrame = recordedFrames[frameIdx];
+          echo.x = targetFrame.x;
+          echo.y = targetFrame.y;
+          echo.onButtonA = targetFrame.onBtnA;
+        } else if (recordedFrames.length > 0) {
+          const lastFrame = recordedFrames[recordedFrames.length - 1];
+          echo.x = lastFrame.x;
+          echo.y = lastFrame.y;
+          echo.onButtonA = lastFrame.onBtnA;
+        }
+
+        // 1. CRITICAL EGO RULE: PARADOX COLLISION
+        const dx = player.x - echo.x;
+        const dy = player.y - echo.y;
+        const distSq = dx * dx + dy * dy;
+        const minDist = (player.radius + echo.radius) * 0.95;
+
+        if (distSq < minDist * minDist) {
+          const timeSec = timeElapsed.toFixed(1);
+          triggerParadox(
+            "Temporal Paradox: Self Collision",
+            `You died because of where your past self walked at ${timeSec}s. Look at your ghost's trajectory—you gave yourself no room.`,
+            (player.x + echo.x) / 2,
+            (player.y + echo.y) / 2
+          );
+          return;
+        }
+
+        // 2. Dual Sync Check: Echo on A AND Player on B
+        if (echo.onButtonA && player.onButtonB) {
+          if (!doorUnlocked) {
+            doorUnlocked = true;
+            sound.playDoorOpen();
+            instructionPillEl.innerHTML = `<span class="text-emerald-400 font-bold">DOOR UNLOCKED!</span> Escape through the top gate!`;
+            spawnSparks(lvl.exitDoor.x + lvl.exitDoor.w / 2, lvl.exitDoor.y + lvl.exitDoor.h / 2, '#10b981', 30);
+          }
+        } else {
+          if (doorUnlocked) {
+            doorUnlocked = false; // Must be simultaneously pressed
+          }
+        }
+
+        // 3. Escape Check: Player enters exit door
+        if (doorUnlocked) {
+          const d = lvl.exitDoor;
+          if (player.x >= d.x && player.x <= d.x + d.w && player.y <= d.y + d.h + 10) {
+            triggerWin();
+          }
+        }
+      }
+
+      // Update particles
+      particles.forEach(p => {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= p.decay * dt;
+      });
+      particles = particles.filter(p => p.life > 0);
+    }
+  </script>
+
+  <script>
+    function drawGrid() {
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+      ctx.lineWidth = 1;
+      const gridSize = 35;
+      for (let x = 0; x < CANVAS_WIDTH; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, CANVAS_HEIGHT);
+        ctx.stroke();
+      }
+      for (let y = 0; y < CANVAS_HEIGHT; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(CANVAS_WIDTH, y);
+        ctx.stroke();
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      const lvl = LEVELS[currentLevelIndex];
+
+      // Subtle Background Grid
+      drawGrid();
+
+      // Render Start Pad
+      ctx.fillStyle = 'rgba(51, 65, 85, 0.35)';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(lvl.startPos.x, lvl.startPos.y, 25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('START', lvl.startPos.x, lvl.startPos.y + 4);
+
+      // Render Interactive Buttons
+      // Button A (Echo Target)
+      const btnAActive = (currentPhase === 1 && player.onButtonA) || (currentPhase === 2 && echo.onButtonA);
+      ctx.fillStyle = btnAActive ? 'rgba(236, 72, 153, 0.35)' : 'rgba(236, 72, 153, 0.12)';
+      ctx.strokeStyle = btnAActive ? '#f43f5e' : '#ec4899';
+      ctx.lineWidth = btnAActive ? 3 : 2;
+      ctx.beginPath();
+      ctx.arc(lvl.buttonA.x, lvl.buttonA.y, lvl.buttonA.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f472b6';
+      ctx.font = 'bold 11px Orbitron';
+      ctx.fillText(lvl.buttonA.label, lvl.buttonA.x, lvl.buttonA.y - lvl.buttonA.r - 8);
+
+      // Button B (Player Target)
+      const btnBActive = player.onButtonB;
+      ctx.fillStyle = btnBActive ? 'rgba(6, 182, 212, 0.35)' : 'rgba(6, 182, 212, 0.12)';
+      ctx.strokeStyle = btnBActive ? '#22d3ee' : '#06b6d4';
+      ctx.lineWidth = btnBActive ? 3 : 2;
+      ctx.beginPath();
+      ctx.arc(lvl.buttonB.x, lvl.buttonB.y, lvl.buttonB.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#67e8f9';
+      ctx.font = 'bold 11px Orbitron';
+      ctx.fillText(lvl.buttonB.label, lvl.buttonB.x, lvl.buttonB.y - lvl.buttonB.r - 8);
+
+      // Render Exit Gate
+      const ex = lvl.exitDoor;
+      ctx.fillStyle = doorUnlocked ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.2)';
+      ctx.strokeStyle = doorUnlocked ? '#10b981' : '#ef4444';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(ex.x, ex.y, ex.w, ex.h);
+      ctx.fillRect(ex.x, ex.y, ex.w, ex.h);
+
+      ctx.fillStyle = doorUnlocked ? '#34d399' : '#f87171';
+      ctx.font = 'bold 11px Orbitron';
+      ctx.fillText(doorUnlocked ? '▲ EXIT OPEN ▲' : '🔒 EXIT LOCKED', ex.x + ex.w / 2, ex.y + 14);
+
+      // Render Walls
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      lvl.walls.forEach(w => {
+        ctx.fillRect(w.x, w.y, w.w, w.h);
+        ctx.strokeRect(w.x, w.y, w.w, w.h);
+      });
+
+      // Render Recorded Past Ghost Trail (Phase 2 or Freeze)
+      if (recordedFrames.length > 1) {
+        ctx.strokeStyle = 'rgba(236, 72, 153, 0.25)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        for (let i = 0; i < recordedFrames.length; i++) {
+          const pt = recordedFrames[i];
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Render Echo Ghost (Phase 2)
+      if (currentPhase === 2 && echo.active) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(217, 70, 239, 0.35)';
+        ctx.strokeStyle = '#f0abfc';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#d946ef';
+        ctx.shadowBlur = 12;
+
+        ctx.beginPath();
+        ctx.arc(echo.x, echo.y, echo.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Echo Core Icon
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText('PAST', echo.x, echo.y + 3);
+        ctx.restore();
+      }
+
+      // Render Current Player
+      ctx.save();
+      ctx.fillStyle = '#06b6d4';
+      ctx.strokeStyle = '#a5f3fc';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 14;
+
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#083344';
+      ctx.font = 'bold 10px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText(currentPhase === 1 ? 'P1' : 'NOW', player.x, player.y + 3);
+      ctx.restore();
+
+      // Render Paradox Freeze Lightning
+      if (paradoxFreezePoint) {
+        ctx.save();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(paradoxFreezePoint.x, paradoxFreezePoint.y, 35, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f87171';
+        ctx.font = 'bold 12px Orbitron';
+        ctx.fillText('COLLISION CRASH', paradoxFreezePoint.x, paradoxFreezePoint.y - 42);
+        ctx.restore();
+      }
+
+      // Render Particles
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1.0;
+    }
+  </script>
+
+  <script>
+    // Keyboard Event Handling
+    window.addEventListener('keydown', (e) => {
+      sound.init();
+
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = true;
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+
+      // Commit Phase 1 or Restart Hotkeys
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (currentPhase === 1) commitPhase1();
+      }
+
+      if (e.key === 'r' || e.key === 'R') {
+        setupLevel(currentLevelIndex);
+      }
+
+      if (e.key === 'Enter' && isLevelWon) {
+        advanceToNextLevel();
       }
     });
 
-    initGame();
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = false;
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = false;
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+    });
+
+    // Touch Controls
+    function bindTouchButton(elId, keyProp) {
+      const btn = document.getElementById(elId);
+      if (!btn) return;
+      const startHandler = (e) => {
+        e.preventDefault();
+        sound.init();
+        keys[keyProp] = true;
+      };
+      const endHandler = (e) => {
+        e.preventDefault();
+        keys[keyProp] = false;
+      };
+      btn.addEventListener('touchstart', startHandler);
+      btn.addEventListener('touchend', endHandler);
+      btn.addEventListener('mousedown', startHandler);
+      btn.addEventListener('mouseup', endHandler);
+    }
+
+    bindTouchButton('btn-up', 'up');
+    bindTouchButton('btn-down', 'down');
+    bindTouchButton('btn-left', 'left');
+    bindTouchButton('btn-right', 'right');
+
+    const btnTouchAction = document.getElementById('btn-touch-action');
+    if (btnTouchAction) {
+      btnTouchAction.addEventListener('click', () => {
+        sound.init();
+        if (currentPhase === 1) commitPhase1();
+      });
+    }
+
+    // Modal & HUD Buttons
+    btnQuickRestart.addEventListener('click', () => setupLevel(currentLevelIndex));
+    document.getElementById('btn-reset').addEventListener('click', () => setupLevel(currentLevelIndex));
+
+    function advanceToNextLevel() {
+      if (currentLevelIndex < LEVELS.length - 1) {
+        setupLevel(currentLevelIndex + 1);
+      } else {
+        setupLevel(0); // Loop back
+      }
+    }
+
+    btnNextLevel.addEventListener('click', advanceToNextLevel);
+
+    btnAudio.addEventListener('click', () => {
+      sound.init();
+      sound.muted = !sound.muted;
+      audioIcon.textContent = sound.muted ? '🔇' : '🔊';
+    });
+
+    // Main Game Animation Loop
+    let lastTime = performance.now();
+
+    function gameLoop(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      update(dt);
+      render();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start on load
+    window.addEventListener('load', () => {
+      setupLevel(0);
+      requestAnimationFrame(gameLoop);
+    });
   </script>
 </body>
 </html>
