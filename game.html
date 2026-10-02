@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Echo Duel: Paradox Room</title>
+  <title>The Patience Gauge: Breath of Steel</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@600;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;800&family=JetBrains+Mono:wght@400;600;800&display=swap');
 
     body {
       font-family: 'JetBrains Mono', monospace;
@@ -17,31 +17,20 @@
     }
 
     .font-hud {
-      font-family: 'Orbitron', sans-serif;
-    }
-
-    /* Glow utilities */
-    .glow-cyan {
-      box-shadow: 0 0 15px rgba(6, 182, 212, 0.45);
-    }
-    .glow-magenta {
-      box-shadow: 0 0 15px rgba(236, 72, 153, 0.45);
-    }
-    .glow-emerald {
-      box-shadow: 0 0 18px rgba(16, 185, 129, 0.55);
+      font-family: 'Chakra Petch', sans-serif;
     }
 
     /* Scanline overlay effect */
-    .crt-overlay::after {
+    .crt-screen::after {
       content: " ";
       display: block;
       position: absolute;
       top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
       background-size: 100% 4px;
       z-index: 20;
       pointer-events: none;
-      opacity: 0.6;
+      opacity: 0.55;
     }
 
     /* Key press button styles */
@@ -50,22 +39,36 @@
       border: 1px solid #334155;
       box-shadow: 0 2px 0 #0f172a;
     }
+
+    /* Critical Stamina Heartbeat animation */
+    @keyframes heartbeat-pulse {
+      0%, 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+      50% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+    }
+    .critical-pulse {
+      animation: heartbeat-pulse 0.7s infinite ease-in-out;
+    }
   </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-2 select-none">
+<body class="flex flex-col items-center justify-center min-h-screen p-2 sm:p-4 select-none">
 
-  <header class="w-full max-w-2xl flex flex-col sm:flex-row items-center justify-between mb-2 px-2 gap-2 text-center sm:text-left">
+  <!-- Header HUD -->
+  <header class="w-full max-w-3xl flex flex-col sm:flex-row items-center justify-between mb-2 px-2 gap-2 text-center sm:text-left">
     <div>
-      <h1 class="font-hud text-xl sm:text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-fuchsia-500">
-        ECHO DUEL
+      <h1 class="font-hud text-xl sm:text-2xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-amber-400">
+        BREATH OF STEEL
       </h1>
-      <p class="text-xs text-slate-400 tracking-wider font-semibold">PARADOX PROTOCOL // APNE PAST SE LADAI</p>
+      <p class="text-[11px] text-slate-400 tracking-wider font-semibold">PATIENCE GAUGE PROTOCOL // JALDBAZI KA TRAP</p>
     </div>
     
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
       <div class="px-3 py-1 bg-slate-900/90 border border-slate-700/80 rounded-lg text-xs font-hud">
         <span class="text-slate-400">SECTOR:</span>
-        <span id="level-indicator" class="text-cyan-400 font-bold ml-1">01 / 03</span>
+        <span id="level-indicator" class="text-cyan-400 font-bold ml-1">01 / 04</span>
+      </div>
+      <div class="px-3 py-1 bg-slate-900/90 border border-slate-700/80 rounded-lg text-xs font-hud">
+        <span class="text-slate-400">ATTEMPTS:</span>
+        <span id="death-indicator" class="text-rose-400 font-bold ml-1">00</span>
       </div>
       <button id="btn-audio" class="px-2.5 py-1 bg-slate-800 border border-slate-700 text-xs rounded hover:bg-slate-700 transition flex items-center gap-1.5 text-slate-300">
         <span id="audio-icon">🔊</span> AUDIO
@@ -73,106 +76,125 @@
     </div>
   </header>
 
-  <main class="relative w-full max-w-2xl flex flex-col items-center">
-    <div class="relative w-full aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl crt-overlay">
+  <!-- Main Viewport -->
+  <main class="relative w-full max-w-3xl flex flex-col items-center">
+    <div id="game-frame" class="relative w-full aspect-[16/9] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl crt-screen">
       <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
-      <!-- Dynamic Game Info Overlay (Phase & Timer) -->
+      <!-- Real-time HUD overlay on canvas -->
       <div class="absolute top-3 left-3 right-3 flex justify-between items-center z-10 pointer-events-none">
-        <div id="phase-badge" class="px-3 py-1 rounded-md text-xs font-black tracking-widest border transition-all duration-300 bg-cyan-950/80 text-cyan-300 border-cyan-500/50 glow-cyan">
-          PHASE 1: RECORD PAST
+        <div id="sector-title-pill" class="px-3 py-1 rounded-md text-xs font-hud font-bold tracking-wider border bg-slate-900/85 text-cyan-300 border-cyan-500/40 backdrop-blur-sm">
+          LEVEL 1: THE IMPULSE TEST
         </div>
 
-        <div class="flex items-center gap-2 bg-slate-950/85 px-3 py-1 rounded-md border border-slate-800">
-          <span class="text-[11px] text-slate-400 font-bold tracking-wider">LOOP:</span>
-          <span id="timer-display" class="font-hud font-bold text-sm text-yellow-400">7.0s</span>
+        <div class="flex items-center gap-2 bg-slate-950/85 px-3 py-1 rounded-md border border-slate-800 backdrop-blur-sm text-xs">
+          <span class="text-slate-400">STATUS:</span>
+          <span id="player-action-state" class="font-hud font-bold text-emerald-400">RESTING (+RECOVERY)</span>
         </div>
       </div>
 
-      <!-- Action Prompt Banner (Mid screen hints) -->
-      <div id="instruction-pill" class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-900/90 border border-slate-700/70 text-slate-200 backdrop-blur-sm text-center shadow-lg whitespace-nowrap">
-        Walk to <span class="text-fuchsia-400 font-bold">Button A</span> & stand on it. [SPACE] to lock timeline.
-      </div>
+      <!-- Cold Reality Failure Modal -->
+      <div id="fail-modal" class="absolute inset-0 z-30 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-6 text-center transition-all opacity-0 pointer-events-none duration-150">
+        <div class="max-w-lg w-full border border-red-500/60 bg-red-950/40 rounded-xl p-5 shadow-2xl shadow-red-950/50">
+          <div class="font-hud text-red-400 text-base sm:text-lg font-black tracking-widest mb-1 flex items-center justify-center gap-2">
+            <span>⚠️</span> PROTOCOL FAILED
+          </div>
+          
+          <div id="fail-headline" class="text-sm font-bold text-slate-200 mt-2">
+            Collapsed 1.4m from the door!
+          </div>
 
-      <!-- Reality Check Modal / Fail Screen -->
-      <div id="fail-modal" class="absolute inset-0 z-30 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center transition-all opacity-0 pointer-events-none duration-200">
-        <div class="max-w-md w-full border border-red-500/60 bg-red-950/30 rounded-xl p-5 glow-magenta">
-          <div class="font-hud text-red-400 text-lg font-black tracking-widest mb-1 flex items-center justify-center gap-2">
-            <span>⚠️</span> TIME PARADOX DETECTED
+          <div class="my-3 py-2 px-3 bg-black/50 border border-red-900/40 rounded text-left text-xs font-mono grid grid-cols-2 gap-2 text-slate-300">
+            <div>Distance to Exit: <span id="stat-dist" class="text-red-400 font-bold">1.2m</span></div>
+            <div>Remaining Stamina: <span id="stat-stamina" class="text-red-400 font-bold">0.0%</span></div>
+            <div>Time Spent Sprinting: <span id="stat-sprint-time" class="text-yellow-400 font-bold">2.4s</span></div>
+            <div>Available Safe Rest: <span id="stat-safe-available" class="text-emerald-400 font-bold">Yes (Alcove #2)</span></div>
           </div>
-          <div id="fail-title" class="text-sm font-bold text-slate-200 mt-2">
-            You crashed into your past ghost!
-          </div>
-          <p id="fail-reason" class="text-xs text-red-300/90 mt-2 border-t border-red-900/50 pt-2 leading-relaxed">
-            "Your past self was erratic 3.4 seconds ago. You gave your current self zero space to pass."
+
+          <p id="fail-cold-truth" class="text-xs text-red-300/90 border-t border-red-900/50 pt-2 leading-relaxed italic">
+            "You were only 0.8 seconds away from full recovery. A 1-second pause at Safe Alcove 2 would have guaranteed victory. Why did you sprint?"
           </p>
 
           <div class="mt-4 flex gap-3 justify-center">
-            <button id="btn-quick-restart" class="px-5 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold tracking-wider uppercase transition shadow-lg shadow-red-900/40">
-              Retry Loop [R]
+            <button id="btn-quick-restart" class="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold font-hud tracking-wider uppercase transition shadow-lg shadow-red-900/40 active:scale-95">
+              RETRY INSTANTLY [SPACE / R]
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Success Victory Modal -->
-      <div id="win-modal" class="absolute inset-0 z-30 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center opacity-0 pointer-events-none transition-all duration-300">
-        <div class="max-w-md w-full border border-emerald-500/60 bg-emerald-950/30 rounded-xl p-6 glow-emerald">
+      <!-- Sector Victory Modal -->
+      <div id="win-modal" class="absolute inset-0 z-30 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center opacity-0 pointer-events-none transition-all duration-200">
+        <div class="max-w-md w-full border border-emerald-500/60 bg-emerald-950/40 rounded-xl p-6 shadow-2xl shadow-emerald-950/50">
           <div class="font-hud text-emerald-400 text-xl font-black tracking-widest mb-1">
-            PARADOX RESOLVED
+            DISCIPLINE PREVAILED
           </div>
           <p id="win-desc" class="text-xs text-emerald-200 mt-2">
-            Disciplined planning synchronized both timelines simultaneously. Exit achieved!
+            You mastered your impulse to rush. Controlled pauses conquered the trap.
           </p>
           <div class="mt-5 flex gap-3 justify-center">
-            <button id="btn-next-level" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold rounded-lg text-xs tracking-wider uppercase transition shadow-lg shadow-emerald-900/40">
-              Advance Sector [Enter]
+            <button id="btn-next-level" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold font-hud rounded-lg text-xs tracking-wider uppercase transition shadow-lg shadow-emerald-900/40 active:scale-95">
+              ADVANCE TO NEXT SECTOR [ENTER]
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="w-full mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+    <!-- Stamina / Breath Gauge Dashboard -->
+    <div class="w-full mt-3 bg-slate-900/90 border border-slate-800 rounded-xl p-3 shadow-lg">
+      <div class="flex items-center justify-between text-xs mb-1.5 font-hud">
+        <span class="text-slate-400 font-bold flex items-center gap-1.5">
+          <span id="stamina-icon" class="text-cyan-400">⚡</span> PATIENCE GAUGE (BREATH)
+        </span>
+        <span id="stamina-percentage" class="text-cyan-400 font-bold text-sm">100.0%</span>
+      </div>
+
+      <div class="w-full h-3.5 bg-slate-950 rounded-full p-0.5 border border-slate-700/80 overflow-hidden relative">
+        <div id="stamina-bar" class="h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-75 ease-out" style="width: 100%;"></div>
+      </div>
+
+      <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1 font-mono">
+        <span>[DRAINS WHEN SPRINTING]</span>
+        <span class="text-slate-400 font-semibold">[STAND STILL IN SAFE ZONES TO RESTORE]</span>
+      </div>
+    </div>
+
+    <!-- Keyboard Controls Guide -->
+    <div class="w-full mt-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
       <div class="flex items-center gap-2 flex-wrap justify-center">
-        <span class="flex items-center gap-1"><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">W</kbd><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">A</kbd><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">S</kbd><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">D</kbd> or <span class="text-slate-300">Arrows</span> Move</span>
+        <span class="flex items-center gap-1"><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">A</kbd><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">D</kbd> or <span class="text-slate-300">◀ ▶</span> Move</span>
         <span class="text-slate-600">|</span>
-        <span class="flex items-center gap-1"><kbd class="key-cap px-2 py-0.5 rounded text-[11px] text-slate-300">SPACE</kbd> Lock Timeline</span>
-        <span class="text-slate-600">|</span>
-        <span class="flex items-center gap-1"><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">R</kbd> Instant Reset</span>
+        <span class="flex items-center gap-1"><kbd class="key-cap px-1.5 py-0.5 rounded text-[11px] text-slate-300">R</kbd> Quick Restart</span>
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="btn-reset" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-md font-semibold transition active:scale-95">
-          Restart Loop (R)
+        <button id="btn-restart" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-md font-semibold transition active:scale-95 text-xs">
+          Restart Sector (R)
         </button>
       </div>
     </div>
 
-    <!-- On-screen D-Pad for Mobile Devices -->
-    <div class="w-full flex md:hidden items-center justify-between mt-3 px-4">
-      <div class="grid grid-cols-3 gap-1.5 w-32">
-        <div></div>
-        <button id="btn-up" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">▲</button>
-        <div></div>
-        <button id="btn-left" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">◀</button>
-        <button id="btn-down" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">▼</button>
-        <button id="btn-right" class="w-10 h-10 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-sm font-bold shadow">▶</button>
+    <!-- Mobile Virtual Controls -->
+    <div class="w-full flex md:hidden items-center justify-between mt-3 px-4 py-2 bg-slate-900/60 rounded-xl border border-slate-800/80">
+      <div class="flex items-center gap-2">
+        <button id="btn-touch-left" class="w-14 h-12 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-lg font-bold shadow">◀</button>
+        <button id="btn-touch-right" class="w-14 h-12 bg-slate-800 active:bg-cyan-600 rounded-lg flex items-center justify-center text-slate-200 text-lg font-bold shadow">▶</button>
       </div>
-
-      <div class="flex flex-col gap-2">
-        <button id="btn-touch-action" class="px-5 py-3 bg-cyan-700 active:bg-cyan-600 text-white rounded-xl text-xs font-bold font-hud tracking-wider shadow">
-          LOCK TIMELINE (SPACE)
-        </button>
-      </div>
+      <button id="btn-touch-restart" class="px-4 py-3 bg-red-950/80 active:bg-red-700 border border-red-700/60 text-red-200 rounded-xl text-xs font-hud font-bold">
+        QUICK RETRY
+      </button>
     </div>
   </main>
 
+  <!-- Audio Synthesis Engine Script -->
   <script>
-    class SoundEngine {
+    class SynthesizerAudio {
       constructor() {
         this.ctx = null;
         this.muted = false;
+        this.heartbeatOsc = null;
+        this.lastHeartbeatTime = 0;
       }
 
       init() {
@@ -190,353 +212,348 @@
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(140 + Math.random() * 40, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+        osc.frequency.setValueAtTime(160 + Math.random() * 30, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.025, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.05);
+        osc.stop(this.ctx.currentTime + 0.04);
       }
 
-      playButtonPress() {
+      playHeartbeat(rateMultiplier = 1) {
         if (this.muted || !this.ctx) return;
+        const now = performance.now();
+        if (now - this.lastHeartbeatTime < 380 / rateMultiplier) return;
+        this.lastHeartbeatTime = now;
+
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(640, this.ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.frequency.setValueAtTime(55, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(35, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.12);
+        osc.stop(this.ctx.currentTime + 0.15);
       }
 
-      playParadoxAlert() {
+      playLaserHum() {
         if (this.muted || !this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(80, this.ctx.currentTime + 0.35);
-        gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.005, this.ctx.currentTime + 0.35);
+        osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.35);
+        osc.stop(this.ctx.currentTime + 0.08);
       }
 
-      playDoorOpen() {
+      playCollapse() {
         if (this.muted || !this.ctx) return;
-        const chord = [330, 440, 550, 660];
+        // Deep fail thud
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.45);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.45);
+      }
+
+      playCoin() {
+        if (this.muted || !this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(1318, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.22);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.22);
+      }
+
+      playVictory() {
+        if (this.muted || !this.ctx) return;
+        const chord = [523.25, 659.25, 783.99, 1046.50];
         chord.forEach((freq, idx) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
-          gain.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.06);
-          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.4);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(this.ctx.currentTime + idx * 0.06);
-          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.4);
-        });
-      }
-
-      playWin() {
-        if (this.muted || !this.ctx) return;
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        notes.forEach((freq, i) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + i * 0.09);
-          gain.gain.setValueAtTime(0.12, this.ctx.currentTime + i * 0.09);
-          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.09 + 0.35);
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.4);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
-          osc.start(this.ctx.currentTime + i * 0.09);
-          osc.stop(this.ctx.currentTime + i * 0.09 + 0.35);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.4);
         });
       }
     }
 
-    const sound = new SoundEngine();
+    const sound = new SynthesizerAudio();
   </script>
 
+  <!-- Level Blueprints & Game State Engine -->
   <script>
-    const CANVAS_WIDTH = 800;
-    const CANVAS_HEIGHT = 600;
-    const MAX_TIME = 7.0; // Seconds per timeline phase
-    const PLAYER_RADIUS = 15;
-    const PLAYER_SPEED = 210; // px/sec
+    const CANVAS_WIDTH = 960;
+    const CANVAS_HEIGHT = 440;
+    const FLOOR_Y = 360;
+    const PLAYER_SIZE = 24;
+    const BASE_SPEED = 240; // px/sec
 
-    // Sector Level Blueprints
+    // 4 Psychological Sectors testing patience & ego
     const LEVELS = [
       {
         id: 1,
-        title: "Sector 1: Baseline Paradox",
-        brief: "Touch Button A in Phase 1. Touch Button B while Echo holds A in Phase 2.",
-        startPos: { x: 400, y: 510 },
-        exitDoor: { x: 350, y: 15, w: 100, h: 20 },
-        buttonA: { x: 170, y: 300, r: 28, label: "A (ECHO)" },
-        buttonB: { x: 630, y: 300, r: 28, label: "B (YOU)" },
-        walls: [
-          // Outer perimeter
-          { x: 20, y: 35, w: 760, h: 10 },
-          { x: 20, y: 555, w: 760, h: 10 },
-          { x: 20, y: 35, w: 10, h: 530 },
-          { x: 770, y: 35, w: 10, h: 530 },
+        title: "LEVEL 1: THE IMPULSE TEST",
+        subtitle: "The gate is 15 meters away. Running the whole way drains 100% of your breath.",
+        playerStart: 45,
+        exitDoor: { x: 890, y: FLOOR_Y - 70, w: 35, h: 70 },
+        safeZones: [
+          { x: 30, w: 70, label: "START" },
+          { x: 310, w: 85, label: "ALCOVE 1" },
+          { x: 620, w: 85, label: "ALCOVE 2" }
         ],
-        doorExitBarrier: { x: 350, y: 35, w: 100, h: 10 }
+        lasers: [
+          { x: 230, w: 10, period: 2.4, onTime: 1.2, offset: 0 },
+          { x: 520, w: 10, period: 2.8, onTime: 1.4, offset: 0.6 },
+          { x: 790, w: 10, period: 2.2, onTime: 1.1, offset: 1.0 }
+        ],
+        windTunnels: [],
+        relics: []
       },
       {
         id: 2,
-        title: "Sector 2: The Bottleneck",
-        brief: "A tight corridor divides the room. If your past self walks in the middle, you trap yourself!",
-        startPos: { x: 400, y: 520 },
-        exitDoor: { x: 350, y: 15, w: 100, h: 20 },
-        buttonA: { x: 150, y: 180, r: 28, label: "A (ECHO)" },
-        buttonB: { x: 650, y: 180, r: 28, label: "B (YOU)" },
-        walls: [
-          // Outer bounds
-          { x: 20, y: 35, w: 760, h: 10 },
-          { x: 20, y: 555, w: 760, h: 10 },
-          { x: 20, y: 35, w: 10, h: 530 },
-          { x: 770, y: 35, w: 10, h: 530 },
-          // Choke pillars leaving a strict dual highway
-          { x: 100, y: 330, w: 230, h: 20 },
-          { x: 470, y: 330, w: 230, h: 20 },
-          { x: 375, y: 220, w: 50, h: 240 } // Center divider
+        title: "LEVEL 2: THE GREED TRAP",
+        subtitle: "A shiny relic floats above. Collecting it requires extra steps while stamina burns.",
+        playerStart: 45,
+        exitDoor: { x: 890, y: FLOOR_Y - 70, w: 35, h: 70 },
+        safeZones: [
+          { x: 30, w: 65, label: "START" },
+          { x: 270, w: 75, label: "REST A" },
+          { x: 640, w: 75, label: "REST B" }
         ],
-        doorExitBarrier: { x: 350, y: 35, w: 100, h: 10 }
+        lasers: [
+          { x: 190, w: 10, period: 2.5, onTime: 1.3, offset: 0 },
+          { x: 480, w: 10, period: 2.6, onTime: 1.3, offset: 0.8 },
+          { x: 780, w: 10, period: 2.4, onTime: 1.2, offset: 0.3 }
+        ],
+        windTunnels: [],
+        relics: [
+          { x: 440, y: FLOOR_Y - 55, r: 14, collected: false, label: "GREED STAR" }
+        ]
       },
       {
         id: 3,
-        title: "Sector 3: The Crossfire",
-        brief: "Buttons are diagonally swapped. Tight timing. Any hesitation creates an unavoidable crash.",
-        startPos: { x: 400, y: 510 },
-        exitDoor: { x: 350, y: 15, w: 100, h: 20 },
-        buttonA: { x: 640, y: 170, r: 26, label: "A (ECHO)" },
-        buttonB: { x: 160, y: 170, r: 26, label: "B (YOU)" },
-        walls: [
-          { x: 20, y: 35, w: 760, h: 10 },
-          { x: 20, y: 555, w: 760, h: 10 },
-          { x: 20, y: 35, w: 10, h: 530 },
-          { x: 770, y: 35, w: 10, h: 530 },
-          // Center obstacle requiring intentional curved paths
-          { x: 320, y: 240, w: 160, h: 110 },
-          { x: 130, y: 370, w: 140, h: 15 },
-          { x: 530, y: 370, w: 140, h: 15 },
+        title: "LEVEL 3: WIND TUNNEL & THE MIRAGE",
+        subtitle: "Headwinds increase resistance. Fighting the storm empties your lungs instantly.",
+        playerStart: 45,
+        exitDoor: { x: 890, y: FLOOR_Y - 70, w: 35, h: 70 },
+        safeZones: [
+          { x: 30, w: 65, label: "START" },
+          { x: 260, w: 80, label: "BUNKER 1" },
+          { x: 530, w: 80, label: "BUNKER 2" },
+          { x: 740, w: 65, label: "BUNKER 3" }
         ],
-        doorExitBarrier: { x: 350, y: 35, w: 100, h: 10 }
+        lasers: [
+          { x: 420, w: 10, period: 2.8, onTime: 1.4, offset: 0.2 },
+          { x: 680, w: 10, period: 2.4, onTime: 1.2, offset: 1.1 }
+        ],
+        windTunnels: [
+          { x: 130, w: 120, force: -90, active: true },
+          { x: 350, w: 160, force: -120, active: true }
+        ],
+        relics: []
+      },
+      {
+        id: 4,
+        title: "LEVEL 4: THE FINAL STRETCH",
+        subtitle: "A completely open corridor. It looks easy. It is calculated to kill you 1 step before the exit.",
+        playerStart: 45,
+        exitDoor: { x: 900, y: FLOOR_Y - 70, w: 35, h: 70 },
+        safeZones: [
+          { x: 30, w: 60, label: "START" },
+          { x: 340, w: 65, label: "OASIS 1" },
+          { x: 680, w: 65, label: "OASIS 2" }
+        ],
+        lasers: [
+          { x: 210, w: 8, period: 2.0, onTime: 1.0, offset: 0 },
+          { x: 490, w: 8, period: 2.0, onTime: 1.0, offset: 0.5 },
+          { x: 570, w: 8, period: 2.0, onTime: 1.0, offset: 1.0 },
+          { x: 810, w: 8, period: 1.8, onTime: 0.9, offset: 0.3 }
+        ],
+        windTunnels: [],
+        relics: []
       }
     ];
   </script>
 
+  <!-- Core Game Logic & Animation Engine -->
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
 
-    // UI Element references
+    // DOM References
     const levelIndEl = document.getElementById('level-indicator');
-    const phaseBadgeEl = document.getElementById('phase-badge');
-    const timerDisplayEl = document.getElementById('timer-display');
-    const instructionPillEl = document.getElementById('instruction-pill');
+    const deathIndEl = document.getElementById('death-indicator');
+    const sectorTitlePill = document.getElementById('sector-title-pill');
+    const playerActionStateEl = document.getElementById('player-action-state');
+    const staminaBarEl = document.getElementById('stamina-bar');
+    const staminaPercentageEl = document.getElementById('stamina-percentage');
+    const staminaIconEl = document.getElementById('stamina-icon');
+    const gameFrame = document.getElementById('game-frame');
+
+    // Modals
     const failModal = document.getElementById('fail-modal');
-    const failTitleEl = document.getElementById('fail-title');
-    const failReasonEl = document.getElementById('fail-reason');
+    const failHeadline = document.getElementById('fail-headline');
+    const failColdTruth = document.getElementById('fail-cold-truth');
+    const statDist = document.getElementById('stat-dist');
+    const statStamina = document.getElementById('stat-stamina');
+    const statSprintTime = document.getElementById('stat-sprint-time');
+    const statSafeAvailable = document.getElementById('stat-safe-available');
+
     const winModal = document.getElementById('win-modal');
-    const btnNextLevel = document.getElementById('btn-next-level');
+    const winDesc = document.getElementById('win-desc');
+
     const btnQuickRestart = document.getElementById('btn-quick-restart');
+    const btnNextLevel = document.getElementById('btn-next-level');
+    const btnRestart = document.getElementById('btn-restart');
     const btnAudio = document.getElementById('btn-audio');
     const audioIcon = document.getElementById('audio-icon');
 
-    // Input States
+    // State Variables
+    let currentLevelIndex = 0;
+    let attemptCount = 0;
+    let stamina = 100.0; // 0 to 100
+    let isGameOver = false;
+    let isLevelWon = false;
+    let timeAlive = 0;
+    let totalSprintDuration = 0;
+
+    // Chalk outlines of previous fatal collapses per level
+    let chalkGhosts = [[], [], [], []];
+
+    // Player Entity
+    let player = {
+      x: 45,
+      y: FLOOR_Y - PLAYER_SIZE,
+      vx: 0,
+      size: PLAYER_SIZE,
+      isMoving: false,
+      inSafeZone: false,
+      color: '#06b6d4'
+    };
+
+    // Particles system
+    let particles = [];
+    let windParticles = [];
+
+    // Keyboard states
     const keys = {
-      up: false,
-      down: false,
       left: false,
       right: false
     };
 
-    let currentLevelIndex = 0;
-    let currentPhase = 1; // 1 = Recording player path, 2 = Playing alongside Echo
-    let timeElapsed = 0;
-    let isGameOver = false;
-    let isLevelWon = false;
-    let doorUnlocked = false;
+    function loadLevel(index) {
+      currentLevelIndex = index;
+      const lvl = LEVELS[currentLevelIndex];
 
-    // Collision & Freeze state for dramatic paradox analysis
-    let paradoxFreezePoint = null;
+      levelIndEl.textContent = `0${lvl.id} / 0${LEVELS.length}`;
+      deathIndEl.textContent = attemptCount < 10 ? `0${attemptCount}` : `${attemptCount}`;
+      sectorTitlePill.textContent = lvl.title;
 
-    // Movement History Frame: { time, x, y, onBtnA }
-    let recordedFrames = [];
+      stamina = 100.0;
+      isGameOver = false;
+      isLevelWon = false;
+      timeAlive = 0;
+      totalSprintDuration = 0;
 
-    // Live Player state
-    let player = {
-      x: 0,
-      y: 0,
-      vx: 0,
-      vy: 0,
-      radius: PLAYER_RADIUS,
-      color: '#06b6d4',
-      onButtonA: false,
-      onButtonB: false
-    };
+      player.x = lvl.playerStart;
+      player.y = FLOOR_Y - PLAYER_SIZE;
+      player.vx = 0;
+      player.isMoving = false;
+      player.inSafeZone = true;
 
-    // Echo Ghost state (Phase 2)
-    let echo = {
-      x: 0,
-      y: 0,
-      radius: PLAYER_RADIUS,
-      active: false,
-      onButtonA: false
-    };
+      // Reset relics
+      lvl.relics.forEach(r => r.collected = false);
 
-    // Sparks & Particle effects
-    let particles = [];
+      // Clean modals
+      failModal.classList.add('opacity-0', 'pointer-events-none');
+      winModal.classList.add('opacity-0', 'pointer-events-none');
+      gameFrame.classList.remove('critical-pulse');
 
-    function spawnSparks(x, y, color = '#ef4444', count = 25) {
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 40 + Math.random() * 180;
+      updateStaminaUI();
+    }
+
+    function triggerVictory() {
+      if (isGameOver || isLevelWon) return;
+      isLevelWon = true;
+      sound.playVictory();
+
+      winDesc.textContent = `Mastered ${LEVELS[currentLevelIndex].title}. Your calculated restraint defeated impulse.`;
+      winModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function triggerDefeat(reason, headline, coldMirror) {
+      if (isGameOver || isLevelWon) return;
+      isGameOver = true;
+      attemptCount++;
+      deathIndEl.textContent = attemptCount < 10 ? `0${attemptCount}` : `${attemptCount}`;
+      sound.playCollapse();
+
+      // Record chalk outline marker
+      chalkGhosts[currentLevelIndex].push({
+        x: player.x,
+        y: player.y,
+        reason: reason,
+        stamina: stamina.toFixed(1)
+      });
+
+      // Spawn collapse dust particles
+      for (let i = 0; i < 30; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = 30 + Math.random() * 140;
         particles.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
+          x: player.x + player.size / 2,
+          y: player.y + player.size / 2,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
           life: 1.0,
-          decay: 1.5 + Math.random() * 2.0,
-          color,
+          decay: 1.2 + Math.random() * 1.5,
+          color: reason === 'LASER' ? '#ef4444' : '#38bdf8',
           size: 2 + Math.random() * 3
         });
       }
-    }
 
-    function setupLevel(index) {
-      currentLevelIndex = index;
+      // Populate failure stats
       const lvl = LEVELS[currentLevelIndex];
-      levelIndEl.textContent = `0${lvl.id} / 0${LEVELS.length}`;
+      const distRemaining = Math.max(0, (lvl.exitDoor.x - (player.x + player.size)) / 40).toFixed(1);
+      
+      statDist.textContent = `${distRemaining} meters`;
+      statStamina.textContent = `${stamina.toFixed(1)}%`;
+      statSprintTime.textContent = `${totalSprintDuration.toFixed(1)}s`;
 
-      currentPhase = 1;
-      timeElapsed = 0;
-      isGameOver = false;
-      isLevelWon = false;
-      doorUnlocked = false;
-      paradoxFreezePoint = null;
-      recordedFrames = [];
-      particles = [];
+      const safeAlcove = lvl.safeZones.find(z => z.x > player.x);
+      statSafeAvailable.textContent = safeAlcove ? `Yes (${safeAlcove.label})` : "Near Exit Gate";
 
-      player.x = lvl.startPos.x;
-      player.y = lvl.startPos.y;
-      player.vx = 0;
-      player.vy = 0;
-      player.onButtonA = false;
-      player.onButtonB = false;
-
-      echo.active = false;
-      echo.x = lvl.startPos.x;
-      echo.y = lvl.startPos.y;
-      echo.onButtonA = false;
-
-      // Update HUD
-      updatePhaseHUD();
-      instructionPillEl.innerHTML = `Phase 1: Walk to <span class="text-fuchsia-400 font-bold">Button A</span> and hold it! Press [SPACE] to lock.`;
-      failModal.classList.add('opacity-0', 'pointer-events-none');
-      winModal.classList.add('opacity-0', 'pointer-events-none');
-    }
-
-    function updatePhaseHUD() {
-      if (currentPhase === 1) {
-        phaseBadgeEl.className = "px-3 py-1 rounded-md text-xs font-black tracking-widest border transition-all duration-300 bg-cyan-950/80 text-cyan-300 border-cyan-500/50 glow-cyan";
-        phaseBadgeEl.textContent = "PHASE 1: RECORD PAST";
-      } else {
-        phaseBadgeEl.className = "px-3 py-1 rounded-md text-xs font-black tracking-widest border transition-all duration-300 bg-fuchsia-950/90 text-fuchsia-300 border-fuchsia-500/60 glow-magenta";
-        phaseBadgeEl.textContent = "PHASE 2: DUEL THE ECHO";
-      }
-    }
-
-    function commitPhase1() {
-      if (currentPhase !== 1 || isGameOver) return;
-      sound.init();
-      sound.playButtonPress();
-
-      const lvl = LEVELS[currentLevelIndex];
-      // Check if player even touched Button A during Phase 1
-      const visitedBtnA = recordedFrames.some(f => f.onBtnA);
-
-      if (!visitedBtnA) {
-        triggerParadox(
-          "Unfulfilled Objective in Past Self",
-          "Your past self never stood on Button A. There is nothing to unlock in Phase 2!",
-          player.x, player.y
-        );
-        return;
-      }
-
-      // Switch to Phase 2
-      currentPhase = 2;
-      timeElapsed = 0;
-      player.x = lvl.startPos.x;
-      player.y = lvl.startPos.y;
-      player.vx = 0;
-      player.vy = 0;
-      echo.active = true;
-      echo.x = lvl.startPos.x;
-      echo.y = lvl.startPos.y;
-
-      updatePhaseHUD();
-      instructionPillEl.innerHTML = `Phase 2: Sprint to <span class="text-cyan-400 font-bold">Button B</span>! Do NOT touch your past Echo!`;
-    }
-
-    function triggerParadox(title, realityQuote, freezeX, freezeY) {
-      if (isGameOver) return;
-      isGameOver = true;
-      sound.playParadoxAlert();
-
-      paradoxFreezePoint = { x: freezeX, y: freezeY };
-      spawnSparks(freezeX, freezeY, '#ef4444', 35);
-
-      failTitleEl.textContent = title;
-      failReasonEl.innerHTML = `"${realityQuote}"`;
-
+      failHeadline.textContent = headline;
+      failColdTruth.innerHTML = `"${coldMirror}"`;
       failModal.classList.remove('opacity-0', 'pointer-events-none');
-    }
-
-    function triggerWin() {
-      if (isGameOver || isLevelWon) return;
-      isLevelWon = true;
-      sound.playWin();
-
-      winModal.classList.remove('opacity-0', 'pointer-events-none');
-    }
-  </script>
-
-  <script>
-    function checkWallCollision(newX, newY, radius, walls) {
-      for (const wall of walls) {
-        // Nearest point on rect to circle
-        const closestX = Math.max(wall.x, Math.min(newX, wall.x + wall.w));
-        const closestY = Math.max(wall.y, Math.min(newY, wall.y + wall.h));
-        const dx = newX - closestX;
-        const dy = newY - closestY;
-        if ((dx * dx + dy * dy) < (radius * radius)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function isInsideCircle(x, y, cx, cy, radius) {
-      const dx = x - cx;
-      const dy = y - cy;
-      return (dx * dx + dy * dy) <= (radius * radius);
     }
 
     function update(dt) {
@@ -551,158 +568,160 @@
         return;
       }
 
-      timeElapsed += dt;
-      timerDisplayEl.textContent = `${Math.max(0, MAX_TIME - timeElapsed).toFixed(1)}s`;
-
+      timeAlive += dt;
       const lvl = LEVELS[currentLevelIndex];
 
-      // Time run-out check
-      if (timeElapsed >= MAX_TIME) {
-        if (currentPhase === 1) {
-          commitPhase1();
-          return;
+      // Input calculation
+      let moveDir = 0;
+      if (keys.right) moveDir += 1;
+      if (keys.left) moveDir -= 1;
+
+      player.isMoving = moveDir !== 0;
+
+      // Check current position in Safe Zone
+      player.inSafeZone = lvl.safeZones.some(z => {
+        return (player.x + player.size * 0.5) >= z.x && (player.x + player.size * 0.5) <= (z.x + z.w);
+      });
+
+      // Wind Tunnels Force Application
+      let windPush = 0;
+      lvl.windTunnels.forEach(wt => {
+        if (player.x >= wt.x && player.x <= wt.x + wt.w) {
+          windPush += wt.force;
+        }
+      });
+
+      // Movement & Stamina Rate
+      if (player.isMoving) {
+        sound.init();
+        if (Math.random() < 0.2) sound.playStep();
+
+        totalSprintDuration += dt;
+        player.x += (moveDir * BASE_SPEED + windPush) * dt;
+
+        // Moving burns stamina rapidly (18.5% per second)
+        stamina -= 19.5 * dt;
+
+        playerActionStateEl.textContent = "SPRINTING (-DRAIN)";
+        playerActionStateEl.className = "font-hud font-bold text-amber-400";
+      } else {
+        // Standing still recovers stamina
+        if (player.inSafeZone) {
+          stamina += 32.0 * dt; // Faster recovery in safe zones
+          playerActionStateEl.textContent = "SAFE REST (+FAST RECOVERY)";
+          playerActionStateEl.className = "font-hud font-bold text-emerald-400";
         } else {
-          triggerParadox(
-            "Temporal Window Expired",
-            `Loop exceeded ${MAX_TIME}s. Your past self ran out of timeline before synchronization.`,
-            player.x, player.y
-          );
-          return;
+          stamina += 18.0 * dt; // Normal standing recovery
+          playerActionStateEl.textContent = "RESTING (+RECOVERY)";
+          playerActionStateEl.className = "font-hud font-bold text-cyan-400";
         }
       }
 
-      // Input calculation
-      let moveX = 0;
-      let moveY = 0;
-      if (keys.up) moveY -= 1;
-      if (keys.down) moveY += 1;
-      if (keys.left) moveX -= 1;
-      if (keys.right) moveX += 1;
+      // Constrain stamina
+      stamina = Math.max(0, Math.min(100.0, stamina));
 
-      // Normalize diagonal speed
-      if (moveX !== 0 && moveY !== 0) {
-        const invLen = 1 / Math.sqrt(2);
-        moveX *= invLen;
-        moveY *= invLen;
+      // Low stamina pulse & heartbeat warning
+      if (stamina < 28) {
+        gameFrame.classList.add('critical-pulse');
+        sound.playHeartbeat(stamina < 15 ? 1.6 : 1.0);
+      } else {
+        gameFrame.classList.remove('critical-pulse');
       }
 
-      if (moveX !== 0 || moveY !== 0) {
-        if (Math.random() < 0.25) sound.playStep();
+      // Keep within bounds
+      player.x = Math.max(10, Math.min(CANVAS_WIDTH - player.size - 10, player.x));
+
+      // 1. FATAL COLLAPSE: STAMINA HIT 0%
+      if (stamina <= 0) {
+        const dist = Math.max(0, (lvl.exitDoor.x - (player.x + player.size)) / 40).toFixed(1);
+        triggerDefeat(
+          'EXHAUSTION',
+          `Collapsed ${dist}m from the exit!`,
+          `You ran continuously for ${totalSprintDuration.toFixed(1)}s without catching your breath. The exit was directly ahead, but you refused to pause.`
+        );
+        return;
       }
 
-      // Compute walls with active exit gate barrier
-      const currentWalls = [...lvl.walls];
-      if (!doorUnlocked) {
-        currentWalls.push(lvl.doorExitBarrier);
+      // 2. HAZARD CHECK: TIMED LASERS
+      lvl.lasers.forEach(laser => {
+        const cycleTime = (timeAlive + laser.offset) % laser.period;
+        const isActive = cycleTime < laser.onTime;
+
+        if (isActive) {
+          // Check intersection with laser beam
+          const laserLeft = laser.x;
+          const laserRight = laser.x + laser.w;
+          const playerLeft = player.x;
+          const playerRight = player.x + player.size;
+
+          if (playerRight > laserLeft && playerLeft < laserRight) {
+            triggerDefeat(
+              'LASER',
+              'Vaporized by Laser Barrier!',
+              'You panicked because your stamina was dropping and sprinted straight into an active laser cycle. A 0.5s pause was all you needed.'
+            );
+          }
+        }
+      });
+
+      // 3. RELIC CHECK (GREED TRAP)
+      lvl.relics.forEach(relic => {
+        if (!relic.collected) {
+          const dx = (player.x + player.size / 2) - relic.x;
+          const dy = (player.y + player.size / 2) - relic.y;
+          if (Math.sqrt(dx * dx + dy * dy) < (player.size / 2 + relic.r)) {
+            relic.collected = true;
+            sound.playCoin();
+            // Reward or ego punishment: Relic consumes extra instant breath!
+            stamina = Math.max(1, stamina - 12);
+          }
+        }
+      });
+
+      // 4. VICTORY CHECK: EXIT REACHED
+      const door = lvl.exitDoor;
+      if (player.x + player.size >= door.x && player.x <= door.x + door.w) {
+        triggerVictory();
       }
 
-      // Move player with wall sliding
-      const nextX = player.x + moveX * PLAYER_SPEED * dt;
-      const nextY = player.y + moveY * PLAYER_SPEED * dt;
+      // Update HUD
+      updateStaminaUI();
 
-      if (!checkWallCollision(nextX, player.y, player.radius, currentWalls)) {
-        player.x = nextX;
-      }
-      if (!checkWallCollision(player.x, nextY, player.radius, currentWalls)) {
-        player.y = nextY;
-      }
-
-      // Button checks for Player
-      player.onButtonA = isInsideCircle(player.x, player.y, lvl.buttonA.x, lvl.buttonA.y, lvl.buttonA.r);
-      player.onButtonB = isInsideCircle(player.x, player.y, lvl.buttonB.x, lvl.buttonB.y, lvl.buttonB.r);
-
-      // Phase 1: Record player history
-      if (currentPhase === 1) {
-        recordedFrames.push({
-          time: timeElapsed,
-          x: player.x,
-          y: player.y,
-          onBtnA: player.onButtonA
+      // Ambient Wind Dust particles
+      if (lvl.windTunnels.length > 0 && Math.random() < 0.35) {
+        windParticles.push({
+          x: CANVAS_WIDTH - 20,
+          y: FLOOR_Y - Math.random() * 80,
+          vx: -220 - Math.random() * 120,
+          life: 1.0,
+          decay: 0.9,
+          size: 1.5 + Math.random() * 2
         });
       }
 
-      // Phase 2: Replay Echo & Check Collisions
-      if (currentPhase === 2) {
-        // Interpolate Echo from recorded frames
-        const frameIdx = recordedFrames.findIndex(f => f.time >= timeElapsed);
-        if (frameIdx !== -1) {
-          const targetFrame = recordedFrames[frameIdx];
-          echo.x = targetFrame.x;
-          echo.y = targetFrame.y;
-          echo.onButtonA = targetFrame.onBtnA;
-        } else if (recordedFrames.length > 0) {
-          const lastFrame = recordedFrames[recordedFrames.length - 1];
-          echo.x = lastFrame.x;
-          echo.y = lastFrame.y;
-          echo.onButtonA = lastFrame.onBtnA;
-        }
-
-        // 1. CRITICAL EGO RULE: PARADOX COLLISION
-        const dx = player.x - echo.x;
-        const dy = player.y - echo.y;
-        const distSq = dx * dx + dy * dy;
-        const minDist = (player.radius + echo.radius) * 0.95;
-
-        if (distSq < minDist * minDist) {
-          const timeSec = timeElapsed.toFixed(1);
-          triggerParadox(
-            "Temporal Paradox: Self Collision",
-            `You died because of where your past self walked at ${timeSec}s. Look at your ghost's trajectory—you gave yourself no room.`,
-            (player.x + echo.x) / 2,
-            (player.y + echo.y) / 2
-          );
-          return;
-        }
-
-        // 2. Dual Sync Check: Echo on A AND Player on B
-        if (echo.onButtonA && player.onButtonB) {
-          if (!doorUnlocked) {
-            doorUnlocked = true;
-            sound.playDoorOpen();
-            instructionPillEl.innerHTML = `<span class="text-emerald-400 font-bold">DOOR UNLOCKED!</span> Escape through the top gate!`;
-            spawnSparks(lvl.exitDoor.x + lvl.exitDoor.w / 2, lvl.exitDoor.y + lvl.exitDoor.h / 2, '#10b981', 30);
-          }
-        } else {
-          if (doorUnlocked) {
-            doorUnlocked = false; // Must be simultaneously pressed
-          }
-        }
-
-        // 3. Escape Check: Player enters exit door
-        if (doorUnlocked) {
-          const d = lvl.exitDoor;
-          if (player.x >= d.x && player.x <= d.x + d.w && player.y <= d.y + d.h + 10) {
-            triggerWin();
-          }
-        }
-      }
-
-      // Update particles
-      particles.forEach(p => {
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.life -= p.decay * dt;
+      windParticles.forEach(wp => {
+        wp.x += wp.vx * dt;
+        wp.life -= wp.decay * dt;
       });
-      particles = particles.filter(p => p.life > 0);
+      windParticles = windParticles.filter(wp => wp.life > 0 && wp.x > 0);
     }
-  </script>
 
-  <script>
-    function drawGrid() {
-      ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
-      ctx.lineWidth = 1;
-      const gridSize = 35;
-      for (let x = 0; x < CANVAS_WIDTH; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, CANVAS_HEIGHT);
-        ctx.stroke();
-      }
-      for (let y = 0; y < CANVAS_HEIGHT; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(CANVAS_WIDTH, y);
-        ctx.stroke();
+    function updateStaminaUI() {
+      staminaBarEl.style.width = `${stamina}%`;
+      staminaPercentageEl.textContent = `${stamina.toFixed(1)}%`;
+
+      if (stamina > 55) {
+        staminaBarEl.className = "h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-75 ease-out";
+        staminaPercentageEl.className = "text-cyan-400 font-bold text-sm";
+        staminaIconEl.className = "text-cyan-400";
+      } else if (stamina > 25) {
+        staminaBarEl.className = "h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all duration-75 ease-out";
+        staminaPercentageEl.className = "text-amber-400 font-bold text-sm";
+        staminaIconEl.className = "text-amber-400";
+      } else {
+        staminaBarEl.className = "h-full bg-gradient-to-r from-red-600 via-rose-500 to-red-400 rounded-full transition-all duration-75 ease-out";
+        staminaPercentageEl.className = "text-red-400 font-bold text-sm animate-pulse";
+        staminaIconEl.className = "text-red-400 animate-bounce";
       }
     }
 
@@ -711,241 +730,261 @@
       const lvl = LEVELS[currentLevelIndex];
 
       // Subtle Background Grid
-      drawGrid();
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < CANVAS_WIDTH; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, CANVAS_HEIGHT);
+        ctx.stroke();
+      }
 
-      // Render Start Pad
-      ctx.fillStyle = 'rgba(51, 65, 85, 0.35)';
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(lvl.startPos.x, lvl.startPos.y, 25, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#64748b';
-      ctx.font = '10px JetBrains Mono';
-      ctx.textAlign = 'center';
-      ctx.fillText('START', lvl.startPos.x, lvl.startPos.y + 4);
-
-      // Render Interactive Buttons
-      // Button A (Echo Target)
-      const btnAActive = (currentPhase === 1 && player.onButtonA) || (currentPhase === 2 && echo.onButtonA);
-      ctx.fillStyle = btnAActive ? 'rgba(236, 72, 153, 0.35)' : 'rgba(236, 72, 153, 0.12)';
-      ctx.strokeStyle = btnAActive ? '#f43f5e' : '#ec4899';
-      ctx.lineWidth = btnAActive ? 3 : 2;
-      ctx.beginPath();
-      ctx.arc(lvl.buttonA.x, lvl.buttonA.y, lvl.buttonA.r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#f472b6';
-      ctx.font = 'bold 11px Orbitron';
-      ctx.fillText(lvl.buttonA.label, lvl.buttonA.x, lvl.buttonA.y - lvl.buttonA.r - 8);
-
-      // Button B (Player Target)
-      const btnBActive = player.onButtonB;
-      ctx.fillStyle = btnBActive ? 'rgba(6, 182, 212, 0.35)' : 'rgba(6, 182, 212, 0.12)';
-      ctx.strokeStyle = btnBActive ? '#22d3ee' : '#06b6d4';
-      ctx.lineWidth = btnBActive ? 3 : 2;
-      ctx.beginPath();
-      ctx.arc(lvl.buttonB.x, lvl.buttonB.y, lvl.buttonB.r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#67e8f9';
-      ctx.font = 'bold 11px Orbitron';
-      ctx.fillText(lvl.buttonB.label, lvl.buttonB.x, lvl.buttonB.y - lvl.buttonB.r - 8);
-
-      // Render Exit Gate
-      const ex = lvl.exitDoor;
-      ctx.fillStyle = doorUnlocked ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.2)';
-      ctx.strokeStyle = doorUnlocked ? '#10b981' : '#ef4444';
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(ex.x, ex.y, ex.w, ex.h);
-      ctx.fillRect(ex.x, ex.y, ex.w, ex.h);
-
-      ctx.fillStyle = doorUnlocked ? '#34d399' : '#f87171';
-      ctx.font = 'bold 11px Orbitron';
-      ctx.fillText(doorUnlocked ? '▲ EXIT OPEN ▲' : '🔒 EXIT LOCKED', ex.x + ex.w / 2, ex.y + 14);
-
-      // Render Walls
-      ctx.fillStyle = '#1e293b';
+      // Draw Floor Platform
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, FLOOR_Y, CANVAS_WIDTH, CANVAS_HEIGHT - FLOOR_Y);
       ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 2;
-      lvl.walls.forEach(w => {
-        ctx.fillRect(w.x, w.y, w.w, w.h);
-        ctx.strokeRect(w.x, w.y, w.w, w.h);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, FLOOR_Y);
+      ctx.lineTo(CANVAS_WIDTH, FLOOR_Y);
+      ctx.stroke();
+
+      // Render Safe Zones / Recovery Alcoves
+      lvl.safeZones.forEach(zone => {
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.12)';
+        ctx.fillRect(zone.x, FLOOR_Y - 80, zone.w, 80);
+
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(zone.x, FLOOR_Y - 80, zone.w, 80);
+
+        ctx.fillStyle = '#22d3ee';
+        ctx.font = 'bold 9px Chakra Petch';
+        ctx.textAlign = 'center';
+        ctx.fillText(zone.label, zone.x + zone.w / 2, FLOOR_Y - 85);
+        ctx.fillText('REST ZONE', zone.x + zone.w / 2, FLOOR_Y - 6);
       });
 
-      // Render Recorded Past Ghost Trail (Phase 2 or Freeze)
-      if (recordedFrames.length > 1) {
-        ctx.strokeStyle = 'rgba(236, 72, 153, 0.25)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        for (let i = 0; i < recordedFrames.length; i++) {
-          const pt = recordedFrames[i];
-          if (i === 0) ctx.moveTo(pt.x, pt.y);
-          else ctx.lineTo(pt.x, pt.y);
-        }
-        ctx.stroke();
+      // Render Wind Tunnels
+      lvl.windTunnels.forEach(wt => {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+        ctx.fillRect(wt.x, 60, wt.w, FLOOR_Y - 60);
+
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+        ctx.setLineDash([4, 6]);
+        ctx.strokeRect(wt.x, 60, wt.w, FLOOR_Y - 60);
         ctx.setLineDash([]);
-      }
 
-      // Render Echo Ghost (Phase 2)
-      if (currentPhase === 2 && echo.active) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(217, 70, 239, 0.35)';
-        ctx.strokeStyle = '#f0abfc';
-        ctx.lineWidth = 2;
-        ctx.shadowColor = '#d946ef';
-        ctx.shadowBlur = 12;
-
-        ctx.beginPath();
-        ctx.arc(echo.x, echo.y, echo.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // Echo Core Icon
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '10px Chakra Petch';
         ctx.textAlign = 'center';
-        ctx.fillText('PAST', echo.x, echo.y + 3);
+        ctx.fillText('◄ HEADWIND GUST', wt.x + wt.w / 2, 85);
+      });
+
+      // Wind dust particles
+      windParticles.forEach(wp => {
+        ctx.fillStyle = 'rgba(125, 211, 252, 0.6)';
+        ctx.fillRect(wp.x, wp.y, wp.size * 3, wp.size);
+      });
+
+      // Render Chalk Outlines (Ghosts of Previous Deaths)
+      const ghosts = chalkGhosts[currentLevelIndex];
+      ghosts.forEach((ghost, idx) => {
+        ctx.save();
+        ctx.strokeStyle = ghost.reason === 'LASER' ? 'rgba(239, 68, 68, 0.45)' : 'rgba(148, 163, 184, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.strokeRect(ghost.x, ghost.y, PLAYER_SIZE, PLAYER_SIZE);
+
+        ctx.fillStyle = ghost.reason === 'LASER' ? 'rgba(239, 68, 68, 0.6)' : 'rgba(148, 163, 184, 0.6)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(`💀 FAIL #${idx + 1}`, ghost.x + PLAYER_SIZE / 2, ghost.y - 4);
         ctx.restore();
-      }
+      });
 
-      // Render Current Player
+      // Render Greed Relics
+      lvl.relics.forEach(relic => {
+        if (!relic.collected) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(251, 191, 36, 0.25)';
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(relic.x, relic.y, relic.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = 'bold 13px Chakra Petch';
+          ctx.textAlign = 'center';
+          ctx.fillText('★', relic.x, relic.y + 4);
+
+          ctx.font = '9px Chakra Petch';
+          ctx.fillText('BAIT', relic.x, relic.y - 18);
+          ctx.restore();
+        }
+      });
+
+      // Render Exit Portal
+      const door = lvl.exitDoor;
       ctx.save();
-      ctx.fillStyle = '#06b6d4';
-      ctx.strokeStyle = '#a5f3fc';
-      ctx.lineWidth = 2.5;
-      ctx.shadowColor = '#06b6d4';
-      ctx.shadowBlur = 14;
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#10b981';
+      ctx.shadowBlur = 12;
+      ctx.fillRect(door.x, door.y, door.w, door.h);
+      ctx.strokeRect(door.x, door.y, door.w, door.h);
 
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#083344';
-      ctx.font = 'bold 10px JetBrains Mono';
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 11px Chakra Petch';
       ctx.textAlign = 'center';
-      ctx.fillText(currentPhase === 1 ? 'P1' : 'NOW', player.x, player.y + 3);
+      ctx.fillText('EXIT', door.x + door.w / 2, door.y + 35);
       ctx.restore();
 
-      // Render Paradox Freeze Lightning
-      if (paradoxFreezePoint) {
-        ctx.save();
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(paradoxFreezePoint.x, paradoxFreezePoint.y, 35, 0, Math.PI * 2);
-        ctx.stroke();
+      // Render Timed Lasers
+      lvl.lasers.forEach(laser => {
+        const cycleTime = (timeAlive + laser.offset) % laser.period;
+        const isActive = cycleTime < laser.onTime;
+        const chargePhase = cycleTime / laser.period;
 
-        ctx.fillStyle = '#f87171';
-        ctx.font = 'bold 12px Orbitron';
-        ctx.fillText('COLLISION CRASH', paradoxFreezePoint.x, paradoxFreezePoint.y - 42);
+        if (isActive) {
+          // Full lethal beam
+          ctx.save();
+          ctx.fillStyle = '#ef4444';
+          ctx.strokeStyle = '#fca5a5';
+          ctx.lineWidth = 1;
+          ctx.shadowColor = '#ef4444';
+          ctx.shadowBlur = 14;
+          ctx.fillRect(laser.x, 30, laser.w, FLOOR_Y - 30);
+          ctx.strokeRect(laser.x, 30, laser.w, FLOOR_Y - 30);
+          ctx.restore();
+        } else {
+          // Warning indicator beam
+          ctx.save();
+          ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+          ctx.fillRect(laser.x + 2, 30, laser.w - 4, FLOOR_Y - 30);
+
+          // Emitter light
+          ctx.fillStyle = chargePhase > 0.75 ? '#ef4444' : '#64748b';
+          ctx.beginPath();
+          ctx.arc(laser.x + laser.w / 2, 28, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+
+      // Render Live Player
+      if (!isGameOver) {
+        ctx.save();
+        ctx.fillStyle = player.inSafeZone ? '#10b981' : (stamina < 25 ? '#ef4444' : '#06b6d4');
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = player.inSafeZone ? '#10b981' : '#06b6d4';
+        ctx.shadowBlur = 12;
+
+        ctx.fillRect(player.x, player.y, player.size, player.size);
+        ctx.strokeRect(player.x, player.y, player.size, player.size);
+
+        // Core eye/visor
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(player.x + (keys.right ? 14 : (keys.left ? 3 : 8)), player.y + 6, 7, 5);
         ctx.restore();
       }
 
       // Render Particles
       particles.forEach(p => {
+        ctx.save();
         ctx.fillStyle = p.color;
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       });
       ctx.globalAlpha = 1.0;
     }
   </script>
 
+  <!-- Input Handlers & Animation Loop -->
   <script>
-    // Keyboard Event Handling
+    // Keyboard Input
     window.addEventListener('keydown', (e) => {
       sound.init();
 
-      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = true;
-      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
-
-      // Commit Phase 1 or Restart Hotkeys
-      if (e.code === 'Space') {
-        e.preventDefault();
-        if (currentPhase === 1) commitPhase1();
-      }
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
 
       if (e.key === 'r' || e.key === 'R') {
-        setupLevel(currentLevelIndex);
+        loadLevel(currentLevelIndex);
+      }
+
+      if (e.code === 'Space' && isGameOver) {
+        e.preventDefault();
+        loadLevel(currentLevelIndex);
       }
 
       if (e.key === 'Enter' && isLevelWon) {
-        advanceToNextLevel();
+        advanceSector();
       }
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = false;
-      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = false;
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
     });
 
     // Touch Controls
-    function bindTouchButton(elId, keyProp) {
-      const btn = document.getElementById(elId);
+    function bindTouch(btnId, keyProp) {
+      const btn = document.getElementById(btnId);
       if (!btn) return;
-      const startHandler = (e) => {
+      const start = (e) => {
         e.preventDefault();
         sound.init();
         keys[keyProp] = true;
       };
-      const endHandler = (e) => {
+      const end = (e) => {
         e.preventDefault();
         keys[keyProp] = false;
       };
-      btn.addEventListener('touchstart', startHandler);
-      btn.addEventListener('touchend', endHandler);
-      btn.addEventListener('mousedown', startHandler);
-      btn.addEventListener('mouseup', endHandler);
+      btn.addEventListener('touchstart', start);
+      btn.addEventListener('touchend', end);
+      btn.addEventListener('mousedown', start);
+      btn.addEventListener('mouseup', end);
     }
 
-    bindTouchButton('btn-up', 'up');
-    bindTouchButton('btn-down', 'down');
-    bindTouchButton('btn-left', 'left');
-    bindTouchButton('btn-right', 'right');
+    bindTouch('btn-touch-left', 'left');
+    bindTouch('btn-touch-right', 'right');
 
-    const btnTouchAction = document.getElementById('btn-touch-action');
-    if (btnTouchAction) {
-      btnTouchAction.addEventListener('click', () => {
-        sound.init();
-        if (currentPhase === 1) commitPhase1();
-      });
+    const touchRestart = document.getElementById('btn-touch-restart');
+    if (touchRestart) {
+      touchRestart.addEventListener('click', () => loadLevel(currentLevelIndex));
     }
 
-    // Modal & HUD Buttons
-    btnQuickRestart.addEventListener('click', () => setupLevel(currentLevelIndex));
-    document.getElementById('btn-reset').addEventListener('click', () => setupLevel(currentLevelIndex));
+    // Modal buttons
+    btnQuickRestart.addEventListener('click', () => loadLevel(currentLevelIndex));
+    btnRestart.addEventListener('click', () => loadLevel(currentLevelIndex));
 
-    function advanceToNextLevel() {
+    function advanceSector() {
       if (currentLevelIndex < LEVELS.length - 1) {
-        setupLevel(currentLevelIndex + 1);
+        loadLevel(currentLevelIndex + 1);
       } else {
-        setupLevel(0); // Loop back
+        loadLevel(0); // Cycle back
       }
     }
 
-    btnNextLevel.addEventListener('click', advanceToNextLevel);
+    btnNextLevel.addEventListener('click', advanceSector);
 
+    // Audio toggle
     btnAudio.addEventListener('click', () => {
       sound.init();
       sound.muted = !sound.muted;
       audioIcon.textContent = sound.muted ? '🔇' : '🔊';
     });
 
-    // Main Game Animation Loop
+    // Main animation loop
     let lastTime = performance.now();
-
     function gameLoop(now) {
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
@@ -956,9 +995,9 @@
       requestAnimationFrame(gameLoop);
     }
 
-    // Start on load
+    // Initialize immediately on load
     window.addEventListener('load', () => {
-      setupLevel(0);
+      loadLevel(0);
       requestAnimationFrame(gameLoop);
     });
   </script>
