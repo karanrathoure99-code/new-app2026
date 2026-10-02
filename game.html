@@ -392,8 +392,8 @@
         let platforms = [];
         let coins = [];
         
-        // Gate ko bada aur saaf banaya gaya hai
-        let goal = { x: 0, y: 0, w: 42, h: 56 };
+        // Gate Dimensions
+        let goal = { x: 0, y: 0, w: 38, h: 54 };
 
         function updateGameLayout() {
             score = 0;
@@ -493,8 +493,8 @@
             }
 
             goal.y = surfaceTop - goal.h;
-            // Gate ko thoda andar rakha gaya hai taaki border ke andar clear aur proper dikhe
-            goal.x = canvasWidth - goal.w - 12;
+            // Box ke andar acche se set position
+            goal.x = canvasWidth - goal.w - 14;
         }
 
         function goToPrevLevel() {
@@ -814,8 +814,8 @@
 
             player.x += player.vx;
 
-            // Player gate ke aage ya bahar nahi ja sakta (Solid Wall check)
-            let maxRightLimit = goal.x + goal.w - player.width;
+            // Player gate ke aage ya paar nahi nikal sakta
+            let maxRightLimit = goal.x + goal.w - player.width - 2;
             if (player.x < 0) player.x = 0;
             if (player.x > maxRightLimit) player.x = maxRightLimit;
 
@@ -852,20 +852,17 @@
 
             checkCoins();
 
-            // Gate Collision & Win check
             let playerCenter = player.x + player.width / 2;
             let touchesGate = (player.x + player.width >= goal.x && player.x <= goal.x + goal.w);
 
             if (touchesGate && player.y + player.height >= goal.y) {
                 if (!isDoorOpen) {
-                    // Agar door lock hai toh player ko gate ke bahar rok do
                     player.x = goal.x - player.width - 1; 
                     if (Math.random() < 0.05) { 
                         floatingTexts.push({ text: 'LOCKED!', x: player.x - 10, y: player.y - 10, alpha: 1, vy: -0.5 });
                     }
                 } 
                 else if (playerCenter >= goal.x + 8 && !levelWon) {
-                    // Gate open hai aur player gate ke andar enter hua -> Win
                     levelWon = true;
                     playSound('win');
                     
@@ -953,97 +950,131 @@
                 }
             });
 
-            // =======================================================
-            // 🚪 CLEAR, HIGH VISIBILITY GATE (INSIDE ARENA BOX)
-            // =======================================================
-            let doorX = goal.x;
-            let doorY = goal.y;
-            let doorW = goal.w;
-            let doorH = goal.h;
+            // ==============================================================
+            // 🚪 THEMED SCI-FI PORTAL GATE (DARK AMBER & GOLD METALLIC)
+            // ==============================================================
+            let gx = goal.x;
+            let gy = goal.y;
+            let gw = goal.w;
+            let gh = goal.h;
 
             if (isDoorOpen) {
-                // Neon glow background
-                ctx.fillStyle = 'rgba(0, 255, 170, 0.25)';
-                ctx.fillRect(doorX - 5, doorY - 5, doorW + 10, doorH + 10);
+                // 1. Soft Amber/Golden Energy Aura
+                let auraGrad = ctx.createRadialGradient(gx + gw/2, gy + gh/2, 5, gx + gw/2, gy + gh/2, gw);
+                auraGrad.addColorStop(0, 'rgba(255, 170, 0, 0.45)');
+                auraGrad.addColorStop(0.7, 'rgba(212, 163, 115, 0.2)');
+                auraGrad.addColorStop(1, 'transparent');
+                ctx.fillStyle = auraGrad;
+                ctx.fillRect(gx - 8, gy - 8, gw + 16, gh + 14);
 
-                // Door Portal Body
-                let openGrad = ctx.createLinearGradient(doorX, doorY, doorX + doorW, doorY);
-                openGrad.addColorStop(0, '#00e676');
-                openGrad.addColorStop(1, '#004d40');
-                ctx.fillStyle = openGrad;
-                ctx.fillRect(doorX, doorY, doorW, doorH);
+                // 2. Portal Void (Deep Dark Bronze-Gold Interior)
+                let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
+                portalGrad.addColorStop(0, '#2b180a');
+                portalGrad.addColorStop(0.5, '#4a2800');
+                portalGrad.addColorStop(1, '#ffaa00');
+                ctx.fillStyle = portalGrad;
+                ctx.fillRect(gx, gy, gw, gh);
 
-                // Door Arch / Pillars inside
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(doorX + 5, doorY + 5, doorW - 10, doorH - 5);
-
-                // Portal Arrow
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 3;
+                // 3. Inner Energy Rings
+                ctx.strokeStyle = 'rgba(255, 230, 160, 0.6)';
+                ctx.lineWidth = 1.5;
                 ctx.beginPath();
-                ctx.moveTo(doorX + 12, doorY + doorH/2 - 8);
-                ctx.lineTo(doorX + doorW - 14, doorY + doorH/2);
-                ctx.lineTo(doorX + 12, doorY + doorH/2 + 8);
+                ctx.ellipse(gx + gw/2, gy + gh/2, gw/3.2, gh/3, 0, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // High Contrast Border
-                ctx.strokeStyle = '#00ffcc';
-                ctx.lineWidth = 3.5;
-                ctx.strokeRect(doorX, doorY, doorW, doorH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(gx + 10, gy + gh/2);
+                ctx.lineTo(gx + gw - 12, gy + gh/2);
+                ctx.moveTo(gx + gw - 18, gy + gh/2 - 6);
+                ctx.lineTo(gx + gw - 12, gy + gh/2);
+                ctx.lineTo(gx + gw - 18, gy + gh/2 + 6);
+                ctx.stroke();
 
-                // Text Indicator
+                // 4. Heavy Bronze-Gold Framed Arch
+                ctx.strokeStyle = '#d4a373';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(gx, gy, gw, gh);
+
+                // Corner Tech Braces
+                ctx.strokeStyle = '#ffcc00';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(gx - 1, gy - 1, 6, 6);
+                ctx.strokeRect(gx + gw - 5, gy - 1, 6, 6);
+                ctx.strokeRect(gx - 1, gy + gh - 5, 6, 6);
+                ctx.strokeRect(gx + gw - 5, gy + gh - 5, 6, 6);
+
+                // 5. HUD Themed Status Text
                 ctx.font = '900 10px Orbitron, sans-serif';
-                ctx.fillStyle = '#00ffcc';
-                ctx.fillText('OPEN', doorX + 4, doorY - 7);
+                ctx.fillStyle = '#ffcc00';
+                ctx.fillText('ENTER', gx + 1, gy - 7);
             } else {
-                // Red Glow
-                ctx.fillStyle = 'rgba(255, 23, 68, 0.3)';
-                ctx.fillRect(doorX - 5, doorY - 5, doorW + 10, doorH + 10);
+                // 1. Deep Burnt Red-Amber Ambient Warning
+                let warnGrad = ctx.createRadialGradient(gx + gw/2, gy + gh/2, 5, gx + gw/2, gy + gh/2, gw);
+                warnGrad.addColorStop(0, 'rgba(180, 50, 10, 0.35)');
+                warnGrad.addColorStop(1, 'transparent');
+                ctx.fillStyle = warnGrad;
+                ctx.fillRect(gx - 6, gy - 6, gw + 12, gh + 12);
 
-                // Door Locked Body
-                let lockGrad = ctx.createLinearGradient(doorX, doorY, doorX + doorW, doorY);
-                lockGrad.addColorStop(0, '#d50000');
-                lockGrad.addColorStop(1, '#3b0000');
-                ctx.fillStyle = lockGrad;
-                ctx.fillRect(doorX, doorY, doorW, doorH);
+                // 2. Heavy Blast Door Metal Plate (Dark Wood-Metal Theme)
+                let metalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy);
+                metalGrad.addColorStop(0, '#1a0e05');
+                metalGrad.addColorStop(0.5, '#2e190b');
+                metalGrad.addColorStop(1, '#150b04');
+                ctx.fillStyle = metalGrad;
+                ctx.fillRect(gx, gy, gw, gh);
 
-                // Metal Grille / Cross Security Bars
-                ctx.strokeStyle = '#ff80ab';
+                // 3. Reinforced Crossed Metal Beams (Theme Amber Colored)
+                ctx.strokeStyle = 'rgba(140, 88, 48, 0.7)';
                 ctx.lineWidth = 2.5;
                 ctx.beginPath();
-                ctx.moveTo(doorX + 4, doorY + 4);
-                ctx.lineTo(doorX + doorW - 4, doorY + doorH - 4);
-                ctx.moveTo(doorX + doorW - 4, doorY + 4);
-                ctx.lineTo(doorX + 4, doorY + doorH - 4);
+                ctx.moveTo(gx + 3, gy + 3);
+                ctx.lineTo(gx + gw - 3, gy + gh - 3);
+                ctx.moveTo(gx + gw - 3, gy + 3);
+                ctx.lineTo(gx + 3, gy + gh - 3);
                 ctx.stroke();
 
-                // Padlock Center
-                let lX = doorX + doorW / 2 - 6;
-                let lY = doorY + doorH / 2 - 4;
+                // Horizontal Security Clamp
+                ctx.fillStyle = '#3a200e';
+                ctx.fillRect(gx + 4, gy + gh/2 - 7, gw - 8, 14);
+                ctx.strokeStyle = '#8c5830';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(gx + 4, gy + gh/2 - 7, gw - 8, 14);
+
+                // 4. Center Golden Lock Icon
+                let lx = gx + gw/2 - 5;
+                let ly = gy + gh/2 - 4;
                 
                 // Shackle
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#d4a373';
+                ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.arc(lX + 6, lY - 2, 5, Math.PI, 0);
+                ctx.arc(lx + 5, ly - 2, 4, Math.PI, 0);
                 ctx.stroke();
 
-                // Body
-                ctx.fillStyle = '#ffeb3b';
-                ctx.fillRect(lX, lY, 12, 10);
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(lX + 4.5, lY + 3, 3, 4);
+                // Core Lock Body
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(lx, ly, 10, 8);
+                ctx.fillStyle = '#1f1208';
+                ctx.fillRect(lx + 3.5, ly + 2.5, 3, 3);
 
-                // High Contrast Border
-                ctx.strokeStyle = '#ff1744';
-                ctx.lineWidth = 3.5;
-                ctx.strokeRect(doorX, doorY, doorW, doorH);
+                // 5. Outer Armor Frame
+                ctx.strokeStyle = '#8c5830';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(gx, gy, gw, gh);
 
-                // Text Indicator
+                // Rivets / Bolts
+                ctx.fillStyle = '#d4a373';
+                ctx.fillRect(gx + 2, gy + 2, 2.5, 2.5);
+                ctx.fillRect(gx + gw - 4.5, gy + 2, 2.5, 2.5);
+                ctx.fillRect(gx + 2, gy + gh - 4.5, 2.5, 2.5);
+                ctx.fillRect(gx + gw - 4.5, gy + gh - 4.5, 2.5, 2.5);
+
+                // Status text
                 ctx.font = '900 10px Orbitron, sans-serif';
-                ctx.fillStyle = '#ff1744';
-                ctx.fillText('LOCK', doorX + 5, doorY - 7);
+                ctx.fillStyle = '#d4a373';
+                ctx.fillText('LOCKED', gx - 3, gy - 7);
             }
 
             particles.forEach(p => {
