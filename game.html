@@ -375,7 +375,7 @@
         let particles = [];
         let floatingTexts = [];
 
-        // ⚡ PLAYER STATS UPDATED: Speed badha di (4.2), jump 30% kam (-6.6)
+        // ⚡ PLAYER STATS UPDATED: Sirf speed ko 2.8 kiya gaya hai
         let player = {
             x: 40,
             y: 100,
@@ -383,7 +383,7 @@
             height: 40.5,    
             vx: 0,
             vy: 0,
-            speed: 4.2,        
+            speed: 2.8,        
             jumpForce: -6.6,  
             gravity: 0.38,    
             isGrounded: false,
@@ -503,7 +503,7 @@
                 updateGameLayout();
             } else {
                 const modal = document.getElementById('notificationModal');
-                modal.innerText = "⚠️️ Yeh pehla level hai!";
+                modal.innerText = "⚠ Yeh pehla level hai!";
                 modal.classList.add('show');
                 setTimeout(() => modal.classList.remove('show'), 1500);
             }
@@ -604,7 +604,6 @@
         bindButton('rightBtnM', () => keys.right = true, () => keys.right = false);
         bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
 
-        // ⚡ Jump Force updated: -9.4 se 30% kam karke -6.6 kar diya gaya
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
                 let activeJumpForce = -6.6; 
