@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🎮 YEH "game.html" (REDIRECT BUG FIXED) HAI 🎮            -->
+<!-- 🎮 YEH "game.html" (REDIRECT ERROR 100% FIXED) HAI 🎮     -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +33,6 @@
             position: relative;
         }
 
-        /* Glowing Ambient Orbs */
         .orb {
             position: absolute;
             border-radius: 50%;
@@ -60,7 +59,6 @@
             100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
         }
 
-        /* Centered Game Screen Wrapper */
         .game-wrapper {
             width: 1280px;
             height: 720px;
@@ -75,7 +73,6 @@
             box-sizing: border-box;
         }
 
-        /* Glassmorphism HUD */
         .game-hud {
             display: flex;
             justify-content: space-between;
@@ -143,7 +140,6 @@
             padding-bottom: 8px;
         }
 
-        /* Cyber Background Grid */
         .distractor-bg {
             position: absolute;
             inset: 0;
@@ -199,7 +195,6 @@
             align-items: center;
         }
 
-        /* Neon Glass Controls */
         .ctrl-btn {
             background: rgba(20, 20, 35, 0.6);
             backdrop-filter: blur(10px);
@@ -395,13 +390,13 @@
         }
 
         // ==========================================
-        // 💾 AUTO-RESUME HIGHEST UNLOCKED LEVEL (FIXED)
+        // 💾 AUTO-RESUME HIGHEST UNLOCKED LEVEL (FIXED TO game2.html)
         // ==========================================
         let savedMaxLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
         
-        // 🛠️ FIX 1: game20.html ko badal kar game2.html kar diya gaya hai
+        // FIX 1: Corrected to ./game2.html
         if (savedMaxLevel >= 6) {
-            window.location.replace("game2.html");
+            window.location.replace("./game2.html");
         }
 
         let currentLevel = savedMaxLevel;
@@ -418,7 +413,6 @@
         let particles = [];
         let floatingTexts = [];
 
-        // 🏃 PLAYER STATS
         let player = {
             x: 40,
             y: 100,
@@ -956,12 +950,12 @@
                             updateGameLayout();
                         }, 2000);
                     } else {
-                        // 🛠️ FIX 2: Level 5 pass hone par game2.html par le jayega
+                        // FIX 2: Corrected to ./game2.html
                         localStorage.setItem('saveLevel_TumseNaHoPayga', 6);
                         modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game2.html...";
                         modal.classList.add('show');
                         setTimeout(() => {
-                            window.location.href = "game2.html"; 
+                            window.location.href = "./game2.html"; 
                         }, 2000);
                     }
                 }
@@ -991,7 +985,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Platforms
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return; 
                 ctx.fillStyle = '#0c0d18';
@@ -1008,7 +1001,6 @@
                 ctx.shadowBlur = 0; 
             });
 
-            // Coins
             coins.forEach((c) => {
                 if (!c.collected) {
                     c.floatOffset += 0.08;
@@ -1033,7 +1025,6 @@
                 }
             });
 
-            // 🚪 90%+ VISIBLE SCI-FI PORTAL GATE
             let gx = goal.x;
             let gy = goal.y;
             let gw = goal.w;
@@ -1089,7 +1080,6 @@
                 ctx.fillRect(gx + gw / 2 - 3, gy + gh / 2 - 4, 6, 8);
             }
 
-            // Particles
             particles.forEach(p => {
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
@@ -1097,7 +1087,6 @@
                 ctx.fill();
             });
 
-            // Floating Numbers/Texts
             floatingTexts.forEach(ft => {
                 ctx.save();
                 ctx.globalAlpha = ft.alpha;
@@ -1109,7 +1098,6 @@
                 ctx.restore();
             });
 
-            // ✨ NEW REASSEMBLY RENDERING
             if (isExploding || isRebuilding) {
                 fragments.forEach(f => {
                     ctx.save();
@@ -1199,12 +1187,10 @@
                 ctx.fillStyle = '#ff007f';
                 ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
 
-                // Arms
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX - 3.5, py + 12 + jumpStretch, 2.2, 10);  
                 ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12 + jumpStretch, 2.2, 10); 
 
-                // Legs
                 let legHeight = player.height === 24.3 ? 7 : 12;
                 ctx.fillStyle = '#00f0ff';
                 ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
