@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🤪 YEH "game2.html" (PAGAL TROLL GAME LEVELS 6-15) HAI 🤪 -->
+<!-- 🤪 YEH "game2.html" (HARD TROLL TRAPS + 5 COINS PUZZLE) HAI 🤪 -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +33,6 @@
             position: relative;
         }
 
-        /* Glowing Background Orbs (Exact game.html theme) */
         .orb {
             position: absolute;
             border-radius: 50%;
@@ -304,7 +303,7 @@
         <div class="game-hud">
             <div class="hud-title" id="levelTitle">☠️ TROLL CHAPTER: LVL 6 ☠️</div>
             <div class="hud-stats">
-                <span id="scoreDisplay">COINS: 0/4</span>
+                <span id="scoreDisplay">COINS: 0/5</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
             </div>
             <div class="hud-right-group">
@@ -367,13 +366,11 @@
         function resizeCanvas() {
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
-
             const scaleX = screenW / 1280;
             const scaleY = screenH / 720;
             const scale = Math.min(scaleX, scaleY) * 0.98;
 
             document.documentElement.style.setProperty('--scale-factor', scale);
-
             canvasWidth = 1280;
             canvasHeight = 410;
 
@@ -388,16 +385,21 @@
             updateGameLayout();
         }
 
-        // ==========================================
-        // 💾 HIGHEST LEVEL SAVED (6-15)
-        // ==========================================
+        // URL se level check karo
+        const urlParams = new URLSearchParams(window.location.search);
+        let requestedLvl = parseInt(urlParams.get('level'));
+
         let savedMaxLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 6;
         if (savedMaxLevel < 6) savedMaxLevel = 6;
         if (savedMaxLevel > 15) savedMaxLevel = 15;
 
-        let currentLevel = savedMaxLevel;
+        let currentLevel = requestedLvl || savedMaxLevel;
+        if (currentLevel < 6) currentLevel = 6;
+        if (currentLevel > 15) currentLevel = 15;
+
         let isDoorOpen = false;
         let score = 0;
+        const TARGET_COINS = 5; // Har level me 5 coins zaroori hai door kholne ke liye!
         let shieldActive = false;
         let isExploding = false;
         let isRebuilding = false;
@@ -407,10 +409,11 @@
         let particles = [];
         let floatingTexts = [];
 
-        // Troll Traps
-        let trollTraps = [];
-        let invisibleBlocks = [];
-        let movingGate = false;
+        // Traps & Secret Puzzle Elements
+        let surfaceSpikes = [];       // Main floor timing kante (Levels 6, 12, 14)
+        let hiddenPlatformSpikes = []; // 2nd surface hidden kante (Levels 7, 8, 9, 10, 11, 13, 15)
+        let secretBlocks = [];        // Secret lucky boxes jo 5th missing coin nikalenge
+        let globalTick = 0;
 
         let player = {
             x: 40,
@@ -431,136 +434,141 @@
         let goal = { x: 0, y: 0, w: 38, h: 52 };
 
         const trollTaunts = [
-            "Hahaha! Kaha ja rahe the bhai? 🤡",
-            "Aukaat se bahar hai ye level! 📉",
-            "Aankhein band karke khelte ho kya? 🙈",
-            "Tutorial complete karke aao! 🍼",
-            "Gravity ne dhoka de diya? 💀",
-            "Overconfidence roast ho gaya! 🔥",
-            "Main character banne chale the? 🤖"
+            "Hahaha! Gate ke bahar hi latak gaye? 🚪🤡",
+            "5 Coins chahiye the, 3 leke kahan ja rahe ho? 🪙🤣",
+            "2nd Surface par pair rakhna mana tha! 📌💀",
+            "Zameen par kante dikh nahi rahe the kya? ⚡🙈",
+            "Pura andar ghuso, tabhi gate manega! 🎯🍼",
+            "Aukaat se bahar hai ye gate, wapas jao! 📉🔥"
         ];
 
-        function showTrollTaunt() {
-            let randomMsg = trollTaunts[Math.floor(Math.random() * trollTaunts.length)];
+        function showTrollTaunt(customMsg) {
+            let msg = customMsg || trollTaunts[Math.floor(Math.random() * trollTaunts.length)];
             const modal = document.getElementById('notificationModal');
-            modal.innerText = randomMsg;
+            modal.innerText = msg;
             modal.classList.add('show');
-            setTimeout(() => modal.classList.remove('show'), 1200);
+            setTimeout(() => modal.classList.remove('show'), 1500);
         }
 
         function updateGameLayout() {
             score = 0;
+            isDoorOpen = false;
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
 
             const levelNames = {
-                6: "🤡『 🚪 BHAGTA HUA GATE TRAP 』- Lvl 6",
-                7: "👻『 🕳️ INVISIBLE CEILING BRICKS 』- Lvl 7",
-                8: "🔄『 🌀 ULTI DIRECTION KA GLITCH 』- Lvl 8",
-                9: "⚡『 🪙 ZEHERILA FAKE COIN 』- Lvl 9",
-                10: "🌧️『 📌 DHOKEBAAZ FLOOR DROP 』- Lvl 10",
-                11: "🏃『 🛑 TELEPORTING GATE RUN 』- Lvl 11",
-                12: "💣『 💥 SUDDEN POPUP SPIKES 』- Lvl 12",
-                13: "🛰️『 🌪️ JUMP FORCE MINUS GLITCH 』- Lvl 13",
-                14: "☠️『 🪚 CHALTI HUI DHOKA MACHINE 』- Lvl 14",
-                15: "👑『 🤪 ULTIMATE PAGAL PANTI 』- Lvl 15"
+                6: "🚪『 FULL GATE ENTRY + TIMING KANTE 』- Lvl 6",
+                7: "📌『 2ND SURFACE HIDDEN KANTA 』- Lvl 7",
+                8: "🌀『 SECRET 5TH COIN PUZZLE 』- Lvl 8",
+                9: "☠️『 DANGEROUS CEILING & PLATFORM TRAP 』- Lvl 9",
+                10: "🕳️『 DOUBLE STEP HIDDEN SPIKES 』- Lvl 10",
+                11: "⚡『 2ND SURFACE SURPRISE KANTE 』- Lvl 11",
+                12: "⏱️『 TIMED GROUND FLOOR KANTE 』- Lvl 12",
+                13: "🛰️『 2ND SURFACE SHARP TRAPS 』- Lvl 13",
+                14: "💣『 FAST TIMING FLOOR SPIKES 』- Lvl 14",
+                15: "👑『 2ND SURFACE FINAL SPIKE GAUNTLET 』- Lvl 15"
             };
 
             document.getElementById('levelTitle').innerText = levelNames[currentLevel] || `⚡ LEVEL ${currentLevel} ⚡`;
-            document.getElementById('scoreDisplay').innerText = `COINS: ${score}/3`;
+            document.getElementById('scoreDisplay').innerText = `COINS: ${score}/${TARGET_COINS}`;
 
             platforms = [];
-            trollTraps = [];
-            invisibleBlocks = [];
-            movingGate = false;
+            surfaceSpikes = [];
+            hiddenPlatformSpikes = [];
+            secretBlocks = [];
 
-            // Ground Setup
+            // Main Base Ground
             platforms.push({ x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' });
 
-            // 🤪 TROLL LEVEL DESIGNS (DIMAG GHUMANE WALE)
-            if (currentLevel === 6) {
-                // Gate bhagega jab player paas aayega!
-                movingGate = true;
-                platforms.push({ x: 350, y: surfaceTop - 60, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 700, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
-                isDoorOpen = true; // Gate khula hai par pakad nahi paoge!
-            }
-            else if (currentLevel === 7) {
-                // Invisible Ceiling Blocks (Hawa me jump karte hi sar takrayega aur neeche giroge)
-                invisibleBlocks.push({ x: 420, y: surfaceTop - 110, w: 80, h: 20, revealed: false });
-                invisibleBlocks.push({ x: 720, y: surfaceTop - 110, w: 80, h: 20, revealed: false });
-                platforms.push({ x: 400, y: surfaceTop - 55, w: 100, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 700, y: surfaceTop - 55, w: 100, h: 16, type: 'secondSurface' });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 8) {
-                // Controls Inverted Level (Left is Right, Right is Left)
-                platforms.push({ x: 300, y: surfaceTop - 50, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 550, y: surfaceTop - 80, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 800, y: surfaceTop - 60, w: 80, h: 16, type: 'secondSurface' });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 9) {
-                // Fake Coin jo lene par blast hota hai!
-                platforms.push({ x: 450, y: surfaceTop - 65, w: 120, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 750, y: surfaceTop - 65, w: 120, h: 16, type: 'secondSurface' });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 10) {
-                // Floor Gayab Trap (Bich ka floor achanak gaayab ho jata hai)
-                trollTraps.push({ type: 'fakeFloor', x: 500, y: surfaceTop, w: 250, h: surfaceHeight, active: true });
-                platforms.push({ x: 480, y: surfaceTop - 75, w: 90, h: 16, type: 'secondSurface' });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 11) {
-                // Teleporting Gate
-                platforms.push({ x: 350, y: surfaceTop - 60, w: 100, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 680, y: surfaceTop - 60, w: 100, h: 16, type: 'secondSurface' });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 12) {
-                // Sudden Spikes (Jaise hi chaloge zameen se spike pop up hoga)
-                trollTraps.push({ type: 'popupSpike', x: 380, y: surfaceTop - 25, w: 30, h: 25, active: false, triggerX: 320 });
-                trollTraps.push({ type: 'popupSpike', x: 720, y: surfaceTop - 25, w: 30, h: 25, active: false, triggerX: 660 });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 13) {
-                // Sudden High-speed Troll Blade
-                trollTraps.push({ type: 'trollSaw', x: 1000, y: surfaceTop - 20, r: 22, vx: -8, triggerX: 400, launched: false });
-                platforms.push({ x: 500, y: surfaceTop - 70, w: 120, h: 16, type: 'secondSurface' });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 14) {
-                // Vanishing Troll Staircase
-                platforms.push({ x: 300, y: surfaceTop - 45, w: 70, h: 16, type: 'trollVanish', timer: 25, touched: false });
-                platforms.push({ x: 520, y: surfaceTop - 75, w: 70, h: 16, type: 'trollVanish', timer: 25, touched: false });
-                platforms.push({ x: 740, y: surfaceTop - 100, w: 70, h: 16, type: 'trollVanish', timer: 25, touched: false });
-                isDoorOpen = false;
-            }
-            else if (currentLevel === 15) {
-                // ULTIMATE TROLL CHAOS: Moving gate + Popup Spikes + Invisible Head Block!
-                movingGate = true;
-                invisibleBlocks.push({ x: 520, y: surfaceTop - 110, w: 80, h: 20, revealed: false });
-                trollTraps.push({ type: 'popupSpike', x: 450, y: surfaceTop - 25, w: 30, h: 25, active: false, triggerX: 380 });
-                platforms.push({ x: 500, y: surfaceTop - 60, w: 100, h: 16, type: 'secondSurface' });
-                isDoorOpen = false;
+            // 7 LEVELS (7, 8, 9, 10, 11, 13, 15) WITH 2ND SURFACE HIDDEN KANTE
+            const levelsWithHidden2ndSpikes = [7, 8, 9, 10, 11, 13, 15];
+            const hasHidden2ndSpikes = levelsWithHidden2ndSpikes.includes(currentLevel);
+
+            // BAKI LEVELS (6, 12, 14) WITH MAIN SURFACE TIMING KANTE
+            const hasTimingGroundSpikes = !hasHidden2ndSpikes;
+
+            if (hasTimingGroundSpikes) {
+                // Timing Kante on ground
+                surfaceSpikes.push({ x: 380, y: surfaceTop - 18, w: 70, h: 18, period: 120, offset: 0 });
+                surfaceSpikes.push({ x: 740, y: surfaceTop - 18, w: 70, h: 18, period: 120, offset: 60 });
             }
 
-            // Coins Setup (3 coins per level)
+            // Platforms Setup
+            if (currentLevel === 6) {
+                platforms.push({ x: 320, y: surfaceTop - 55, w: 110, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 680, y: surfaceTop - 65, w: 110, h: 16, type: 'secondSurface' });
+            } 
+            else if (currentLevel === 7) {
+                platforms.push({ x: 300, y: surfaceTop - 55, w: 100, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 650, y: surfaceTop - 65, w: 100, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 670, y: surfaceTop - 65 - 16, w: 50, h: 16, triggered: false, revealed: false });
+            }
+            else if (currentLevel === 8) {
+                platforms.push({ x: 260, y: surfaceTop - 50, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 540, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 800, y: surfaceTop - 55, w: 90, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 560, y: surfaceTop - 70 - 16, w: 45, h: 16, triggered: false, revealed: false });
+            }
+            else if (currentLevel === 9) {
+                platforms.push({ x: 350, y: surfaceTop - 65, w: 110, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 720, y: surfaceTop - 70, w: 110, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 370, y: surfaceTop - 65 - 16, w: 55, h: 16, triggered: false, revealed: false });
+            }
+            else if (currentLevel === 10) {
+                platforms.push({ x: 280, y: surfaceTop - 55, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 560, y: surfaceTop - 75, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 820, y: surfaceTop - 55, w: 90, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 840, y: surfaceTop - 55 - 16, w: 45, h: 16, triggered: false, revealed: false });
+            }
+            else if (currentLevel === 11) {
+                platforms.push({ x: 400, y: surfaceTop - 60, w: 130, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 720, y: surfaceTop - 60, w: 130, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 430, y: surfaceTop - 60 - 16, w: 60, h: 16, triggered: false, revealed: false });
+            }
+            else if (currentLevel === 12) {
+                platforms.push({ x: 330, y: surfaceTop - 55, w: 100, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 670, y: surfaceTop - 70, w: 100, h: 16, type: 'secondSurface' });
+            }
+            else if (currentLevel === 13) {
+                platforms.push({ x: 350, y: surfaceTop - 60, w: 100, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 680, y: surfaceTop - 75, w: 100, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 700, y: surfaceTop - 75 - 16, w: 50, h: 16, triggered: false, revealed: false });
+            }
+            else if (currentLevel === 14) {
+                platforms.push({ x: 320, y: surfaceTop - 50, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 600, y: surfaceTop - 75, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 850, y: surfaceTop - 60, w: 90, h: 16, type: 'secondSurface' });
+            }
+            else if (currentLevel === 15) {
+                platforms.push({ x: 350, y: surfaceTop - 60, w: 100, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 680, y: surfaceTop - 70, w: 100, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 370, y: surfaceTop - 60 - 16, w: 50, h: 16, triggered: false, revealed: false });
+                hiddenPlatformSpikes.push({ x: 700, y: surfaceTop - 70 - 16, w: 50, h: 16, triggered: false, revealed: false });
+            }
+
+            // 🎁 SECRET TROLL LUCKY BLOCKS (SAR SE HIT KARNE PAR MISSING 5TH COIN DENGE)
+            secretBlocks.push({
+                x: 520,
+                y: surfaceTop - 110,
+                w: 36,
+                h: 22,
+                hit: false,
+                rewardCoins: 2 // 3 initial coins + 2 secret coins = Total 5 coins!
+            });
+
+            // 3 INITIAL VISIBLE COINS ONLY (PLAYER SOCHEGA 5 KAISE HONGE!)
             coins = [];
             let startMargin = 220;
-            let endMargin = 240;
+            let endMargin = 260;
             let usableWidth = canvasWidth - startMargin - endMargin;
             let coinSpacing = usableWidth / 2;
 
             for (let i = 0; i < 3; i++) {
-                let isPoison = (currentLevel === 9 && i === 1); // Level 9 ka beech wala coin zeher hai!
                 coins.push({
                     x: startMargin + i * coinSpacing,
                     y: surfaceTop - 25,
                     collected: false,
                     radius: 5,
-                    isPoison: isPoison,
                     floatOffset: Math.random() * Math.PI
                 });
             }
@@ -570,6 +578,7 @@
             player.vx = 0;
             player.vy = 0;
 
+            // 90% Visible Gate Position
             goal.y = surfaceTop - goal.h;
             goal.x = canvasWidth - goal.w - 8;
         }
@@ -579,7 +588,7 @@
                 currentLevel--;
                 updateGameLayout();
             } else {
-                window.location.href = "./game.html";
+                window.location.href = "./game.html?level=5";
             }
         }
 
@@ -623,6 +632,15 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
+                } else if (type === 'secret') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
                 } else if (type === 'blast') {
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(140, now);
@@ -645,7 +663,7 @@
                     osc.frequency.setValueAtTime(554.37, now + 0.1);
                     osc.frequency.setValueAtTime(659.25, now + 0.2);
                     osc.frequency.setValueAtTime(880, now + 0.3);
-                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.setValueAtTime(0.35, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
                     osc.start(now);
                     osc.stop(now + 0.6);
@@ -798,19 +816,15 @@
             coins.forEach(c => {
                 if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
                     c.collected = true;
-
-                    if (c.isPoison) {
-                        triggerExplosion();
-                        return;
-                    }
-
                     score += 1;
                     playSound('coin');
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
 
-                    if (score >= 3) {
+                    if (score >= TARGET_COINS) {
                         isDoorOpen = true;
-                        floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
+                        floatingTexts.push({ text: 'GATE UNLOCKED! 🚪⚡', x: player.x - 40, y: player.y - 25, alpha: 1, vy: -1 });
+                    } else {
+                        floatingTexts.push({ text: `NEED ${TARGET_COINS - score} MORE!`, x: player.x - 30, y: player.y - 20, alpha: 1, vy: -0.7 });
                     }
                 }
             });
@@ -820,6 +834,7 @@
 
         function update() {
             let timeFactor = isSlowMo ? 0.25 : 1.0;
+            globalTick++;
 
             if (isExploding) {
                 fragments.forEach(f => {
@@ -840,14 +855,10 @@
 
             if (respawnAuraTimer > 0) respawnAuraTimer--;
 
-            // 🌀 Level 8: Inverted Controls Glitch
-            let leftPressed = (currentLevel === 8) ? keys.right : keys.left;
-            let rightPressed = (currentLevel === 8) ? keys.left : keys.right;
-
-            if (leftPressed) {
+            if (keys.left) {
                 player.vx = -player.speed;
                 player.animTimer += 0.18;
-            } else if (rightPressed) {
+            } else if (keys.right) {
                 player.vx = player.speed;
                 player.animTimer += 0.18;
             } else {
@@ -867,22 +878,8 @@
 
             player.isGrounded = false;
 
-            // 🏃 Moving Gate Troll Update
-            if (movingGate) {
-                if (Math.abs(player.x - goal.x) < 180 && goal.x > 300) {
-                    goal.x -= 2.5; // Gate bhaagta hai aage aage!
-                }
-            }
-
             // Platform Collision
             platforms.forEach(p => {
-                if (p.type === 'trollVanish') {
-                    if (p.touched) {
-                        p.timer -= 1;
-                        if (p.timer <= 0) return; // gayab!
-                    }
-                }
-
                 if (
                     player.x + player.width > p.x &&
                     player.x < p.x + p.w &&
@@ -892,48 +889,63 @@
                     player.y = p.y - player.height;
                     player.vy = 0;
                     player.isGrounded = true;
-                    if (p.type === 'trollVanish') p.touched = true;
+
+                    // 💥 2ND SURFACE HIDDEN KANTA TRIGGER CHECK
+                    if (p.type === 'secondSurface') {
+                        hiddenPlatformSpikes.forEach(sp => {
+                            if (player.x + player.width > sp.x && player.x < sp.x + sp.w) {
+                                sp.revealed = true;
+                                triggerExplosion();
+                            }
+                        });
+                    }
                 }
             });
 
-            // 🕳️ Invisible Head-Hit Blocks Collision
-            invisibleBlocks.forEach(b => {
-                if (
-                    player.x + player.width > b.x &&
-                    player.x < b.x + b.w &&
-                    player.y <= b.y + b.h &&
-                    player.y - player.vy >= b.y
-                ) {
-                    b.revealed = true;
-                    player.vy = 4; // Sar takra gaya, neeche phenko!
-                    floatingTexts.push({ text: 'OUCH! 🤡', x: player.x - 10, y: player.y - 15, alpha: 1, vy: -1 });
+            // 🎁 SECRET TROLL LUCKY BLOCK HEAD-HIT CHECK (REVEAL 5TH COIN)
+            secretBlocks.forEach(sb => {
+                if (!sb.hit) {
+                    if (
+                        player.x + player.width > sb.x &&
+                        player.x < sb.x + sb.w &&
+                        player.y <= sb.y + sb.h &&
+                        player.y - player.vy >= sb.y
+                    ) {
+                        sb.hit = true;
+                        player.vy = 3;
+                        playSound('secret');
+                        floatingTexts.push({ text: 'SECRET LUCKY COINS! 🎁✨', x: sb.x - 50, y: sb.y - 20, alpha: 1, vy: -1 });
+
+                        // Spawn 2 Hidden Coins on map to complete 5 coins!
+                        coins.push({
+                            x: sb.x - 40,
+                            y: sb.y - 40,
+                            collected: false,
+                            radius: 5,
+                            floatOffset: 0
+                        });
+                        coins.push({
+                            x: sb.x + 60,
+                            y: sb.y - 40,
+                            collected: false,
+                            radius: 5,
+                            floatOffset: Math.PI
+                        });
+                    }
                 }
             });
 
-            // ☠️ Troll Traps Check
-            trollTraps.forEach(t => {
-                if (t.type === 'fakeFloor') {
-                    if (player.x + player.width > t.x && player.x < t.x + t.w && player.y + player.height >= t.y) {
-                        triggerExplosion(); // Dhokebaaz floor!
-                    }
-                }
-                else if (t.type === 'popupSpike') {
-                    if (!t.active && player.x > t.triggerX) {
-                        t.active = true; // Achannak nikal aana!
-                    }
-                    if (t.active && player.x + player.width > t.x && player.x < t.x + t.w && player.y + player.height > t.y) {
+            // ⏱️ MAIN SURFACE TIMING KANTE HIT-TEST
+            surfaceSpikes.forEach(sp => {
+                let cycle = (globalTick + sp.offset) % sp.period;
+                let active = cycle < (sp.period / 2); // Aadha time bahar, aadha time andar
+                if (active) {
+                    if (
+                        player.x + player.width > sp.x + 4 &&
+                        player.x < sp.x + sp.w - 4 &&
+                        player.y + player.height >= sp.y + 4
+                    ) {
                         triggerExplosion();
-                    }
-                }
-                else if (t.type === 'trollSaw') {
-                    if (!t.launched && player.x > t.triggerX) {
-                        t.launched = true;
-                    }
-                    if (t.launched) {
-                        t.x += t.vx;
-                        if (Math.hypot((player.x + player.width/2) - t.x, (player.y + player.height/2) - t.y) < t.r + 8) {
-                            triggerExplosion();
-                        }
                     }
                 }
             });
@@ -942,44 +954,56 @@
 
             checkCoins();
 
-            // Goal Touch
-            let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
-            if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
+            // 🚪 LEVEL 6 & ALL LEVELS: FULL BODY INSIDE GATE CHECK
+            let gateInsideLeft = goal.x + 6;
+            let gateInsideRight = goal.x + goal.w - 6;
+            let isDummyCompletelyInsideGate = (player.x >= gateInsideLeft && (player.x + player.width) <= gateInsideRight);
+            let isDummyTouchingGateVertically = (player.y + player.height >= goal.y && player.y <= goal.y + goal.h);
+
+            if (isDummyTouchingGateVertically && (player.x + player.width >= goal.x && player.x <= goal.x + goal.w)) {
                 if (!isDoorOpen) {
                     player.x = goal.x - player.width - 2;
-                    floatingTexts.push({ text: 'LOCKED! 🔒', x: player.x - 10, y: player.y - 10, alpha: 1, vy: -0.5 });
+                    floatingTexts.push({ text: `LOCKED! NEED 5 COINS (${score}/5) 🔒`, x: player.x - 70, y: player.y - 15, alpha: 1, vy: -0.5 });
                 } 
-                else if (!levelWon) {
-                    levelWon = true;
-                    playSound('win');
-                    const modal = document.getElementById('notificationModal');
+                else if (isDoorOpen && !levelWon) {
+                    // Jab tak pura dummy gate ke andar nahi jayega tabtak win nahi hoga!
+                    if (isDummyCompletelyInsideGate) {
+                        levelWon = true;
+                        playSound('win');
+                        const modal = document.getElementById('notificationModal');
 
-                    if (currentLevel < 15) {
-                        modal.innerText = `🎉 TROLL LEVEL ${currentLevel} CLEARED! 🤪`;
-                        modal.classList.add('show');
+                        if (currentLevel < 15) {
+                            modal.innerText = `🎉 LEVEL ${currentLevel} CLEARED! DUMMY ESCAPED! 🤪`;
+                            modal.classList.add('show');
 
-                        let nextLvl = currentLevel + 1;
-                        let savedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 6;
-                        if (nextLvl > savedMax) localStorage.setItem('saveLevel_TumseNaHoPayga', nextLvl);
+                            let nextLvl = currentLevel + 1;
+                            let savedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 6;
+                            if (nextLvl > savedMax) localStorage.setItem('saveLevel_TumseNaHoPayga', nextLvl);
 
-                        setTimeout(() => {
-                            modal.classList.remove('show');
-                            currentLevel = nextLvl;
-                            levelWon = false;
-                            updateGameLayout();
-                        }, 2000);
+                            setTimeout(() => {
+                                modal.classList.remove('show');
+                                currentLevel = nextLvl;
+                                levelWon = false;
+                                updateGameLayout();
+                            }, 2000);
+                        } else {
+                            localStorage.setItem('saveLevel_TumseNaHoPayga', 16);
+                            modal.innerText = "🏆 TU TOH SACH MEIN PRO NIKLA! ALL 15 LEVELS CLEARED! 👑";
+                            modal.classList.add('show');
+                            setTimeout(() => {
+                                window.location.href = "index.html";
+                            }, 2500);
+                        }
                     } else {
-                        localStorage.setItem('saveLevel_TumseNaHoPayga', 16);
-                        modal.innerText = "🏆 TU TOH SACH MEIN PRO NIKLA! 15/15 CLEARED! 👑";
-                        modal.classList.add('show');
-                        setTimeout(() => {
-                            window.location.href = "index.html";
-                        }, 2500);
+                        // Agar aadha dummy bahar hai toh prompt dega
+                        if (Math.random() < 0.08) {
+                            floatingTexts.push({ text: 'ENTER FULLY INSIDE GATE! 🚪🏃', x: goal.x - 80, y: goal.y - 20, alpha: 1, vy: -0.5 });
+                        }
                     }
                 }
             }
 
-            document.getElementById('scoreDisplay').innerText = `COINS: ${score}/3`;
+            document.getElementById('scoreDisplay').innerText = `COINS: ${score}/${TARGET_COINS}`;
 
             for (let i = floatingTexts.length - 1; i >= 0; i--) {
                 let ft = floatingTexts[i];
@@ -992,10 +1016,8 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Platforms
+            // Draw Platforms
             platforms.forEach(p => {
-                if (p.type === 'trollVanish' && p.timer <= 0) return;
-
                 ctx.fillStyle = '#0c0d18';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
 
@@ -1010,38 +1032,68 @@
                 ctx.shadowBlur = 0;
             });
 
-            // Invisible / Revealed Blocks
-            invisibleBlocks.forEach(b => {
-                if (b.revealed) {
-                    ctx.fillStyle = '#ff007f';
-                    ctx.fillRect(b.x, b.y, b.w, b.h);
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(b.x, b.y, b.w, b.h);
+            // 🎁 Draw Secret Lucky Block
+            secretBlocks.forEach(sb => {
+                ctx.save();
+                ctx.fillStyle = sb.hit ? 'rgba(255, 255, 255, 0.1)' : '#1f1035';
+                ctx.fillRect(sb.x, sb.y, sb.w, sb.h);
+                ctx.strokeStyle = sb.hit ? '#555555' : '#ffd700';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(sb.x, sb.y, sb.w, sb.h);
+
+                if (!sb.hit) {
+                    ctx.font = 'bold 12px Orbitron, sans-serif';
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fillText('?', sb.x + 13, sb.y + 16);
+                }
+                ctx.restore();
+            });
+
+            // ⏱️ Draw Timing Spikes on Main Surface
+            surfaceSpikes.forEach(sp => {
+                let cycle = (globalTick + sp.offset) % sp.period;
+                let active = cycle < (sp.period / 2);
+
+                if (active) {
+                    ctx.save();
+                    ctx.fillStyle = '#ff0055';
+                    ctx.shadowColor = '#ff0055';
+                    ctx.shadowBlur = 10;
+                    let numSpikes = Math.floor(sp.w / 14);
+                    for (let i = 0; i < numSpikes; i++) {
+                        let sx = sp.x + i * 14;
+                        ctx.beginPath();
+                        ctx.moveTo(sx, sp.y + sp.h);
+                        ctx.lineTo(sx + 7, sp.y);
+                        ctx.lineTo(sx + 14, sp.y + sp.h);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                } else {
+                    // Small warning groove
+                    ctx.fillStyle = 'rgba(255, 0, 85, 0.2)';
+                    ctx.fillRect(sp.x, sp.y + sp.h - 3, sp.w, 3);
                 }
             });
 
-            // Traps
-            trollTraps.forEach(t => {
-                if (t.type === 'popupSpike' && t.active) {
-                    ctx.fillStyle = '#ff007f';
-                    ctx.beginPath();
-                    ctx.moveTo(t.x, t.y + t.h);
-                    ctx.lineTo(t.x + t.w / 2, t.y);
-                    ctx.lineTo(t.x + t.w, t.y + t.h);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-                else if (t.type === 'trollSaw' && t.launched) {
+            // 📌 Draw Hidden 2nd Surface Spikes (Only if triggered or revealed)
+            hiddenPlatformSpikes.forEach(sp => {
+                if (sp.revealed) {
                     ctx.save();
-                    ctx.translate(t.x, t.y);
-                    ctx.rotate(Date.now() * 0.02);
-                    ctx.beginPath();
-                    ctx.arc(0, 0, t.r, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ff007f';
-                    ctx.shadowColor = '#ff007f';
+                    ctx.fillStyle = '#ff0055';
+                    ctx.shadowColor = '#ff0055';
                     ctx.shadowBlur = 12;
-                    ctx.fill();
+                    let numSpikes = Math.floor(sp.w / 12);
+                    for (let i = 0; i < numSpikes; i++) {
+                        let sx = sp.x + i * 12;
+                        ctx.beginPath();
+                        ctx.moveTo(sx, sp.y + sp.h);
+                        ctx.lineTo(sx + 6, sp.y);
+                        ctx.lineTo(sx + 12, sp.y + sp.h);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
                     ctx.restore();
                 }
             });
@@ -1058,8 +1110,8 @@
 
                     ctx.beginPath();
                     ctx.arc(c.x, floatY, c.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = c.isPoison ? '#ff0055' : '#00f0ff';
-                    ctx.shadowColor = c.isPoison ? '#ff0055' : '#00f0ff';
+                    ctx.fillStyle = '#00f0ff';
+                    ctx.shadowColor = '#00f0ff';
                     ctx.shadowBlur = 10;
                     ctx.fill();
                     ctx.shadowBlur = 0;
@@ -1084,6 +1136,9 @@
                 ctx.strokeStyle = '#00ffcc';
                 ctx.lineWidth = 2.5;
                 ctx.strokeRect(gx, gy, gw, gh);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(gx + gw / 2 - 1, gy + 8, 2, gh - 16);
             } else {
                 ctx.fillStyle = 'rgba(255, 0, 127, 0.15)';
                 ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
@@ -1094,11 +1149,20 @@
                 ctx.lineWidth = 2.5;
                 ctx.strokeRect(gx, gy, gw, gh);
 
+                ctx.strokeStyle = 'rgba(255, 0, 127, 0.7)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(gx + 6, gy + 6);
+                ctx.lineTo(gx + gw - 6, gy + gh - 6);
+                ctx.moveTo(gx + gw - 6, gy + 6);
+                ctx.lineTo(gx + 6, gy + gh - 6);
+                ctx.stroke();
+
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(gx + gw / 2 - 3, gy + gh / 2 - 4, 6, 8);
             }
 
-            // Explosion Rebuild
+            // Explosion & Rebuild
             if (isExploding || isRebuilding) {
                 fragments.forEach(f => {
                     ctx.save();
@@ -1136,39 +1200,53 @@
                     ctx.fill();
                     ctx.strokeStyle = '#ff007f';
                     ctx.lineWidth = 2;
+                    ctx.shadowColor = '#ff007f';
+                    ctx.shadowBlur = 14;
                     ctx.stroke();
+                    ctx.shadowBlur = 0;
                 }
 
-                // Player character
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.beginPath();
+                ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
                 let legSwing = (player.vx !== 0 || !player.isGrounded) ? Math.sin(player.animTimer) * 4 : 0;
+                let isJumpingOrAirborne = !player.isGrounded;
+                let jumpStretch = isJumpingOrAirborne ? -2 : 0;
+
                 let headRadius = 4.5;
                 let headX = px + player.width/2;
-                let headY = py + 5;
+                let headY = py + 5 + jumpStretch;
 
-                ctx.fillStyle = '#ffffff';
+                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
+                headGrad.addColorStop(0, '#ffffff');
+                headGrad.addColorStop(1, '#a0c4ff');
+
+                ctx.fillStyle = headGrad;
                 ctx.beginPath();
                 ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
                 let torsoWidth = 6.3;
                 let torsoX = px + (player.width - torsoWidth) / 2;
-                let chestGrad = ctx.createLinearGradient(torsoX, py + 10, torsoX + torsoWidth, py + 10);
+                let chestGrad = ctx.createLinearGradient(torsoX, py + 10 + jumpStretch, torsoX + torsoWidth, py + 10 + jumpStretch);
                 chestGrad.addColorStop(0, '#00f0ff');
                 chestGrad.addColorStop(1, '#7928ca');
                 ctx.fillStyle = chestGrad;
-                ctx.fillRect(torsoX, py + 10, torsoWidth, 13);
+                ctx.fillRect(torsoX, py + 10 + jumpStretch, torsoWidth, 13);
 
                 ctx.fillStyle = '#ff007f';
-                ctx.fillRect(torsoX - 1, py + 23, torsoWidth + 2, 2.2);
+                ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
 
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX - 3.5, py + 12, 2.2, 10);
-                ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12, 2.2, 10);
+                ctx.fillRect(torsoX - 3.5, py + 12 + jumpStretch, 2.2, 10);
+                ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12 + jumpStretch, 2.2, 10);
 
                 let legHeight = player.height === 24.3 ? 7 : 12;
                 ctx.fillStyle = '#00f0ff';
-                ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2, 2.2, legHeight);
-                ctx.fillRect(torsoX + torsoWidth - 3 - legSwing, py + 25.2, 2.2, legHeight);
+                ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight);
+                ctx.fillRect(torsoX + torsoWidth - 3 - legSwing, py + 25.2 + jumpStretch, 2.2, legHeight);
             }
 
             floatingTexts.forEach(ft => {
@@ -1176,6 +1254,8 @@
                 ctx.globalAlpha = ft.alpha;
                 ctx.font = 'bold 12px Orbitron, sans-serif';
                 ctx.fillStyle = '#00f0ff';
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 8;
                 ctx.fillText(ft.text, ft.x - 8, ft.y);
                 ctx.restore();
             });
