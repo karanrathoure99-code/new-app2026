@@ -1,6 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🎮 YEH "game.html" (MAIN GAMEPLAY WALI FILE) HAI 🎮      -->
-<!-- ISME GAME KA ACTUAL GAMEPLAY, JUMP AUR LOGIC AAYEGA!     -->
+<!-- 🎮 YEH "game.html" (CYBER ARCADE THEME + AUTO-RESUME) HAI 🎮  -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -20,15 +19,43 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1f1208 0%, #0d0603 50%, #2b180a 100%);
-            background-attachment: fixed;
-            color: #ffffff;
             width: 100vw;
             height: 100vh;
-            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
+            background: #020205;
+            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
+            overflow: hidden;
+            color: #ffffff;
+            position: relative;
+        }
+
+        /* Glowing Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.45;
+            animation: float 12s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 450px; height: 450px;
+            background: linear-gradient(135deg, #ff007f, #7928ca);
+            top: -120px; left: -100px;
+        }
+        .orb-2 {
+            width: 520px; height: 520px;
+            background: linear-gradient(135deg, #00f0ff, #0072ff);
+            bottom: -150px; right: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1) rotate(0deg); }
+            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
         }
 
         .game-wrapper {
@@ -40,6 +67,7 @@
             flex-direction: column;
             padding: 10px;
             position: relative;
+            z-index: 10;
             transition: transform 0.2s ease;
         }
 
@@ -62,17 +90,19 @@
             }
         }
 
+        /* Cyber Glassmorphism HUD */
         .game-hud {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(50, 28, 10, 0.85);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(212, 163, 115, 0.4);
-            border-radius: 15px;
-            padding: 8px 20px;
+            background: rgba(15, 15, 25, 0.78);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 16px;
+            padding: 8px 22px;
             margin-bottom: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
             z-index: 20;
         }
 
@@ -80,57 +110,71 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 13px;
             font-weight: 900;
-            color: #d4a373;
-            text-shadow: 0 0 10px rgba(212,163,115,0.6);
+            color: #00f0ff;
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+            letter-spacing: 1px;
         }
 
         .hud-stats {
             display: flex;
-            gap: 20px;
+            gap: 22px;
             font-family: 'Orbitron', sans-serif;
             font-size: 13px;
             font-weight: 700;
-            color: #faedcd;
+            color: #ffffff;
             align-items: center;
+        }
+
+        #scoreDisplay {
+            color: #ffd700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+        }
+
+        #shieldDisplay {
+            color: #00ffcc;
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+            letter-spacing: 0.5px;
         }
 
         .hud-right-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .arena-container {
             flex: 1;
-            background: rgba(20, 11, 5, 0.95);
-            border: 3px solid rgba(140, 88, 48, 0.85);
+            background: rgba(10, 10, 18, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(0, 240, 255, 0.3);
             border-radius: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 40px rgba(140, 88, 48, 0.25), 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0, 240, 255, 0.08);
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             padding-bottom: 8px;
         }
 
+        /* Cyber Futuristic Grid Arena Background */
         .distractor-bg {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(212, 163, 115, 0.15) 0%, rgba(140, 88, 48, 0.1) 40%, transparent 70%),
-                        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 40px, rgba(212, 163, 115, 0.05) 40px, rgba(212, 163, 115, 0.05) 42px),
-                        linear-gradient(45deg, rgba(140, 88, 48, 0.05) 25%, transparent 25%, transparent 75%, rgba(140, 88, 48, 0.05) 75%, rgba(140, 88, 48, 0.05)),
-                        linear-gradient(45deg, rgba(140, 88, 48, 0.05) 25%, transparent 25%, transparent 75%, rgba(140, 88, 48, 0.05) 75%, rgba(140, 88, 48, 0.05));
-            background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
-            background-position: 0 0, 0 0, 0 0, 30px 30px;
-            animation: pulseBg 6s ease-in-out infinite alternate;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 127, 0.08) 0%, rgba(0, 240, 255, 0.05) 50%, transparent 80%),
+                linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            animation: pulseBg 7s ease-in-out infinite alternate;
             pointer-events: none;
             z-index: 1;
         }
 
         @keyframes pulseBg {
-            0% { opacity: 0.7; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.03); }
+            0% { opacity: 0.65; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.02); }
         }
 
         #gameCanvas {
@@ -151,8 +195,8 @@
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                margin-top: 2px;
-                padding: 0 4px;
+                margin-top: 4px;
+                padding: 0 8px;
                 pointer-events: auto;
                 background: transparent;
                 display: flex;
@@ -164,7 +208,7 @@
 
         .control-group {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             pointer-events: auto;
             align-items: center;
         }
@@ -173,85 +217,99 @@
             .control-group.right-group {
                 display: flex;
                 flex-direction: row;
-                gap: 6px;
+                gap: 8px;
                 align-items: center;
             }
         }
 
+        /* Neon Glass Controls */
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
-            border-bottom: 3px solid rgba(0, 0, 0, 0.2);
-            color: rgba(255, 255, 255, 0.4);
+            background: rgba(20, 20, 35, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(0, 240, 255, 0.25);
+            border-bottom: 3px solid rgba(0, 240, 255, 0.45);
+            color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             width: 95px;
             height: 70px;
-            font-size: 15px;
-            border-radius: 12px;
+            font-size: 16px;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             touch-action: manipulation;
             position: relative;
+            transition: all 0.15s ease;
         }
 
         .ctrl-btn:active, .ctrl-btn.pressed {
-            transform: translateY(2px);
-            background: rgba(140, 88, 48, 0.25);
-            border-color: rgba(212, 163, 115, 0.5);
+            transform: translateY(2px) scale(0.97);
+            background: linear-gradient(135deg, rgba(255, 0, 127, 0.35), rgba(121, 40, 202, 0.35));
+            border-color: #ff007f;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
         }
 
         .btn-logo {
             font-size: 12px;
             font-weight: 900;
-            color: rgba(255, 204, 0, 0.45);
+            color: #00f0ff;
             margin-bottom: 2px;
-            letter-spacing: -0.5px;
+            text-shadow: 0 0 6px rgba(0, 240, 255, 0.6);
         }
 
         .btn-label {
             font-size: 11px;
             font-weight: 700;
             line-height: 1;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 0.5px;
         }
 
+        /* Cyber Buttons */
         .back-btn, .prev-lvl-btn {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #faedcd;
-            padding: 4px 10px;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 5px 12px;
+            border-radius: 10px;
             font-size: 11px;
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
-        }
-        .back-btn:hover, .prev-lvl-btn:hover {
-            color: #fff;
-            border-color: #d4a373;
-            background: rgba(212, 163, 115, 0.2);
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
 
+        .back-btn:hover, .prev-lvl-btn:hover {
+            color: #00f0ff;
+            border-color: #00f0ff;
+            background: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        /* Glassmorphism Notification Banner */
         #notificationModal {
             position: absolute;
             top: 20%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
-            background: rgba(43, 24, 10, 0.95);
-            border: 2px solid #d4a373;
-            padding: 16px 28px;
-            border-radius: 14px;
+            background: rgba(15, 15, 30, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid #00f0ff;
+            padding: 16px 30px;
+            border-radius: 16px;
             font-family: 'Orbitron', sans-serif;
             font-size: 14px;
-            color: #ffcc00;
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 25px rgba(0, 240, 255, 0.3);
             z-index: 100;
             opacity: 0;
             pointer-events: none;
@@ -265,6 +323,9 @@
     </style>
 </head>
 <body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
     <div id="notificationModal">🎉 Level Cleared!</div>
 
@@ -361,7 +422,17 @@
             checkDeviceControls();
         }
 
-        let currentLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        // ==========================================
+        // 💾 HIGHEST UNLOCKED LEVEL TRACKER LOGIC
+        // ==========================================
+        let savedMaxLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        
+        // Agar pehle se Level 5 se aage cross kar chuka hai toh redirect to game20.html (ya game2.html)
+        if (savedMaxLevel >= 6) {
+            window.location.replace("game20.html");
+        }
+
+        let currentLevel = savedMaxLevel;
         
         let isDoorOpen = true; 
         let score = 0;
@@ -463,14 +534,13 @@
             let usableWidth = canvasWidth - startMargin - endMargin;
             let coinSpacing = totalCoinsInLevel > 1 ? usableWidth / (totalCoinsInLevel - 1) : 0;
 
-            // Level 3 me 2 bomb, Level 4 me 3 bomb aur Level 5 me 2 bomb
             let boomIndices = [];
             if (currentLevel === 3) {
                 boomIndices = [1, 2];
             } else if (currentLevel === 4) {
-                boomIndices = [0, 1, 3]; // 4 me se koi 3 coin boom wale
+                boomIndices = [0, 1, 3];
             } else if (currentLevel === 5) {
-                boomIndices = [1, 2];    // 4 me se koi 2 coin boom wale
+                boomIndices = [1, 2];
             }
 
             for (let i = 1; i <= totalCoinsInLevel; i++) {
@@ -485,9 +555,9 @@
                 });
             }
 
+            // 🚪 GATE KO RIGHT WALL/BOX KE SATH EXACT JOIN KAR DIYA GAYA HAI
             goal.y = surfaceTop - goal.h;
-            // Gap khatam: Gate ko right-most wall ke barabar laga diya
-            goal.x = canvasWidth - goal.w;
+            goal.x = canvasWidth - goal.w; 
         }
 
         function goToPrevLevel() {
@@ -535,16 +605,16 @@
 
                 if (type === 'jump') {
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.exponentialRampToValueAtTime(350, now + 0.15);
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(500, now + 0.15);
                     gain.gain.setValueAtTime(0.2, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                     osc.start(now);
                     osc.stop(now + 0.15);
                 } else if (type === 'coin') {
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(587.33, now); 
-                    osc.frequency.setValueAtTime(880, now + 0.08); 
+                    osc.frequency.setValueAtTime(659.25, now); 
+                    osc.frequency.setValueAtTime(987.77, now + 0.08); 
                     gain.gain.setValueAtTime(0.25, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
                     osc.start(now);
@@ -602,18 +672,17 @@
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
                 let activeJumpForce = -9.4; 
-
                 player.vy = activeJumpForce;
                 player.isGrounded = false;
                 playSound('jump');
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 6; i++) {
                     particles.push({
                         x: player.x + player.width / 2,
                         y: player.y + player.height,
-                        vx: (Math.random() - 0.5) * 2,
-                        vy: -Math.random() * 1.5,
+                        vx: (Math.random() - 0.5) * 2.5,
+                        vy: -Math.random() * 1.8,
                         size: Math.random() * 3 + 1,
-                        color: 'rgba(212, 163, 115, 0.7)',
+                        color: 'rgba(0, 240, 255, 0.8)',
                         life: 25
                     });
                 }
@@ -640,15 +709,19 @@
                 initAudio();
                 shieldBtnM.classList.add('pressed');
                 shieldActive = true;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-                document.getElementById('shieldDisplay').style.color = "#ffaa00";
+                const el = document.getElementById('shieldDisplay');
+                el.innerText = "SHIELD: ON";
+                el.style.color = "#ff007f";
+                el.style.textShadow = "0 0 10px rgba(255, 0, 127, 0.8)";
             };
             const deactivateShield = (e) => {
                 if (e) e.preventDefault();
                 shieldBtnM.classList.remove('pressed');
                 shieldActive = false;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                document.getElementById('shieldDisplay').style.color = "#d8b4fe";
+                const el = document.getElementById('shieldDisplay');
+                el.innerText = "SHIELD: OFF";
+                el.style.color = "#00ffcc";
+                el.style.textShadow = "0 0 8px rgba(0, 255, 204, 0.4)";
             };
             shieldBtnM.addEventListener('touchstart', activateShield, { passive: false });
             shieldBtnM.addEventListener('touchend', deactivateShield, { passive: false });
@@ -665,8 +738,10 @@
             if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
             if (e.key === 'Shift') {
                 shieldActive = true;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-                document.getElementById('shieldDisplay').style.color = "#ffaa00";
+                const el = document.getElementById('shieldDisplay');
+                el.innerText = "SHIELD: ON";
+                el.style.color = "#ff007f";
+                el.style.textShadow = "0 0 10px rgba(255, 0, 127, 0.8)";
             }
             if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
                 e.preventDefault();
@@ -680,13 +755,14 @@
             if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
             if (e.key === 'Shift') {
                 shieldActive = false;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                document.getElementById('shieldDisplay').style.color = "#d8b4fe";
+                const el = document.getElementById('shieldDisplay');
+                el.innerText = "SHIELD: OFF";
+                el.style.color = "#00ffcc";
+                el.style.textShadow = "0 0 8px rgba(0, 255, 204, 0.4)";
             }
         });
 
         function triggerExplosion() {
-            // Level 3, Level 4 aur Level 5 me shield blast se nahi bachayegi (proper work nahi karegi)
             if (currentLevel !== 3 && currentLevel !== 4 && currentLevel !== 5 && shieldActive) return;
             if (isExploding) return;
             
@@ -695,20 +771,20 @@
             playSound('blast');
 
             fragments = [
-                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ffffff' },
-                { x: player.x + 4, y: player.y + 10, vx: 4, vy: -6, color: '#ffffff' },
-                { x: player.x + 2, y: player.y + 18, vx: -5, vy: 2, color: '#e0e0e0' },
-                { x: player.x + 6, y: player.y + 22, vx: 5, vy: 3, color: '#ffffff' }
+                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ff007f' },
+                { x: player.x + 4, y: player.y + 10, vx: 4, vy: -6, color: '#00f0ff' },
+                { x: player.x + 2, y: player.y + 18, vx: -5, vy: 2, color: '#ffffff' },
+                { x: player.x + 6, y: player.y + 22, vx: 5, vy: 3, color: '#00ffcc' }
             ];
 
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 25; i++) {
                 particles.push({
                     x: player.x + player.width / 2,
                     y: player.y + player.height / 2,
                     vx: (Math.random() - 0.5) * 8,
                     vy: (Math.random() - 0.5) * 8,
                     size: Math.random() * 5 + 2,
-                    color: Math.random() > 0.5 ? '#ff9f1c' : '#ffffff',
+                    color: Math.random() > 0.5 ? '#ff007f' : '#00f0ff',
                     life: 40
                 });
             }
@@ -748,12 +824,10 @@
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                     } 
                     else if (currentLevel === 4 && score >= 1) {
-                        // Level 4: 1 coin lete hi gate unlock
                         isDoorOpen = true; 
                         floatingTexts.push({ text: 'GATE UNLOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                     }
                     else if (currentLevel === 5 && score >= 1) {
-                        // Level 5: 1 coin bhi liya toh gate lock
                         isDoorOpen = false;
                         floatingTexts.push({ text: 'GATE LOCKED!', x: player.x - 30, y: player.y - 20, alpha: 1, vy: -1 });
                     }
@@ -765,7 +839,7 @@
                             vx: (Math.random() - 0.5) * 5,
                             vy: (Math.random() - 0.5) * 5,
                             size: Math.random() * 3 + 1,
-                            color: '#ffcc00',
+                            color: '#00f0ff',
                             life: 20
                         });
                     }
@@ -846,6 +920,7 @@
 
             checkCoins();
 
+            // Check Goal Detection
             let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
 
             if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
@@ -878,10 +953,12 @@
                             updateGameLayout();
                         }, 2000);
                     } else {
-                        modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game2.html...";
+                        // Level 5 complete hote hi highest progress save karo aur redirect
+                        localStorage.setItem('saveLevel_TumseNaHoPayga', 6);
+                        modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game20.html...";
                         modal.classList.add('show');
                         setTimeout(() => {
-                            window.location.href = "game2.html"; 
+                            window.location.href = "game20.html"; 
                         }, 2000);
                     }
                 }
@@ -911,56 +988,75 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
+            // Cyber Platforms Styling
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return; 
-                ctx.fillStyle = '#2b180a';
+                ctx.fillStyle = '#0c0d18';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.strokeStyle = '#d4a373';
+
+                // Neon glowing top outline
+                ctx.strokeStyle = '#00f0ff';
                 ctx.lineWidth = 2;
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 8;
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(p.x + p.w, p.y);
                 ctx.stroke();
+                ctx.shadowBlur = 0; 
             });
 
+            // Glowing Cyber Coins
             coins.forEach((c) => {
                 if (!c.collected) {
                     c.floatOffset += 0.08;
                     let floatY = c.y + Math.sin(c.floatOffset) * 3;
 
                     ctx.beginPath();
-                    ctx.arc(c.x, floatY, c.radius + 1.5, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 204, 0, 0.25)';
+                    ctx.arc(c.x, floatY, c.radius + 3, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 240, 255, 0.25)';
                     ctx.fill();
 
                     ctx.beginPath();
                     ctx.arc(c.x, floatY, c.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ffcc00';
+                    ctx.fillStyle = '#00f0ff';
+                    ctx.shadowColor = '#00f0ff';
+                    ctx.shadowBlur = 10;
                     ctx.fill();
+                    ctx.shadowBlur = 0;
+
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = '#ffffff';
                     ctx.stroke();
                 }
             });
 
+            // Cyber Portal Gate
             if (isDoorOpen) {
-                ctx.fillStyle = 'rgba(255, 159, 28, 0.25)';
+                ctx.fillStyle = 'rgba(0, 255, 204, 0.2)';
                 ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
-                ctx.fillStyle = '#532d0c';
+                ctx.fillStyle = '#022622';
                 ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-                ctx.strokeStyle = '#ff9f1c';
+                ctx.strokeStyle = '#00ffcc';
+                ctx.shadowColor = '#00ffcc';
+                ctx.shadowBlur = 12;
             } else {
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.25)';
+                ctx.fillStyle = 'rgba(255, 0, 127, 0.2)';
                 ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
-                ctx.fillStyle = '#4a0000';
+                ctx.fillStyle = '#2c0418';
                 ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
-                ctx.strokeStyle = '#ff0000';
+                ctx.strokeStyle = '#ff007f';
+                ctx.shadowColor = '#ff007f';
+                ctx.shadowBlur = 12;
+
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(goal.x + goal.w/2 - 2, goal.y + goal.h/2 - 2, 4, 4);
             }
             ctx.lineWidth = 2.5;
             ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
+            ctx.shadowBlur = 0;
 
+            // Particles
             particles.forEach(p => {
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
@@ -968,15 +1064,19 @@
                 ctx.fill();
             });
 
+            // Floating Numbers/Texts
             floatingTexts.forEach(ft => {
                 ctx.save();
                 ctx.globalAlpha = ft.alpha;
                 ctx.font = 'bold 12px Orbitron, sans-serif';
-                ctx.fillStyle = '#ffcc00';
+                ctx.fillStyle = '#00f0ff';
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 8;
                 ctx.fillText(ft.text, ft.x - 8, ft.y);
                 ctx.restore();
             });
 
+            // Player character
             if (isExploding) {
                 fragments.forEach(f => {
                     ctx.fillStyle = f.color;
@@ -989,13 +1089,17 @@
                 if (shieldActive) {
                     ctx.beginPath();
                     ctx.arc(px + player.width/2, py + player.height/2, 23, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
+                    ctx.fillStyle = 'rgba(255, 0, 127, 0.25)';
                     ctx.fill();
-                    ctx.strokeStyle = '#ffaa00';
+                    ctx.strokeStyle = '#ff007f';
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = '#ff007f';
+                    ctx.shadowBlur = 14;
                     ctx.stroke();
+                    ctx.shadowBlur = 0;
                 }
 
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
                 ctx.beginPath();
                 ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
@@ -1010,7 +1114,7 @@
                 
                 let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
                 headGrad.addColorStop(0, '#ffffff');
-                headGrad.addColorStop(1, '#c0c0c0');
+                headGrad.addColorStop(1, '#a0c4ff');
                 
                 ctx.fillStyle = headGrad;
                 ctx.beginPath();
@@ -1020,22 +1124,22 @@
                 let torsoWidth = 6.3; 
                 let torsoX = px + (player.width - torsoWidth) / 2;
                 let chestGrad = ctx.createLinearGradient(torsoX, py + 10 + jumpStretch, torsoX + torsoWidth, py + 10 + jumpStretch);
-                chestGrad.addColorStop(0, '#ffffff');
-                chestGrad.addColorStop(1, '#b0b0b0');
+                chestGrad.addColorStop(0, '#00f0ff');
+                chestGrad.addColorStop(1, '#7928ca');
                 ctx.fillStyle = chestGrad;
                 ctx.fillRect(torsoX, py + 10 + jumpStretch, torsoWidth, 13);
 
-                ctx.fillStyle = '#ffcc00';
+                ctx.fillStyle = '#ff007f';
                 ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
 
-                // Hath (Arms) still rahenge
+                // Arms
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(torsoX - 3.5, py + 12 + jumpStretch, 2.2, 10);  
                 ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12 + jumpStretch, 2.2, 10); 
 
-                // Sirf pair chalenge
+                // Legs
                 let legHeight = player.height === 24.3 ? 7 : 12;
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#00f0ff';
                 ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
                 ctx.fillRect(torsoX + torsoWidth - 3 - legSwing, py + 25.2 + jumpStretch, 2.2, legHeight); 
             }
