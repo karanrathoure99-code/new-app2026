@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🎮 YEH "game.html" (90% GATE VISIBLE + NEW RESPAWN FX) 🎮 -->
+<!-- 🎮 YEH "game.html" (REDIRECT BUG FIXED) HAI 🎮            -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -395,11 +395,13 @@
         }
 
         // ==========================================
-        // 💾 AUTO-RESUME HIGHEST UNLOCKED LEVEL
+        // 💾 AUTO-RESUME HIGHEST UNLOCKED LEVEL (FIXED)
         // ==========================================
         let savedMaxLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        
+        // 🛠️ FIX 1: game20.html ko badal kar game2.html kar diya gaya hai
         if (savedMaxLevel >= 6) {
-            window.location.replace("game20.html");
+            window.location.replace("game2.html");
         }
 
         let currentLevel = savedMaxLevel;
@@ -408,7 +410,7 @@
         let score = 0;
         let shieldActive = false;
         let isExploding = false;
-        let isRebuilding = false; // ✨ NAYA REASSEMBLY / REGEN STATUS
+        let isRebuilding = false;
         let rebuildTimer = 0;
         let respawnAuraTimer = 0;
         let isSlowMo = false;
@@ -433,7 +435,6 @@
 
         let platforms = [];
         let coins = [];
-        // 🚪 90%+ VISIBLE HIGH-RES GATE (Size: 38 x 52)
         let goal = { x: 0, y: 0, w: 38, h: 52 };
 
         function updateGameLayout() {
@@ -447,7 +448,7 @@
             } else if (currentLevel === 2) {
                 document.getElementById('levelTitle').innerText = "🎯『 💎 Aukaat se bahar hai ye gate, wapas ja 』- Lvl 2 ⚡";
             } else if (currentLevel === 3) {
-                document.getElementById('levelTitle').innerText = "🚀『 💰Aukaat se bahar hai ye gate, wapas ja 』- Lvl 3 ⚡";
+                document.getElementById('levelTitle').innerText = "🚀『 💰 Aukaat se bahar hai ye gate, wapas ja 』- Lvl 3 ⚡";
             } else if (currentLevel === 4) {
                 document.getElementById('levelTitle').innerText = "🔥『 🏆 Aukaat se bahar hai ye gate, wapas ja 』- Lvl 4 ⚡";
             } else if (currentLevel === 5) {
@@ -530,7 +531,6 @@
                 });
             }
 
-            // 🚪 GATE POSITION: Canvas ke right boundary par 90%+ visible with clean frame padding
             goal.y = surfaceTop - goal.h;
             goal.x = canvasWidth - goal.w - 8; 
         }
@@ -604,7 +604,6 @@
                     osc.start(now);
                     osc.stop(now + 0.5);
                 } else if (type === 'reboot') {
-                    // ✨ NAYA RESPAWN / REBOOT SOUND
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(220, now);
                     osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
@@ -746,7 +745,6 @@
             }
         });
 
-        // ✨ NAYA SCI-FI REASSEMBLY & REGEN ANIMATION
         function triggerExplosion() {
             if (currentLevel !== 3 && currentLevel !== 4 && currentLevel !== 5 && shieldActive) return;
             if (isExploding || isRebuilding) return;
@@ -774,7 +772,6 @@
                 });
             }
 
-            // Phase 1: Fragment Scatter (0.8s) -> Phase 2: Quantum Magnetic Reassembly (0.8s)
             setTimeout(() => {
                 isExploding = false;
                 isRebuilding = true;
@@ -784,7 +781,7 @@
                 setTimeout(() => {
                     isRebuilding = false;
                     isSlowMo = false;
-                    respawnAuraTimer = 35; // 35 frames tak futuristic energy aura flash hoga
+                    respawnAuraTimer = 35;
                     updateGameLayout();
                 }, 800);
 
@@ -847,7 +844,6 @@
         function update() {
             let timeFactor = isSlowMo ? 0.25 : 1.0;
 
-            // Explosion state
             if (isExploding) {
                 fragments.forEach(f => {
                     f.x += f.vx * timeFactor;
@@ -857,7 +853,6 @@
                 return;
             }
 
-            // Magnetic Rebuild / Matrix Synthesis state
             if (isRebuilding) {
                 fragments.forEach(f => {
                     f.x += (f.originX - f.x) * 0.18;
@@ -929,7 +924,6 @@
 
             checkCoins();
 
-            // Goal detection
             let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
 
             if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
@@ -962,11 +956,12 @@
                             updateGameLayout();
                         }, 2000);
                     } else {
+                        // 🛠️ FIX 2: Level 5 pass hone par game2.html par le jayega
                         localStorage.setItem('saveLevel_TumseNaHoPayga', 6);
                         modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game2.html...";
                         modal.classList.add('show');
                         setTimeout(() => {
-                            window.location.href = "game20.html"; 
+                            window.location.href = "game2.html"; 
                         }, 2000);
                     }
                 }
@@ -1045,15 +1040,12 @@
             let gh = goal.h;
 
             if (isDoorOpen) {
-                // Outer Cyan Aura
                 ctx.fillStyle = 'rgba(0, 255, 204, 0.15)';
                 ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
 
-                // Main Door Frame
                 ctx.fillStyle = '#031c19';
                 ctx.fillRect(gx, gy, gw, gh);
 
-                // Inner Warp Portal Core
                 let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
                 portalGrad.addColorStop(0, '#00ffcc');
                 portalGrad.addColorStop(0.5, '#0072ff');
@@ -1061,7 +1053,6 @@
                 ctx.fillStyle = portalGrad;
                 ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 4);
 
-                // Portal Frame Highlight
                 ctx.strokeStyle = '#00ffcc';
                 ctx.shadowColor = '#00ffcc';
                 ctx.shadowBlur = 14;
@@ -1069,15 +1060,12 @@
                 ctx.strokeRect(gx, gy, gw, gh);
                 ctx.shadowBlur = 0;
 
-                // Portal Energy Bars
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(gx + gw / 2 - 1, gy + 8, 2, gh - 16);
             } else {
-                // Locked Pink/Red Aura
                 ctx.fillStyle = 'rgba(255, 0, 127, 0.15)';
                 ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
 
-                // Door Inner Solid Lock
                 ctx.fillStyle = '#1c0310';
                 ctx.fillRect(gx, gy, gw, gh);
 
@@ -1088,7 +1076,6 @@
                 ctx.strokeRect(gx, gy, gw, gh);
                 ctx.shadowBlur = 0;
 
-                // Locked Cross Security Bars
                 ctx.strokeStyle = 'rgba(255, 0, 127, 0.7)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -1098,7 +1085,6 @@
                 ctx.lineTo(gx + 6, gy + gh - 6);
                 ctx.stroke();
 
-                // Center Hologram Padlock Icon
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(gx + gw / 2 - 3, gy + gh / 2 - 4, 6, 8);
             }
@@ -1132,7 +1118,6 @@
                     ctx.shadowBlur = 8;
                     ctx.fillRect(f.x, f.y, f.size, f.size);
 
-                    // Reassembly Digital Laser Connection Strings
                     if (isRebuilding) {
                         ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
                         ctx.lineWidth = 1;
@@ -1144,7 +1129,6 @@
                     ctx.restore();
                 });
 
-                // Spawn Center Matrix Ring
                 if (isRebuilding) {
                     let originX = (currentLevel === 3) ? 50 : 40;
                     let originY = (currentLevel === 3) ? (canvasHeight - 40 - 90) : 100;
@@ -1159,7 +1143,6 @@
                 let px = player.x;
                 let py = player.y;
 
-                // ✨ RESPAWN POST-AURA SHOCKWAVE EFFECT
                 if (respawnAuraTimer > 0) {
                     ctx.save();
                     ctx.beginPath();
