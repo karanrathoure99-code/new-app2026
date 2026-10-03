@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🎮 YEH "game.html" (CYBER ARCADE THEME + AUTO-RESUME) HAI 🎮  -->
+<!-- 🎮 YEH "game.html" (PERFECT SCREEN CENTERED FIX) HAI 🎮  -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -18,15 +18,17 @@
             -webkit-user-select: none;
         }
 
-        body {
+        html, body {
             width: 100vw;
             height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #020205;
+            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #020205;
-            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
-            overflow: hidden;
             color: #ffffff;
             position: relative;
         }
@@ -58,36 +60,19 @@
             100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
         }
 
+        /* Responsive Perfect-Center Wrapper */
         .game-wrapper {
-            width: 100%;
-            height: 100%;
-            max-width: 1280px;
-            max-height: 720px;
+            width: 1280px;
+            height: 720px;
             display: flex;
             flex-direction: column;
             padding: 10px;
             position: relative;
             z-index: 10;
-            transition: transform 0.2s ease;
-        }
-
-        @media (max-width: 1023px) {
-            body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            .game-wrapper {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) scale(var(--scale-factor, 0.65));
-                width: 1280px;
-                height: 720px;
-                justify-content: flex-start;
-                padding: 10px;
-                transform-origin: center center;
-            }
+            transform: scale(var(--scale-factor, 1));
+            transform-origin: center center;
+            flex-shrink: 0;
+            box-sizing: border-box;
         }
 
         /* Cyber Glassmorphism HUD */
@@ -95,7 +80,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(15, 15, 25, 0.78);
+            background: rgba(15, 15, 25, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 240, 255, 0.25);
@@ -144,7 +129,7 @@
 
         .arena-container {
             flex: 1;
-            background: rgba(10, 10, 18, 0.88);
+            background: rgba(10, 10, 18, 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 2px solid rgba(0, 240, 255, 0.3);
@@ -186,24 +171,18 @@
         }
 
         .controls-overlay {
-            display: none;
-        }
-
-        @media (max-width: 1023px) {
-            .controls-overlay {
-                position: relative;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                margin-top: 4px;
-                padding: 0 8px;
-                pointer-events: auto;
-                background: transparent;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                z-index: 30;
-            }
+            position: relative;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            margin-top: 4px;
+            padding: 0 8px;
+            pointer-events: auto;
+            background: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 30;
         }
 
         .control-group {
@@ -213,13 +192,11 @@
             align-items: center;
         }
 
-        @media (max-width: 1023px) {
-            .control-group.right-group {
-                display: flex;
-                flex-direction: row;
-                gap: 8px;
-                align-items: center;
-            }
+        .control-group.right-group {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
         }
 
         /* Neon Glass Controls */
@@ -270,7 +247,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Cyber Buttons */
         .back-btn, .prev-lvl-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -292,10 +268,9 @@
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
         }
 
-        /* Glassmorphism Notification Banner */
         #notificationModal {
             position: absolute;
-            top: 20%;
+            top: 25%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
             background: rgba(15, 15, 30, 0.95);
@@ -329,7 +304,7 @@
 
     <div id="notificationModal">🎉 Level Cleared!</div>
 
-    <div class="game-wrapper">
+    <div class="game-wrapper" id="gameWrapper">
         <div class="game-hud">
             <div class="hud-title" id="levelTitle">⚡ LEVEL 1 ⚡</div>
             <div class="hud-stats">
@@ -370,6 +345,7 @@
     </div>
 
     <script>
+        // Fullscreen & Landscape Orientation Lock
         function handleScreenFit(e) {
             if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) {
                 return;
@@ -395,18 +371,18 @@
         let canvasWidth = 1280;
         let canvasHeight = 410;
 
-        function checkDeviceControls() {
-            const isMobileOrTablet = window.innerWidth <= 1023;
-            document.getElementById('mobileControls').style.display = isMobileOrTablet ? 'flex' : 'none';
-        }
-
+        // Auto Perfect Landscape Centering Logic
         function resizeCanvas() {
-            if (window.innerWidth <= 1023) {
-                const scaleX = window.innerWidth / 1280;
-                const scaleY = window.innerHeight / 720;
-                const scale = Math.min(scaleX, scaleY) * 0.95;
-                document.documentElement.style.setProperty('--scale-factor', scale);
-            }
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
+
+            // Box ko screen ke andar 100% fit aur center me scale karega
+            const scaleX = screenW / 1280;
+            const scaleY = screenH / 720;
+            const scale = Math.min(scaleX, scaleY) * 0.98;
+
+            document.documentElement.style.setProperty('--scale-factor', scale);
+
             canvasWidth = 1280;
             canvasHeight = 410;
 
@@ -419,15 +395,12 @@
             canvas.style.height = canvasHeight + 'px';
 
             updateGameLayout();
-            checkDeviceControls();
         }
 
         // ==========================================
-        // 💾 HIGHEST UNLOCKED LEVEL TRACKER LOGIC
+        // 💾 AUTO-RESUME HIGHEST UNLOCKED LEVEL
         // ==========================================
         let savedMaxLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
-        
-        // Agar pehle se Level 5 se aage cross kar chuka hai toh redirect to game20.html (ya game2.html)
         if (savedMaxLevel >= 6) {
             window.location.replace("game20.html");
         }
@@ -443,6 +416,7 @@
         let particles = [];
         let floatingTexts = [];
 
+        // 🏃 SPEED 4.5 AUR JUMP FORCE -7.8
         let player = {
             x: 40,
             y: 100,
@@ -450,8 +424,8 @@
             height: 40.5,    
             vx: 0,
             vy: 0,
-            speed: 2.8,        
-            jumpForce: -8.5,  
+            speed: 4.5,       
+            jumpForce: -7.8,  
             gravity: 0.38,    
             isGrounded: false,
             animTimer: 0
@@ -555,7 +529,7 @@
                 });
             }
 
-            // 🚪 GATE KO RIGHT WALL/BOX KE SATH EXACT JOIN KAR DIYA GAYA HAI
+            // Gate right edge se joined
             goal.y = surfaceTop - goal.h;
             goal.x = canvasWidth - goal.w; 
         }
@@ -575,6 +549,7 @@
         }
 
         window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', resizeCanvas);
         resizeCanvas();
 
         let keys = { left: false, right: false, down: false };
@@ -671,8 +646,7 @@
 
         function triggerJump() {
             if (player.isGrounded && !isExploding) {
-                let activeJumpForce = -9.4; 
-                player.vy = activeJumpForce;
+                player.vy = player.jumpForce; 
                 player.isGrounded = false;
                 playSound('jump');
                 for (let i = 0; i < 6; i++) {
@@ -920,7 +894,6 @@
 
             checkCoins();
 
-            // Check Goal Detection
             let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
 
             if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
@@ -953,7 +926,6 @@
                             updateGameLayout();
                         }, 2000);
                     } else {
-                        // Level 5 complete hote hi highest progress save karo aur redirect
                         localStorage.setItem('saveLevel_TumseNaHoPayga', 6);
                         modal.innerText = "🏆 Yeto ashan tha! 🤪 LEVEL 5 COMPLETED! Opening game20.html...";
                         modal.classList.add('show');
@@ -988,13 +960,12 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Cyber Platforms Styling
+            // Platforms
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return; 
                 ctx.fillStyle = '#0c0d18';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
 
-                // Neon glowing top outline
                 ctx.strokeStyle = '#00f0ff';
                 ctx.lineWidth = 2;
                 ctx.shadowColor = '#00f0ff';
@@ -1006,7 +977,7 @@
                 ctx.shadowBlur = 0; 
             });
 
-            // Glowing Cyber Coins
+            // Coins
             coins.forEach((c) => {
                 if (!c.collected) {
                     c.floatOffset += 0.08;
