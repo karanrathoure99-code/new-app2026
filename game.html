@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🎮 YEH "game.html" (PERFECT SCREEN CENTERED FIX) HAI 🎮  -->
+<!-- 🎮 YEH "game.html" (90% GATE VISIBLE + NEW RESPAWN FX) 🎮 -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +33,7 @@
             position: relative;
         }
 
-        /* Glowing Background Orbs */
+        /* Glowing Ambient Orbs */
         .orb {
             position: absolute;
             border-radius: 50%;
@@ -60,7 +60,7 @@
             100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
         }
 
-        /* Responsive Perfect-Center Wrapper */
+        /* Centered Game Screen Wrapper */
         .game-wrapper {
             width: 1280px;
             height: 720px;
@@ -75,7 +75,7 @@
             box-sizing: border-box;
         }
 
-        /* Cyber Glassmorphism HUD */
+        /* Glassmorphism HUD */
         .game-hud {
             display: flex;
             justify-content: space-between;
@@ -143,7 +143,7 @@
             padding-bottom: 8px;
         }
 
-        /* Cyber Futuristic Grid Arena Background */
+        /* Cyber Background Grid */
         .distractor-bg {
             position: absolute;
             inset: 0;
@@ -345,7 +345,6 @@
     </div>
 
     <script>
-        // Fullscreen & Landscape Orientation Lock
         function handleScreenFit(e) {
             if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) {
                 return;
@@ -371,12 +370,10 @@
         let canvasWidth = 1280;
         let canvasHeight = 410;
 
-        // Auto Perfect Landscape Centering Logic
         function resizeCanvas() {
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
 
-            // Box ko screen ke andar 100% fit aur center me scale karega
             const scaleX = screenW / 1280;
             const scaleY = screenH / 720;
             const scale = Math.min(scaleX, scaleY) * 0.98;
@@ -411,12 +408,15 @@
         let score = 0;
         let shieldActive = false;
         let isExploding = false;
+        let isRebuilding = false; // ✨ NAYA REASSEMBLY / REGEN STATUS
+        let rebuildTimer = 0;
+        let respawnAuraTimer = 0;
         let isSlowMo = false;
         let fragments = [];
         let particles = [];
         let floatingTexts = [];
 
-        // 🏃 SPEED 4.5 AUR JUMP FORCE -7.8
+        // 🏃 PLAYER STATS
         let player = {
             x: 40,
             y: 100,
@@ -433,7 +433,8 @@
 
         let platforms = [];
         let coins = [];
-        let goal = { x: 0, y: 0, w: 25, h: 35 };
+        // 🚪 90%+ VISIBLE HIGH-RES GATE (Size: 38 x 52)
+        let goal = { x: 0, y: 0, w: 38, h: 52 };
 
         function updateGameLayout() {
             score = 0;
@@ -504,7 +505,7 @@
 
             coins = [];
             let startMargin = 160; 
-            let endMargin = 160;   
+            let endMargin = 180;   
             let usableWidth = canvasWidth - startMargin - endMargin;
             let coinSpacing = totalCoinsInLevel > 1 ? usableWidth / (totalCoinsInLevel - 1) : 0;
 
@@ -529,9 +530,9 @@
                 });
             }
 
-            // Gate right edge se joined
+            // 🚪 GATE POSITION: Canvas ke right boundary par 90%+ visible with clean frame padding
             goal.y = surfaceTop - goal.h;
-            goal.x = canvasWidth - goal.w; 
+            goal.x = canvasWidth - goal.w - 8; 
         }
 
         function goToPrevLevel() {
@@ -602,6 +603,15 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                     osc.start(now);
                     osc.stop(now + 0.5);
+                } else if (type === 'reboot') {
+                    // ✨ NAYA RESPAWN / REBOOT SOUND
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
                 } else if (type === 'win') {
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(440, now);
@@ -645,7 +655,7 @@
         bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
 
         function triggerJump() {
-            if (player.isGrounded && !isExploding) {
+            if (player.isGrounded && !isExploding && !isRebuilding) {
                 player.vy = player.jumpForce; 
                 player.isGrounded = false;
                 playSound('jump');
@@ -736,38 +746,49 @@
             }
         });
 
+        // ✨ NAYA SCI-FI REASSEMBLY & REGEN ANIMATION
         function triggerExplosion() {
             if (currentLevel !== 3 && currentLevel !== 4 && currentLevel !== 5 && shieldActive) return;
-            if (isExploding) return;
+            if (isExploding || isRebuilding) return;
             
             isExploding = true;
             isSlowMo = true;
             playSound('blast');
 
-            fragments = [
-                { x: player.x, y: player.y, vx: -4, vy: -5, color: '#ff007f' },
-                { x: player.x + 4, y: player.y + 10, vx: 4, vy: -6, color: '#00f0ff' },
-                { x: player.x + 2, y: player.y + 18, vx: -5, vy: 2, color: '#ffffff' },
-                { x: player.x + 6, y: player.y + 22, vx: 5, vy: 3, color: '#00ffcc' }
-            ];
+            let spawnX = (currentLevel === 3) ? 50 : 40;
+            let spawnY = (currentLevel === 3) ? (canvasHeight - 40 - 90) : 100;
 
-            for (let i = 0; i < 25; i++) {
-                particles.push({
-                    x: player.x + player.width / 2,
-                    y: player.y + player.height / 2,
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: (Math.random() - 0.5) * 8,
-                    size: Math.random() * 5 + 2,
-                    color: Math.random() > 0.5 ? '#ff007f' : '#00f0ff',
-                    life: 40
+            fragments = [];
+            const colors = ['#00f0ff', '#ff007f', '#00ffcc', '#ffffff', '#7928ca'];
+            for (let i = 0; i < 30; i++) {
+                fragments.push({
+                    x: player.x + Math.random() * player.width,
+                    y: player.y + Math.random() * player.height,
+                    originX: spawnX + player.width / 2,
+                    originY: spawnY + player.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.6) * 12,
+                    color: colors[i % colors.length],
+                    size: Math.random() * 4 + 2,
+                    spin: Math.random() * 0.4
                 });
             }
 
+            // Phase 1: Fragment Scatter (0.8s) -> Phase 2: Quantum Magnetic Reassembly (0.8s)
             setTimeout(() => {
                 isExploding = false;
-                isSlowMo = false;
-                updateGameLayout();
-            }, 2000);
+                isRebuilding = true;
+                rebuildTimer = 1.0;
+                playSound('reboot');
+
+                setTimeout(() => {
+                    isRebuilding = false;
+                    isSlowMo = false;
+                    respawnAuraTimer = 35; // 35 frames tak futuristic energy aura flash hoga
+                    updateGameLayout();
+                }, 800);
+
+            }, 850);
         }
 
         function checkCoins() {
@@ -826,13 +847,27 @@
         function update() {
             let timeFactor = isSlowMo ? 0.25 : 1.0;
 
+            // Explosion state
             if (isExploding) {
                 fragments.forEach(f => {
                     f.x += f.vx * timeFactor;
                     f.y += f.vy * timeFactor;
-                    f.vy += 0.45 * timeFactor; 
+                    f.vy += 0.35 * timeFactor;
                 });
                 return;
+            }
+
+            // Magnetic Rebuild / Matrix Synthesis state
+            if (isRebuilding) {
+                fragments.forEach(f => {
+                    f.x += (f.originX - f.x) * 0.18;
+                    f.y += (f.originY - f.y) * 0.18;
+                });
+                return;
+            }
+
+            if (respawnAuraTimer > 0) {
+                respawnAuraTimer--;
             }
 
             if (keys.left) {
@@ -894,6 +929,7 @@
 
             checkCoins();
 
+            // Goal detection
             let playerCenterInsideGoal = (player.x + player.width / 2 >= goal.x && player.x + player.width / 2 <= goal.x + goal.w);
 
             if (playerCenterInsideGoal && player.y + player.height >= goal.y) {
@@ -1002,30 +1038,70 @@
                 }
             });
 
-            // Cyber Portal Gate
+            // 🚪 90%+ VISIBLE SCI-FI PORTAL GATE
+            let gx = goal.x;
+            let gy = goal.y;
+            let gw = goal.w;
+            let gh = goal.h;
+
             if (isDoorOpen) {
-                ctx.fillStyle = 'rgba(0, 255, 204, 0.2)';
-                ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
-                ctx.fillStyle = '#022622';
-                ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+                // Outer Cyan Aura
+                ctx.fillStyle = 'rgba(0, 255, 204, 0.15)';
+                ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
+
+                // Main Door Frame
+                ctx.fillStyle = '#031c19';
+                ctx.fillRect(gx, gy, gw, gh);
+
+                // Inner Warp Portal Core
+                let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
+                portalGrad.addColorStop(0, '#00ffcc');
+                portalGrad.addColorStop(0.5, '#0072ff');
+                portalGrad.addColorStop(1, '#7928ca');
+                ctx.fillStyle = portalGrad;
+                ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 4);
+
+                // Portal Frame Highlight
                 ctx.strokeStyle = '#00ffcc';
                 ctx.shadowColor = '#00ffcc';
-                ctx.shadowBlur = 12;
+                ctx.shadowBlur = 14;
+                ctx.lineWidth = 2.5;
+                ctx.strokeRect(gx, gy, gw, gh);
+                ctx.shadowBlur = 0;
+
+                // Portal Energy Bars
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(gx + gw / 2 - 1, gy + 8, 2, gh - 16);
             } else {
-                ctx.fillStyle = 'rgba(255, 0, 127, 0.2)';
-                ctx.fillRect(goal.x - 4, goal.y - 4, goal.w + 8, goal.h + 8);
-                ctx.fillStyle = '#2c0418';
-                ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+                // Locked Pink/Red Aura
+                ctx.fillStyle = 'rgba(255, 0, 127, 0.15)';
+                ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
+
+                // Door Inner Solid Lock
+                ctx.fillStyle = '#1c0310';
+                ctx.fillRect(gx, gy, gw, gh);
+
                 ctx.strokeStyle = '#ff007f';
                 ctx.shadowColor = '#ff007f';
-                ctx.shadowBlur = 12;
+                ctx.shadowBlur = 14;
+                ctx.lineWidth = 2.5;
+                ctx.strokeRect(gx, gy, gw, gh);
+                ctx.shadowBlur = 0;
 
+                // Locked Cross Security Bars
+                ctx.strokeStyle = 'rgba(255, 0, 127, 0.7)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(gx + 6, gy + 6);
+                ctx.lineTo(gx + gw - 6, gy + gh - 6);
+                ctx.moveTo(gx + gw - 6, gy + 6);
+                ctx.lineTo(gx + 6, gy + gh - 6);
+                ctx.stroke();
+
+                // Center Hologram Padlock Icon
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(goal.x + goal.w/2 - 2, goal.y + goal.h/2 - 2, 4, 4);
+                ctx.fillRect(gx + gw / 2 - 3, gy + gh / 2 - 4, 6, 8);
             }
-            ctx.lineWidth = 2.5;
-            ctx.strokeRect(goal.x, goal.y, goal.w, goal.h);
-            ctx.shadowBlur = 0;
 
             // Particles
             particles.forEach(p => {
@@ -1047,15 +1123,52 @@
                 ctx.restore();
             });
 
-            // Player character
-            if (isExploding) {
+            // ✨ NEW REASSEMBLY RENDERING
+            if (isExploding || isRebuilding) {
                 fragments.forEach(f => {
+                    ctx.save();
                     ctx.fillStyle = f.color;
-                    ctx.fillRect(f.x, f.y, 4, 4);
+                    ctx.shadowColor = f.color;
+                    ctx.shadowBlur = 8;
+                    ctx.fillRect(f.x, f.y, f.size, f.size);
+
+                    // Reassembly Digital Laser Connection Strings
+                    if (isRebuilding) {
+                        ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(f.x, f.y);
+                        ctx.lineTo(f.originX, f.originY);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
                 });
+
+                // Spawn Center Matrix Ring
+                if (isRebuilding) {
+                    let originX = (currentLevel === 3) ? 50 : 40;
+                    let originY = (currentLevel === 3) ? (canvasHeight - 40 - 90) : 100;
+                    ctx.beginPath();
+                    ctx.arc(originX + player.width / 2, originY + player.height / 2, 26, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(0, 255, 204, 0.7)';
+                    ctx.setLineDash([4, 4]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
             } else {
                 let px = player.x;
                 let py = player.y;
+
+                // ✨ RESPAWN POST-AURA SHOCKWAVE EFFECT
+                if (respawnAuraTimer > 0) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(px + player.width / 2, py + player.height / 2, 38 - respawnAuraTimer, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(0, 240, 255, ${respawnAuraTimer / 35})`;
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                    ctx.restore();
+                }
 
                 if (shieldActive) {
                     ctx.beginPath();
