@@ -1,5 +1,5 @@
 <!-- ======================================================== -->
-<!-- 🤪 YEH "game2.html" (HARD TROLL TRAPS + 5 COINS PUZZLE) HAI 🤪 -->
+<!-- 🤪 YEH "game2.html" (+35% EXTRA HARD + BOMB COINS) HAI 🤪 -->
 <!-- ======================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -301,9 +301,9 @@
 
     <div class="game-wrapper" id="gameWrapper">
         <div class="game-hud">
-            <div class="hud-title" id="levelTitle">☠️ TROLL CHAPTER: LVL 6 ☠️</div>
+            <div class="hud-title" id="levelTitle">☠️ HARD CHAPTER: LVL 6 ☠️</div>
             <div class="hud-stats">
-                <span id="scoreDisplay">COINS: 0/5</span>
+                <span id="scoreDisplay">COINS: 0</span>
                 <span id="shieldDisplay">SHIELD: OFF</span>
             </div>
             <div class="hud-right-group">
@@ -385,7 +385,6 @@
             updateGameLayout();
         }
 
-        // URL se level check karo
         const urlParams = new URLSearchParams(window.location.search);
         let requestedLvl = parseInt(urlParams.get('level'));
 
@@ -397,9 +396,8 @@
         if (currentLevel < 6) currentLevel = 6;
         if (currentLevel > 15) currentLevel = 15;
 
-        let isDoorOpen = false;
+        let isDoorOpen = true; // Coins compulsory nahi hain, Gate direct open hai!
         let score = 0;
-        const TARGET_COINS = 5; // Har level me 5 coins zaroori hai door kholne ke liye!
         let shieldActive = false;
         let isExploding = false;
         let isRebuilding = false;
@@ -409,10 +407,10 @@
         let particles = [];
         let floatingTexts = [];
 
-        // Traps & Secret Puzzle Elements
-        let surfaceSpikes = [];       // Main floor timing kante (Levels 6, 12, 14)
-        let hiddenPlatformSpikes = []; // 2nd surface hidden kante (Levels 7, 8, 9, 10, 11, 13, 15)
-        let secretBlocks = [];        // Secret lucky boxes jo 5th missing coin nikalenge
+        // Traps & Obstacles
+        let surfaceSpikes = [];       // Main floor fast timing spikes (Levels 6, 12, 14)
+        let hiddenPlatformSpikes = []; // 2nd surface stealth spikes
+        let secretBlocks = [];        // Har level me alag jagah secret '?' box
         let globalTick = 0;
 
         let player = {
@@ -434,12 +432,12 @@
         let goal = { x: 0, y: 0, w: 38, h: 52 };
 
         const trollTaunts = [
-            "Hahaha! Gate ke bahar hi latak gaye? 🚪🤡",
-            "5 Coins chahiye the, 3 leke kahan ja rahe ho? 🪙🤣",
-            "2nd Surface par pair rakhna mana tha! 📌💀",
-            "Zameen par kante dikh nahi rahe the kya? ⚡🙈",
-            "Pura andar ghuso, tabhi gate manega! 🎯🍼",
-            "Aukaat se bahar hai ye gate, wapas jao! 📉🔥"
+            "Hahaha! Bomb coin chhu liya na? 💣💥",
+            "Aukaat se bahar hai ye hard mode! 📉🔥",
+            "Itna aasan samajh rakha tha kya? 🤡",
+            "2nd surface ke kante yaad hain ya bhool gaye? 📌💀",
+            "Main character banne chale the, bomb se udd gaye! 🤖",
+            "Floor timings se fast nikalna tha! ⚡🍼"
         ];
 
         function showTrollTaunt(customMsg) {
@@ -452,123 +450,133 @@
 
         function updateGameLayout() {
             score = 0;
-            isDoorOpen = false;
+            isDoorOpen = true; // Gate open hai, bas survive karke andar jana hai
             const surfaceTop = canvasHeight - 40;
             const surfaceHeight = 40;
 
             const levelNames = {
-                6: "🚪『 FULL GATE ENTRY + TIMING KANTE 』- Lvl 6",
-                7: "📌『 2ND SURFACE HIDDEN KANTA 』- Lvl 7",
-                8: "🌀『 SECRET 5TH COIN PUZZLE 』- Lvl 8",
-                9: "☠️『 DANGEROUS CEILING & PLATFORM TRAP 』- Lvl 9",
-                10: "🕳️『 DOUBLE STEP HIDDEN SPIKES 』- Lvl 10",
-                11: "⚡『 2ND SURFACE SURPRISE KANTE 』- Lvl 11",
-                12: "⏱️『 TIMED GROUND FLOOR KANTE 』- Lvl 12",
-                13: "🛰️『 2ND SURFACE SHARP TRAPS 』- Lvl 13",
-                14: "💣『 FAST TIMING FLOOR SPIKES 』- Lvl 14",
-                15: "👑『 2ND SURFACE FINAL SPIKE GAUNTLET 』- Lvl 15"
+                6: "🔥『 +35% HARD: BOMB COIN ROULETTE 』- Lvl 6",
+                7: "📌『 STEALTH 2ND SURFACE SPIKES 』- Lvl 7",
+                8: "🌀『 DANGEROUS HIGH JUMP PUZZLE 』- Lvl 8",
+                9: "☠️『 TRIPLE SPIKE RUN & EXPLOSIVES 』- Lvl 9",
+                10: "🕳️『 ULTRA FAST VANISHING STEPS 』- Lvl 10",
+                11: "⚡『 SURPRISE HIGH LEDGE TRAPS 』- Lvl 11",
+                12: "⏱️『 BLITZ FAST GROUND KANTE 』- Lvl 12",
+                13: "🛰️『 DOUBLE 2ND SURFACE RAZORS 』- Lvl 13",
+                14: "💣『 RAPID SPEED SPIKE CYCLES 』- Lvl 14",
+                15: "👑『 HELL MATRIX: ULTIMATE SURVIVAL 』- Lvl 15"
             };
 
             document.getElementById('levelTitle').innerText = levelNames[currentLevel] || `⚡ LEVEL ${currentLevel} ⚡`;
-            document.getElementById('scoreDisplay').innerText = `COINS: ${score}/${TARGET_COINS}`;
+            document.getElementById('scoreDisplay').innerText = `COINS: ${score}`;
 
             platforms = [];
             surfaceSpikes = [];
             hiddenPlatformSpikes = [];
             secretBlocks = [];
 
-            // Main Base Ground
+            // Main Floor
             platforms.push({ x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' });
 
-            // 7 LEVELS (7, 8, 9, 10, 11, 13, 15) WITH 2ND SURFACE HIDDEN KANTE
+            // 7 Levels with 2nd Surface Hidden Spikes: (7, 8, 9, 10, 11, 13, 15)
             const levelsWithHidden2ndSpikes = [7, 8, 9, 10, 11, 13, 15];
             const hasHidden2ndSpikes = levelsWithHidden2ndSpikes.includes(currentLevel);
 
-            // BAKI LEVELS (6, 12, 14) WITH MAIN SURFACE TIMING KANTE
-            const hasTimingGroundSpikes = !hasHidden2ndSpikes;
-
-            if (hasTimingGroundSpikes) {
-                // Timing Kante on ground
-                surfaceSpikes.push({ x: 380, y: surfaceTop - 18, w: 70, h: 18, period: 120, offset: 0 });
-                surfaceSpikes.push({ x: 740, y: surfaceTop - 18, w: 70, h: 18, period: 120, offset: 60 });
+            // Baki levels (6, 12, 14) par Fast Timing Ground Spikes (+35% fast period = 70 frames)
+            if (!hasHidden2ndSpikes) {
+                surfaceSpikes.push({ x: 340, y: surfaceTop - 18, w: 80, h: 18, period: 70, offset: 0 });
+                surfaceSpikes.push({ x: 680, y: surfaceTop - 18, w: 80, h: 18, period: 70, offset: 35 });
+                surfaceSpikes.push({ x: 960, y: surfaceTop - 18, w: 70, h: 18, period: 70, offset: 15 });
             }
 
-            // Platforms Setup
+            // Har level me ? Box ki alag-alag unique location
+            const boxPositions = {
+                6: { x: 360, y: surfaceTop - 120 },
+                7: { x: 720, y: surfaceTop - 110 },
+                8: { x: 180, y: surfaceTop - 90 },
+                9: { x: 880, y: surfaceTop - 130 },
+                10: { x: 540, y: surfaceTop - 140 },
+                11: { x: 420, y: surfaceTop - 100 },
+                12: { x: 820, y: surfaceTop - 115 },
+                13: { x: 620, y: surfaceTop - 135 },
+                14: { x: 280, y: surfaceTop - 95 },
+                15: { x: 760, y: surfaceTop - 145 }
+            };
+
+            let bPos = boxPositions[currentLevel] || { x: 500, y: surfaceTop - 110 };
+            secretBlocks.push({ x: bPos.x, y: bPos.y, w: 36, h: 22, hit: false });
+
+            // Platforms & Hidden 2nd Surface Kante Setup (+35% Tighter Margins)
             if (currentLevel === 6) {
-                platforms.push({ x: 320, y: surfaceTop - 55, w: 110, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 680, y: surfaceTop - 65, w: 110, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 280, y: surfaceTop - 60, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 620, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
             } 
             else if (currentLevel === 7) {
-                platforms.push({ x: 300, y: surfaceTop - 55, w: 100, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 650, y: surfaceTop - 65, w: 100, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 670, y: surfaceTop - 65 - 16, w: 50, h: 16, triggered: false, revealed: false });
+                platforms.push({ x: 260, y: surfaceTop - 60, w: 85, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 620, y: surfaceTop - 70, w: 85, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 630, y: surfaceTop - 70 - 18, w: 65, h: 18, revealed: false });
             }
             else if (currentLevel === 8) {
-                platforms.push({ x: 260, y: surfaceTop - 50, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 540, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 800, y: surfaceTop - 55, w: 90, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 560, y: surfaceTop - 70 - 16, w: 45, h: 16, triggered: false, revealed: false });
+                platforms.push({ x: 220, y: surfaceTop - 55, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 500, y: surfaceTop - 75, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 780, y: surfaceTop - 60, w: 80, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 510, y: surfaceTop - 75 - 18, w: 60, h: 18, revealed: false });
             }
             else if (currentLevel === 9) {
-                platforms.push({ x: 350, y: surfaceTop - 65, w: 110, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 720, y: surfaceTop - 70, w: 110, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 370, y: surfaceTop - 65 - 16, w: 55, h: 16, triggered: false, revealed: false });
+                platforms.push({ x: 300, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 680, y: surfaceTop - 75, w: 90, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 310, y: surfaceTop - 70 - 18, w: 70, h: 18, revealed: false });
             }
             else if (currentLevel === 10) {
-                platforms.push({ x: 280, y: surfaceTop - 55, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 560, y: surfaceTop - 75, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 820, y: surfaceTop - 55, w: 90, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 840, y: surfaceTop - 55 - 16, w: 45, h: 16, triggered: false, revealed: false });
+                platforms.push({ x: 240, y: surfaceTop - 60, w: 75, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 520, y: surfaceTop - 80, w: 75, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 800, y: surfaceTop - 60, w: 75, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 810, y: surfaceTop - 60 - 18, w: 55, h: 18, revealed: false });
             }
             else if (currentLevel === 11) {
-                platforms.push({ x: 400, y: surfaceTop - 60, w: 130, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 720, y: surfaceTop - 60, w: 130, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 430, y: surfaceTop - 60 - 16, w: 60, h: 16, triggered: false, revealed: false });
+                platforms.push({ x: 360, y: surfaceTop - 65, w: 100, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 700, y: surfaceTop - 65, w: 100, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 380, y: surfaceTop - 65 - 18, w: 70, h: 18, revealed: false });
             }
             else if (currentLevel === 12) {
-                platforms.push({ x: 330, y: surfaceTop - 55, w: 100, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 670, y: surfaceTop - 70, w: 100, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 300, y: surfaceTop - 60, w: 85, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 650, y: surfaceTop - 75, w: 85, h: 16, type: 'secondSurface' });
             }
             else if (currentLevel === 13) {
-                platforms.push({ x: 350, y: surfaceTop - 60, w: 100, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 680, y: surfaceTop - 75, w: 100, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 700, y: surfaceTop - 75 - 16, w: 50, h: 16, triggered: false, revealed: false });
+                platforms.push({ x: 320, y: surfaceTop - 65, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 660, y: surfaceTop - 80, w: 90, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 675, y: surfaceTop - 80 - 18, w: 60, h: 18, revealed: false });
             }
             else if (currentLevel === 14) {
-                platforms.push({ x: 320, y: surfaceTop - 50, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 600, y: surfaceTop - 75, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 850, y: surfaceTop - 60, w: 90, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 280, y: surfaceTop - 55, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 560, y: surfaceTop - 80, w: 80, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 840, y: surfaceTop - 65, w: 80, h: 16, type: 'secondSurface' });
             }
             else if (currentLevel === 15) {
-                platforms.push({ x: 350, y: surfaceTop - 60, w: 100, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 680, y: surfaceTop - 70, w: 100, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 370, y: surfaceTop - 60 - 16, w: 50, h: 16, triggered: false, revealed: false });
-                hiddenPlatformSpikes.push({ x: 700, y: surfaceTop - 70 - 16, w: 50, h: 16, triggered: false, revealed: false });
+                platforms.push({ x: 320, y: surfaceTop - 65, w: 85, h: 16, type: 'secondSurface' });
+                platforms.push({ x: 660, y: surfaceTop - 75, w: 85, h: 16, type: 'secondSurface' });
+                hiddenPlatformSpikes.push({ x: 335, y: surfaceTop - 65 - 18, w: 60, h: 18, revealed: false });
+                hiddenPlatformSpikes.push({ x: 675, y: surfaceTop - 75 - 18, w: 60, h: 18, revealed: false });
             }
 
-            // 🎁 SECRET TROLL LUCKY BLOCKS (SAR SE HIT KARNE PAR MISSING 5TH COIN DENGE)
-            secretBlocks.push({
-                x: 520,
-                y: surfaceTop - 110,
-                w: 36,
-                h: 22,
-                hit: false,
-                rewardCoins: 2 // 3 initial coins + 2 secret coins = Total 5 coins!
-            });
-
-            // 3 INITIAL VISIBLE COINS ONLY (PLAYER SOCHEGA 5 KAISE HONGE!)
+            // 💣 COINS GENERATION WITH RANDOM BOMB COIN FIT (SURFACE PAR NAHI, HAWA MEIN)
             coins = [];
+            let totalCoinsInMap = 4;
+            let bombCoinIndex = Math.floor(Math.random() * totalCoinsInMap); // Randomly 1 coin is a Bomb!
+
             let startMargin = 220;
             let endMargin = 260;
             let usableWidth = canvasWidth - startMargin - endMargin;
-            let coinSpacing = usableWidth / 2;
+            let coinSpacing = usableWidth / (totalCoinsInMap - 1);
 
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < totalCoinsInMap; i++) {
+                let isBomb = (i === bombCoinIndex);
                 coins.push({
                     x: startMargin + i * coinSpacing,
-                    y: surfaceTop - 25,
+                    y: surfaceTop - 30 - (i % 2 === 0 ? 0 : 25), // Alternating floating height
                     collected: false,
                     radius: 5,
+                    isBomb: isBomb, // Touch karte hi BOOM!
                     floatOffset: Math.random() * Math.PI
                 });
             }
@@ -578,7 +586,6 @@
             player.vx = 0;
             player.vy = 0;
 
-            // 90% Visible Gate Position
             goal.y = surfaceTop - goal.h;
             goal.x = canvasWidth - goal.w - 8;
         }
@@ -812,20 +819,21 @@
             }, 850);
         }
 
+        // 💣 CHECK COINS (RANDOM BOMB COIN BLAST CHECK)
         function checkCoins() {
             coins.forEach(c => {
                 if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
                     c.collected = true;
+
+                    if (c.isBomb) {
+                        floatingTexts.push({ text: '💣 BOOM! TRAP COIN!', x: c.x - 40, y: c.y - 20, alpha: 1, vy: -1 });
+                        triggerExplosion(); // Galat coin touch kiya toh blast!
+                        return;
+                    }
+
                     score += 1;
                     playSound('coin');
                     floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
-
-                    if (score >= TARGET_COINS) {
-                        isDoorOpen = true;
-                        floatingTexts.push({ text: 'GATE UNLOCKED! 🚪⚡', x: player.x - 40, y: player.y - 25, alpha: 1, vy: -1 });
-                    } else {
-                        floatingTexts.push({ text: `NEED ${TARGET_COINS - score} MORE!`, x: player.x - 30, y: player.y - 20, alpha: 1, vy: -0.7 });
-                    }
                 }
             });
         }
@@ -902,7 +910,7 @@
                 }
             });
 
-            // 🎁 SECRET TROLL LUCKY BLOCK HEAD-HIT CHECK (REVEAL 5TH COIN)
+            // 🎁 SECRET TROLL LUCKY BLOCK CHECK
             secretBlocks.forEach(sb => {
                 if (!sb.hit) {
                     if (
@@ -914,31 +922,25 @@
                         sb.hit = true;
                         player.vy = 3;
                         playSound('secret');
-                        floatingTexts.push({ text: 'SECRET LUCKY COINS! 🎁✨', x: sb.x - 50, y: sb.y - 20, alpha: 1, vy: -1 });
+                        floatingTexts.push({ text: 'LUCKY SURPRISE! 🎁✨', x: sb.x - 40, y: sb.y - 20, alpha: 1, vy: -1 });
 
-                        // Spawn 2 Hidden Coins on map to complete 5 coins!
+                        // Spawn 1 safe bonus coin
                         coins.push({
-                            x: sb.x - 40,
-                            y: sb.y - 40,
+                            x: sb.x + 18,
+                            y: sb.y - 35,
                             collected: false,
                             radius: 5,
+                            isBomb: false,
                             floatOffset: 0
-                        });
-                        coins.push({
-                            x: sb.x + 60,
-                            y: sb.y - 40,
-                            collected: false,
-                            radius: 5,
-                            floatOffset: Math.PI
                         });
                     }
                 }
             });
 
-            // ⏱️ MAIN SURFACE TIMING KANTE HIT-TEST
+            // ⏱️ MAIN SURFACE FAST TIMING KANTE HIT-TEST
             surfaceSpikes.forEach(sp => {
                 let cycle = (globalTick + sp.offset) % sp.period;
-                let active = cycle < (sp.period / 2); // Aadha time bahar, aadha time andar
+                let active = cycle < (sp.period / 2);
                 if (active) {
                     if (
                         player.x + player.width > sp.x + 4 &&
@@ -954,26 +956,21 @@
 
             checkCoins();
 
-            // 🚪 LEVEL 6 & ALL LEVELS: FULL BODY INSIDE GATE CHECK
+            // 🚪 FULL BODY INSIDE GATE CHECK
             let gateInsideLeft = goal.x + 6;
             let gateInsideRight = goal.x + goal.w - 6;
             let isDummyCompletelyInsideGate = (player.x >= gateInsideLeft && (player.x + player.width) <= gateInsideRight);
             let isDummyTouchingGateVertically = (player.y + player.height >= goal.y && player.y <= goal.y + goal.h);
 
             if (isDummyTouchingGateVertically && (player.x + player.width >= goal.x && player.x <= goal.x + goal.w)) {
-                if (!isDoorOpen) {
-                    player.x = goal.x - player.width - 2;
-                    floatingTexts.push({ text: `LOCKED! NEED 5 COINS (${score}/5) 🔒`, x: player.x - 70, y: player.y - 15, alpha: 1, vy: -0.5 });
-                } 
-                else if (isDoorOpen && !levelWon) {
-                    // Jab tak pura dummy gate ke andar nahi jayega tabtak win nahi hoga!
+                if (!levelWon) {
                     if (isDummyCompletelyInsideGate) {
                         levelWon = true;
                         playSound('win');
                         const modal = document.getElementById('notificationModal');
 
                         if (currentLevel < 15) {
-                            modal.innerText = `🎉 LEVEL ${currentLevel} CLEARED! DUMMY ESCAPED! 🤪`;
+                            modal.innerText = `🎉 LEVEL ${currentLevel} CLEARED! HARD RUN! 🤪`;
                             modal.classList.add('show');
 
                             let nextLvl = currentLevel + 1;
@@ -988,14 +985,13 @@
                             }, 2000);
                         } else {
                             localStorage.setItem('saveLevel_TumseNaHoPayga', 16);
-                            modal.innerText = "🏆 TU TOH SACH MEIN PRO NIKLA! ALL 15 LEVELS CLEARED! 👑";
+                            modal.innerText = "🏆 ALL 15 HARD LEVELS CLEARED! GOD LEVEL PLAYER! 👑";
                             modal.classList.add('show');
                             setTimeout(() => {
                                 window.location.href = "index.html";
                             }, 2500);
                         }
                     } else {
-                        // Agar aadha dummy bahar hai toh prompt dega
                         if (Math.random() < 0.08) {
                             floatingTexts.push({ text: 'ENTER FULLY INSIDE GATE! 🚪🏃', x: goal.x - 80, y: goal.y - 20, alpha: 1, vy: -0.5 });
                         }
@@ -1003,7 +999,7 @@
                 }
             }
 
-            document.getElementById('scoreDisplay').innerText = `COINS: ${score}/${TARGET_COINS}`;
+            document.getElementById('scoreDisplay').innerText = `COINS: ${score}`;
 
             for (let i = floatingTexts.length - 1; i >= 0; i--) {
                 let ft = floatingTexts[i];
@@ -1016,7 +1012,7 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Draw Platforms
+            // Platforms
             platforms.forEach(p => {
                 ctx.fillStyle = '#0c0d18';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
@@ -1049,7 +1045,7 @@
                 ctx.restore();
             });
 
-            // ⏱️ Draw Timing Spikes on Main Surface
+            // ⏱️ Fast Ground Timing Spikes
             surfaceSpikes.forEach(sp => {
                 let cycle = (globalTick + sp.offset) % sp.period;
                 let active = cycle < (sp.period / 2);
@@ -1071,13 +1067,12 @@
                     }
                     ctx.restore();
                 } else {
-                    // Small warning groove
                     ctx.fillStyle = 'rgba(255, 0, 85, 0.2)';
                     ctx.fillRect(sp.x, sp.y + sp.h - 3, sp.w, 3);
                 }
             });
 
-            // 📌 Draw Hidden 2nd Surface Spikes (Only if triggered or revealed)
+            // 📌 Hidden 2nd Surface Spikes
             hiddenPlatformSpikes.forEach(sp => {
                 if (sp.revealed) {
                     ctx.save();
@@ -1098,7 +1093,7 @@
                 }
             });
 
-            // Coins
+            // Coins (All look identical golden tokens, but 1 has a hidden bomb)
             coins.forEach(c => {
                 if (!c.collected) {
                     c.floatOffset += 0.08;
@@ -1120,49 +1115,26 @@
 
             // 90% Visible Gate
             let gx = goal.x, gy = goal.y, gw = goal.w, gh = goal.h;
-            if (isDoorOpen) {
-                ctx.fillStyle = 'rgba(0, 255, 204, 0.15)';
-                ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
-                ctx.fillStyle = '#031c19';
-                ctx.fillRect(gx, gy, gw, gh);
+            ctx.fillStyle = 'rgba(0, 255, 204, 0.15)';
+            ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
+            ctx.fillStyle = '#031c19';
+            ctx.fillRect(gx, gy, gw, gh);
 
-                let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
-                portalGrad.addColorStop(0, '#00ffcc');
-                portalGrad.addColorStop(0.5, '#0072ff');
-                portalGrad.addColorStop(1, '#7928ca');
-                ctx.fillStyle = portalGrad;
-                ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 4);
+            let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
+            portalGrad.addColorStop(0, '#00ffcc');
+            portalGrad.addColorStop(0.5, '#0072ff');
+            portalGrad.addColorStop(1, '#7928ca');
+            ctx.fillStyle = portalGrad;
+            ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 4);
 
-                ctx.strokeStyle = '#00ffcc';
-                ctx.lineWidth = 2.5;
-                ctx.strokeRect(gx, gy, gw, gh);
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(gx, gy, gw, gh);
 
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(gx + gw / 2 - 1, gy + 8, 2, gh - 16);
-            } else {
-                ctx.fillStyle = 'rgba(255, 0, 127, 0.15)';
-                ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
-                ctx.fillStyle = '#1c0310';
-                ctx.fillRect(gx, gy, gw, gh);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(gx + gw / 2 - 1, gy + 8, 2, gh - 16);
 
-                ctx.strokeStyle = '#ff007f';
-                ctx.lineWidth = 2.5;
-                ctx.strokeRect(gx, gy, gw, gh);
-
-                ctx.strokeStyle = 'rgba(255, 0, 127, 0.7)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(gx + 6, gy + 6);
-                ctx.lineTo(gx + gw - 6, gy + gh - 6);
-                ctx.moveTo(gx + gw - 6, gy + 6);
-                ctx.lineTo(gx + 6, gy + gh - 6);
-                ctx.stroke();
-
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(gx + gw / 2 - 3, gy + gh / 2 - 4, 6, 8);
-            }
-
-            // Explosion & Rebuild
+            // Explosion Rebuild Animation
             if (isExploding || isRebuilding) {
                 fragments.forEach(f => {
                     ctx.save();
