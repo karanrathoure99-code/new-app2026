@@ -239,7 +239,7 @@
             letter-spacing: 0.5px;
         }
 
-        .back-btn, .prev-lvl-btn {
+        .back-btn, .prev-lvl-btn, .next-lvl-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
@@ -253,11 +253,19 @@
             transition: all 0.3s ease;
         }
 
-        .back-btn:hover, .prev-lvl-btn:hover {
+        .back-btn:hover, .prev-lvl-btn:hover, .next-lvl-btn:hover:not(:disabled) {
             color: #00f0ff;
             border-color: #00f0ff;
             background: rgba(0, 240, 255, 0.15);
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .next-lvl-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            box-shadow: none;
         }
 
         #notificationModal {
@@ -305,6 +313,7 @@
             </div>
             <div class="hud-right-group">
                 <button class="prev-lvl-btn" onclick="goToPrevLevel()">◀ BACK</button>
+                <button class="next-lvl-btn" id="nextLvlBtn" onclick="goToNextUnlockedLevel()">NEXT ▶</button>
                 <button class="back-btn" onclick="goHome()">QUIT</button>
             </div>
         </div>
@@ -387,7 +396,7 @@
         if (savedMaxLevel > 15) savedMaxLevel = 15;
         let currentLevel = savedMaxLevel;
 
-        let isDoorOpen = true; // Coins compulsory nahi hain, Gate direct accessible hai
+        let isDoorOpen = true; 
         let score = 0;
         let shieldActive = false;
         let isExploding = false;
@@ -440,6 +449,24 @@
             setTimeout(() => modal.classList.remove('show'), 1500);
         }
 
+        // NEXT BUTTON STATE UPDATE FUNCTION
+        function updateNavigationButtons() {
+            const nextBtn = document.getElementById('nextLvlBtn');
+            if (nextBtn) {
+                // Agar player piche ki level par hai toh NEXT button active hoga
+                if (currentLevel < savedMaxLevel) {
+                    nextBtn.disabled = false;
+                    nextBtn.style.color = '#00f0ff';
+                    nextBtn.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+                } else {
+                    // Agar player aakhiri unlocked level par hai toh disable
+                    nextBtn.disabled = true;
+                    nextBtn.style.color = 'rgba(255, 255, 255, 0.3)';
+                    nextBtn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                }
+            }
+        }
+
         function updateGameLayout() {
             score = 0;
             isDoorOpen = true;
@@ -472,21 +499,17 @@
             hiddenPlatformSpikes = [];
             secretBlocks = [];
 
-            // Base ground
             platforms.push({ x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' });
 
-            // 7 Levels with Stealth Spikes on 2nd Surface (7, 8, 9, 10, 11, 13, 15)
             const levelsWithHidden2ndSpikes = [7, 8, 9, 10, 11, 13, 15];
             const hasHidden2ndSpikes = levelsWithHidden2ndSpikes.includes(currentLevel);
 
-            // Baki levels (6, 12, 14) par Fast Timing Ground Spikes
             if (!hasHidden2ndSpikes && currentLevel >= 6) {
                 surfaceSpikes.push({ x: 340, y: surfaceTop - 18, w: 80, h: 18, period: 70, offset: 0 });
                 surfaceSpikes.push({ x: 680, y: surfaceTop - 18, w: 80, h: 18, period: 70, offset: 35 });
                 surfaceSpikes.push({ x: 960, y: surfaceTop - 18, w: 70, h: 18, period: 70, offset: 15 });
             }
 
-            // Har level me alag unique jagah '?' Lucky Box
             const boxPositions = {
                 1: { x: 450, y: surfaceTop - 90 },
                 2: { x: 650, y: surfaceTop - 100 },
@@ -508,7 +531,6 @@
             let bPos = boxPositions[currentLevel] || { x: 500, y: surfaceTop - 110 };
             secretBlocks.push({ x: bPos.x, y: bPos.y, w: 36, h: 22, hit: false });
 
-            // Layouts for all 15 Levels
             if (currentLevel === 1) {
                 platforms.push({ x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
             } 
@@ -583,7 +605,6 @@
                 hiddenPlatformSpikes.push({ x: 675, y: surfaceTop - 75 - 18, w: 60, h: 18, revealed: false });
             }
 
-            // 💣 COIN GENERATION WITH RANDOM BOMB COIN ROULETTE (HAWA MEIN)
             coins = [];
             let totalCoins = 4;
             let bombIndex = (currentLevel >= 6) ? Math.floor(Math.random() * totalCoins) : -1;
@@ -612,9 +633,10 @@
 
             goal.y = surfaceTop - goal.h;
             goal.x = canvasWidth - goal.w - 8;
+
+            updateNavigationButtons();
         }
 
-        // 🔄 STEP-BY-STEP BACK BUTTON LOGIC (PURA LEVEL 1 TAK PEECHE JAYEGA)
         function goToPrevLevel() {
             if (currentLevel > 1) {
                 currentLevel--;
@@ -624,6 +646,14 @@
                 modal.innerText = "⚠️ Yeh pehla level hai!";
                 modal.classList.add('show');
                 setTimeout(() => modal.classList.remove('show'), 1500);
+            }
+        }
+
+        // NEXT BUTTON CLICK HANDLER (FORWARD SIRF UNLOCKED LEVEL TAK)
+        function goToNextUnlockedLevel() {
+            if (currentLevel < savedMaxLevel) {
+                currentLevel++;
+                updateGameLayout();
             }
         }
 
@@ -918,7 +948,6 @@
 
             player.isGrounded = false;
 
-            // Platform collision
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap') {
                     let playerCenterX = player.x + player.width / 2;
@@ -940,7 +969,6 @@
                     player.vy = 0;
                     player.isGrounded = true;
 
-                    // 💥 Stealth spike check on 2nd surface
                     if (p.type === 'secondSurface') {
                         hiddenPlatformSpikes.forEach(sp => {
                             if (player.x + player.width > sp.x && player.x < sp.x + sp.w) {
@@ -952,7 +980,6 @@
                 }
             });
 
-            // 🎁 Secret Lucky Box Hit Check
             secretBlocks.forEach(sb => {
                 if (!sb.hit) {
                     if (
@@ -978,7 +1005,6 @@
                 }
             });
 
-            // ⏱️ Fast Timing Spikes Hit Check
             surfaceSpikes.forEach(sp => {
                 let cycle = (globalTick + sp.offset) % sp.period;
                 let active = cycle < (sp.period / 2);
@@ -997,7 +1023,6 @@
 
             checkCoins();
 
-            // 🚪 FULL BODY INSIDE GATE WIN CONDITION
             let gateInsideLeft = goal.x + 6;
             let gateInsideRight = goal.x + goal.w - 6;
             let isDummyCompletelyInsideGate = (player.x >= gateInsideLeft && (player.x + player.width) <= gateInsideRight);
@@ -1015,8 +1040,10 @@
                             modal.classList.add('show');
 
                             let nextLvl = currentLevel + 1;
-                            let savedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
-                            if (nextLvl > savedMax) localStorage.setItem('saveLevel_TumseNaHoPayga', nextLvl);
+                            if (nextLvl > savedMaxLevel) {
+                                savedMaxLevel = nextLvl;
+                                localStorage.setItem('saveLevel_TumseNaHoPayga', savedMaxLevel);
+                            }
 
                             setTimeout(() => {
                                 modal.classList.remove('show');
@@ -1053,7 +1080,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Platforms
             platforms.forEach(p => {
                 if (p.type === 'hiddenTrap' && p.triggered) return;
                 ctx.fillStyle = '#0c0d18';
@@ -1070,7 +1096,6 @@
                 ctx.shadowBlur = 0;
             });
 
-            // Secret Blocks
             secretBlocks.forEach(sb => {
                 ctx.save();
                 ctx.fillStyle = sb.hit ? 'rgba(255, 255, 255, 0.1)' : '#1f1035';
@@ -1087,7 +1112,6 @@
                 ctx.restore();
             });
 
-            // Surface Spikes
             surfaceSpikes.forEach(sp => {
                 let cycle = (globalTick + sp.offset) % sp.period;
                 let active = cycle < (sp.period / 2);
@@ -1114,7 +1138,6 @@
                 }
             });
 
-            // Hidden Spikes on 2nd surface
             hiddenPlatformSpikes.forEach(sp => {
                 if (sp.revealed) {
                     ctx.save();
@@ -1135,7 +1158,6 @@
                 }
             });
 
-            // Coins
             coins.forEach(c => {
                 if (!c.collected) {
                     c.floatOffset += 0.08;
@@ -1155,7 +1177,6 @@
                 }
             });
 
-            // Gate
             let gx = goal.x, gy = goal.y, gw = goal.w, gh = goal.h;
             ctx.fillStyle = 'rgba(0, 255, 204, 0.15)';
             ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
@@ -1176,7 +1197,6 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(gx + gw / 2 - 1, gy + 8, 2, gh - 16);
 
-            // Explosion Animation
             if (isExploding || isRebuilding) {
                 fragments.forEach(f => {
                     ctx.save();
