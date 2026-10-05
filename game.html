@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Theme Colors */
+      /* Theme colors */
       --bg-outer: #916000;
       --corridor-bg: #ffb356;
       --player-color: #000000;
@@ -45,7 +45,7 @@
       padding: 0 10px;
     }
 
-    /* Level Devil Style Clean Flat Buttons */
+    /* Level Devil Buttons (Clean, Flat, Solid Shadow) */
     .level-badge {
       background: #523500;
       color: #ffb356;
@@ -151,15 +151,16 @@
       levels.push(lvl);
     }
 
-    // Player State (Level Devil Dummy Size)
+    // Player State with Walk Animation Parameters
     const player = {
       x: 100,
       y: 0,
       width: 14,
-      height: 26,
+      height: 27,
       vx: 0,
       vy: 0,
-      facing: 1, // 1 for Right, -1 for Left
+      facing: 1, // 1: Right, -1: Left
+      walkCycle: 0,
       speed: 3.6,
       jumpPower: -8.6,
       grounded: false
@@ -175,7 +176,7 @@
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.frequency.value = freq;
-        gain.gain.value = 0.1;
+        gain.gain.value = 0.08;
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
@@ -196,6 +197,7 @@
       player.y = corridor.y + corridor.height - player.height;
       player.vx = 0;
       player.vy = 0;
+      player.walkCycle = 0;
       player.facing = 1;
 
       lvl.pits.forEach(p => p.opened = false);
@@ -210,7 +212,7 @@
       initLevel(currentLevelIdx);
     }
 
-    // Door (Clean Flat Look, No Outlines)
+    // Flat Door (No Outlines)
     function drawDoor(x, y, w, h) {
       ctx.fillStyle = '#523500';
       ctx.beginPath();
@@ -225,7 +227,7 @@
       ctx.fill();
     }
 
-    // Spikes (Clean Flat Look)
+    // Spikes (No Outlines)
     function drawSpikes(x, y, w, h) {
       ctx.fillStyle = '#b91c1c';
       const count = 3;
@@ -239,47 +241,65 @@
       }
     }
 
-    // Original Video Dummy Drawing (Black Devil Silhouette + Horns + Eyes)
-    function drawDummy(x, y, w, h, facing) {
+    // Original Video Dummy Drawing with Animated Moving Legs
+    function drawDummy(p) {
       ctx.save();
       ctx.fillStyle = '#000000';
+      ctx.strokeStyle = '#000000';
+      ctx.lineCap = 'round';
 
-      // 1. Head with Horns
-      const headHeight = 11;
-      const headWidth = 12;
-      const headX = x + (w - headWidth) / 2;
-      const headY = y + 3;
+      const cx = p.x + p.width / 2;
+      const headRadius = 4.2;
+      const headCenterY = p.y + headRadius + 1;
+      const hipY = p.y + 17;
+      const legLength = p.height - 17;
 
-      // Base Head
-      ctx.fillRect(headX, headY, headWidth, headHeight);
-
-      // Devil Horns on Head top
+      // 1. Head
       ctx.beginPath();
-      // Left horn
-      ctx.moveTo(headX, headY);
-      ctx.lineTo(headX - 1.5, headY - 3.5);
-      ctx.lineTo(headX + 3.5, headY);
-      // Right horn
-      ctx.moveTo(headX + headWidth - 3.5, headY);
-      ctx.lineTo(headX + headWidth + 1.5, headY - 3.5);
-      ctx.lineTo(headX + headWidth, headY);
+      ctx.arc(cx, headCenterY, headRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Body & Legs
-      const bodyWidth = 10;
-      const bodyX = x + (w - bodyWidth) / 2;
-      ctx.fillRect(bodyX, y + headHeight + 2, bodyWidth, h - headHeight - 2);
+      // 2. Torso (Body)
+      ctx.lineWidth = 4.2;
+      ctx.beginPath();
+      ctx.moveTo(cx, headCenterY + headRadius - 0.5);
+      ctx.lineTo(cx, hipY);
+      ctx.stroke();
 
-      // Leg cut in middle (two legs feel)
-      ctx.fillStyle = '#ffb356';
-      ctx.fillRect(x + w / 2 - 1, y + h - 5, 2, 5);
+      // 3. Legs Animation (Standing / Walking / Jumping)
+      ctx.lineWidth = 3.2;
 
-      // 3. Devil Eye (facing direction ke hisaab se)
-      ctx.fillStyle = '#ffb356'; // Background color match pupil
-      if (facing === 1) {
-        ctx.fillRect(headX + headWidth - 4, headY + 3.5, 2.5, 2.5);
+      if (!p.grounded) {
+        // Air / Jump Pose
+        ctx.beginPath();
+        ctx.moveTo(cx, hipY);
+        ctx.lineTo(cx - 3.5 * p.facing, p.y + p.height - 3);
+        ctx.moveTo(cx, hipY);
+        ctx.lineTo(cx + 4.5 * p.facing, p.y + p.height - 1);
+        ctx.stroke();
+      } else if (Math.abs(p.vx) > 0.1) {
+        // Moving / Walking animation
+        const legSwing = Math.sin(p.walkCycle) * 4.8;
+
+        // Front leg
+        ctx.beginPath();
+        ctx.moveTo(cx, hipY);
+        ctx.lineTo(cx + legSwing, p.y + p.height);
+        ctx.stroke();
+
+        // Back leg
+        ctx.beginPath();
+        ctx.moveTo(cx, hipY);
+        ctx.lineTo(cx - legSwing, p.y + p.height);
+        ctx.stroke();
       } else {
-        ctx.fillRect(headX + 1.5, headY + 3.5, 2.5, 2.5);
+        // Standing Still (Idle legs)
+        ctx.beginPath();
+        ctx.moveTo(cx - 2, hipY);
+        ctx.lineTo(cx - 2, p.y + p.height);
+        ctx.moveTo(cx + 2, hipY);
+        ctx.lineTo(cx + 2, p.y + p.height);
+        ctx.stroke();
       }
 
       ctx.restore();
@@ -295,11 +315,15 @@
       if (keys['ArrowLeft'] || keys['KeyA']) move -= 1;
       if (lvl.invert) move *= -1;
 
+      player.vx = move * player.speed;
+
+      // Update facing and walk animation
       if (move !== 0) {
         player.facing = move > 0 ? 1 : -1;
+        player.walkCycle += 0.32; // Walking speed
+      } else {
+        player.walkCycle = 0;
       }
-
-      player.vx = move * player.speed;
 
       if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && player.grounded) {
         player.vy = player.jumpPower;
@@ -373,15 +397,15 @@
       // ================= DRAW SCENE =================
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Outer Background Wall
+      // 1. Outer Background
       ctx.fillStyle = '#916000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Play Area Corridor (Clean Flat - No outline)
+      // 2. Play Area Corridor (No outlines, Clean Flat)
       ctx.fillStyle = '#ffb356';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      // Pits (Direct flat cutout)
+      // 3. Pits (Direct flat cutout)
       lvl.pits.forEach(p => {
         if (p.opened) {
           ctx.fillStyle = '#916000';
@@ -389,20 +413,20 @@
         }
       });
 
-      // Spikes
+      // 4. Spikes
       lvl.spikes.forEach(s => {
         if (s.active) {
           drawSpikes(s.x, corridor.y + corridor.height, s.width, s.height);
         }
       });
 
-      // Door
+      // 5. Door
       drawDoor(doorX, corridor.y + corridor.height - 36, 32, 36);
 
-      // Player Devil Dummy (Video jaisa original Devil silhouette)
-      drawDummy(player.x, player.y, player.width, player.height, player.facing);
+      // 6. Player Dummy (With Running Legs Animation)
+      drawDummy(player);
 
-      // Death Flash
+      // 7. Death Flash
       if (deathFlashTimer > 0) {
         ctx.fillStyle = 'rgba(82, 53, 0, 0.4)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
