@@ -7,12 +7,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Theme colors */
-      --bg-outer: #916000;
-      --corridor-bg: #ffb356;
+      --bg-outer: #a26916;
+      --corridor-bg: #fca240;
       --player-color: #000000;
+      --door-frame: #3b2200;
       --door-fill: #cbd5e1;
-      --trap-spike: #b91c1c;
     }
 
     * {
@@ -20,6 +19,7 @@
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-user-select: none;
       font-family: 'Press Start 2P', monospace;
     }
 
@@ -29,64 +29,94 @@
       background-color: var(--bg-outer);
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
       overflow: hidden;
-      padding: 10px;
+      padding: 16px 10px 24px 10px;
     }
 
     .top-header {
       width: 100%;
-      max-width: 900px;
+      max-width: 860px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
-      padding: 0 10px;
+      padding: 4px 10px;
     }
 
-    /* Level Devil Buttons (Clean, Flat, Solid Shadow) */
     .level-badge {
-      background: #523500;
-      color: #ffb356;
+      background: #4a2d04;
+      color: #fca240;
       font-size: 11px;
-      padding: 10px 18px;
+      padding: 8px 14px;
       border-radius: 4px;
       border: none;
       outline: none;
-      box-shadow: 0 4px 0 #332000;
+      box-shadow: 0 4px 0 #281700;
       letter-spacing: 1px;
     }
 
     .home-btn {
-      background: #ffb356;
-      color: #523500;
+      background: #fca240;
+      color: #3b2200;
       font-size: 10px;
-      padding: 10px 16px;
+      padding: 9px 15px;
       border-radius: 4px;
       border: none;
       outline: none;
       cursor: pointer;
-      box-shadow: 0 4px 0 #cc8430;
-      transition: all 0.08s ease;
+      box-shadow: 0 4px 0 #b86e18;
+      transition: transform 0.08s ease;
       text-decoration: none;
       display: inline-block;
       font-weight: bold;
     }
 
-    .home-btn:hover {
-      background: #ffbe6b;
-    }
-
     .home-btn:active {
       transform: translateY(3px);
-      box-shadow: 0 1px 0 #cc8430;
+      box-shadow: 0 1px 0 #b86e18;
     }
 
     #gameCanvas {
       background-color: var(--bg-outer);
       image-rendering: pixelated;
       display: block;
+      border-radius: 4px;
+    }
+
+    /* Video style on-screen touch buttons */
+    .controls-container {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .dpad {
+      display: flex;
+      gap: 18px;
+    }
+
+    .ctrl-btn {
+      width: 80px;
+      height: 48px;
+      background: rgba(252, 162, 64, 0.45);
+      border: 3px solid rgba(74, 45, 4, 0.55);
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      color: #3b2200;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .ctrl-btn:active {
+      background: rgba(252, 162, 64, 0.85);
+      transform: scale(0.96);
     }
   </style>
 </head>
@@ -97,19 +127,28 @@
     <a href="home.html" class="home-btn">🏠 HOME</a>
   </div>
 
-  <canvas id="gameCanvas" width="900" height="380"></canvas>
+  <canvas id="gameCanvas" width="860" height="360"></canvas>
+
+  <!-- Video jaise touch controls -->
+  <div class="controls-container">
+    <div class="dpad">
+      <button class="ctrl-btn" id="btnLeft">◀</button>
+      <button class="ctrl-btn" id="btnRight">▶</button>
+    </div>
+    <button class="ctrl-btn" id="btnJump">▲</button>
+  </div>
 
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const levelDisplay = document.getElementById('levelDisplay');
 
-    // Corridor Play Area
+    // Corridor Play Area (Video proportion)
     const corridor = {
-      x: 50,
-      y: 130,
-      width: 800,
-      height: 120
+      x: 60,
+      y: 125,
+      width: 740,
+      height: 110
     };
 
     const STORAGE_KEY = 'saveLevel_TumseNaHoPayga';
@@ -117,58 +156,71 @@
     let currentLevelIdx = currentSavedLevel - 1;
     let deathFlashTimer = 0;
 
-    // 50 Levels Trap Roadmap
+    // 50 Levels Trap Framework
     const levels = [];
     for (let i = 1; i <= 50; i++) {
       let lvl = {
         id: i,
-        playerStart: { x: 100 },
-        door: { x: 740, behavior: 'none' },
+        playerStart: { x: 95 },
+        door: { x: 700, behavior: 'none' },
         pits: [],
         spikes: [],
         invert: false
       };
 
+      // Video Level 1 Trap: Pit falls near door
       if (i % 5 === 1) {
-        lvl.pits.push({ x: 560, width: 70, triggerX: 450, opened: false });
+        lvl.pits.push({ x: 520, width: 44, triggerX: 430, opened: false });
       } else if (i % 5 === 2) {
         lvl.door.behavior = 'jump_away';
         lvl.door.triggerDist = 120;
         lvl.door.jumped = false;
       } else if (i % 5 === 3) {
-        lvl.spikes.push({ x: 480, width: 45, height: 20, triggerX: 380, active: false });
-        lvl.pits.push({ x: 620, width: 60, triggerX: 520, opened: false });
+        lvl.spikes.push({ x: 450, width: 45, height: 22, triggerX: 360, active: false });
+        lvl.pits.push({ x: 590, width: 48, triggerX: 490, opened: false });
       } else if (i % 5 === 4) {
         lvl.invert = true;
-        lvl.pits.push({ x: 420, width: 65, triggerX: 300, opened: false });
+        lvl.pits.push({ x: 380, width: 50, triggerX: 270, opened: false });
       } else if (i % 5 === 0) {
         lvl.door.behavior = 'teleport';
         lvl.door.triggerDist = 95;
         lvl.door.teleported = false;
-        lvl.spikes.push({ x: 660, width: 40, height: 18, triggerX: 550, active: false });
+        lvl.spikes.push({ x: 610, width: 40, height: 20, triggerX: 510, active: false });
       }
 
       levels.push(lvl);
     }
 
-    // Player State with Walk Animation Parameters
+    // Player with moving legs setup
     const player = {
-      x: 100,
+      x: 95,
       y: 0,
       width: 14,
-      height: 27,
+      height: 28,
       vx: 0,
       vy: 0,
-      facing: 1, // 1: Right, -1: Left
+      facing: 1,
       walkCycle: 0,
-      speed: 3.6,
-      jumpPower: -8.6,
+      speed: 3.5,
+      jumpPower: -8.8,
       grounded: false
     };
 
     const keys = {};
     window.addEventListener('keydown', (e) => keys[e.code] = true);
     window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+    // Mobile button listeners
+    const setupBtn = (id, keyName) => {
+      const btn = document.getElementById(id);
+      btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
+      btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
+      btn.addEventListener('mousedown', () => keys[keyName] = true);
+      btn.addEventListener('mouseup', () => keys[keyName] = false);
+    };
+    setupBtn('btnLeft', 'ArrowLeft');
+    setupBtn('btnRight', 'ArrowRight');
+    setupBtn('btnJump', 'Space');
 
     function playBeep(freq, duration) {
       try {
@@ -187,10 +239,9 @@
     function initLevel(idx) {
       if (idx >= levels.length) idx = 0;
       currentLevelIdx = idx;
-      
+
       const lvl = levels[currentLevelIdx];
       levelDisplay.innerText = `LEVEL ${lvl.id} / 50`;
-      
       localStorage.setItem(STORAGE_KEY, lvl.id);
 
       player.x = lvl.playerStart.x;
@@ -208,13 +259,13 @@
 
     function triggerDeath() {
       playBeep(180, 0.12);
-      deathFlashTimer = 18;
+      deathFlashTimer = 16;
       initLevel(currentLevelIdx);
     }
 
-    // Flat Door (No Outlines)
+    // Door without outline (Flat Devil Arch)
     function drawDoor(x, y, w, h) {
-      ctx.fillStyle = '#523500';
+      ctx.fillStyle = '#3b2200';
       ctx.beginPath();
       ctx.arc(x + w / 2, y + 10, w / 2, Math.PI, 0);
       ctx.rect(x, y + 10, w, h - 10);
@@ -227,7 +278,7 @@
       ctx.fill();
     }
 
-    // Spikes (No Outlines)
+    // Spikes without outline
     function drawSpikes(x, y, w, h) {
       ctx.fillStyle = '#b91c1c';
       const count = 3;
@@ -241,7 +292,7 @@
       }
     }
 
-    // Original Video Dummy Drawing with Animated Moving Legs
+    // Exact Level Devil Silhouette with Animated Legs
     function drawDummy(p) {
       ctx.save();
       ctx.fillStyle = '#000000';
@@ -252,48 +303,41 @@
       const headRadius = 4.2;
       const headCenterY = p.y + headRadius + 1;
       const hipY = p.y + 17;
-      const legLength = p.height - 17;
 
-      // 1. Head
+      // 1. Devil Head
       ctx.beginPath();
       ctx.arc(cx, headCenterY, headRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Torso (Body)
-      ctx.lineWidth = 4.2;
+      // 2. Body Trunk
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.moveTo(cx, headCenterY + headRadius - 0.5);
+      ctx.moveTo(cx, headCenterY + headRadius);
       ctx.lineTo(cx, hipY);
       ctx.stroke();
 
-      // 3. Legs Animation (Standing / Walking / Jumping)
+      // 3. Legs (Dynamic Walking / Jumping / Idle)
       ctx.lineWidth = 3.2;
 
       if (!p.grounded) {
-        // Air / Jump Pose
+        // Jumping in air
         ctx.beginPath();
         ctx.moveTo(cx, hipY);
-        ctx.lineTo(cx - 3.5 * p.facing, p.y + p.height - 3);
+        ctx.lineTo(cx - 4 * p.facing, p.y + p.height - 3);
         ctx.moveTo(cx, hipY);
         ctx.lineTo(cx + 4.5 * p.facing, p.y + p.height - 1);
         ctx.stroke();
       } else if (Math.abs(p.vx) > 0.1) {
-        // Moving / Walking animation
-        const legSwing = Math.sin(p.walkCycle) * 4.8;
-
-        // Front leg
+        // Running legs animation
+        const swing = Math.sin(p.walkCycle) * 5;
         ctx.beginPath();
         ctx.moveTo(cx, hipY);
-        ctx.lineTo(cx + legSwing, p.y + p.height);
-        ctx.stroke();
-
-        // Back leg
-        ctx.beginPath();
+        ctx.lineTo(cx + swing, p.y + p.height);
         ctx.moveTo(cx, hipY);
-        ctx.lineTo(cx - legSwing, p.y + p.height);
+        ctx.lineTo(cx - swing, p.y + p.height);
         ctx.stroke();
       } else {
-        // Standing Still (Idle legs)
+        // Standing still
         ctx.beginPath();
         ctx.moveTo(cx - 2, hipY);
         ctx.lineTo(cx - 2, p.y + p.height);
@@ -317,10 +361,9 @@
 
       player.vx = move * player.speed;
 
-      // Update facing and walk animation
       if (move !== 0) {
         player.facing = move > 0 ? 1 : -1;
-        player.walkCycle += 0.32; // Walking speed
+        player.walkCycle += 0.35;
       } else {
         player.walkCycle = 0;
       }
@@ -332,7 +375,7 @@
       }
 
       // 2. Physics
-      player.vy += 0.42;
+      player.vy += 0.44;
       player.x += player.vx;
       player.y += player.vy;
 
@@ -372,7 +415,7 @@
         player.grounded = true;
       }
 
-      // Spike Touch
+      // Spikes Collision
       lvl.spikes.forEach(s => {
         if (s.active) {
           const sTop = corridor.y + corridor.height - s.height;
@@ -383,7 +426,7 @@
       });
 
       // Pit Death
-      if (player.y > canvas.height + 50) {
+      if (player.y > canvas.height + 40) {
         triggerDeath();
       }
 
@@ -394,41 +437,41 @@
         initLevel(currentLevelIdx + 1);
       }
 
-      // ================= DRAW SCENE =================
+      // ================= DRAW SCENE (Flat, No Outlines) =================
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Outer Background
-      ctx.fillStyle = '#916000';
+      // Background Wall
+      ctx.fillStyle = '#a26916';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Play Area Corridor (No outlines, Clean Flat)
-      ctx.fillStyle = '#ffb356';
+      // Corridor Floor Area
+      ctx.fillStyle = '#fca240';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      // 3. Pits (Direct flat cutout)
+      // Pit Trap (Video jaisa vertical shaft direct cut)
       lvl.pits.forEach(p => {
         if (p.opened) {
-          ctx.fillStyle = '#916000';
-          ctx.fillRect(p.x, corridor.y + corridor.height - 18, p.width, 22);
+          ctx.fillStyle = '#a26916';
+          ctx.fillRect(p.x, corridor.y, p.width, corridor.height + 150);
         }
       });
 
-      // 4. Spikes
+      // Spikes
       lvl.spikes.forEach(s => {
         if (s.active) {
           drawSpikes(s.x, corridor.y + corridor.height, s.width, s.height);
         }
       });
 
-      // 5. Door
-      drawDoor(doorX, corridor.y + corridor.height - 36, 32, 36);
+      // Door
+      drawDoor(doorX, corridor.y + corridor.height - 36, 30, 36);
 
-      // 6. Player Dummy (With Running Legs Animation)
+      // Player Dummy
       drawDummy(player);
 
-      // 7. Death Flash
+      // Death Flash
       if (deathFlashTimer > 0) {
-        ctx.fillStyle = 'rgba(82, 53, 0, 0.4)';
+        ctx.fillStyle = 'rgba(59, 34, 0, 0.45)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         deathFlashTimer--;
       }
