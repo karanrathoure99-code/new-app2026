@@ -1,134 +1,169 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Devil Troll Runner</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🤪 Z PAJAL - Level Devil Play</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
   <style>
-    /* ========== THEME CUSTOMIZATION ========== */
     :root {
-      /* Level Devil जैसी क्लासिक ओरिजिनल थीम:
-         --bg-wall: #845203; --corridor: #fbb034; --player: #000; --door: #d1d5db; */
-
-      /* मॉडर्न डार्क/साइबर थीम (डिफ़ॉल्ट) */
-      --bg-wall: #0f172a;        /* स्क्रीन के बाहर की दीवार */
-      --corridor: #1e293b;       /* बीच का टनल / प्लेएरिया */
-      --floor-color: #334155;    /* ज़मीन के ब्लॉक्स */
-      --player-color: #38bdf8;   /* प्लेयर कैरेक्टर */
-      --door-frame: #64748b;     /* दरवाज़े का फ्रेम */
-      --door-fill: #94a3b8;      /* दरवाज़ा */
-      --trap-spike: #ef4444;     /* स्पाइक्स / कांटे */
+      /* home.html ke exact colors */
+      --bg-outer: #916000;
+      --corridor-bg: #ffb356;
+      --border-dark: #523500;
+      --border-shadow: #3b2500;
+      --player-color: #000000;
+      --door-frame: #523500;
+      --door-fill: #cbd5e1;
+      --trap-spike: #b91c1c;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      user-select: none;
+      font-family: 'Press Start 2P', monospace;
     }
 
     body {
-      background-color: var(--bg-wall);
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg-outer);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
       overflow: hidden;
-      font-family: 'Courier New', Courier, monospace;
-      user-select: none;
+      padding: 10px;
+    }
+
+    .top-header {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 10px;
+    }
+
+    .level-badge {
+      background: var(--border-dark);
+      color: var(--corridor-bg);
+      font-size: 11px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 3px solid var(--border-shadow);
+      box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.35);
+      letter-spacing: 1px;
+    }
+
+    .home-btn {
+      background: var(--corridor-bg);
+      color: var(--border-dark);
+      border: 3px solid var(--border-dark);
+      padding: 8px 12px;
+      font-size: 9px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 3px 3px 0px var(--border-dark);
+      transition: 0.1s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .home-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px var(--border-dark);
     }
 
     #gameCanvas {
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      background-color: var(--bg-outer);
       image-rendering: pixelated;
-    }
-
-    .ui-overlay {
-      position: absolute;
-      top: 15px;
-      color: #94a3b8;
-      font-size: 16px;
-      font-weight: bold;
-      letter-spacing: 2px;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
-  <div class="ui-overlay" id="levelDisplay">LEVEL 1 / 50</div>
-  <canvas id="gameCanvas" width="960" height="420"></canvas>
 
+  <div class="top-header">
+    <div class="level-badge" id="levelDisplay">LEVEL 1 / 50</div>
+    <a href="home.html" class="home-btn">🏠 HOME</a>
+  </div>
+
+  <canvas id="gameCanvas" width="900" height="380"></canvas>
+
+  <!-- Game Engine & Troll Traps -->
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const levelDisplay = document.getElementById('levelDisplay');
 
-    // ================= TUNNEL DIMENSIONS =================
+    // home.html ka play area corridor setup
     const corridor = {
-      x: 70,
-      y: 160,
-      width: 820,
-      height: 100
+      x: 50,
+      y: 130,
+      width: 800,
+      height: 120
     };
 
-    // ================= GAME STATE & CONFIG =================
-    let currentLevelIdx = 0;
-    let deaths = 0;
-    let deathScreenTimer = 0;
+    // Firebase storage key jo aapne home.html me set ki hai
+    const STORAGE_KEY = 'saveLevel_TumseNaHoPayga';
+    let currentSavedLevel = parseInt(localStorage.getItem(STORAGE_KEY)) || 1;
+    let currentLevelIdx = currentSavedLevel - 1;
+    let deathFlashTimer = 0;
 
-    // 50 लेवल्स का इंजन बेस (प्रारंभिक 5 वर्किंग लेवल्स)
-    const levels = [
-      {
-        id: 1,
-        playerStart: { x: 120 },
+    // 50 Levels Trap Roadmap (Levels 1 to 50 Framework)
+    const levels = [];
+    for (let i = 1; i <= 50; i++) {
+      let lvl = {
+        id: i,
+        playerStart: { x: 100 },
         door: { x: 740, behavior: 'none' },
-        pits: [{ x: 540, width: 70, triggerX: 430, opened: false }],
-        spikes: [],
-        invert: false
-      },
-      {
-        id: 2,
-        playerStart: { x: 120 },
-        door: { x: 740, behavior: 'jump_away', triggerDist: 120, jumped: false },
         pits: [],
         spikes: [],
         invert: false
-      },
-      {
-        id: 3,
-        playerStart: { x: 120 },
-        door: { x: 740, behavior: 'none' },
-        pits: [{ x: 380, width: 80, triggerX: 300, opened: false }],
-        spikes: [{ x: 620, width: 40, height: 16, triggerX: 520, active: false }],
-        invert: false
-      },
-      {
-        id: 4,
-        playerStart: { x: 120 },
-        door: { x: 740, behavior: 'none' },
-        pits: [{ x: 420, width: 60, triggerX: 340, opened: false }],
-        spikes: [],
-        invert: true // Controls Ulte
-      },
-      {
-        id: 5,
-        playerStart: { x: 120 },
-        door: { x: 740, behavior: 'teleport', triggerDist: 90, teleported: false },
-        pits: [{ x: 600, width: 60, triggerX: 480, opened: false }],
-        spikes: [],
-        invert: false
-      }
-    ];
+      };
 
-    // ================= PLAYER OBJECT =================
+      // Specific Troll Traps (Devil mechanics)
+      if (i % 5 === 1) {
+        // Pit falls near door
+        lvl.pits.push({ x: 560, width: 70, triggerX: 450, opened: false });
+      } else if (i % 5 === 2) {
+        // Door jumps away
+        lvl.door.behavior = 'jump_away';
+        lvl.door.triggerDist = 120;
+        lvl.door.jumped = false;
+      } else if (i % 5 === 3) {
+        // Pop-up floor spikes
+        lvl.spikes.push({ x: 480, width: 45, height: 20, triggerX: 380, active: false });
+        lvl.pits.push({ x: 620, width: 60, triggerX: 520, opened: false });
+      } else if (i % 5 === 4) {
+        // Inverted Left-Right controls
+        lvl.invert = true;
+        lvl.pits.push({ x: 420, width: 65, triggerX: 300, opened: false });
+      } else if (i % 5 === 0) {
+        // Teleporting door
+        lvl.door.behavior = 'teleport';
+        lvl.door.triggerDist = 95;
+        lvl.door.teleported = false;
+        lvl.spikes.push({ x: 660, width: 40, height: 18, triggerX: 550, active: false });
+      }
+
+      levels.push(lvl);
+    }
+
+    // Player State
     const player = {
-      x: 120,
+      x: 100,
       y: 0,
       width: 14,
       height: 28,
       vx: 0,
       vy: 0,
-      speed: 3.5,
-      jumpPower: -8.8,
+      speed: 3.6,
+      jumpPower: -8.6,
       grounded: false
     };
 
@@ -136,11 +171,30 @@
     window.addEventListener('keydown', (e) => keys[e.code] = true);
     window.addEventListener('keyup', (e) => keys[e.code] = false);
 
+    // Tech sound for jumps & deaths
+    function playBeep(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        gain.gain.value = 0.1;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
     function initLevel(idx) {
-      currentLevelIdx = idx % levels.length;
-      levelDisplay.innerText = `LEVEL ${levels[currentLevelIdx].id} / 50`;
+      if (idx >= levels.length) idx = 0;
+      currentLevelIdx = idx;
       
       const lvl = levels[currentLevelIdx];
+      levelDisplay.innerText = `LEVEL ${lvl.id} / 50`;
+      
+      localStorage.setItem(STORAGE_KEY, lvl.id);
+
       player.x = lvl.playerStart.x;
       player.y = corridor.y + corridor.height - player.height;
       player.vx = 0;
@@ -153,25 +207,29 @@
       if (lvl.door.behavior === 'teleport') lvl.door.teleported = false;
     }
 
-    // ================= DRAW FUNCTIONS =================
+    function triggerDeath() {
+      playBeep(180, 0.12);
+      deathFlashTimer = 18;
+      initLevel(currentLevelIdx);
+    }
+
+    // Canvas Draw Helpers
     function drawDoor(x, y, w, h) {
-      // Outer arch
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--door-frame').trim() || '#64748b';
+      ctx.fillStyle = '#523500';
       ctx.beginPath();
       ctx.arc(x + w / 2, y + 10, w / 2, Math.PI, 0);
       ctx.rect(x, y + 10, w, h - 10);
       ctx.fill();
 
-      // Inner panel
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--door-fill').trim() || '#94a3b8';
+      ctx.fillStyle = '#cbd5e1';
       ctx.beginPath();
       ctx.arc(x + w / 2, y + 12, (w - 6) / 2, Math.PI, 0);
       ctx.rect(x + 3, y + 12, w - 6, h - 12);
       ctx.fill();
     }
 
-    function drawSpike(x, y, w, h) {
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--trap-spike').trim() || '#ef4444';
+    function drawSpikes(x, y, w, h) {
+      ctx.fillStyle = '#b91c1c';
       const count = 3;
       const step = w / count;
       for (let i = 0; i < count; i++) {
@@ -183,145 +241,140 @@
       }
     }
 
-    function triggerDeath() {
-      deaths++;
-      deathScreenTimer = 25; // Flash screen frames
-      initLevel(currentLevelIdx);
-    }
-
-    // ================= MAIN LOOP =================
-    function loop() {
+    // Main Update & Render Loop
+    function update() {
       const lvl = levels[currentLevelIdx];
       const floorY = corridor.y + corridor.height - player.height;
 
       // 1. Controls
-      let moveDir = 0;
-      if (keys['ArrowRight'] || keys['KeyD']) moveDir += 1;
-      if (keys['ArrowLeft'] || keys['KeyA']) moveDir -= 1;
-      if (lvl.invert) moveDir *= -1; // उल्टे कंट्रोल्स
+      let move = 0;
+      if (keys['ArrowRight'] || keys['KeyD']) move += 1;
+      if (keys['ArrowLeft'] || keys['KeyA']) move -= 1;
+      if (lvl.invert) move *= -1;
 
-      player.vx = moveDir * player.speed;
+      player.vx = move * player.speed;
 
       if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && player.grounded) {
         player.vy = player.jumpPower;
         player.grounded = false;
+        playBeep(450, 0.05);
       }
 
-      // 2. Physics & Gravity
+      // 2. Physics
       player.vy += 0.42;
       player.x += player.vx;
       player.y += player.vy;
 
-      // 3. Traps Trigger Check
-      lvl.pits.forEach(pit => {
-        if (player.x > pit.triggerX) pit.opened = true;
+      // Boundaries
+      if (player.x < corridor.x) player.x = corridor.x;
+
+      // 3. Traps Trigger
+      lvl.pits.forEach(p => {
+        if (player.x > p.triggerX) p.opened = true;
       });
 
-      lvl.spikes.forEach(spike => {
-        if (player.x > spike.triggerX) spike.active = true;
+      lvl.spikes.forEach(s => {
+        if (player.x > s.triggerX) s.active = true;
       });
 
-      // Door Troll Mechanics
-      let currentDoorX = lvl.door.x;
+      let doorX = lvl.door.x;
       if (lvl.door.behavior === 'jump_away' && Math.abs(player.x - lvl.door.x) < lvl.door.triggerDist) {
         lvl.door.jumped = true;
       }
-      if (lvl.door.jumped) currentDoorX = corridor.x + corridor.width - 50;
+      if (lvl.door.jumped) doorX = corridor.x + corridor.width - 45;
 
       if (lvl.door.behavior === 'teleport' && Math.abs(player.x - lvl.door.x) < lvl.door.triggerDist) {
         lvl.door.teleported = true;
       }
-      if (lvl.door.teleported) currentDoorX = corridor.x + 30;
+      if (lvl.door.teleported) doorX = corridor.x + 30;
 
-      // 4. Collision with Floor & Pits
-      let onPit = false;
-      lvl.pits.forEach(pit => {
-        if (pit.opened && (player.x + player.width > pit.x && player.x < pit.x + pit.width)) {
-          onPit = true;
+      // 4. Collisions
+      let fallingInPit = false;
+      lvl.pits.forEach(p => {
+        if (p.opened && (player.x + player.width > p.x && player.x < p.x + p.width)) {
+          fallingInPit = true;
         }
       });
 
-      if (!onPit && player.y >= floorY) {
+      if (!fallingInPit && player.y >= floorY) {
         player.y = floorY;
         player.vy = 0;
         player.grounded = true;
       }
 
-      // Spike Collision
-      lvl.spikes.forEach(spike => {
-        if (spike.active) {
-          const spikeTop = corridor.y + corridor.height - spike.height;
-          if (
-            player.x + player.width > spike.x &&
-            player.x < spike.x + spike.width &&
-            player.y + player.height > spikeTop
-          ) {
+      // Spike Touch
+      lvl.spikes.forEach(s => {
+        if (s.active) {
+          const sTop = corridor.y + corridor.height - s.height;
+          if (player.x + player.width > s.x && player.x < s.x + s.width && player.y + player.height > sTop) {
             triggerDeath();
           }
         }
       });
 
-      // Out of bounds / Fall death
+      // Pit Death
       if (player.y > canvas.height + 50) {
         triggerDeath();
       }
 
-      // Door Entry (Level Complete)
+      // Door Clear
       const doorY = corridor.y + corridor.height - 36;
-      if (
-        player.x + player.width > currentDoorX &&
-        player.x < currentDoorX + 32 &&
-        player.y + player.height >= doorY
-      ) {
+      if (player.x + player.width > doorX && player.x < doorX + 32 && player.y + player.height >= doorY) {
+        playBeep(700, 0.1);
         initLevel(currentLevelIdx + 1);
       }
 
-      // ================= RENDERING =================
+      // ================= DRAW SCENE =================
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Background Wall
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-wall').trim() || '#0f172a';
+      // Outer Background Wall
+      ctx.fillStyle = '#916000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Death Flash / Red Screen
-      if (deathScreenTimer > 0) {
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        deathScreenTimer--;
-      }
-
-      // Corridor (Play Area)
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--corridor').trim() || '#1e293b';
+      // Play Area Corridor
+      ctx.fillStyle = '#ffb356';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      // Pits (गड्ढे - बैकग्राउंड कलर से ढकना)
-      lvl.pits.forEach(pit => {
-        if (pit.opened) {
-          ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-wall').trim() || '#0f172a';
-          ctx.fillRect(pit.x, corridor.y + corridor.height - 8, pit.width, 20);
+      // Shadow border box (home.html jaisa 3D look)
+      ctx.strokeStyle = '#523500';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(corridor.x, corridor.y, corridor.width, corridor.height);
+
+      // Pits (Fallen ground matching outer background)
+      lvl.pits.forEach(p => {
+        if (p.opened) {
+          ctx.fillStyle = '#916000';
+          ctx.fillRect(p.x, corridor.y + corridor.height - 10, p.width, 14);
         }
       });
 
       // Spikes
-      lvl.spikes.forEach(spike => {
-        if (spike.active) {
-          drawSpike(spike.x, corridor.y + corridor.height, spike.width, spike.height);
+      lvl.spikes.forEach(s => {
+        if (s.active) {
+          drawSpikes(s.x, corridor.y + corridor.height, s.width, s.height);
         }
       });
 
       // Door
-      drawDoor(currentDoorX, corridor.y + corridor.height - 36, 32, 36);
+      drawDoor(doorX, corridor.y + corridor.height - 36, 32, 36);
 
-      // Player
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#38bdf8';
+      // Player (Devil Black Character)
+      ctx.fillStyle = '#000000';
       ctx.fillRect(player.x, player.y, player.width, player.height);
 
-      requestAnimationFrame(loop);
+      // Death Flash
+      if (deathFlashTimer > 0) {
+        ctx.fillStyle = 'rgba(82, 53, 0, 0.4)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        deathFlashTimer--;
+      }
+
+      requestAnimationFrame(update);
     }
 
-    // Start Game
-    initLevel(0);
-    loop();
+    // Game Start
+    initLevel(currentLevelIdx);
+    update();
   </script>
 </body>
 </html>
