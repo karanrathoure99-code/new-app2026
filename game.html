@@ -7,13 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Aapke theme ke exact colors */
+      /* Theme Colors */
       --bg-outer: #916000;
       --corridor-bg: #ffb356;
       --player-color: #000000;
       --door-fill: #cbd5e1;
       --trap-spike: #b91c1c;
-      --btn-dark: #221400;
     }
 
     * {
@@ -46,7 +45,7 @@
       padding: 0 10px;
     }
 
-    /* Level Devil Style Buttons & Badges (Clean, no outline, solid 3D click feel) */
+    /* Level Devil Style Clean Flat Buttons */
     .level-badge {
       background: #523500;
       color: #ffb356;
@@ -152,14 +151,15 @@
       levels.push(lvl);
     }
 
-    // Player State
+    // Player State (Level Devil Dummy Size)
     const player = {
       x: 100,
       y: 0,
       width: 14,
-      height: 28,
+      height: 26,
       vx: 0,
       vy: 0,
+      facing: 1, // 1 for Right, -1 for Left
       speed: 3.6,
       jumpPower: -8.6,
       grounded: false
@@ -196,6 +196,7 @@
       player.y = corridor.y + corridor.height - player.height;
       player.vx = 0;
       player.vy = 0;
+      player.facing = 1;
 
       lvl.pits.forEach(p => p.opened = false);
       lvl.spikes.forEach(s => s.active = false);
@@ -209,7 +210,7 @@
       initLevel(currentLevelIdx);
     }
 
-    // Flat Arch Door (No Outlines)
+    // Door (Clean Flat Look, No Outlines)
     function drawDoor(x, y, w, h) {
       ctx.fillStyle = '#523500';
       ctx.beginPath();
@@ -224,7 +225,7 @@
       ctx.fill();
     }
 
-    // Spikes (No Outlines)
+    // Spikes (Clean Flat Look)
     function drawSpikes(x, y, w, h) {
       ctx.fillStyle = '#b91c1c';
       const count = 3;
@@ -238,6 +239,52 @@
       }
     }
 
+    // Original Video Dummy Drawing (Black Devil Silhouette + Horns + Eyes)
+    function drawDummy(x, y, w, h, facing) {
+      ctx.save();
+      ctx.fillStyle = '#000000';
+
+      // 1. Head with Horns
+      const headHeight = 11;
+      const headWidth = 12;
+      const headX = x + (w - headWidth) / 2;
+      const headY = y + 3;
+
+      // Base Head
+      ctx.fillRect(headX, headY, headWidth, headHeight);
+
+      // Devil Horns on Head top
+      ctx.beginPath();
+      // Left horn
+      ctx.moveTo(headX, headY);
+      ctx.lineTo(headX - 1.5, headY - 3.5);
+      ctx.lineTo(headX + 3.5, headY);
+      // Right horn
+      ctx.moveTo(headX + headWidth - 3.5, headY);
+      ctx.lineTo(headX + headWidth + 1.5, headY - 3.5);
+      ctx.lineTo(headX + headWidth, headY);
+      ctx.fill();
+
+      // 2. Body & Legs
+      const bodyWidth = 10;
+      const bodyX = x + (w - bodyWidth) / 2;
+      ctx.fillRect(bodyX, y + headHeight + 2, bodyWidth, h - headHeight - 2);
+
+      // Leg cut in middle (two legs feel)
+      ctx.fillStyle = '#ffb356';
+      ctx.fillRect(x + w / 2 - 1, y + h - 5, 2, 5);
+
+      // 3. Devil Eye (facing direction ke hisaab se)
+      ctx.fillStyle = '#ffb356'; // Background color match pupil
+      if (facing === 1) {
+        ctx.fillRect(headX + headWidth - 4, headY + 3.5, 2.5, 2.5);
+      } else {
+        ctx.fillRect(headX + 1.5, headY + 3.5, 2.5, 2.5);
+      }
+
+      ctx.restore();
+    }
+
     function update() {
       const lvl = levels[currentLevelIdx];
       const floorY = corridor.y + corridor.height - player.height;
@@ -247,6 +294,10 @@
       if (keys['ArrowRight'] || keys['KeyD']) move += 1;
       if (keys['ArrowLeft'] || keys['KeyA']) move -= 1;
       if (lvl.invert) move *= -1;
+
+      if (move !== 0) {
+        player.facing = move > 0 ? 1 : -1;
+      }
 
       player.vx = move * player.speed;
 
@@ -319,18 +370,18 @@
         initLevel(currentLevelIdx + 1);
       }
 
-      // ================= DRAW SCENE (Outline Free) =================
+      // ================= DRAW SCENE =================
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Outer Background
+      // Outer Background Wall
       ctx.fillStyle = '#916000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Play Corridor (Flat, Clean - No Stroke)
+      // Play Area Corridor (Clean Flat - No outline)
       ctx.fillStyle = '#ffb356';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      // 3. Pits (Direct color cut-in, no outlines)
+      // Pits (Direct flat cutout)
       lvl.pits.forEach(p => {
         if (p.opened) {
           ctx.fillStyle = '#916000';
@@ -338,21 +389,20 @@
         }
       });
 
-      // 4. Spikes
+      // Spikes
       lvl.spikes.forEach(s => {
         if (s.active) {
           drawSpikes(s.x, corridor.y + corridor.height, s.width, s.height);
         }
       });
 
-      // 5. Door
+      // Door
       drawDoor(doorX, corridor.y + corridor.height - 36, 32, 36);
 
-      // 6. Player
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(player.x, player.y, player.width, player.height);
+      // Player Devil Dummy (Video jaisa original Devil silhouette)
+      drawDummy(player.x, player.y, player.width, player.height, player.facing);
 
-      // 7. Death Flash
+      // Death Flash
       if (deathFlashTimer > 0) {
         ctx.fillStyle = 'rgba(82, 53, 0, 0.4)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
