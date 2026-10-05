@@ -84,7 +84,7 @@
       border-radius: 4px;
     }
 
-    /* Video style on-screen touch buttons */
+    /* On-screen touch buttons */
     .controls-container {
       width: 100%;
       max-width: 860px;
@@ -123,13 +123,13 @@
 <body>
 
   <div class="top-header">
-    <div class="level-badge" id="levelDisplay">LEVEL 1 / 50</div>
+    <div class="level-badge" id="levelDisplay">LEVEL 1 / 2</div>
     <a href="home.html" class="home-btn">🏠 HOME</a>
   </div>
 
   <canvas id="gameCanvas" width="860" height="360"></canvas>
 
-  <!-- Video jaise touch controls -->
+  <!-- Touch controls -->
   <div class="controls-container">
     <div class="dpad">
       <button class="ctrl-btn" id="btnLeft">◀</button>
@@ -143,7 +143,7 @@
     const ctx = canvas.getContext('2d');
     const levelDisplay = document.getElementById('levelDisplay');
 
-    // Corridor Play Area (Video proportion)
+    // Corridor Play Area
     const corridor = {
       x: 60,
       y: 125,
@@ -153,43 +153,31 @@
 
     const STORAGE_KEY = 'saveLevel_TumseNaHoPayga';
     let currentSavedLevel = parseInt(localStorage.getItem(STORAGE_KEY)) || 1;
+    if (currentSavedLevel > 2) currentSavedLevel = 1; // Only 2 levels allowed
     let currentLevelIdx = currentSavedLevel - 1;
     let deathFlashTimer = 0;
 
-    // 50 Levels Trap Framework
-    const levels = [];
-    for (let i = 1; i <= 50; i++) {
-      let lvl = {
-        id: i,
+    // ONLY LEVEL 1 AND LEVEL 2
+    const levels = [
+      {
+        id: 1,
         playerStart: { x: 95 },
         door: { x: 700, behavior: 'none' },
+        pits: [
+          { x: 520, width: 44, triggerX: 430, opened: false }
+        ],
+        spikes: [],
+        invert: false
+      },
+      {
+        id: 2,
+        playerStart: { x: 95 },
+        door: { x: 620, behavior: 'jump_away', triggerDist: 130, jumped: false },
         pits: [],
         spikes: [],
         invert: false
-      };
-
-      // Video Level 1 Trap: Pit falls near door
-      if (i % 5 === 1) {
-        lvl.pits.push({ x: 520, width: 44, triggerX: 430, opened: false });
-      } else if (i % 5 === 2) {
-        lvl.door.behavior = 'jump_away';
-        lvl.door.triggerDist = 120;
-        lvl.door.jumped = false;
-      } else if (i % 5 === 3) {
-        lvl.spikes.push({ x: 450, width: 45, height: 22, triggerX: 360, active: false });
-        lvl.pits.push({ x: 590, width: 48, triggerX: 490, opened: false });
-      } else if (i % 5 === 4) {
-        lvl.invert = true;
-        lvl.pits.push({ x: 380, width: 50, triggerX: 270, opened: false });
-      } else if (i % 5 === 0) {
-        lvl.door.behavior = 'teleport';
-        lvl.door.triggerDist = 95;
-        lvl.door.teleported = false;
-        lvl.spikes.push({ x: 610, width: 40, height: 20, triggerX: 510, active: false });
       }
-
-      levels.push(lvl);
-    }
+    ];
 
     // Player with moving legs setup
     const player = {
@@ -237,11 +225,11 @@
     }
 
     function initLevel(idx) {
-      if (idx >= levels.length) idx = 0;
+      if (idx >= levels.length) idx = 0; // Loop back to Level 1
       currentLevelIdx = idx;
 
       const lvl = levels[currentLevelIdx];
-      levelDisplay.innerText = `LEVEL ${lvl.id} / 50`;
+      levelDisplay.innerText = `LEVEL ${lvl.id} / ${levels.length}`;
       localStorage.setItem(STORAGE_KEY, lvl.id);
 
       player.x = lvl.playerStart.x;
@@ -251,10 +239,10 @@
       player.walkCycle = 0;
       player.facing = 1;
 
+      // Reset level traps
       lvl.pits.forEach(p => p.opened = false);
       lvl.spikes.forEach(s => s.active = false);
       if (lvl.door.behavior === 'jump_away') lvl.door.jumped = false;
-      if (lvl.door.behavior === 'teleport') lvl.door.teleported = false;
     }
 
     function triggerDeath() {
@@ -263,7 +251,7 @@
       initLevel(currentLevelIdx);
     }
 
-    // Door without outline (Flat Devil Arch)
+    // Door without outline (Flat Arch)
     function drawDoor(x, y, w, h) {
       ctx.fillStyle = '#3b2200';
       ctx.beginPath();
@@ -276,20 +264,6 @@
       ctx.arc(x + w / 2, y + 12, (w - 6) / 2, Math.PI, 0);
       ctx.rect(x + 3, y + 12, w - 6, h - 12);
       ctx.fill();
-    }
-
-    // Spikes without outline
-    function drawSpikes(x, y, w, h) {
-      ctx.fillStyle = '#b91c1c';
-      const count = 3;
-      const step = w / count;
-      for (let i = 0; i < count; i++) {
-        ctx.beginPath();
-        ctx.moveTo(x + i * step, y);
-        ctx.lineTo(x + (i + 0.5) * step, y - h);
-        ctx.lineTo(x + (i + 1) * step, y);
-        ctx.fill();
-      }
     }
 
     // Exact Level Devil Silhouette with Animated Legs
@@ -316,7 +290,7 @@
       ctx.lineTo(cx, hipY);
       ctx.stroke();
 
-      // 3. Legs (Dynamic Walking / Jumping / Idle)
+      // 3. Legs
       ctx.lineWidth = 3.2;
 
       if (!p.grounded) {
@@ -386,20 +360,11 @@
         if (player.x > p.triggerX) p.opened = true;
       });
 
-      lvl.spikes.forEach(s => {
-        if (player.x > s.triggerX) s.active = true;
-      });
-
       let doorX = lvl.door.x;
       if (lvl.door.behavior === 'jump_away' && Math.abs(player.x - lvl.door.x) < lvl.door.triggerDist) {
         lvl.door.jumped = true;
       }
       if (lvl.door.jumped) doorX = corridor.x + corridor.width - 45;
-
-      if (lvl.door.behavior === 'teleport' && Math.abs(player.x - lvl.door.x) < lvl.door.triggerDist) {
-        lvl.door.teleported = true;
-      }
-      if (lvl.door.teleported) doorX = corridor.x + 30;
 
       // 4. Collisions
       let fallingInPit = false;
@@ -415,16 +380,6 @@
         player.grounded = true;
       }
 
-      // Spikes Collision
-      lvl.spikes.forEach(s => {
-        if (s.active) {
-          const sTop = corridor.y + corridor.height - s.height;
-          if (player.x + player.width > s.x && player.x < s.x + s.width && player.y + player.height > sTop) {
-            triggerDeath();
-          }
-        }
-      });
-
       // Pit Death
       if (player.y > canvas.height + 40) {
         triggerDeath();
@@ -437,7 +392,7 @@
         initLevel(currentLevelIdx + 1);
       }
 
-      // ================= DRAW SCENE (Flat, No Outlines) =================
+      // ================= DRAW SCENE =================
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Background Wall
@@ -448,18 +403,11 @@
       ctx.fillStyle = '#fca240';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      // Pit Trap (Video jaisa vertical shaft direct cut)
+      // Pit Trap (Vertical Shaft Cut)
       lvl.pits.forEach(p => {
         if (p.opened) {
           ctx.fillStyle = '#a26916';
           ctx.fillRect(p.x, corridor.y, p.width, corridor.height + 150);
-        }
-      });
-
-      // Spikes
-      lvl.spikes.forEach(s => {
-        if (s.active) {
-          drawSpikes(s.x, corridor.y + corridor.height, s.width, s.height);
         }
       });
 
