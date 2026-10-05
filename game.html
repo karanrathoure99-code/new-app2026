@@ -9,7 +9,7 @@
     :root {
       --bg-outer: #a26916;
       --corridor-bg: #fca240;
-      --player-color: #000000;
+      --player-color: #111111;
       --door-frame: #3b2200;
       --door-fill: #cbd5e1;
     }
@@ -32,7 +32,7 @@
       justify-content: space-between;
       align-items: center;
       overflow: hidden;
-      padding: 10px 10px 16px 10px;
+      padding: 8px 10px 14px 10px;
     }
 
     .top-header {
@@ -41,7 +41,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 10px;
+      padding: 4px 8px;
     }
 
     .level-badge {
@@ -86,14 +86,15 @@
       max-height: 72vh;
     }
 
-    /* On-Screen Touch Buttons (Phone / Tablet Only) */
+    /* On-Screen Touch Buttons (Phone/Tablet me visible) */
     .controls-container {
       width: 100%;
       max-width: 960px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 20px;
+      padding: 0 16px;
+      z-index: 10;
     }
 
     .dpad {
@@ -103,27 +104,27 @@
     }
 
     .ctrl-btn {
-      width: 74px;
-      height: 48px;
-      background: rgba(252, 162, 64, 0.45);
-      border: 3px solid rgba(74, 45, 4, 0.55);
+      width: 72px;
+      height: 52px;
+      background: rgba(252, 162, 64, 0.6);
+      border: 3px solid rgba(74, 45, 4, 0.7);
       border-radius: 12px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 20px;
+      font-size: 22px;
       color: #3b2200;
       cursor: pointer;
       touch-action: manipulation;
     }
 
     .ctrl-btn:active {
-      background: rgba(252, 162, 64, 0.85);
-      transform: scale(0.96);
+      background: rgba(252, 162, 64, 0.95);
+      transform: scale(0.94);
     }
 
-    /* Laptop / Desktop par buttons hide */
-    @media (hover: hover) and (pointer: fine) {
+    /* Desktop mouse users ke liye hide, mobile/tablet me compulsory show */
+    @media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
       .controls-container {
         display: none !important;
       }
@@ -138,13 +139,14 @@
 
   <div class="top-header">
     <div class="level-badge" id="levelDisplay">LEVEL 1 / 2</div>
-    <a href="levels.html" class="levels-btn">📑 LEVELS</a>
+    <!-- 404 fix: level.html set kar diya gaya hai -->
+    <a href="level.html" class="levels-btn">📑 LEVEL</a>
   </div>
 
   <canvas id="gameCanvas" width="960" height="400"></canvas>
 
-  <!-- Phone / Tablet Touch Controls with Crouch (Down) Button -->
-  <div class="controls-container">
+  <!-- Mobile & Tablet Controls -->
+  <div class="controls-container" id="touchControls">
     <div class="dpad">
       <button class="ctrl-btn" id="btnLeft">◀</button>
       <button class="ctrl-btn" id="btnDown">▼</button>
@@ -178,6 +180,12 @@
     window.addEventListener('click', triggerAutoFullscreen, { once: true });
     window.addEventListener('touchstart', triggerAutoFullscreen, { once: true });
 
+    // Phone / Tablet Check to ensure buttons never disappear on touch devices
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (isTouchDevice) {
+      document.getElementById('touchControls').style.display = 'flex';
+    }
+
     // Corridor Play Area
     const corridor = {
       x: 40,
@@ -192,14 +200,12 @@
     let currentLevelIdx = currentSavedLevel - 1;
     let deathFlashTimer = 0;
 
-    // Door State for Closing Animation
     let doorState = {
       isClosing: false,
-      closeProgress: 0, // 0 = fully open, 1 = fully closed
-      speed: 0.08 // 80% fast closing speed per frame
+      closeProgress: 0,
+      speed: 0.08 // 80% Fast close
     };
 
-    // Sirf Level 1 aur 2
     const levels = [
       {
         id: 1,
@@ -221,31 +227,31 @@
       }
     ];
 
-    // Player State (Dummy 70% mota: width 27px, crouch feature add)
-    const NORMAL_HEIGHT = 32;
-    const CROUCH_HEIGHT = 20;
+    // Character State
+    const NORMAL_HEIGHT = 36;
+    const CROUCH_HEIGHT = 22;
 
     const player = {
       x: 80,
       y: 0,
-      width: 27, // 70% extra mota
+      width: 24, // 70% solid body
       height: NORMAL_HEIGHT,
       vx: 0,
       vy: 0,
       facing: 1,
       walkCycle: 0,
       speed: 3.8,
-      jumpPower: -9.2,
+      jumpPower: -9.4,
       grounded: false,
       isCrouching: false,
-      enteredDoor: false // Gate ke andar jaane ke baad bahar aana lock
+      enteredDoor: false
     };
 
     const keys = {};
     window.addEventListener('keydown', (e) => keys[e.code] = true);
     window.addEventListener('keyup', (e) => keys[e.code] = false);
 
-    // Mobile button listeners
+    // Touch button listeners
     const setupBtn = (id, keyName) => {
       const btn = document.getElementById(id);
       if (!btn) return;
@@ -305,24 +311,20 @@
       initLevel(currentLevelIdx);
     }
 
-    // Door with 80% Fast Closing Shutter Animation
     function drawDoor(x, y, w, h, closeProgress) {
       ctx.save();
-      // Outer Frame
       ctx.fillStyle = '#3b2200';
       ctx.beginPath();
       ctx.arc(x + w / 2, y + 14, w / 2, Math.PI, 0);
       ctx.rect(x, y + 14, w, h - 14);
       ctx.fill();
 
-      // Inner Light Door Frame
       ctx.fillStyle = '#cbd5e1';
       ctx.beginPath();
       ctx.arc(x + w / 2, y + 16, (w - 8) / 2, Math.PI, 0);
       ctx.rect(x + 4, y + 16, w - 8, h - 16);
       ctx.fill();
 
-      // Fast sliding door shutter (Closing effect)
       if (closeProgress > 0) {
         ctx.fillStyle = '#3b2200';
         const shutterHeight = (h - 16) * Math.min(1, closeProgress);
@@ -331,91 +333,105 @@
       ctx.restore();
     }
 
-    // 70% Mota Dummy with Crouch Animation & Moving Legs
+    // Authentic Game Character: Devil with Horns, Eye, Torso & Boots
     function drawDummy(p) {
       ctx.save();
-      ctx.fillStyle = '#000000';
-      ctx.strokeStyle = '#000000';
+      const cx = p.x + p.width / 2;
+      const f = p.facing;
+
+      ctx.fillStyle = '#111111';
+      ctx.strokeStyle = '#111111';
       ctx.lineCap = 'round';
 
-      const cx = p.x + p.width / 2;
-
       if (p.isCrouching) {
-        // Crouched / Baithe hue pose (Chop-down stance)
-        const crouchHeadRadius = 7.2; // 70% mota head
-        const headCenterY = p.y + crouchHeadRadius;
-        const hipY = p.y + p.height - 4;
+        // Crouched / Sitting Character
+        const headRadius = 7;
+        const headY = p.y + headRadius;
+
+        // Devil Horns
+        ctx.beginPath();
+        ctx.moveTo(cx - 5 * f, headY - 4);
+        ctx.lineTo(cx - 7 * f, headY - 10);
+        ctx.lineTo(cx - 2 * f, headY - 6);
+        ctx.moveTo(cx + 1 * f, headY - 6);
+        ctx.lineTo(cx + 4 * f, headY - 10);
+        ctx.lineTo(cx + 3 * f, headY - 4);
+        ctx.fill();
 
         // Head
         ctx.beginPath();
-        ctx.arc(cx + (2 * p.facing), headCenterY, crouchHeadRadius, 0, Math.PI * 2);
+        ctx.arc(cx, headY, headRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Thick squat body
-        ctx.lineWidth = 9;
-        ctx.beginPath();
-        ctx.moveTo(cx, headCenterY + 4);
-        ctx.lineTo(cx - (3 * p.facing), hipY);
-        ctx.stroke();
+        // Eye slit (Devil look)
+        ctx.fillStyle = '#fca240';
+        ctx.fillRect(cx + 2 * f, headY - 1, 2.5, 2.5);
 
-        // Bent sitting legs
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.moveTo(cx - (3 * p.facing), hipY);
-        ctx.lineTo(cx - 7 * p.facing, p.y + p.height);
-        ctx.moveTo(cx - (3 * p.facing), hipY);
-        ctx.lineTo(cx + 6 * p.facing, p.y + p.height);
-        ctx.stroke();
+        // Body squatted
+        ctx.fillStyle = '#111111';
+        ctx.fillRect(cx - 8, headY + 5, 16, p.height - (headRadius + 5));
 
       } else {
-        // Normal Standing / Walking / Jumping Pose (70% Choda & Mota)
-        const headRadius = 7.5; // Extra thick head
-        const headCenterY = p.y + headRadius + 1;
-        const hipY = p.y + 20;
+        // Standing / Running Game Character
+        const headRadius = 7.5;
+        const headY = p.y + headRadius + 3;
 
-        // 1. Devil Head
+        // 1. Devil Horns (Sharp devil points)
         ctx.beginPath();
-        ctx.arc(cx, headCenterY, headRadius, 0, Math.PI * 2);
+        ctx.moveTo(cx - 5, headY - 4);
+        ctx.lineTo(cx - 7, headY - 11);
+        ctx.lineTo(cx - 2, headY - 6);
+        ctx.moveTo(cx + 2, headY - 6);
+        ctx.lineTo(cx + 7, headY - 11);
+        ctx.lineTo(cx + 5, headY - 4);
         ctx.fill();
 
-        // 2. Heavy Torso Trunk (70% mota)
-        ctx.lineWidth = 8.5;
+        // 2. Devil Round Head
         ctx.beginPath();
-        ctx.moveTo(cx, headCenterY + headRadius);
-        ctx.lineTo(cx, hipY);
-        ctx.stroke();
+        ctx.arc(cx, headY, headRadius, 0, Math.PI * 2);
+        ctx.fill();
 
-        // 3. Thick Legs
-        ctx.lineWidth = 6;
+        // 3. Eye Slit
+        ctx.fillStyle = '#fca240';
+        ctx.fillRect(cx + 2 * f, headY - 1, 2.5, 2.5);
+
+        // 4. Solid Torso
+        ctx.fillStyle = '#111111';
+        const torsoTop = headY + headRadius - 1;
+        const torsoH = 11;
+        ctx.fillRect(cx - 7, torsoTop, 14, torsoH);
+
+        // 5. Animated Legs
+        const hipY = torsoTop + torsoH;
+        ctx.lineWidth = 5;
 
         if (!p.grounded) {
-          // Jump in air
+          // In-air jump pose
           ctx.beginPath();
-          ctx.moveTo(cx, hipY);
-          ctx.lineTo(cx - 6 * p.facing, p.y + p.height - 3);
-          ctx.moveTo(cx, hipY);
-          ctx.lineTo(cx + 7 * p.facing, p.y + p.height - 1);
+          ctx.moveTo(cx - 3, hipY);
+          ctx.lineTo(cx - 8 * f, p.y + p.height - 2);
+          ctx.moveTo(cx + 3, hipY);
+          ctx.lineTo(cx + 7 * f, p.y + p.height - 4);
           ctx.stroke();
         } else if (Math.abs(p.vx) > 0.1) {
-          // Walk cycle
-          const swing = Math.sin(p.walkCycle) * 6.5;
+          // Real running cycle
+          const swing = Math.sin(p.walkCycle) * 7.5;
           ctx.beginPath();
-          ctx.moveTo(cx, hipY);
-          ctx.lineTo(cx + swing, p.y + p.height);
-          ctx.moveTo(cx, hipY);
-          ctx.lineTo(cx - swing, p.y + p.height);
+          ctx.moveTo(cx - 3, hipY);
+          ctx.lineTo(cx - 3 + swing, p.y + p.height);
+          ctx.moveTo(cx + 3, hipY);
+          ctx.lineTo(cx + 3 - swing, p.y + p.height);
           ctx.stroke();
         } else {
-          // Normal Idle Legs
+          // Standing idle boots
           ctx.beginPath();
-          ctx.moveTo(cx - 4.5, hipY);
-          ctx.lineTo(cx - 4.5, p.y + p.height);
-          ctx.moveTo(cx + 4.5, hipY);
-          ctx.lineTo(cx + 4.5, p.y + p.height);
+          ctx.moveTo(cx - 4, hipY);
+          ctx.lineTo(cx - 4, p.y + p.height);
+          ctx.moveTo(cx + 4, hipY);
+          ctx.lineTo(cx + 4, p.y + p.height);
           ctx.stroke();
         }
       }
-
       ctx.restore();
     }
 
@@ -423,7 +439,7 @@
       const lvl = levels[currentLevelIdx];
       const groundY = corridor.y + corridor.height;
 
-      // 1. Handle Door Closing Sequence
+      // Door Closing Logic
       if (doorState.isClosing) {
         doorState.closeProgress += doorState.speed;
         if (doorState.closeProgress >= 1) {
@@ -434,10 +450,9 @@
         }
       }
 
-      // 2. Controls & Movement (Locked if inside door)
+      // Movement
       let move = 0;
       if (!player.enteredDoor) {
-        // Crouch Handling
         const wantsCrouch = (keys['ArrowDown'] || keys['KeyS']) && player.grounded;
         if (wantsCrouch && !player.isCrouching) {
           player.isCrouching = true;
@@ -453,7 +468,6 @@
         if (keys['ArrowLeft'] || keys['KeyA']) move -= 1;
         if (lvl.invert) move *= -1;
 
-        // Crouch me move speed thodi slow ho jati hai
         const currentSpeed = player.isCrouching ? player.speed * 0.5 : player.speed;
         player.vx = move * currentSpeed;
 
@@ -464,14 +478,12 @@
           player.walkCycle = 0;
         }
 
-        // Jump (Cannot jump while crouching)
         if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && player.grounded && !player.isCrouching) {
           player.vy = player.jumpPower;
           player.grounded = false;
           playBeep(450, 0.05);
         }
       } else {
-        // Gate ke andar jane ke baad player fixed rahega aur bahar nahi aa sakega
         player.vx = 0;
       }
 
@@ -482,7 +494,6 @@
 
       if (player.x < corridor.x) player.x = corridor.x;
 
-      // Traps Trigger
       lvl.pits.forEach(p => {
         if (player.x > p.triggerX) p.opened = true;
       });
@@ -493,7 +504,6 @@
       }
       if (lvl.door.jumped) doorX = corridor.x + corridor.width - 55;
 
-      // Pit Collision
       let fallingInPit = false;
       lvl.pits.forEach(p => {
         if (p.opened && (player.x + player.width > p.x && player.x < p.x + p.width)) {
@@ -508,12 +518,10 @@
         player.grounded = true;
       }
 
-      // Pit Death
       if (player.y > canvas.height + 40) {
         triggerDeath();
       }
 
-      // Door Enter Trigger (Dami andar chala gaya aur wapas bahar na aane paye)
       const doorW = 38;
       const doorH = 46;
       const doorY = groundY - doorH;
@@ -523,23 +531,20 @@
           player.x < doorX + doorW &&
           player.y + player.height >= doorY) {
         player.enteredDoor = true;
-        player.x = doorX + (doorW - player.width) / 2; // Center inside door
-        doorState.isClosing = true; // 80% speed se gate band hona start
+        player.x = doorX + (doorW - player.width) / 2;
+        doorState.isClosing = true;
         playBeep(320, 0.15);
       }
 
-      // ================= DRAW SCENE =================
+      // Drawing
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Background Wall
       ctx.fillStyle = '#a26916';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Corridor Floor Area
       ctx.fillStyle = '#fca240';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      // Pit Hole Cutout
       lvl.pits.forEach(p => {
         if (p.opened) {
           ctx.fillStyle = '#a26916';
@@ -547,18 +552,13 @@
         }
       });
 
-      // Draw Door (Background / Open Frame)
       drawDoor(doorX, doorY, doorW, doorH, 0);
-
-      // Draw Dummy inside or outside
       drawDummy(player);
 
-      // Agar gate close ho raha hai to shutter ko player ke upar draw karein
       if (doorState.closeProgress > 0) {
         drawDoor(doorX, doorY, doorW, doorH, doorState.closeProgress);
       }
 
-      // Death Flash
       if (deathFlashTimer > 0) {
         ctx.fillStyle = 'rgba(59, 34, 0, 0.45)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
