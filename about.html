@@ -5,48 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🤪 Z PAJAL - About Game</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Press+Start+2P&family=Poppins:wght@600;800&display=swap');
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Chakra Petch', 'Poppins', sans-serif;
         }
 
         body {
             min-height: 100vh;
-            background: #020205;
-            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
+            background: #916000;
             overflow-x: hidden;
             padding: 30px 20px;
-            color: #fff;
-        }
-
-        /* Animated Background Orbs */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: 0;
-            animation: float 12s infinite alternate ease-in-out;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px; height: 400px;
-            background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(121, 40, 202, 0.2));
-            top: -100px; left: -100px;
-        }
-        .orb-2 {
-            width: 500px; height: 500px;
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 114, 255, 0.2));
-            bottom: -150px; right: -100px;
-            animation-delay: -4s;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) scale(1) rotate(0deg); }
-            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
+            color: #523500;
         }
 
         /* Header Title */
@@ -58,12 +31,12 @@
         }
 
         .header-container h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 34px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            color: #fff;
-            text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffb356;
+            text-shadow: 3px 3px 0px #523500;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -71,22 +44,18 @@
         }
 
         .emoji {
-            font-size: 40px;
-            animation: pulse-light 1.5s infinite alternate;
-        }
-
-        @keyframes pulse-light {
-            0% { opacity: 0.4; filter: drop-shadow(0 0 8px #ff007f); transform: scale(0.95); }
-            100% { opacity: 1; filter: drop-shadow(0 0 20px #00f0ff); transform: scale(1.1); }
+            font-size: 32px;
         }
 
         .subtitle {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 15px;
-            margin-top: 8px;
+            color: #ffdeb3;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
         }
 
-        /* Grid for 6 3D Glass Squares (Optimized for Landscape Widescreen) */
+        /* Grid for 6 Glass Squares */
         .grid-container {
             position: relative;
             z-index: 10;
@@ -107,86 +76,95 @@
             .grid-container {
                 grid-template-columns: 1fr;
             }
+            .header-container h1 {
+                font-size: 18px;
+            }
         }
 
-        /* 3D Glass Squares */
+        /* Glass Squares - Theme Matching */
         .glass-card {
-            background: rgba(15, 15, 25, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
+            background: #ffb356;
+            border: 5px solid #ffb356;
+            border-radius: 14px;
             padding: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.35);
             position: relative;
-            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .glass-card:hover {
-            transform: translateY(-6px) scale(1.02);
-            border-color: rgba(0, 240, 255, 0.5);
-            box-shadow: 0 30px 60px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transform: translateY(-4px);
+            box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.45);
         }
 
         .glass-card h3 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 13px;
             font-weight: 700;
-            color: #00f0ff;
-            margin-bottom: 12px;
+            color: #523500;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 10px;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            line-height: 1.5;
         }
 
         .glass-card p {
             font-size: 13px;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.75);
+            color: #3b2500;
+            font-weight: 600;
+        }
+
+        .glass-card strong {
+            color: #523500;
         }
 
         /* Back Button */
         .back-btn-container {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 35px;
             position: relative;
             z-index: 10;
         }
 
         .back-btn {
-            padding: 12px 35px;
-            background: linear-gradient(135deg, #ff007f, #7928ca);
-            color: #fff;
+            padding: 12px 32px;
+            background: #523500;
+            color: #ffb356;
             text-decoration: none;
-            border-radius: 12px;
+            border: 3px solid #3b2500;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', monospace;
             font-weight: 800;
-            font-size: 14px;
-            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.4);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 12px;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4);
+            transition: all 0.15s ease;
             display: inline-block;
             letter-spacing: 1px;
         }
 
         .back-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.7);
+            background: #694400;
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4);
+        }
+
+        .back-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 <body>
-
-    <!-- Background Orbs -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
 
     <div class="header-container">
         <h1><span class="emoji">🤪</span> ABOUT Z PAJAL</h1>
         <p class="subtitle">Dimag ka dahi karne wale is safar ki poori kahani...</p>
     </div>
 
-    <!-- 6 3D Glass Squares Containing Deep Lore & Details -->
+    <!-- 6 Cards Containing Lore & Details -->
     <div class="grid-container">
         
         <!-- Square 1 -->
