@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Level Devil World Map (1-50)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700;800&display=swap" rel="stylesheet">
+    <title>🤪 Z PAJAL - Level Devil Map (1-50)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -31,6 +31,7 @@
             height: 100vh;
             overflow: hidden;
             cursor: grab;
+            background: #916000;
         }
 
         #mapViewport:active {
@@ -43,7 +44,7 @@
             display: block;
         }
 
-        /* Top HUD */
+        /* Top HUD Layer */
         .hud-layer {
             position: absolute;
             top: 0;
@@ -54,7 +55,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 16px;
+            padding: 14px 18px;
             z-index: 100;
         }
 
@@ -65,12 +66,13 @@
             width: 100%;
         }
 
-        .hud-btn {
+        /* Level Devil Style Pill Buttons */
+        .level-devil-btn {
             pointer-events: auto;
             background: #ffa742;
             border: 3px solid #523500;
-            border-radius: 8px;
-            padding: 8px 12px;
+            border-radius: 6px;
+            padding: 7px 12px;
             color: #523500;
             font-size: 10px;
             display: inline-flex;
@@ -79,25 +81,44 @@
             cursor: pointer;
             box-shadow: 3px 3px 0px #523500;
             text-decoration: none;
-            transition: transform 0.1s ease;
+            font-family: 'Press Start 2P', monospace;
         }
 
-        .hud-btn:hover {
+        .level-devil-btn:hover {
             background: #ffbe73;
             transform: translateY(-2px);
+            box-shadow: 4px 4px 0px #523500;
         }
 
-        .hud-btn:active {
+        .level-devil-btn:active {
             transform: translate(2px, 2px);
             box-shadow: 1px 1px 0px #523500;
         }
 
+        /* Infinite Levels Tag */
+        .infinite-badge {
+            pointer-events: auto;
+            background: #ffa742;
+            border: 3px solid #523500;
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #523500;
+            font-size: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            box-shadow: 3px 3px 0px #523500;
+        }
+
+        /* Header Center Title */
         .game-title {
-            font-size: 20px;
+            font-size: 26px;
+            font-weight: 900;
             color: #ffb356;
-            text-shadow: 3px 3px 0px #523500;
-            letter-spacing: 2px;
+            text-shadow: 4px 4px 0px #523500;
+            letter-spacing: 3px;
             text-align: center;
+            pointer-events: none;
         }
 
         .bottom-bar {
@@ -108,16 +129,17 @@
         }
 
         .info-pill {
-            background: rgba(82, 53, 0, 0.85);
-            color: #ffb356;
-            padding: 8px 14px;
+            background: #ffb356;
+            color: #523500;
+            padding: 7px 12px;
             border-radius: 6px;
-            border: 2px solid #523500;
+            border: 3px solid #523500;
             font-size: 9px;
+            box-shadow: 3px 3px 0px #523500;
             letter-spacing: 1px;
         }
 
-        /* Mobile Touch D-Pad */
+        /* Mobile Controls */
         .touch-pad {
             display: none;
             gap: 8px;
@@ -129,7 +151,7 @@
             height: 44px;
             background: #ffa742;
             border: 3px solid #523500;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 14px;
             display: flex;
             justify-content: center;
@@ -155,11 +177,11 @@
                 display: flex;
             }
             .game-title {
-                font-size: 14px;
+                font-size: 16px;
             }
             .info-pill {
-                font-size: 8px;
-                padding: 6px 10px;
+                font-size: 7px;
+                padding: 5px 8px;
             }
         }
     </style>
@@ -172,9 +194,19 @@
 
     <div class="hud-layer">
         <div class="top-bar">
-            <a href="home.html" class="hud-btn">⬅ HOME</a>
-            <div class="game-title">😈 LEVEL DEVIL</div>
-            <div class="hud-btn" id="recenterBtn">🎯 FOCUS</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <a href="home.html" class="level-devil-btn">⬅ HOME</a>
+                <div class="infinite-badge">
+                    <span>👑 DEVIL</span>
+                    <span>1-50 LVL</span>
+                </div>
+            </div>
+
+            <div class="game-title">LEVEL DEVIL</div>
+
+            <div style="display: flex; gap: 8px;">
+                <div class="level-devil-btn" id="recenterBtn">🎯 FOCUS</div>
+            </div>
         </div>
 
         <div class="bottom-bar">
@@ -182,7 +214,7 @@
             
             <div class="touch-pad">
                 <div class="touch-btn" id="mPrev">◀</div>
-                <div class="touch-btn touch-enter" id="mEnter">PLAY</div>
+                <div class="touch-btn touch-enter" id="mEnter">ENTER</div>
                 <div class="touch-btn" id="mNext">▶</div>
             </div>
 
@@ -195,39 +227,37 @@
         const ctx = canvas.getContext('2d');
         const viewport = document.getElementById('mapViewport');
 
-        // Total 1 to 50 Levels
         const TOTAL_LEVELS = 50;
 
-        // Current unlocked progress from storage
         let unlockedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
         if (unlockedMax > TOTAL_LEVELS) unlockedMax = TOTAL_LEVELS;
 
-        // Colors
+        // Level Devil exact theme palette
         const C_BG = "#916000";
         const C_ISLAND_TOP = "#ffb356";
         const C_ISLAND_SIDE = "#d48b28";
         const C_ISLAND_SHADOW = "#523500";
-        const C_PATH = "#d48b28";
-        const C_DOOR_LOCKED = "#80500e";
-        const C_DOOR_OUTLINE = "#523500";
-        const C_DOOR_GLOW = "#fff099";
+        const C_PATH = "#a66e1e";
+        const C_CAVE_LOCKED = "#523500";
+        const C_CAVE_OPEN = "#3b2500";
+        const C_ACTIVE_GLOW = "#fff099";
 
-        // Virtual World Canvas Dimensions (Long scrolling world for 50 levels)
-        const WORLD_W = 5200;
+        // Virtual World Canvas Dimensions for 50 Levels
+        const WORLD_W = 5400;
         const WORLD_H = 1200;
         canvas.width = WORLD_W;
         canvas.height = WORLD_H;
 
-        // Generate 50 Level Nodes in a S-curved Web Road
+        // Generate 50 Level Nodes with Level Devil Style clusters and branches
         const nodes = [];
         const edges = [];
 
+        // Exact pattern nodes
         for (let i = 1; i <= TOTAL_LEVELS; i++) {
-            // Winding track calculation
             const progress = (i - 1) / (TOTAL_LEVELS - 1);
-            const x = 200 + progress * (WORLD_W - 450) + (Math.sin(i * 1.3) * 35);
-            const waveY = Math.sin(i * 0.45) * 260;
-            const y = (WORLD_H / 2) + waveY + (Math.cos(i * 0.8) * 40);
+            const x = 240 + progress * (WORLD_W - 550) + (Math.sin(i * 1.7) * 45);
+            const waveY = Math.sin(i * 0.55) * 250;
+            const y = (WORLD_H / 2) + waveY + (Math.cos(i * 0.9) * 50);
 
             nodes.push({ id: i, x: Math.round(x), y: Math.round(y) });
 
@@ -236,12 +266,10 @@
             }
         }
 
-        // Camera Scroll Position
         let cameraX = 0;
         let cameraY = 0;
         let selectedNodeIdx = Math.min(unlockedMax - 1, TOTAL_LEVELS - 1);
 
-        // Sound Effects
         function playStepSound() {
             try {
                 const actx = new (window.AudioContext || window.webkitAudioContext)();
@@ -275,7 +303,6 @@
             } catch(e){}
         }
 
-        // Center Camera on Node
         function focusNode(idx, smooth = true) {
             const targetX = nodes[idx].x - window.innerWidth / 2;
             const targetY = nodes[idx].y - window.innerHeight / 2;
@@ -284,8 +311,8 @@
                 cameraX = targetX;
                 cameraY = targetY;
             } else {
-                cameraX += (targetX - cameraX) * 0.2;
-                cameraY += (targetY - cameraY) * 0.2;
+                cameraX += (targetX - cameraX) * 0.25;
+                cameraY += (targetY - cameraY) * 0.25;
             }
 
             clampCamera();
@@ -306,14 +333,14 @@
             canvas.style.transform = `translate3d(${-cameraX}px, ${-cameraY}px, 0)`;
         }
 
-        // Draw Thick Continuous Island Web
+        // Draw Stepped Pixel Platforms
         function drawTerrain() {
-            // Shadow Path Layer
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
+            // Depth Bottom Rim
             ctx.strokeStyle = C_ISLAND_SHADOW;
-            ctx.lineWidth = 140;
+            ctx.lineWidth = 150;
             ctx.beginPath();
             nodes.forEach((n, idx) => {
                 if (idx === 0) ctx.moveTo(n.x, n.y + 24);
@@ -321,9 +348,9 @@
             });
             ctx.stroke();
 
-            // Side Depth Layer
+            // Island 3D Side Slope
             ctx.strokeStyle = C_ISLAND_SIDE;
-            ctx.lineWidth = 130;
+            ctx.lineWidth = 140;
             ctx.beginPath();
             nodes.forEach((n, idx) => {
                 if (idx === 0) ctx.moveTo(n.x, n.y + 12);
@@ -331,9 +358,9 @@
             });
             ctx.stroke();
 
-            // Top Island Surface
+            // Island Flat Surface
             ctx.strokeStyle = C_ISLAND_TOP;
-            ctx.lineWidth = 120;
+            ctx.lineWidth = 130;
             ctx.beginPath();
             nodes.forEach((n, idx) => {
                 if (idx === 0) ctx.moveTo(n.x, n.y);
@@ -341,22 +368,22 @@
             });
             ctx.stroke();
 
-            // Circular land plate at each level
+            // Flat Plateau at each cave station
             nodes.forEach(n => {
                 ctx.fillStyle = C_ISLAND_TOP;
                 ctx.beginPath();
-                ctx.arc(n.x, n.y, 65, 0, Math.PI * 2);
+                ctx.arc(n.x, n.y, 70, 0, Math.PI * 2);
                 ctx.fill();
             });
 
-            // Walking Dotted Trail
+            // Level Devil Sand Track Footpaths
             ctx.strokeStyle = C_PATH;
-            ctx.lineWidth = 4;
-            ctx.setLineDash([8, 8]);
+            ctx.lineWidth = 5;
+            ctx.setLineDash([10, 8]);
             ctx.beginPath();
             edges.forEach(([a, b]) => {
-                ctx.moveTo(nodes[a].x, nodes[a].y);
-                ctx.lineTo(nodes[b].x, nodes[b].y);
+                ctx.moveTo(nodes[a].x, nodes[a].y + 6);
+                ctx.lineTo(nodes[b].x, nodes[b].y + 6);
             });
             ctx.stroke();
             ctx.setLineDash([]);
@@ -373,7 +400,7 @@
             ctx.fill();
         }
 
-        // Draw Devil Doors & Gates
+        // Draw Caves & Active Gate
         function drawLevels() {
             animFrame++;
 
@@ -381,66 +408,82 @@
                 const isUnlocked = n.id <= unlockedMax;
                 const isSelected = idx === selectedNodeIdx;
 
-                // Ground shadow
-                ctx.fillStyle = "rgba(82, 53, 0, 0.35)";
+                // Ground dust shadow
+                ctx.fillStyle = "rgba(82, 53, 0, 0.4)";
                 ctx.beginPath();
-                ctx.ellipse(n.x, n.y + 16, 20, 7, 0, 0, Math.PI * 2);
+                ctx.ellipse(n.x, n.y + 14, 22, 8, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 if (isSelected) {
-                    // Selected Devil Door with Horns
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    drawArch(n.x, n.y - 16, 38, 44);
+                    // Level Devil Glowing Gate
+                    ctx.fillStyle = C_ISLAND_SHADOW;
+                    drawArch(n.x, n.y - 14, 38, 42);
 
-                    ctx.fillStyle = C_DOOR_GLOW;
-                    drawArch(n.x, n.y - 14, 30, 38);
+                    ctx.fillStyle = C_ACTIVE_GLOW;
+                    drawArch(n.x, n.y - 12, 30, 36);
 
                     // Devil Horns
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    ctx.fillRect(n.x - 18, n.y - 24, 6, 10);
-                    ctx.fillRect(n.x + 12, n.y - 24, 6, 10);
+                    ctx.fillStyle = C_ISLAND_SHADOW;
+                    ctx.fillRect(n.x - 17, n.y - 22, 6, 10);
+                    ctx.fillRect(n.x + 11, n.y - 22, 6, 10);
 
-                    // Pulsing Arrow Prompt
-                    const bounce = Math.sin(animFrame * 0.08) * 5;
+                    // Downward Triangle Pointer
+                    const bounce = Math.sin(animFrame * 0.09) * 5;
                     ctx.fillStyle = "#ffcc00";
                     ctx.beginPath();
-                    ctx.moveTo(n.x, n.y - 42 + bounce);
-                    ctx.lineTo(n.x - 10, n.y - 56 + bounce);
-                    ctx.lineTo(n.x + 10, n.y - 56 + bounce);
+                    ctx.moveTo(n.x, n.y - 36 + bounce);
+                    ctx.lineTo(n.x - 8, n.y - 48 + bounce);
+                    ctx.lineTo(n.x + 8, n.y - 48 + bounce);
                     ctx.closePath();
                     ctx.fill();
 
+                    // "PRESS SPACE" / "ENTER" Prompt
                     ctx.fillStyle = "#523500";
                     ctx.font = "8px 'Press Start 2P'";
                     ctx.textAlign = "center";
-                    ctx.fillText("ENTER", n.x, n.y + 36);
+                    ctx.fillText("press", n.x, n.y + 30);
+                    ctx.fillText("space", n.x, n.y + 40);
 
                 } else if (isUnlocked) {
-                    // Clear Unlocked Stage Door
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    drawArch(n.x, n.y - 12, 32, 36);
+                    // Open Cave Door
+                    ctx.fillStyle = C_ISLAND_SHADOW;
+                    drawArch(n.x, n.y - 10, 30, 34);
 
-                    ctx.fillStyle = "#3b2500";
-                    drawArch(n.x, n.y - 10, 24, 30);
+                    ctx.fillStyle = C_CAVE_OPEN;
+                    drawArch(n.x, n.y - 8, 24, 28);
                 } else {
-                    // Locked Dark Stage
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    drawArch(n.x, n.y - 12, 30, 34);
+                    // Locked Brown Cave
+                    ctx.fillStyle = C_ISLAND_SHADOW;
+                    drawArch(n.x, n.y - 10, 28, 32);
 
-                    ctx.fillStyle = C_DOOR_LOCKED;
-                    drawArch(n.x, n.y - 10, 22, 28);
-
-                    // Lock Icon
-                    ctx.fillStyle = "#301d02";
-                    ctx.fillRect(n.x - 4, n.y - 1, 8, 8);
+                    ctx.fillStyle = C_CAVE_LOCKED;
+                    drawArch(n.x, n.y - 8, 22, 26);
                 }
 
                 // Stage Number
-                ctx.fillStyle = isSelected ? "#523500" : (isUnlocked ? "#ffb356" : "#4a3007");
-                ctx.font = "8px 'Press Start 2P'";
+                ctx.fillStyle = isSelected ? "#523500" : (isUnlocked ? "#ffb356" : "#2d1d02");
+                ctx.font = "7px 'Press Start 2P'";
                 ctx.textAlign = "center";
                 ctx.fillText(n.id, n.x, n.y + 4);
             });
+        }
+
+        // Grave landmark at the end (Level Devil Style)
+        function drawMapDecorations() {
+            // End Island Tombstone
+            const endNode = nodes[TOTAL_LEVELS - 1];
+            ctx.fillStyle = "#615c54";
+            ctx.beginPath();
+            ctx.arc(endNode.x + 120, endNode.y - 30, 16, Math.PI, 0);
+            ctx.lineTo(endNode.x + 136, endNode.y);
+            ctx.lineTo(endNode.x + 104, endNode.y);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = "#ffb356";
+            ctx.font = "12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("💀", endNode.x + 120, endNode.y - 10);
         }
 
         function render() {
@@ -448,16 +491,15 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             drawTerrain();
+            drawMapDecorations();
             drawLevels();
 
             requestAnimationFrame(render);
         }
 
-        // Initialize view
         focusNode(selectedNodeIdx, false);
         render();
 
-        // Navigation & Enter
         function selectLevel(idx) {
             if (idx < 0 || idx >= TOTAL_LEVELS) return;
             selectedNodeIdx = idx;
@@ -477,7 +519,7 @@
             }
         }
 
-        // Keyboard Controls
+        // Controls
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
                 if (selectedNodeIdx < TOTAL_LEVELS - 1) selectLevel(selectedNodeIdx + 1);
@@ -488,7 +530,6 @@
             }
         });
 
-        // Touch button handlers
         document.getElementById('mPrev').addEventListener('click', () => {
             if (selectedNodeIdx > 0) selectLevel(selectedNodeIdx - 1);
         });
@@ -515,7 +556,7 @@
             });
         });
 
-        // Mouse Drag / Touch Swipe to Pan Map
+        // Mouse Drag & Touch Pan
         let isDragging = false;
         let startX, startY;
 
@@ -535,7 +576,6 @@
 
         window.addEventListener('mouseup', () => isDragging = false);
 
-        // Touch Drag
         viewport.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1) {
                 isDragging = true;
@@ -554,7 +594,6 @@
 
         window.addEventListener('touchend', () => isDragging = false);
 
-        // Mouse Wheel Horizontal Scroll
         viewport.addEventListener('wheel', (e) => {
             cameraX += e.deltaY;
             clampCamera();
