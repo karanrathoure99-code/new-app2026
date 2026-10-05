@@ -7,10 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-outer: #a26916;
-      --corridor-bg: #fca240;
+      --bg-outer: #8f5b0d;      /* Original Level Devil Brownish Wall */
+      --corridor-bg: #fca240;  /* Original Orange-Yellow Path */
       --player-color: #111111;
-      --door-frame: #3b2200;
+      --door-frame: #3d2402;
       --door-fill: #cbd5e1;
     }
 
@@ -86,7 +86,7 @@
       max-height: 72vh;
     }
 
-    /* On-Screen Touch Buttons (Phone/Tablet me visible) */
+    /* Mobile & Tablet Controls */
     .controls-container {
       width: 100%;
       max-width: 960px;
@@ -104,7 +104,7 @@
     }
 
     .ctrl-btn {
-      width: 72px;
+      width: 74px;
       height: 52px;
       background: rgba(252, 162, 64, 0.6);
       border: 3px solid rgba(74, 45, 4, 0.7);
@@ -123,7 +123,7 @@
       transform: scale(0.94);
     }
 
-    /* Desktop mouse users ke liye hide, mobile/tablet me compulsory show */
+    /* Desktop/Laptop par buttons hide */
     @media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
       .controls-container {
         display: none !important;
@@ -138,14 +138,12 @@
 <body>
 
   <div class="top-header">
-    <div class="level-badge" id="levelDisplay">LEVEL 1 / 2</div>
-    <!-- 404 fix: level.html set kar diya gaya hai -->
+    <div class="level-badge" id="levelDisplay">LEVEL 1</div>
     <a href="level.html" class="levels-btn">📑 LEVEL</a>
   </div>
 
   <canvas id="gameCanvas" width="960" height="400"></canvas>
 
-  <!-- Mobile & Tablet Controls -->
   <div class="controls-container" id="touchControls">
     <div class="dpad">
       <button class="ctrl-btn" id="btnLeft">◀</button>
@@ -160,7 +158,7 @@
     const ctx = canvas.getContext('2d');
     const levelDisplay = document.getElementById('levelDisplay');
 
-    // Auto Fullscreen & Landscape on tap/click anywhere
+    // Auto Fullscreen & Landscape API
     async function triggerAutoFullscreen() {
       try {
         const docEl = document.documentElement;
@@ -180,13 +178,7 @@
     window.addEventListener('click', triggerAutoFullscreen, { once: true });
     window.addEventListener('touchstart', triggerAutoFullscreen, { once: true });
 
-    // Phone / Tablet Check to ensure buttons never disappear on touch devices
-    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    if (isTouchDevice) {
-      document.getElementById('touchControls').style.display = 'flex';
-    }
-
-    // Corridor Play Area
+    // Play Area Corridor
     const corridor = {
       x: 40,
       y: 125,
@@ -194,54 +186,54 @@
       height: 145
     };
 
-    const STORAGE_KEY = 'saveLevel_TumseNaHoPayga';
-    let currentSavedLevel = parseInt(localStorage.getItem(STORAGE_KEY)) || 1;
-    if (currentSavedLevel > 2) currentSavedLevel = 1;
-    let currentLevelIdx = currentSavedLevel - 1;
     let deathFlashTimer = 0;
+    let currentLevel = 1;
 
+    // Door Closing Mechanism (80% Speed)
     let doorState = {
       isClosing: false,
       closeProgress: 0,
-      speed: 0.08 // 80% Fast close
+      speed: 0.08
     };
 
-    const levels = [
-      {
-        id: 1,
-        playerStart: { x: 80 },
-        door: { x: 820, behavior: 'none' },
-        pits: [
-          { x: 620, width: 52, triggerX: 500, opened: false }
-        ],
-        spikes: [],
-        invert: false
-      },
-      {
-        id: 2,
-        playerStart: { x: 80 },
-        door: { x: 700, behavior: 'jump_away', triggerDist: 150, jumped: false },
-        pits: [],
-        spikes: [],
-        invert: false
-      }
-    ];
+    // LEVEL CHANGE DEVIL THEME TRANSITION
+    let transition = {
+      active: false,
+      progress: 0,     // 0 to 1 (close), 1 to 2 (open)
+      speed: 0.035,
+      nextLevel: 1
+    };
 
-    // Character State
+    // Level 1 Data (Floor falls in front of door)
+    const level1Data = {
+      playerStart: { x: 80 },
+      door: { x: 810 },
+      fallingBlock: {
+        x: 640,
+        y: corridor.y + corridor.height - 15,
+        width: 65,
+        height: 15,
+        triggerX: 470,
+        triggered: false,
+        vy: 0
+      }
+    };
+
+    // Player State
     const NORMAL_HEIGHT = 36;
     const CROUCH_HEIGHT = 22;
 
     const player = {
       x: 80,
       y: 0,
-      width: 24, // 70% solid body
+      width: 24,
       height: NORMAL_HEIGHT,
       vx: 0,
       vy: 0,
       facing: 1,
       walkCycle: 0,
       speed: 3.8,
-      jumpPower: -9.4,
+      jumpPower: -9.5,
       grounded: false,
       isCrouching: false,
       enteredDoor: false
@@ -251,7 +243,6 @@
     window.addEventListener('keydown', (e) => keys[e.code] = true);
     window.addEventListener('keyup', (e) => keys[e.code] = false);
 
-    // Touch button listeners
     const setupBtn = (id, keyName) => {
       const btn = document.getElementById(id);
       if (!btn) return;
@@ -279,16 +270,12 @@
       } catch (e) {}
     }
 
-    function initLevel(idx) {
-      if (idx >= levels.length) idx = 0;
-      currentLevelIdx = idx;
-
-      const lvl = levels[currentLevelIdx];
-      levelDisplay.innerText = `LEVEL ${lvl.id} / ${levels.length}`;
-      localStorage.setItem(STORAGE_KEY, lvl.id);
+    function initLevel(lvlNum = 1) {
+      currentLevel = lvlNum;
+      levelDisplay.innerText = "LEVEL " + currentLevel;
 
       player.height = NORMAL_HEIGHT;
-      player.x = lvl.playerStart.x;
+      player.x = level1Data.playerStart.x;
       player.y = corridor.y + corridor.height - player.height;
       player.vx = 0;
       player.vy = 0;
@@ -297,23 +284,32 @@
       player.isCrouching = false;
       player.enteredDoor = false;
 
+      // Reset Falling Floor
+      level1Data.fallingBlock.y = corridor.y + corridor.height - 15;
+      level1Data.fallingBlock.vy = 0;
+      level1Data.fallingBlock.triggered = false;
+
       doorState.isClosing = false;
       doorState.closeProgress = 0;
+    }
 
-      lvl.pits.forEach(p => p.opened = false);
-      lvl.spikes.forEach(s => s.active = false);
-      if (lvl.door.behavior === 'jump_away') lvl.door.jumped = false;
+    function startLevelTransition(nextLvl) {
+      transition.active = true;
+      transition.progress = 0;
+      transition.nextLevel = nextLvl;
+      playBeep(260, 0.25);
     }
 
     function triggerDeath() {
       playBeep(180, 0.12);
       deathFlashTimer = 16;
-      initLevel(currentLevelIdx);
+      initLevel(currentLevel);
     }
 
+    // Door Drawing with Fast Shutter
     function drawDoor(x, y, w, h, closeProgress) {
       ctx.save();
-      ctx.fillStyle = '#3b2200';
+      ctx.fillStyle = '#3d2402';
       ctx.beginPath();
       ctx.arc(x + w / 2, y + 14, w / 2, Math.PI, 0);
       ctx.rect(x, y + 14, w, h - 14);
@@ -326,14 +322,14 @@
       ctx.fill();
 
       if (closeProgress > 0) {
-        ctx.fillStyle = '#3b2200';
+        ctx.fillStyle = '#3d2402';
         const shutterHeight = (h - 16) * Math.min(1, closeProgress);
         ctx.fillRect(x + 4, y + 16, w - 8, shutterHeight);
       }
       ctx.restore();
     }
 
-    // Authentic Game Character: Devil with Horns, Eye, Torso & Boots
+    // Original Devil Character Sprite
     function drawDummy(p) {
       ctx.save();
       const cx = p.x + p.width / 2;
@@ -344,11 +340,9 @@
       ctx.lineCap = 'round';
 
       if (p.isCrouching) {
-        // Crouched / Sitting Character
         const headRadius = 7;
         const headY = p.y + headRadius;
 
-        // Devil Horns
         ctx.beginPath();
         ctx.moveTo(cx - 5 * f, headY - 4);
         ctx.lineTo(cx - 7 * f, headY - 10);
@@ -358,25 +352,19 @@
         ctx.lineTo(cx + 3 * f, headY - 4);
         ctx.fill();
 
-        // Head
         ctx.beginPath();
         ctx.arc(cx, headY, headRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Eye slit (Devil look)
         ctx.fillStyle = '#fca240';
         ctx.fillRect(cx + 2 * f, headY - 1, 2.5, 2.5);
 
-        // Body squatted
         ctx.fillStyle = '#111111';
         ctx.fillRect(cx - 8, headY + 5, 16, p.height - (headRadius + 5));
-
       } else {
-        // Standing / Running Game Character
         const headRadius = 7.5;
         const headY = p.y + headRadius + 3;
 
-        // 1. Devil Horns (Sharp devil points)
         ctx.beginPath();
         ctx.moveTo(cx - 5, headY - 4);
         ctx.lineTo(cx - 7, headY - 11);
@@ -386,27 +374,22 @@
         ctx.lineTo(cx + 5, headY - 4);
         ctx.fill();
 
-        // 2. Devil Round Head
         ctx.beginPath();
         ctx.arc(cx, headY, headRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // 3. Eye Slit
         ctx.fillStyle = '#fca240';
         ctx.fillRect(cx + 2 * f, headY - 1, 2.5, 2.5);
 
-        // 4. Solid Torso
         ctx.fillStyle = '#111111';
         const torsoTop = headY + headRadius - 1;
         const torsoH = 11;
         ctx.fillRect(cx - 7, torsoTop, 14, torsoH);
 
-        // 5. Animated Legs
         const hipY = torsoTop + torsoH;
         ctx.lineWidth = 5;
 
         if (!p.grounded) {
-          // In-air jump pose
           ctx.beginPath();
           ctx.moveTo(cx - 3, hipY);
           ctx.lineTo(cx - 8 * f, p.y + p.height - 2);
@@ -414,7 +397,6 @@
           ctx.lineTo(cx + 7 * f, p.y + p.height - 4);
           ctx.stroke();
         } else if (Math.abs(p.vx) > 0.1) {
-          // Real running cycle
           const swing = Math.sin(p.walkCycle) * 7.5;
           ctx.beginPath();
           ctx.moveTo(cx - 3, hipY);
@@ -423,7 +405,6 @@
           ctx.lineTo(cx + 3 - swing, p.y + p.height);
           ctx.stroke();
         } else {
-          // Standing idle boots
           ctx.beginPath();
           ctx.moveTo(cx - 4, hipY);
           ctx.lineTo(cx - 4, p.y + p.height);
@@ -435,24 +416,119 @@
       ctx.restore();
     }
 
-    function update() {
-      const lvl = levels[currentLevelIdx];
-      const groundY = corridor.y + corridor.height;
+    // THEME-FITTING DEVIL CHOMP & GLOWING EYES TRANSITION ANIMATION
+    function renderDevilTransition() {
+      if (!transition.active) return;
 
-      // Door Closing Logic
-      if (doorState.isClosing) {
+      transition.progress += transition.speed;
+
+      // Half-way point: Switch level
+      if (transition.progress >= 1 && transition.progress - transition.speed < 1) {
+        initLevel(transition.nextLevel);
+        playBeep(520, 0.15);
+      }
+
+      // Finish Transition
+      if (transition.progress >= 2) {
+        transition.active = false;
+        transition.progress = 0;
+        return;
+      }
+
+      // Calculate close factor (0 to 1 then 1 down to 0)
+      const factor = transition.progress < 1 ? transition.progress : (2 - transition.progress);
+
+      ctx.save();
+      const w = canvas.width;
+      const h = canvas.height;
+      const midH = h / 2;
+      const curH = midH * factor;
+
+      // Dark Crimson / Devil Blood Red jaws
+      ctx.fillStyle = '#4c0505';
+
+      // Top Jaw with Spikes
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(w, 0);
+      ctx.lineTo(w, curH);
+      const spikes = 14;
+      const step = w / spikes;
+      for (let i = spikes; i >= 0; i--) {
+        const sx = i * step;
+        const sy = (i % 2 === 0) ? curH : curH + 28 * factor;
+        ctx.lineTo(sx, sy);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Bottom Jaw with Spikes
+      ctx.beginPath();
+      ctx.moveTo(0, h);
+      ctx.lineTo(w, h);
+      ctx.lineTo(w, h - curH);
+      for (let i = spikes; i >= 0; i--) {
+        const sx = i * step;
+        const sy = (i % 2 === 0) ? (h - curH) : (h - curH - 28 * factor);
+        ctx.lineTo(sx, sy);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // When fully closed (around mid transition) -> Glowing Red Devil Eyes in Center
+      if (factor > 0.65) {
+        const eyeAlpha = Math.min(1, (factor - 0.65) / 0.35);
+        ctx.globalAlpha = eyeAlpha;
+
+        const eyeCenterY = midH - 8;
+        const leftEyeX = w / 2 - 45;
+        const rightEyeX = w / 2 + 45;
+
+        // Glowing Devil Horns/Eyes in Deep Red
+        ctx.fillStyle = '#ff1e1e';
+
+        // Left Evil Curved Eye
+        ctx.beginPath();
+        ctx.moveTo(leftEyeX - 35, eyeCenterY - 14);
+        ctx.quadraticCurveTo(leftEyeX - 10, eyeCenterY - 4, leftEyeX + 18, eyeCenterY + 12);
+        ctx.quadraticCurveTo(leftEyeX - 5, eyeCenterY + 6, leftEyeX - 35, eyeCenterY - 14);
+        ctx.fill();
+
+        // Right Evil Curved Eye
+        ctx.beginPath();
+        ctx.moveTo(rightEyeX + 35, eyeCenterY - 14);
+        ctx.quadraticCurveTo(rightEyeX + 10, eyeCenterY - 4, rightEyeX - 18, eyeCenterY + 12);
+        ctx.quadraticCurveTo(rightEyeX + 5, eyeCenterY + 6, rightEyeX + 35, eyeCenterY - 14);
+        ctx.fill();
+
+        // Eye Pupils (Glow center)
+        ctx.fillStyle = '#ffea75';
+        ctx.beginPath();
+        ctx.arc(leftEyeX - 5, eyeCenterY + 2, 4, 0, Math.PI * 2);
+        ctx.arc(rightEyeX + 5, eyeCenterY + 2, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function update() {
+      const groundY = corridor.y + corridor.height;
+      const fb = level1Data.fallingBlock;
+
+      // Door Close Sequence
+      if (doorState.isClosing && !transition.active) {
         doorState.closeProgress += doorState.speed;
         if (doorState.closeProgress >= 1) {
           doorState.closeProgress = 1;
-          playBeep(700, 0.1);
-          initLevel(currentLevelIdx + 1);
-          return;
+          // Trigger Devil Level Transition
+          startLevelTransition(currentLevel === 1 ? 2 : 1);
         }
       }
 
-      // Movement
+      // Movement (Disable during transition)
       let move = 0;
-      if (!player.enteredDoor) {
+      if (!player.enteredDoor && !transition.active) {
         const wantsCrouch = (keys['ArrowDown'] || keys['KeyS']) && player.grounded;
         if (wantsCrouch && !player.isCrouching) {
           player.isCrouching = true;
@@ -466,7 +542,6 @@
 
         if (keys['ArrowRight'] || keys['KeyD']) move += 1;
         if (keys['ArrowLeft'] || keys['KeyA']) move -= 1;
-        if (lvl.invert) move *= -1;
 
         const currentSpeed = player.isCrouching ? player.speed * 0.5 : player.speed;
         player.vx = move * currentSpeed;
@@ -494,37 +569,43 @@
 
       if (player.x < corridor.x) player.x = corridor.x;
 
-      lvl.pits.forEach(p => {
-        if (player.x > p.triggerX) p.opened = true;
-      });
-
-      let doorX = lvl.door.x;
-      if (lvl.door.behavior === 'jump_away' && Math.abs(player.x - lvl.door.x) < lvl.door.triggerDist) {
-        lvl.door.jumped = true;
+      // Trap Trigger
+      if (player.x > fb.triggerX) {
+        fb.triggered = true;
       }
-      if (lvl.door.jumped) doorX = corridor.x + corridor.width - 55;
 
-      let fallingInPit = false;
-      lvl.pits.forEach(p => {
-        if (p.opened && (player.x + player.width > p.x && player.x < p.x + p.width)) {
-          fallingInPit = true;
+      if (fb.triggered) {
+        fb.vy += 0.55;
+        fb.y += fb.vy;
+      }
+
+      // Floor & Pit Collision
+      let onFallingBlock = false;
+      if (player.x + player.width > fb.x && player.x < fb.x + fb.width) {
+        if (fb.y <= corridor.y + corridor.height - 15) {
+          onFallingBlock = true;
         }
-      });
+      } else {
+        onFallingBlock = true;
+      }
 
       const floorY = groundY - player.height;
-      if (!fallingInPit && player.y >= floorY) {
+      if (onFallingBlock && player.y >= floorY) {
         player.y = floorY;
         player.vy = 0;
         player.grounded = true;
       }
 
-      if (player.y > canvas.height + 40) {
+      // Pit Death
+      if (player.y > canvas.height + 40 && !transition.active) {
         triggerDeath();
       }
 
+      // Enter Door
       const doorW = 38;
       const doorH = 46;
       const doorY = groundY - doorH;
+      const doorX = level1Data.door.x;
 
       if (!player.enteredDoor &&
           player.x + player.width / 2 > doorX + 10 &&
@@ -536,39 +617,54 @@
         playBeep(320, 0.15);
       }
 
-      // Drawing
+      // ================= DRAW SCENE =================
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#a26916';
+      // Background Wall
+      ctx.fillStyle = '#8f5b0d';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Corridor
       ctx.fillStyle = '#fca240';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      lvl.pits.forEach(p => {
-        if (p.opened) {
-          ctx.fillStyle = '#a26916';
-          ctx.fillRect(p.x, corridor.y, p.width, corridor.height + 150);
-        }
-      });
+      // Pit Shaft
+      if (fb.triggered) {
+        ctx.fillStyle = '#8f5b0d';
+        ctx.fillRect(fb.x, corridor.y, fb.width, corridor.height + 150);
+      }
 
+      // Falling Block
+      if (fb.y < canvas.height + 50) {
+        ctx.fillStyle = '#fca240';
+        ctx.fillRect(fb.x, fb.y, fb.width, fb.height);
+      }
+
+      // Door (Frame)
       drawDoor(doorX, doorY, doorW, doorH, 0);
+
+      // Player Dummy
       drawDummy(player);
 
+      // Door Shutter Closing over player
       if (doorState.closeProgress > 0) {
         drawDoor(doorX, doorY, doorW, doorH, doorState.closeProgress);
       }
 
+      // Death Flash
       if (deathFlashTimer > 0) {
         ctx.fillStyle = 'rgba(59, 34, 0, 0.45)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         deathFlashTimer--;
       }
 
+      // Level Change Devil Wipe Animation
+      renderDevilTransition();
+
       requestAnimationFrame(update);
     }
 
-    initLevel(currentLevelIdx);
+    initLevel(1);
     update();
   </script>
 </body>
