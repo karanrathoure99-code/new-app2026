@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🤪 Z PAJAL - Secure Registration</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Press+Start+2P&family=Poppins:wght@600;800&display=swap');
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Chakra Petch', 'Poppins', sans-serif;
         }
 
         body {
@@ -20,35 +20,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #020205;
-            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
+            background: #916000;
             overflow: hidden;
             padding: 15px;
-        }
-
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: 0;
-            opacity: 0.5;
-            animation: float 12s infinite alternate ease-in-out;
-        }
-        .orb-1 {
-            width: 400px; height: 400px;
-            background: linear-gradient(135deg, #ff007f, #7928ca);
-            top: -100px; left: -100px;
-        }
-        .orb-2 {
-            width: 500px; height: 500px;
-            background: linear-gradient(135deg, #00f0ff, #0072ff);
-            bottom: -150px; right: -100px;
-            animation-delay: -4s;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) scale(1) rotate(0deg); }
-            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
         }
 
         /* Landscape Horizontal Glass Box */
@@ -57,34 +31,32 @@
             z-index: 10;
             width: 100%;
             max-width: 750px;
-            background: rgba(15, 15, 25, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 24px;
+            background: #ffb356;
+            border: 5px solid #ffb356;
+            border-radius: 14px;
             padding: 25px 35px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.35);
             max-height: 92vh;
             overflow-y: auto;
         }
 
         .glass-box::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
         .glass-box::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: #523500;
             border-radius: 10px;
         }
 
         .game-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 26px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 15px;
-            letter-spacing: 2px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: #523500;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
             text-align: center;
-            text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.4);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -92,13 +64,7 @@
         }
 
         .emoji {
-            font-size: 32px;
-            animation: pulse-light 1.5s infinite alternate;
-        }
-
-        @keyframes pulse-light {
-            0% { opacity: 0.4; filter: drop-shadow(0 0 8px #ff007f); transform: scale(0.95); }
-            100% { opacity: 1; filter: drop-shadow(0 0 20px #00f0ff); transform: scale(1.1); }
+            font-size: 28px;
         }
 
         /* 2-Column Grid Layout for Landscape Efficiency */
@@ -116,95 +82,112 @@
         .input-group label {
             display: block;
             font-size: 11px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 4px;
-            font-weight: 600;
+            color: #523500;
+            margin-bottom: 5px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
         }
 
         .input-group input {
             width: 100%;
             padding: 10px 14px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #fff;
+            background: #ffa742;
+            border: 3px solid #523500;
+            border-radius: 8px;
+            color: #3b2500;
             font-size: 13px;
+            font-weight: 700;
             outline: none;
-            transition: all 0.3s ease;
+            box-shadow: 3px 3px 0px #523500;
+            transition: all 0.2s ease;
         }
 
         .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.35);
+            color: #7d540f;
+            font-weight: 600;
         }
 
         .input-group input:focus {
-            border-color: #00f0ff;
-            background: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            border-color: #3b2500;
+            background: #ffbe73;
+            box-shadow: 4px 4px 0px #3b2500;
         }
 
         .hint {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.4);
-            margin-top: 3px;
+            font-size: 10px;
+            color: #523500;
+            margin-top: 4px;
             line-height: 1.2;
+            font-weight: 700;
         }
 
         .full-width {
             grid-column: span 2;
+            margin-top: 5px;
         }
 
         .register-btn {
             width: 100%;
-            padding: 11px;
-            background: linear-gradient(135deg, #ff007f, #7928ca);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            padding: 13px;
+            background: #523500;
+            color: #ffb356;
+            border: 3px solid #3b2500;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(255, 0, 127, 0.4);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4);
+            transition: all 0.15s ease;
             letter-spacing: 1px;
         }
 
         .register-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.7);
+            background: #694400;
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4);
+        }
+
+        .register-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
         }
 
         .footer-link-container {
             text-align: center;
-            margin-top: 12px;
+            margin-top: 10px;
             grid-column: span 2;
+            padding-top: 10px;
+            border-top: 3px dashed #b87c28;
         }
 
         .back-link {
-            color: rgba(255, 255, 255, 0.75);
+            color: #523500;
             text-decoration: none;
             font-size: 12px;
-            font-weight: 600;
-            transition: color 0.3s, text-shadow 0.3s;
+            font-weight: 700;
+            transition: color 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            background: #ffa742;
+            padding: 6px 12px;
+            border: 2px solid #523500;
+            border-radius: 6px;
+            box-shadow: 2px 2px 0px #523500;
         }
 
         .back-link:hover {
-            color: #00f0ff;
-            text-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
+            color: #000000;
+            background: #ffbe73;
         }
     </style>
 </head>
 <body>
 
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
     <div class="glass-box">
         <div class="game-title">
-            <span class="emoji">✨</span> CREATE ACCOUNT
+            <span class="emoji">😈</span> CREATE ACCOUNT
         </div>
         
         <div class="form-grid">
