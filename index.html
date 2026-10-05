@@ -20,70 +20,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #916000;
-            background-image: 
-                linear-gradient(rgba(0, 0, 0, 0.08) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.08) 2px, transparent 2px);
-            background-size: 40px 40px;
+            background: #916000;
             overflow: hidden;
             padding: 15px;
-            position: relative;
         }
 
-        /* Level Devil Spike Accents */
-        body::before, body::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 16px;
-            background: repeating-linear-gradient(
-                45deg,
-                #6b4700,
-                #6b4700 8px,
-                transparent 8px,
-                transparent 16px
-            );
-            z-index: 1;
-        }
-        body::before { top: 0; }
-        body::after { bottom: 0; transform: rotate(180deg); }
-
-        /* Floating Devil Blocks */
-        .orb {
-            position: absolute;
-            z-index: 0;
-            opacity: 0.2;
-            border-radius: 6px;
-            border: 4px solid #4a3100;
-        }
-        .orb-1 {
-            width: 90px;
-            height: 90px;
-            background: #ffb356;
-            top: 15%;
-            left: 8%;
-            transform: rotate(-12deg);
-            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.3);
-            animation: trollBob 4s infinite alternate ease-in-out;
-        }
-        .orb-2 {
-            width: 110px;
-            height: 110px;
-            background: #d48b00;
-            bottom: 15%;
-            right: 8%;
-            transform: rotate(15deg);
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.3);
-            animation: trollBob 5s infinite alternate-reverse ease-in-out;
-        }
-
-        @keyframes trollBob {
-            0% { transform: translateY(0px) rotate(0deg); }
-            100% { transform: translateY(-18px) rotate(8deg); }
-        }
-
-        /* Glass Box: Exactly matching the light color with seamless border */
+        /* Glass Box / Card */
         .glass-box {
             position: relative;
             z-index: 10;
@@ -100,7 +42,7 @@
             gap: 35px;
         }
 
-        /* Left Side: Level Devil Title & Mascot */
+        /* Left Side: Branding */
         .brand-section {
             flex: 1;
             text-align: center;
@@ -131,12 +73,6 @@
             border-radius: 10px;
             box-shadow: 4px 4px 0px #523500;
             font-size: 38px;
-            animation: dummyIdle 1.2s infinite alternate steps(2);
-        }
-
-        @keyframes dummyIdle {
-            0% { transform: translateY(0) scaleY(1); }
-            100% { transform: translateY(-6px) scaleY(0.96); }
         }
 
         /* Right Side: Form Controls */
@@ -243,9 +179,6 @@
     </style>
 </head>
 <body>
-
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
 
     <div class="glass-box">
         <!-- Left Landscape Branding -->
