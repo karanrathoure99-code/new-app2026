@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - World Map</title>
+    <title>🤪 Z PAJAL - Level Devil World Map (1-50)</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -25,14 +25,25 @@
             font-family: 'Press Start 2P', monospace;
         }
 
+        #mapViewport {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        #mapViewport:active {
+            cursor: grabbing;
+        }
+
         #gameCanvas {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            background: #916000;
+            display: block;
         }
 
-        /* Top HUD Elements */
+        /* Top HUD */
         .hud-layer {
             position: absolute;
             top: 0;
@@ -41,81 +52,85 @@
             height: 100%;
             pointer-events: none;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            z-index: 100;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-        }
-
-        .hud-inner {
-            position: relative;
             width: 100%;
-            height: 100%;
-            max-width: 1000px;
-            max-height: 562px;
         }
 
-        .top-btn {
-            position: absolute;
+        .hud-btn {
             pointer-events: auto;
             background: #ffa742;
             border: 3px solid #523500;
-            border-radius: 6px;
-            padding: 6px 10px;
+            border-radius: 8px;
+            padding: 8px 12px;
             color: #523500;
             font-size: 10px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
             box-shadow: 3px 3px 0px #523500;
-            transition: transform 0.1s ease;
             text-decoration: none;
+            transition: transform 0.1s ease;
         }
 
-        .top-btn:hover {
-            transform: translateY(-2px);
+        .hud-btn:hover {
             background: #ffbe73;
+            transform: translateY(-2px);
         }
 
-        .top-btn:active {
+        .hud-btn:active {
             transform: translate(2px, 2px);
             box-shadow: 1px 1px 0px #523500;
         }
 
-        .btn-home { top: 16px; left: 16px; }
-        .btn-settings { top: 16px; right: 16px; }
-
-        .game-logo {
-            position: absolute;
-            top: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 26px;
+        .game-title {
+            font-size: 20px;
             color: #ffb356;
-            text-shadow: 4px 4px 0px #523500;
+            text-shadow: 3px 3px 0px #523500;
             letter-spacing: 2px;
-            pointer-events: none;
-            white-space: nowrap;
+            text-align: center;
         }
 
-        /* Mobile Touch Controls */
-        .touch-controls {
-            position: absolute;
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
+        .bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        .info-pill {
+            background: rgba(82, 53, 0, 0.85);
+            color: #ffb356;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 2px solid #523500;
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        /* Mobile Touch D-Pad */
+        .touch-pad {
             display: none;
-            gap: 12px;
+            gap: 8px;
             pointer-events: auto;
-            z-index: 50;
         }
 
         .touch-btn {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             background: #ffa742;
             border: 3px solid #523500;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -130,66 +145,64 @@
         }
 
         .touch-enter {
-            width: 90px;
-            font-size: 10px;
+            width: 80px;
+            font-size: 9px;
             font-family: 'Press Start 2P', monospace;
         }
 
         @media (max-width: 850px) {
-            .touch-controls {
+            .touch-pad {
                 display: flex;
             }
-            .game-logo {
-                font-size: 18px;
-                top: 18px;
+            .game-title {
+                font-size: 14px;
+            }
+            .info-pill {
+                font-size: 8px;
+                padding: 6px 10px;
             }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="gameCanvas" width="1000" height="562"></canvas>
+    <div id="mapViewport">
+        <canvas id="gameCanvas"></canvas>
+    </div>
 
     <div class="hud-layer">
-        <div class="hud-inner">
-            <a href="home.html" class="top-btn btn-home">⬅ HOME</a>
-            <div class="game-logo">😈 LEVEL DEVIL</div>
-            <div class="top-btn btn-settings" onclick="location.reload()">🔄 RESET</div>
+        <div class="top-bar">
+            <a href="home.html" class="hud-btn">⬅ HOME</a>
+            <div class="game-title">😈 LEVEL DEVIL</div>
+            <div class="hud-btn" id="recenterBtn">🎯 FOCUS</div>
+        </div>
 
-            <!-- Touch Support on Mobile -->
-            <div class="touch-controls">
-                <div class="touch-btn" id="btnLeft">◀</div>
-                <div class="touch-btn" id="btnUp">▲</div>
-                <div class="touch-btn" id="btnDown">▼</div>
-                <div class="touch-btn" id="btnRight">▶</div>
-                <div class="touch-btn touch-enter" id="btnEnter">ENTER</div>
+        <div class="bottom-bar">
+            <div class="info-pill" id="levelProgress">LEVEL: 1 / 50</div>
+            
+            <div class="touch-pad">
+                <div class="touch-btn" id="mPrev">◀</div>
+                <div class="touch-btn touch-enter" id="mEnter">PLAY</div>
+                <div class="touch-btn" id="mNext">▶</div>
             </div>
+
+            <div class="info-pill">USE ARROWS / DRAG</div>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const viewport = document.getElementById('mapViewport');
 
-        // Responsive Scaling
-        function resize() {
-            const aspect = 1000 / 562;
-            let w = window.innerWidth;
-            let h = window.innerHeight;
+        // Total 1 to 50 Levels
+        const TOTAL_LEVELS = 50;
 
-            if (w / h > aspect) {
-                w = h * aspect;
-            } else {
-                h = w / aspect;
-            }
+        // Current unlocked progress from storage
+        let unlockedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        if (unlockedMax > TOTAL_LEVELS) unlockedMax = TOTAL_LEVELS;
 
-            canvas.style.width = `${w}px`;
-            canvas.style.height = `${h}px`;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Level Devil Style Colors (Matching Your Theme)
+        // Colors
         const C_BG = "#916000";
         const C_ISLAND_TOP = "#ffb356";
         const C_ISLAND_SIDE = "#d48b28";
@@ -199,38 +212,34 @@
         const C_DOOR_OUTLINE = "#523500";
         const C_DOOR_GLOW = "#fff099";
 
-        // Current unlocked progress
-        let currentUnlockedLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+        // Virtual World Canvas Dimensions (Long scrolling world for 50 levels)
+        const WORLD_W = 5200;
+        const WORLD_H = 1200;
+        canvas.width = WORLD_W;
+        canvas.height = WORLD_H;
 
-        // Level Node Coordinates on the Island Map
-        const nodes = [
-            { id: 1,  x: 130, y: 410 },
-            { id: 2,  x: 155, y: 505 },
-            { id: 3,  x: 215, y: 645 },
-            { id: 4,  x: 205, y: 760 },
-            { id: 5,  x: 295, y: 650 },
-            { id: 6,  x: 300, y: 520 },
-            { id: 7,  x: 210, y: 380 },
-            { id: 8,  x: 235, y: 280 },
-            { id: 9,  x: 388, y: 440 },
-            { id: 10, x: 410, y: 610 },
-            { id: 11, x: 535, y: 620 },
-            { id: 12, x: 635, y: 540 },
-            { id: 13, x: 650, y: 400 },
-            { id: 14, x: 735, y: 450 },
-            { id: 15, x: 865, y: 530 }
-        ];
+        // Generate 50 Level Nodes in a S-curved Web Road
+        const nodes = [];
+        const edges = [];
 
-        // Path Connections
-        const edges = [
-            [0, 1], [1, 2], [2, 3], [2, 4], [4, 5],
-            [5, 6], [6, 7], [5, 8], [8, 9], [9, 10],
-            [10, 11], [11, 12], [11, 13], [13, 14]
-        ];
+        for (let i = 1; i <= TOTAL_LEVELS; i++) {
+            // Winding track calculation
+            const progress = (i - 1) / (TOTAL_LEVELS - 1);
+            const x = 200 + progress * (WORLD_W - 450) + (Math.sin(i * 1.3) * 35);
+            const waveY = Math.sin(i * 0.45) * 260;
+            const y = (WORLD_H / 2) + waveY + (Math.cos(i * 0.8) * 40);
 
-        // Active Player Node Index
-        let playerNode = Math.min(currentUnlockedLevel - 1, nodes.length - 1);
-        let animOffset = 0;
+            nodes.push({ id: i, x: Math.round(x), y: Math.round(y) });
+
+            if (i > 1) {
+                edges.push([i - 2, i - 1]);
+            }
+        }
+
+        // Camera Scroll Position
+        let cameraX = 0;
+        let cameraY = 0;
+        let selectedNodeIdx = Math.min(unlockedMax - 1, TOTAL_LEVELS - 1);
 
         // Sound Effects
         function playStepSound() {
@@ -239,8 +248,8 @@
                 const osc = actx.createOscillator();
                 const g = actx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(320, actx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(120, actx.currentTime + 0.05);
+                osc.frequency.setValueAtTime(360, actx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(140, actx.currentTime + 0.05);
                 g.gain.setValueAtTime(0.12, actx.currentTime);
                 g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.05);
                 osc.connect(g);
@@ -250,159 +259,110 @@
             } catch(e){}
         }
 
-        // Draw Level Devil Style Islands
-        function drawIslands() {
-            ctx.fillStyle = C_ISLAND_SHADOW;
+        function playLockSound() {
+            try {
+                const actx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = actx.createOscillator();
+                const g = actx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(140, actx.currentTime);
+                g.gain.setValueAtTime(0.15, actx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.08);
+                osc.connect(g);
+                g.connect(actx.destination);
+                osc.start();
+                osc.stop(actx.currentTime + 0.08);
+            } catch(e){}
+        }
 
-            // Island 1 Shadow
-            drawChunkyPolygon([
-                [50, 245], [470, 135], [510, 275], [580, 310], [700, 270], 
-                [800, 340], [1000, 480], [1000, 562], [760, 562], [690, 475], 
-                [610, 440], [510, 435], [480, 500], [350, 505], [260, 440], 
-                [180, 485], [100, 435], [50, 360]
-            ], 0, 16);
-
-            // Island 1 Base (Side Wall Depth)
-            ctx.fillStyle = C_ISLAND_SIDE;
-            drawChunkyPolygon([
-                [50, 245], [470, 135], [510, 275], [580, 310], [700, 270], 
-                [800, 340], [1000, 480], [1000, 550], [760, 550], [690, 465], 
-                [610, 430], [510, 425], [480, 490], [350, 495], [260, 430], 
-                [180, 475], [100, 425], [50, 350]
-            ], 0, 8);
-
-            // Island 1 Surface
-            ctx.fillStyle = C_ISLAND_TOP;
-            drawChunkyPolygon([
-                [50, 245], [470, 135], [510, 275], [580, 310], [700, 270], 
-                [800, 340], [1000, 480], [1000, 540], [760, 540], [690, 455], 
-                [610, 420], [510, 415], [480, 480], [350, 485], [260, 420], 
-                [180, 465], [100, 415], [50, 340]
-            ], 0, 0);
-
-            // Floating Isolated Islands (Top Right & Bottom Right)
-            // Island 2 - Top Right (Grave Island)
-            drawFloatingIsland(780, 130, 160, 80);
+        // Center Camera on Node
+        function focusNode(idx, smooth = true) {
+            const targetX = nodes[idx].x - window.innerWidth / 2;
+            const targetY = nodes[idx].y - window.innerHeight / 2;
             
-            // Island 3 - Bottom Right (Gate Island)
-            drawFloatingIsland(760, 440, 130, 65);
-        }
-
-        function drawFloatingIsland(x, y, w, h) {
-            // Shadow
-            ctx.fillStyle = C_ISLAND_SHADOW;
-            ctx.beginPath();
-            ctx.ellipse(x + w/2, y + h/2 + 10, w/2, h/2, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Side depth
-            ctx.fillStyle = C_ISLAND_SIDE;
-            ctx.beginPath();
-            ctx.ellipse(x + w/2, y + h/2 + 4, w/2, h/2, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Top
-            ctx.fillStyle = C_ISLAND_TOP;
-            ctx.beginPath();
-            ctx.ellipse(x + w/2, y + h/2, w/2, h/2, 0, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        function drawChunkyPolygon(pts, ox, oy) {
-            ctx.beginPath();
-            ctx.moveTo(pts[0][0] + ox, pts[0][1] + oy);
-            for (let i = 1; i < pts.length; i++) {
-                ctx.lineTo(pts[i][0] + ox, pts[i][1] + oy);
+            if (!smooth) {
+                cameraX = targetX;
+                cameraY = targetY;
+            } else {
+                cameraX += (targetX - cameraX) * 0.2;
+                cameraY += (targetY - cameraY) * 0.2;
             }
-            ctx.closePath();
-            ctx.fill();
+
+            clampCamera();
+            updateCanvasTransform();
+            document.getElementById('levelProgress').innerText = `LEVEL: ${nodes[selectedNodeIdx].id} / 50`;
         }
 
-        // Draw Dotted Walking Trails
-        function drawPaths() {
+        function clampCamera() {
+            const maxCamX = WORLD_W - window.innerWidth;
+            const maxCamY = WORLD_H - window.innerHeight;
+            if (cameraX < 0) cameraX = 0;
+            if (cameraX > maxCamX) cameraX = maxCamX;
+            if (cameraY < 0) cameraY = 0;
+            if (cameraY > maxCamY) cameraY = maxCamY;
+        }
+
+        function updateCanvasTransform() {
+            canvas.style.transform = `translate3d(${-cameraX}px, ${-cameraY}px, 0)`;
+        }
+
+        // Draw Thick Continuous Island Web
+        function drawTerrain() {
+            // Shadow Path Layer
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            ctx.strokeStyle = C_ISLAND_SHADOW;
+            ctx.lineWidth = 140;
+            ctx.beginPath();
+            nodes.forEach((n, idx) => {
+                if (idx === 0) ctx.moveTo(n.x, n.y + 24);
+                else ctx.lineTo(n.x, n.y + 24);
+            });
+            ctx.stroke();
+
+            // Side Depth Layer
+            ctx.strokeStyle = C_ISLAND_SIDE;
+            ctx.lineWidth = 130;
+            ctx.beginPath();
+            nodes.forEach((n, idx) => {
+                if (idx === 0) ctx.moveTo(n.x, n.y + 12);
+                else ctx.lineTo(n.x, n.y + 12);
+            });
+            ctx.stroke();
+
+            // Top Island Surface
+            ctx.strokeStyle = C_ISLAND_TOP;
+            ctx.lineWidth = 120;
+            ctx.beginPath();
+            nodes.forEach((n, idx) => {
+                if (idx === 0) ctx.moveTo(n.x, n.y);
+                else ctx.lineTo(n.x, n.y);
+            });
+            ctx.stroke();
+
+            // Circular land plate at each level
+            nodes.forEach(n => {
+                ctx.fillStyle = C_ISLAND_TOP;
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 65, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Walking Dotted Trail
             ctx.strokeStyle = C_PATH;
             ctx.lineWidth = 4;
             ctx.setLineDash([8, 8]);
-
+            ctx.beginPath();
             edges.forEach(([a, b]) => {
-                const na = nodes[a];
-                const nb = nodes[b];
-                ctx.beginPath();
-                ctx.moveTo(na.x, na.y);
-                ctx.lineTo(nb.x, nb.y);
-                ctx.stroke();
+                ctx.moveTo(nodes[a].x, nodes[a].y);
+                ctx.lineTo(nodes[b].x, nodes[b].y);
             });
-
+            ctx.stroke();
             ctx.setLineDash([]);
         }
 
-        // Draw Cave/Door Levels
-        function drawNodes() {
-            nodes.forEach((n, idx) => {
-                const isUnlocked = n.id <= currentUnlockedLevel;
-                const isCurrent = idx === playerNode;
-
-                // Shadow under door
-                ctx.fillStyle = "rgba(82, 53, 0, 0.4)";
-                ctx.beginPath();
-                ctx.ellipse(n.x, n.y + 12, 16, 6, 0, 0, Math.PI*2);
-                ctx.fill();
-
-                if (isCurrent) {
-                    // Golden Active Door
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    drawArch(n.x, n.y - 12, 32, 36);
-
-                    ctx.fillStyle = C_DOOR_GLOW;
-                    drawArch(n.x, n.y - 10, 26, 32);
-
-                    // Devil Horns on Door
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    ctx.fillRect(n.x - 14, n.y - 18, 5, 8);
-                    ctx.fillRect(n.x + 9, n.y - 18, 5, 8);
-
-                    // Indicator Arrow
-                    const floatY = Math.sin(animOffset * 0.08) * 4;
-                    ctx.fillStyle = "#ffcc00";
-                    ctx.beginPath();
-                    ctx.moveTo(n.x, n.y - 32 + floatY);
-                    ctx.lineTo(n.x - 8, n.y - 44 + floatY);
-                    ctx.lineTo(n.x + 8, n.y - 44 + floatY);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    // "PRESS SPACE" / "ENTER" Prompt
-                    ctx.fillStyle = "#523500";
-                    ctx.font = "8px 'Press Start 2P'";
-                    ctx.textAlign = "center";
-                    ctx.fillText("ENTER", n.x, n.y + 26);
-                } else if (isUnlocked) {
-                    // Unlocked Open Cave
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    drawArch(n.x, n.y - 10, 28, 32);
-
-                    ctx.fillStyle = "#3b2500";
-                    drawArch(n.x, n.y - 8, 22, 28);
-                } else {
-                    // Locked Dark Cave
-                    ctx.fillStyle = C_DOOR_OUTLINE;
-                    drawArch(n.x, n.y - 10, 26, 30);
-
-                    ctx.fillStyle = C_DOOR_LOCKED;
-                    drawArch(n.x, n.y - 8, 20, 26);
-
-                    // Small Lock Marker
-                    ctx.fillStyle = "#2d1d03";
-                    ctx.fillRect(n.x - 3, n.y - 1, 6, 6);
-                }
-
-                // Stage Number
-                ctx.fillStyle = isCurrent ? "#523500" : (isUnlocked ? "#ffb356" : "#4a3007");
-                ctx.font = "7px 'Press Start 2P'";
-                ctx.textAlign = "center";
-                ctx.fillText(n.id, n.x, n.y + 4);
-            });
-        }
+        let animFrame = 0;
 
         function drawArch(cx, cy, w, h) {
             ctx.beginPath();
@@ -413,148 +373,205 @@
             ctx.fill();
         }
 
-        // Grave & Portal Gate Landmarks
-        function drawLandmarks() {
-            // Tombstone on Island 2
-            ctx.fillStyle = "#615c54";
-            ctx.beginPath();
-            ctx.arc(860, 160, 16, Math.PI, 0);
-            ctx.lineTo(876, 185);
-            ctx.lineTo(844, 185);
-            ctx.closePath();
-            ctx.fill();
+        // Draw Devil Doors & Gates
+        function drawLevels() {
+            animFrame++;
 
-            // Skull on Grave
-            ctx.fillStyle = "#8a8377";
-            ctx.font = "12px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("💀", 860, 178);
+            nodes.forEach((n, idx) => {
+                const isUnlocked = n.id <= unlockedMax;
+                const isSelected = idx === selectedNodeIdx;
 
-            ctx.fillStyle = "#523500";
-            ctx.font = "10px 'Press Start 2P'";
-            ctx.fillText("3", 860, 206);
+                // Ground shadow
+                ctx.fillStyle = "rgba(82, 53, 0, 0.35)";
+                ctx.beginPath();
+                ctx.ellipse(n.x, n.y + 16, 20, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
 
-            // Blue Escape Portal on Island 3
-            ctx.fillStyle = "#4a5df5";
-            ctx.fillRect(810, 460, 36, 22);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "12px 'Press Start 2P'";
-            ctx.fillText("➔", 828, 477);
+                if (isSelected) {
+                    // Selected Devil Door with Horns
+                    ctx.fillStyle = C_DOOR_OUTLINE;
+                    drawArch(n.x, n.y - 16, 38, 44);
+
+                    ctx.fillStyle = C_DOOR_GLOW;
+                    drawArch(n.x, n.y - 14, 30, 38);
+
+                    // Devil Horns
+                    ctx.fillStyle = C_DOOR_OUTLINE;
+                    ctx.fillRect(n.x - 18, n.y - 24, 6, 10);
+                    ctx.fillRect(n.x + 12, n.y - 24, 6, 10);
+
+                    // Pulsing Arrow Prompt
+                    const bounce = Math.sin(animFrame * 0.08) * 5;
+                    ctx.fillStyle = "#ffcc00";
+                    ctx.beginPath();
+                    ctx.moveTo(n.x, n.y - 42 + bounce);
+                    ctx.lineTo(n.x - 10, n.y - 56 + bounce);
+                    ctx.lineTo(n.x + 10, n.y - 56 + bounce);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = "#523500";
+                    ctx.font = "8px 'Press Start 2P'";
+                    ctx.textAlign = "center";
+                    ctx.fillText("ENTER", n.x, n.y + 36);
+
+                } else if (isUnlocked) {
+                    // Clear Unlocked Stage Door
+                    ctx.fillStyle = C_DOOR_OUTLINE;
+                    drawArch(n.x, n.y - 12, 32, 36);
+
+                    ctx.fillStyle = "#3b2500";
+                    drawArch(n.x, n.y - 10, 24, 30);
+                } else {
+                    // Locked Dark Stage
+                    ctx.fillStyle = C_DOOR_OUTLINE;
+                    drawArch(n.x, n.y - 12, 30, 34);
+
+                    ctx.fillStyle = C_DOOR_LOCKED;
+                    drawArch(n.x, n.y - 10, 22, 28);
+
+                    // Lock Icon
+                    ctx.fillStyle = "#301d02";
+                    ctx.fillRect(n.x - 4, n.y - 1, 8, 8);
+                }
+
+                // Stage Number
+                ctx.fillStyle = isSelected ? "#523500" : (isUnlocked ? "#ffb356" : "#4a3007");
+                ctx.font = "8px 'Press Start 2P'";
+                ctx.textAlign = "center";
+                ctx.fillText(n.id, n.x, n.y + 4);
+            });
         }
 
-        // Main Render Loop
         function render() {
-            animOffset++;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = C_BG;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            drawIslands();
-            drawPaths();
-            drawLandmarks();
-            drawNodes();
+            drawTerrain();
+            drawLevels();
 
             requestAnimationFrame(render);
         }
+
+        // Initialize view
+        focusNode(selectedNodeIdx, false);
         render();
 
-        // Level Navigation Logic
-        function movePlayer(dir) {
-            const cur = nodes[playerNode];
-            let bestNext = null;
-            let minDist = Infinity;
-
-            edges.forEach(([a, b]) => {
-                let target = null;
-                if (a === playerNode) target = b;
-                if (b === playerNode) target = a;
-
-                if (target !== null && target < currentUnlockedLevel) {
-                    const candidate = nodes[target];
-                    const dx = candidate.x - cur.x;
-                    const dy = candidate.y - cur.y;
-
-                    let isMatch = false;
-                    if (dir === 'left' && dx < -20) isMatch = true;
-                    if (dir === 'right' && dx > 20) isMatch = true;
-                    if (dir === 'up' && dy < -20) isMatch = true;
-                    if (dir === 'down' && dy > 20) isMatch = true;
-
-                    if (isMatch) {
-                        const dist = Math.hypot(dx, dy);
-                        if (dist < minDist) {
-                            minDist = dist;
-                            bestNext = target;
-                        }
-                    }
-                }
-            });
-
-            if (bestNext !== null) {
-                playerNode = bestNext;
-                playStepSound();
-            }
+        // Navigation & Enter
+        function selectLevel(idx) {
+            if (idx < 0 || idx >= TOTAL_LEVELS) return;
+            selectedNodeIdx = idx;
+            playStepSound();
+            focusNode(selectedNodeIdx, true);
         }
 
-        function enterSelectedLevel() {
-            const selectedLevelId = nodes[playerNode].id;
-            playStepSound();
-            setTimeout(() => {
-                window.location.href = `game.html?level=${selectedLevelId}`;
-            }, 120);
+        function enterLevel() {
+            const currentLevel = nodes[selectedNodeIdx].id;
+            if (currentLevel <= unlockedMax) {
+                playStepSound();
+                setTimeout(() => {
+                    window.location.href = `game.html?level=${currentLevel}`;
+                }, 120);
+            } else {
+                playLockSound();
+            }
         }
 
         // Keyboard Controls
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') movePlayer('left');
-            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') movePlayer('right');
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') movePlayer('up');
-            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') movePlayer('down');
-            if (e.key === ' ' || e.key === 'Enter') enterSelectedLevel();
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                if (selectedNodeIdx < TOTAL_LEVELS - 1) selectLevel(selectedNodeIdx + 1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                if (selectedNodeIdx > 0) selectLevel(selectedNodeIdx - 1);
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                enterLevel();
+            }
         });
 
-        // Touch Control Listeners
-        document.getElementById('btnLeft').addEventListener('click', () => movePlayer('left'));
-        document.getElementById('btnRight').addEventListener('click', () => movePlayer('right'));
-        document.getElementById('btnUp').addEventListener('click', () => movePlayer('up'));
-        document.getElementById('btnDown').addEventListener('click', () => movePlayer('down'));
-        document.getElementById('btnEnter').addEventListener('click', enterSelectedLevel);
+        // Touch button handlers
+        document.getElementById('mPrev').addEventListener('click', () => {
+            if (selectedNodeIdx > 0) selectLevel(selectedNodeIdx - 1);
+        });
+        document.getElementById('mNext').addEventListener('click', () => {
+            if (selectedNodeIdx < TOTAL_LEVELS - 1) selectLevel(selectedNodeIdx + 1);
+        });
+        document.getElementById('mEnter').addEventListener('click', enterLevel);
+        document.getElementById('recenterBtn').addEventListener('click', () => focusNode(selectedNodeIdx, true));
 
-        // Click Direct on Node
+        // Click to Choose on Canvas
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = 1000 / rect.width;
-            const scaleY = 562 / rect.height;
-            const cx = (e.clientX - rect.left) * scaleX;
-            const cy = (e.clientY - rect.top) * scaleY;
+            const clickX = e.clientX - rect.left + cameraX;
+            const clickY = e.clientY - rect.top + cameraY;
 
             nodes.forEach((n, idx) => {
-                if (Math.hypot(n.x - cx, n.y - cy) < 28) {
-                    if (n.id <= currentUnlockedLevel) {
-                        if (playerNode === idx) {
-                            enterSelectedLevel();
-                        } else {
-                            playerNode = idx;
-                            playStepSound();
-                        }
+                if (Math.hypot(n.x - clickX, n.y - clickY) < 38) {
+                    if (selectedNodeIdx === idx) {
+                        enterLevel();
+                    } else {
+                        selectLevel(idx);
                     }
                 }
             });
         });
 
-        // Landscape & Fullscreen Auto Lock
-        async function enableLandscapeFullscreen() {
-            const docElement = document.documentElement;
-            try {
-                if (!document.fullscreenElement) {
-                    if (docElement.requestFullscreen) await docElement.requestFullscreen();
-                    else if (docElement.webkitRequestFullscreen) await docElement.webkitRequestFullscreen();
-                }
-                if (screen.orientation && screen.orientation.lock) {
-                    await screen.orientation.lock('landscape');
-                }
-            } catch (err) {}
-        }
-        window.addEventListener('click', enableLandscapeFullscreen, { once: true });
-        window.addEventListener('touchstart', enableLandscapeFullscreen, { once: true });
+        // Mouse Drag / Touch Swipe to Pan Map
+        let isDragging = false;
+        let startX, startY;
+
+        viewport.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX + cameraX;
+            startY = e.clientY + cameraY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            cameraX = startX - e.clientX;
+            cameraY = startY - e.clientY;
+            clampCamera();
+            updateCanvasTransform();
+        });
+
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // Touch Drag
+        viewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX + cameraX;
+                startY = e.touches[0].clientY + cameraY;
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging || e.touches.length !== 1) return;
+            cameraX = startX - e.touches[0].clientX;
+            cameraY = startY - e.touches[0].clientY;
+            clampCamera();
+            updateCanvasTransform();
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => isDragging = false);
+
+        // Mouse Wheel Horizontal Scroll
+        viewport.addEventListener('wheel', (e) => {
+            cameraX += e.deltaY;
+            clampCamera();
+            updateCanvasTransform();
+        }, { passive: true });
+
+        // Auto Focus Smooth Loop
+        setInterval(() => {
+            if (!isDragging) {
+                const targetX = nodes[selectedNodeIdx].x - window.innerWidth / 2;
+                const targetY = nodes[selectedNodeIdx].y - window.innerHeight / 2;
+                cameraX += (targetX - cameraX) * 0.08;
+                cameraY += (targetY - cameraY) * 0.08;
+                clampCamera();
+                updateCanvasTransform();
+            }
+        }, 16);
     </script>
 </body>
 </html>
