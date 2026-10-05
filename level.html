@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Level Devil Map (1-50)</title>
+    <title>🤪 Z PAJAL - Level Devil Map (1-250)</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -66,7 +66,6 @@
             width: 100%;
         }
 
-        /* Level Devil Style Pill Buttons */
         .level-devil-btn {
             pointer-events: auto;
             background: #ffa742;
@@ -95,7 +94,6 @@
             box-shadow: 1px 1px 0px #523500;
         }
 
-        /* Infinite Levels Tag */
         .infinite-badge {
             pointer-events: auto;
             background: #ffa742;
@@ -110,7 +108,6 @@
             box-shadow: 3px 3px 0px #523500;
         }
 
-        /* Header Center Title */
         .game-title {
             font-size: 26px;
             font-weight: 900;
@@ -139,7 +136,6 @@
             letter-spacing: 1px;
         }
 
-        /* Mobile Controls */
         .touch-pad {
             display: none;
             gap: 8px;
@@ -198,7 +194,7 @@
                 <a href="home.html" class="level-devil-btn">⬅ HOME</a>
                 <div class="infinite-badge">
                     <span>👑 DEVIL</span>
-                    <span>1-50 LVL</span>
+                    <span>1-250 LVL</span>
                 </div>
             </div>
 
@@ -210,7 +206,7 @@
         </div>
 
         <div class="bottom-bar">
-            <div class="info-pill" id="levelProgress">LEVEL: 1 / 50</div>
+            <div class="info-pill" id="levelProgress">LEVEL: 1 / 250</div>
             
             <div class="touch-pad">
                 <div class="touch-btn" id="mPrev">◀</div>
@@ -227,12 +223,13 @@
         const ctx = canvas.getContext('2d');
         const viewport = document.getElementById('mapViewport');
 
-        const TOTAL_LEVELS = 50;
+        // Total 250 Levels Set
+        const TOTAL_LEVELS = 250;
 
         let unlockedMax = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
         if (unlockedMax > TOTAL_LEVELS) unlockedMax = TOTAL_LEVELS;
 
-        // Level Devil exact theme palette
+        // Level Devil theme palette
         const C_BG = "#916000";
         const C_ISLAND_TOP = "#ffb356";
         const C_ISLAND_SIDE = "#d48b28";
@@ -242,22 +239,21 @@
         const C_CAVE_OPEN = "#3b2500";
         const C_ACTIVE_GLOW = "#fff099";
 
-        // Virtual World Canvas Dimensions for 50 Levels
-        const WORLD_W = 5400;
+        // Virtual World Canvas Dimensions for 250 Levels
+        const WORLD_W = 28000;
         const WORLD_H = 1200;
         canvas.width = WORLD_W;
         canvas.height = WORLD_H;
 
-        // Generate 50 Level Nodes with Level Devil Style clusters and branches
+        // Generate 250 Level Nodes with S-curved winding track
         const nodes = [];
         const edges = [];
 
-        // Exact pattern nodes
         for (let i = 1; i <= TOTAL_LEVELS; i++) {
             const progress = (i - 1) / (TOTAL_LEVELS - 1);
-            const x = 240 + progress * (WORLD_W - 550) + (Math.sin(i * 1.7) * 45);
-            const waveY = Math.sin(i * 0.55) * 250;
-            const y = (WORLD_H / 2) + waveY + (Math.cos(i * 0.9) * 50);
+            const x = 240 + progress * (WORLD_W - 600) + (Math.sin(i * 1.7) * 45);
+            const waveY = Math.sin(i * 0.45) * 260;
+            const y = (WORLD_H / 2) + waveY + (Math.cos(i * 0.9) * 45);
 
             nodes.push({ id: i, x: Math.round(x), y: Math.round(y) });
 
@@ -317,7 +313,7 @@
 
             clampCamera();
             updateCanvasTransform();
-            document.getElementById('levelProgress').innerText = `LEVEL: ${nodes[selectedNodeIdx].id} / 50`;
+            document.getElementById('levelProgress').innerText = `LEVEL: ${nodes[selectedNodeIdx].id} / 250`;
         }
 
         function clampCamera() {
@@ -333,12 +329,11 @@
             canvas.style.transform = `translate3d(${-cameraX}px, ${-cameraY}px, 0)`;
         }
 
-        // Draw Stepped Pixel Platforms
         function drawTerrain() {
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
-            // Depth Bottom Rim
+            // Bottom Shadow Layer
             ctx.strokeStyle = C_ISLAND_SHADOW;
             ctx.lineWidth = 150;
             ctx.beginPath();
@@ -348,7 +343,7 @@
             });
             ctx.stroke();
 
-            // Island 3D Side Slope
+            // 3D Depth Layer
             ctx.strokeStyle = C_ISLAND_SIDE;
             ctx.lineWidth = 140;
             ctx.beginPath();
@@ -358,7 +353,7 @@
             });
             ctx.stroke();
 
-            // Island Flat Surface
+            // Surface Layer
             ctx.strokeStyle = C_ISLAND_TOP;
             ctx.lineWidth = 130;
             ctx.beginPath();
@@ -368,7 +363,7 @@
             });
             ctx.stroke();
 
-            // Flat Plateau at each cave station
+            // Base plate under each station
             nodes.forEach(n => {
                 ctx.fillStyle = C_ISLAND_TOP;
                 ctx.beginPath();
@@ -376,7 +371,7 @@
                 ctx.fill();
             });
 
-            // Level Devil Sand Track Footpaths
+            // Trail lines
             ctx.strokeStyle = C_PATH;
             ctx.lineWidth = 5;
             ctx.setLineDash([10, 8]);
@@ -400,22 +395,22 @@
             ctx.fill();
         }
 
-        // Draw Caves & Active Gate
         function drawLevels() {
             animFrame++;
 
             nodes.forEach((n, idx) => {
+                // Optimization: only render nodes inside view viewport
+                if (n.x < cameraX - 150 || n.x > cameraX + window.innerWidth + 150) return;
+
                 const isUnlocked = n.id <= unlockedMax;
                 const isSelected = idx === selectedNodeIdx;
 
-                // Ground dust shadow
                 ctx.fillStyle = "rgba(82, 53, 0, 0.4)";
                 ctx.beginPath();
                 ctx.ellipse(n.x, n.y + 14, 22, 8, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 if (isSelected) {
-                    // Level Devil Glowing Gate
                     ctx.fillStyle = C_ISLAND_SHADOW;
                     drawArch(n.x, n.y - 14, 38, 42);
 
@@ -427,7 +422,7 @@
                     ctx.fillRect(n.x - 17, n.y - 22, 6, 10);
                     ctx.fillRect(n.x + 11, n.y - 22, 6, 10);
 
-                    // Downward Triangle Pointer
+                    // Bouncing arrow
                     const bounce = Math.sin(animFrame * 0.09) * 5;
                     ctx.fillStyle = "#ffcc00";
                     ctx.beginPath();
@@ -437,7 +432,6 @@
                     ctx.closePath();
                     ctx.fill();
 
-                    // "PRESS SPACE" / "ENTER" Prompt
                     ctx.fillStyle = "#523500";
                     ctx.font = "8px 'Press Start 2P'";
                     ctx.textAlign = "center";
@@ -445,14 +439,12 @@
                     ctx.fillText("space", n.x, n.y + 40);
 
                 } else if (isUnlocked) {
-                    // Open Cave Door
                     ctx.fillStyle = C_ISLAND_SHADOW;
                     drawArch(n.x, n.y - 10, 30, 34);
 
                     ctx.fillStyle = C_CAVE_OPEN;
                     drawArch(n.x, n.y - 8, 24, 28);
                 } else {
-                    // Locked Brown Cave
                     ctx.fillStyle = C_ISLAND_SHADOW;
                     drawArch(n.x, n.y - 10, 28, 32);
 
@@ -460,30 +452,30 @@
                     drawArch(n.x, n.y - 8, 22, 26);
                 }
 
-                // Stage Number
+                // Level number text
                 ctx.fillStyle = isSelected ? "#523500" : (isUnlocked ? "#ffb356" : "#2d1d02");
-                ctx.font = "7px 'Press Start 2P'";
+                ctx.font = (n.id >= 100) ? "6px 'Press Start 2P'" : "7px 'Press Start 2P'";
                 ctx.textAlign = "center";
                 ctx.fillText(n.id, n.x, n.y + 4);
             });
         }
 
-        // Grave landmark at the end (Level Devil Style)
         function drawMapDecorations() {
-            // End Island Tombstone
             const endNode = nodes[TOTAL_LEVELS - 1];
-            ctx.fillStyle = "#615c54";
-            ctx.beginPath();
-            ctx.arc(endNode.x + 120, endNode.y - 30, 16, Math.PI, 0);
-            ctx.lineTo(endNode.x + 136, endNode.y);
-            ctx.lineTo(endNode.x + 104, endNode.y);
-            ctx.closePath();
-            ctx.fill();
+            if (endNode.x >= cameraX - 200 && endNode.x <= cameraX + window.innerWidth + 200) {
+                ctx.fillStyle = "#615c54";
+                ctx.beginPath();
+                ctx.arc(endNode.x + 120, endNode.y - 30, 16, Math.PI, 0);
+                ctx.lineTo(endNode.x + 136, endNode.y);
+                ctx.lineTo(endNode.x + 104, endNode.y);
+                ctx.closePath();
+                ctx.fill();
 
-            ctx.fillStyle = "#ffb356";
-            ctx.font = "12px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("💀", endNode.x + 120, endNode.y - 10);
+                ctx.fillStyle = "#ffb356";
+                ctx.font = "12px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("💀", endNode.x + 120, endNode.y - 10);
+            }
         }
 
         function render() {
@@ -519,7 +511,7 @@
             }
         }
 
-        // Controls
+        // Keyboard Controls
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
                 if (selectedNodeIdx < TOTAL_LEVELS - 1) selectLevel(selectedNodeIdx + 1);
@@ -539,7 +531,7 @@
         document.getElementById('mEnter').addEventListener('click', enterLevel);
         document.getElementById('recenterBtn').addEventListener('click', () => focusNode(selectedNodeIdx, true));
 
-        // Click to Choose on Canvas
+        // Click on node
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect();
             const clickX = e.clientX - rect.left + cameraX;
@@ -556,7 +548,7 @@
             });
         });
 
-        // Mouse Drag & Touch Pan
+        // Mouse Drag / Touch Navigation
         let isDragging = false;
         let startX, startY;
 
@@ -600,7 +592,6 @@
             updateCanvasTransform();
         }, { passive: true });
 
-        // Auto Focus Smooth Loop
         setInterval(() => {
             if (!isDragging) {
                 const targetX = nodes[selectedNodeIdx].x - window.innerWidth / 2;
