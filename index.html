@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Landscape Gaming Login</title>
+    <title>🤪 Z PAJAL - Level Devil Style Login</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Press+Start+2P&family=Poppins:wght@600;800&display=swap');
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Chakra Petch', 'Poppins', sans-serif;
         }
 
         body {
@@ -20,84 +20,123 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #141312;
-            background: radial-gradient(circle at center, #262422 0%, #151413 70%, #0d0c0b 100%);
+            background-color: #1a1615;
+            background-image: 
+                linear-gradient(#241f1d 2px, transparent 2px),
+                linear-gradient(90deg, #241f1d 2px, transparent 2px);
+            background-size: 40px 40px;
             overflow: hidden;
             padding: 15px;
+            position: relative;
         }
 
-        /* Cyber Orbs */
+        /* Level Devil Spike Accents */
+        body::before, body::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 16px;
+            background: repeating-linear-gradient(
+                45deg,
+                #110f0e,
+                #110f0e 8px,
+                transparent 8px,
+                transparent 16px
+            );
+            z-index: 1;
+        }
+        body::before { top: 0; }
+        body::after { bottom: 0; transform: rotate(180deg); }
+
+        /* Floating Devil Blocks */
         .orb {
             position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
             z-index: 0;
-            opacity: 0.35;
-            animation: float 12s infinite alternate ease-in-out;
+            opacity: 0.15;
+            border-radius: 6px;
+            border: 4px solid #000;
         }
         .orb-1 {
-            width: 400px; height: 400px;
-            background: linear-gradient(135deg, #e67e22, #d35400);
-            top: -100px; left: -100px;
+            width: 90px;
+            height: 90px;
+            background: #ffcc00;
+            top: 15%;
+            left: 8%;
+            transform: rotate(-12deg);
+            box-shadow: 6px 6px 0px #000;
+            animation: trollBob 4s infinite alternate ease-in-out;
         }
         .orb-2 {
-            width: 500px; height: 500px;
-            background: linear-gradient(135deg, #f39c12, #c0392b);
-            bottom: -150px; right: -100px;
-            animation-delay: -4s;
+            width: 110px;
+            height: 110px;
+            background: #ff473a;
+            bottom: 15%;
+            right: 8%;
+            transform: rotate(15deg);
+            box-shadow: 8px 8px 0px #000;
+            animation: trollBob 5s infinite alternate-reverse ease-in-out;
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px) scale(1) rotate(0deg); }
-            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
+        @keyframes trollBob {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-18px) rotate(8deg); }
         }
 
-        /* Landscape Horizontal Glass Card */
+        /* Level Devil Platform Box */
         .glass-box {
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 700px;
-            background: rgba(30, 27, 24, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid #3d3833;
-            border-radius: 24px;
+            max-width: 680px;
+            background: #2b2522;
+            border: 5px solid #110e0d;
+            border-radius: 14px;
             padding: 30px 40px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            box-shadow: 10px 10px 0px #000000;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 40px;
+            gap: 35px;
         }
 
-        /* Left Side: Branding */
+        /* Left Side: Level Devil Title & Dummy Mascot */
         .brand-section {
             flex: 1;
             text-align: center;
         }
 
         .game-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 32px;
-            font-weight: 900;
-            color: #f5f0ea;
-            letter-spacing: 3px;
-            text-shadow: 0 0 15px rgba(230, 126, 34, 0.5);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffcc00;
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0px #000;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
+            line-height: 1.4;
         }
 
         .emoji {
-            font-size: 55px;
-            animation: pulse-light 1.5s infinite alternate;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 70px;
+            height: 70px;
+            background: #ffcc00;
+            border: 4px solid #110e0d;
+            border-radius: 10px;
+            box-shadow: 5px 5px 0px #000;
+            font-size: 38px;
+            animation: dummyIdle 1.2s infinite alternate steps(2);
         }
 
-        @keyframes pulse-light {
-            0% { opacity: 0.5; filter: drop-shadow(0 0 8px #c0392b); transform: scale(0.95); }
-            100% { opacity: 1; filter: drop-shadow(0 0 25px #f39c12); transform: scale(1.1); }
+        @keyframes dummyIdle {
+            0% { transform: translateY(0) scaleY(1); }
+            100% { transform: translateY(-6px) scaleY(0.96); }
         }
 
         /* Right Side: Form Controls */
@@ -109,68 +148,68 @@
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 14px;
             position: relative;
             text-align: left;
         }
 
         .input-group input {
             width: 100%;
-            padding: 12px 18px;
-            background: rgba(18, 16, 14, 0.7);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: #f5f0ea;
+            padding: 12px 16px;
+            background: #1a1614;
+            border: 3px solid #110e0d;
+            border-radius: 8px;
+            color: #f7ede2;
             font-size: 14px;
+            font-weight: 700;
             outline: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.2s ease;
         }
 
         .input-group input::placeholder {
-            color: rgba(245, 240, 234, 0.4);
+            color: #8c827a;
+            font-weight: 600;
         }
 
         .input-group input:focus {
-            border-color: #e67e22;
-            background: rgba(18, 16, 14, 0.9);
-            box-shadow: 0 0 20px rgba(230, 126, 34, 0.35);
+            border-color: #ffcc00;
+            background: #141110;
+            box-shadow: 5px 5px 0px #ffcc00;
         }
 
         .button-wrapper {
-            position: relative;
-            height: 46px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%;
+            height: 48px;
+            margin-top: 6px;
+            margin-bottom: 14px;
         }
 
         #loginBtn {
-            position: absolute;
-            width: 90px;
-            height: 38px;
-            background: #e67e22;
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 13px;
+            width: 100%;
+            height: 100%;
+            background: #ffcc00;
+            color: #110e0d;
+            border: 3px solid #110e0d;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
-            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.4s ease, height 0.4s ease, background 0.4s ease, font-size 0.4s ease, box-shadow 0.4s ease;
-            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4);
-            z-index: 20;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.15s ease;
             letter-spacing: 1px;
         }
 
-        #loginBtn.final-state {
-            width: 100%;
-            height: 100%;
-            background: #27ae60;
-            font-size: 15px;
-            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.5);
-            transform: translate(0px, 0px) !important;
-            letter-spacing: 1.5px;
+        #loginBtn:hover {
+            background: #ffd633;
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px #000;
+        }
+
+        #loginBtn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
         }
 
         .footer-options {
@@ -178,23 +217,28 @@
             justify-content: space-between;
             align-items: center;
             padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 3px dashed #3a322e;
         }
 
         .footer-options a {
-            color: rgba(245, 240, 234, 0.65);
+            color: #d8cec4;
             text-decoration: none;
             font-size: 12px;
-            font-weight: 600;
-            transition: color 0.3s, text-shadow 0.3s;
+            font-weight: 700;
+            transition: color 0.2s;
             display: flex;
             align-items: center;
             gap: 6px;
+            background: #1e1917;
+            padding: 6px 10px;
+            border: 2px solid #110e0d;
+            border-radius: 6px;
+            box-shadow: 2px 2px 0px #000;
         }
 
         .footer-options a:hover {
-            color: #e67e22;
-            text-shadow: 0 0 12px rgba(230, 126, 34, 0.6);
+            color: #ffcc00;
+            border-color: #ffcc00;
         }
     </style>
 </head>
@@ -207,7 +251,8 @@
         <!-- Left Landscape Branding -->
         <div class="brand-section">
             <div class="game-title">
-                <span class="emoji">🤪</span> Z PAJAL
+                <span class="emoji">😈</span>
+                <span>Z PAJAL</span>
             </div>
         </div>
 
@@ -279,52 +324,8 @@
         const loginBtn = document.getElementById('loginBtn');
         const gmailInput = document.getElementById('gmail');
         const passwordInput = document.getElementById('password');
-        
-        let attempts = 0;
-        let isFinalState = false;
 
-        function dodgeAction(e) {
-            if (isFinalState) return;
-
-            if(gmailInput.value.trim() === '' || passwordInput.value.trim() === '') return;
-
-            if (attempts < 5) {
-                if (e && (e.type === 'click' || e.type === 'touchstart')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-
-                const moveX = (Math.random() - 0.5) * 220; 
-                const moveY = (Math.random() - 0.5) * 120; 
-                
-                loginBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
-                
-                const taunts = ["MISS!", "OOPS!", "NOPE!", "HAHA!", "SLOW!"];
-                loginBtn.innerHTML = taunts[attempts];
-                
-                attempts++;
-            } else if (attempts === 5) {
-                isFinalState = true;
-                loginBtn.classList.add('final-state');
-                loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
-            }
-        }
-
-        loginBtn.addEventListener('mouseenter', dodgeAction);
-        loginBtn.addEventListener('touchstart', (e) => {
-            if (!isFinalState) {
-                e.preventDefault(); 
-                dodgeAction(e);
-            }
-        }, { passive: false });
-
-        loginBtn.addEventListener('click', async (e) => {
-            if (!isFinalState) {
-                e.preventDefault();
-                dodgeAction(e);
-                return;
-            }
-
+        loginBtn.addEventListener('click', async () => {
             const email = gmailInput.value.trim();
             const password = passwordInput.value.trim();
 
@@ -334,13 +335,16 @@
             }
 
             try {
-                loginBtn.innerHTML = "Logging in...";
+                loginBtn.innerHTML = "LOGGING IN...";
+                loginBtn.disabled = true;
+                
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
                 if (!user.emailVerified) {
                     alert("⚠️ Pehle apne Gmail (" + email + ") par jaakar verification link par click karein, tabhi game khulegi!");
-                    loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
+                    loginBtn.innerHTML = "START";
+                    loginBtn.disabled = false;
                     return;
                 }
 
@@ -357,7 +361,8 @@
 
             } catch (error) {
                 alert("Login Failed: " + error.message);
-                loginBtn.innerHTML = "GOTCHA! PLAY NOW 🎮";
+                loginBtn.innerHTML = "START";
+                loginBtn.disabled = false;
             }
         });
     </script>
