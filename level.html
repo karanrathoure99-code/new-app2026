@@ -399,7 +399,6 @@
             animFrame++;
 
             nodes.forEach((n, idx) => {
-                // Optimization: only render nodes inside view viewport
                 if (n.x < cameraX - 150 || n.x > cameraX + window.innerWidth + 150) return;
 
                 const isUnlocked = n.id <= unlockedMax;
@@ -602,6 +601,32 @@
                 updateCanvasTransform();
             }
         }, 16);
+    </script>
+
+    <!-- Fullscreen API & Landscape Orientation Lock Integration (Same as home.html) -->
+    <script>
+        async function enableLandscapeFullscreen() {
+            const docElement = document.documentElement;
+            try {
+                if (!document.fullscreenElement) {
+                    if (docElement.requestFullscreen) {
+                        await docElement.requestFullscreen();
+                    } else if (docElement.webkitRequestFullscreen) {
+                        await docElement.webkitRequestFullscreen();
+                    } else if (docElement.msRequestFullscreen) {
+                        await docElement.msRequestFullscreen();
+                    }
+                }
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('landscape');
+                }
+            } catch (err) {
+                // Ignore restrictions
+            }
+        }
+
+        window.addEventListener('click', enableLandscapeFullscreen, { once: true });
+        window.addEventListener('touchstart', enableLandscapeFullscreen, { once: true });
     </script>
 </body>
 </html>
