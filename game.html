@@ -32,16 +32,21 @@
       justify-content: space-between;
       align-items: center;
       overflow: hidden;
-      padding: 16px 10px 24px 10px;
+      padding: 10px 10px 16px 10px;
     }
 
     .top-header {
       width: 100%;
-      max-width: 860px;
+      max-width: 960px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 10px;
+      padding: 2px 8px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
     }
 
     .level-badge {
@@ -56,11 +61,11 @@
       letter-spacing: 1px;
     }
 
-    .home-btn {
+    .action-btn {
       background: #fca240;
       color: #3b2200;
       font-size: 10px;
-      padding: 9px 15px;
+      padding: 8px 14px;
       border-radius: 4px;
       border: none;
       outline: none;
@@ -72,7 +77,7 @@
       font-weight: bold;
     }
 
-    .home-btn:active {
+    .action-btn:active {
       transform: translateY(3px);
       box-shadow: 0 1px 0 #b86e18;
     }
@@ -82,12 +87,14 @@
       image-rendering: pixelated;
       display: block;
       border-radius: 4px;
+      max-width: 98vw;
+      max-height: 72vh;
     }
 
-    /* On-screen touch buttons */
+    /* On-Screen Touch Buttons (Phone / Tablet Only) */
     .controls-container {
       width: 100%;
-      max-width: 860px;
+      max-width: 960px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -96,11 +103,11 @@
 
     .dpad {
       display: flex;
-      gap: 18px;
+      gap: 16px;
     }
 
     .ctrl-btn {
-      width: 80px;
+      width: 78px;
       height: 48px;
       background: rgba(252, 162, 64, 0.45);
       border: 3px solid rgba(74, 45, 4, 0.55);
@@ -118,18 +125,32 @@
       background: rgba(252, 162, 64, 0.85);
       transform: scale(0.96);
     }
+
+    /* LAPTOP / PC par controls ko hide karne ke liye */
+    @media (hover: hover) and (pointer: fine) {
+      .controls-container {
+        display: none !important;
+      }
+      body {
+        justify-content: center;
+        gap: 16px;
+      }
+    }
   </style>
 </head>
 <body>
 
   <div class="top-header">
     <div class="level-badge" id="levelDisplay">LEVEL 1 / 2</div>
-    <a href="home.html" class="home-btn">🏠 HOME</a>
+    <div class="header-actions">
+      <button class="action-btn" id="fsBtn">⛶ FULLSCREEN</button>
+      <a href="home.html" class="action-btn">🏠 HOME</a>
+    </div>
   </div>
 
-  <canvas id="gameCanvas" width="860" height="360"></canvas>
+  <canvas id="gameCanvas" width="960" height="400"></canvas>
 
-  <!-- Touch controls -->
+  <!-- Only Phone / Tablet Controls -->
   <div class="controls-container">
     <div class="dpad">
       <button class="ctrl-btn" id="btnLeft">◀</button>
@@ -142,37 +163,64 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const levelDisplay = document.getElementById('levelDisplay');
+    const fsBtn = document.getElementById('fsBtn');
+
+    // Fullscreen + Landscape Lock API
+    async function enterLandscapeFullscreen() {
+      try {
+        const docEl = document.documentElement;
+        if (!document.fullscreenElement) {
+          if (docEl.requestFullscreen) {
+            await docEl.requestFullscreen();
+          } else if (docEl.webkitRequestFullscreen) {
+            await docEl.webkitRequestFullscreen();
+          }
+        }
+        // Lock screen to Landscape
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock('landscape').catch(() => {});
+        }
+      } catch (err) {}
+    }
+
+    fsBtn.addEventListener('click', enterLandscapeFullscreen);
+    // User ke pehle touch par bhi auto-lock trigger hoga
+    window.addEventListener('touchstart', () => {
+      if (!document.fullscreenElement) {
+        enterLandscapeFullscreen();
+      }
+    }, { once: true });
 
     // Corridor Play Area
     const corridor = {
-      x: 60,
+      x: 40,
       y: 125,
-      width: 740,
-      height: 110
+      width: 880,
+      height: 145
     };
 
     const STORAGE_KEY = 'saveLevel_TumseNaHoPayga';
     let currentSavedLevel = parseInt(localStorage.getItem(STORAGE_KEY)) || 1;
-    if (currentSavedLevel > 2) currentSavedLevel = 1; // Only 2 levels allowed
+    if (currentSavedLevel > 2) currentSavedLevel = 1;
     let currentLevelIdx = currentSavedLevel - 1;
     let deathFlashTimer = 0;
 
-    // ONLY LEVEL 1 AND LEVEL 2
+    // Sirf Level 1 aur Level 2
     const levels = [
       {
         id: 1,
-        playerStart: { x: 95 },
-        door: { x: 700, behavior: 'none' },
+        playerStart: { x: 80 },
+        door: { x: 820, behavior: 'none' },
         pits: [
-          { x: 520, width: 44, triggerX: 430, opened: false }
+          { x: 620, width: 50, triggerX: 500, opened: false }
         ],
         spikes: [],
         invert: false
       },
       {
         id: 2,
-        playerStart: { x: 95 },
-        door: { x: 620, behavior: 'jump_away', triggerDist: 130, jumped: false },
+        playerStart: { x: 80 },
+        door: { x: 700, behavior: 'jump_away', triggerDist: 150, jumped: false },
         pits: [],
         spikes: [],
         invert: false
@@ -181,16 +229,16 @@
 
     // Player with moving legs setup
     const player = {
-      x: 95,
+      x: 80,
       y: 0,
-      width: 14,
-      height: 28,
+      width: 16,
+      height: 32,
       vx: 0,
       vy: 0,
       facing: 1,
       walkCycle: 0,
-      speed: 3.5,
-      jumpPower: -8.8,
+      speed: 3.8,
+      jumpPower: -9.2,
       grounded: false
     };
 
@@ -198,9 +246,10 @@
     window.addEventListener('keydown', (e) => keys[e.code] = true);
     window.addEventListener('keyup', (e) => keys[e.code] = false);
 
-    // Mobile button listeners
+    // Touch button listeners
     const setupBtn = (id, keyName) => {
       const btn = document.getElementById(id);
+      if (!btn) return;
       btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
       btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
       btn.addEventListener('mousedown', () => keys[keyName] = true);
@@ -225,7 +274,7 @@
     }
 
     function initLevel(idx) {
-      if (idx >= levels.length) idx = 0; // Loop back to Level 1
+      if (idx >= levels.length) idx = 0;
       currentLevelIdx = idx;
 
       const lvl = levels[currentLevelIdx];
@@ -239,7 +288,6 @@
       player.walkCycle = 0;
       player.facing = 1;
 
-      // Reset level traps
       lvl.pits.forEach(p => p.opened = false);
       lvl.spikes.forEach(s => s.active = false);
       if (lvl.door.behavior === 'jump_away') lvl.door.jumped = false;
@@ -251,22 +299,20 @@
       initLevel(currentLevelIdx);
     }
 
-    // Door without outline (Flat Arch)
     function drawDoor(x, y, w, h) {
       ctx.fillStyle = '#3b2200';
       ctx.beginPath();
-      ctx.arc(x + w / 2, y + 10, w / 2, Math.PI, 0);
-      ctx.rect(x, y + 10, w, h - 10);
+      ctx.arc(x + w / 2, y + 12, w / 2, Math.PI, 0);
+      ctx.rect(x, y + 12, w, h - 12);
       ctx.fill();
 
       ctx.fillStyle = '#cbd5e1';
       ctx.beginPath();
-      ctx.arc(x + w / 2, y + 12, (w - 6) / 2, Math.PI, 0);
-      ctx.rect(x + 3, y + 12, w - 6, h - 12);
+      ctx.arc(x + w / 2, y + 14, (w - 7) / 2, Math.PI, 0);
+      ctx.rect(x + 3.5, y + 14, w - 7, h - 14);
       ctx.fill();
     }
 
-    // Exact Level Devil Silhouette with Animated Legs
     function drawDummy(p) {
       ctx.save();
       ctx.fillStyle = '#000000';
@@ -274,36 +320,34 @@
       ctx.lineCap = 'round';
 
       const cx = p.x + p.width / 2;
-      const headRadius = 4.2;
+      const headRadius = 4.8;
       const headCenterY = p.y + headRadius + 1;
-      const hipY = p.y + 17;
+      const hipY = p.y + 19;
 
-      // 1. Devil Head
+      // Head
       ctx.beginPath();
       ctx.arc(cx, headCenterY, headRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Body Trunk
-      ctx.lineWidth = 4;
+      // Torso
+      ctx.lineWidth = 4.5;
       ctx.beginPath();
       ctx.moveTo(cx, headCenterY + headRadius);
       ctx.lineTo(cx, hipY);
       ctx.stroke();
 
-      // 3. Legs
-      ctx.lineWidth = 3.2;
+      // Animated Legs
+      ctx.lineWidth = 3.6;
 
       if (!p.grounded) {
-        // Jumping in air
         ctx.beginPath();
         ctx.moveTo(cx, hipY);
-        ctx.lineTo(cx - 4 * p.facing, p.y + p.height - 3);
+        ctx.lineTo(cx - 4.5 * p.facing, p.y + p.height - 3);
         ctx.moveTo(cx, hipY);
-        ctx.lineTo(cx + 4.5 * p.facing, p.y + p.height - 1);
+        ctx.lineTo(cx + 5 * p.facing, p.y + p.height - 1);
         ctx.stroke();
       } else if (Math.abs(p.vx) > 0.1) {
-        // Running legs animation
-        const swing = Math.sin(p.walkCycle) * 5;
+        const swing = Math.sin(p.walkCycle) * 5.8;
         ctx.beginPath();
         ctx.moveTo(cx, hipY);
         ctx.lineTo(cx + swing, p.y + p.height);
@@ -311,12 +355,11 @@
         ctx.lineTo(cx - swing, p.y + p.height);
         ctx.stroke();
       } else {
-        // Standing still
         ctx.beginPath();
-        ctx.moveTo(cx - 2, hipY);
-        ctx.lineTo(cx - 2, p.y + p.height);
-        ctx.moveTo(cx + 2, hipY);
-        ctx.lineTo(cx + 2, p.y + p.height);
+        ctx.moveTo(cx - 2.5, hipY);
+        ctx.lineTo(cx - 2.5, p.y + p.height);
+        ctx.moveTo(cx + 2.5, hipY);
+        ctx.lineTo(cx + 2.5, p.y + p.height);
         ctx.stroke();
       }
 
@@ -327,7 +370,7 @@
       const lvl = levels[currentLevelIdx];
       const floorY = corridor.y + corridor.height - player.height;
 
-      // 1. Controls
+      // Controls
       let move = 0;
       if (keys['ArrowRight'] || keys['KeyD']) move += 1;
       if (keys['ArrowLeft'] || keys['KeyA']) move -= 1;
@@ -348,14 +391,12 @@
         playBeep(450, 0.05);
       }
 
-      // 2. Physics
       player.vy += 0.44;
       player.x += player.vx;
       player.y += player.vy;
 
       if (player.x < corridor.x) player.x = corridor.x;
 
-      // 3. Traps Trigger
       lvl.pits.forEach(p => {
         if (player.x > p.triggerX) p.opened = true;
       });
@@ -364,9 +405,8 @@
       if (lvl.door.behavior === 'jump_away' && Math.abs(player.x - lvl.door.x) < lvl.door.triggerDist) {
         lvl.door.jumped = true;
       }
-      if (lvl.door.jumped) doorX = corridor.x + corridor.width - 45;
+      if (lvl.door.jumped) doorX = corridor.x + corridor.width - 50;
 
-      // 4. Collisions
       let fallingInPit = false;
       lvl.pits.forEach(p => {
         if (p.opened && (player.x + player.width > p.x && player.x < p.x + p.width)) {
@@ -380,30 +420,25 @@
         player.grounded = true;
       }
 
-      // Pit Death
       if (player.y > canvas.height + 40) {
         triggerDeath();
       }
 
-      // Door Clear
-      const doorY = corridor.y + corridor.height - 36;
-      if (player.x + player.width > doorX && player.x < doorX + 32 && player.y + player.height >= doorY) {
+      const doorY = corridor.y + corridor.height - 40;
+      if (player.x + player.width > doorX && player.x < doorX + 34 && player.y + player.height >= doorY) {
         playBeep(700, 0.1);
         initLevel(currentLevelIdx + 1);
       }
 
-      // ================= DRAW SCENE =================
+      // Draw Loop
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Background Wall
       ctx.fillStyle = '#a26916';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Corridor Floor Area
       ctx.fillStyle = '#fca240';
       ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
 
-      // Pit Trap (Vertical Shaft Cut)
       lvl.pits.forEach(p => {
         if (p.opened) {
           ctx.fillStyle = '#a26916';
@@ -411,13 +446,9 @@
         }
       });
 
-      // Door
-      drawDoor(doorX, corridor.y + corridor.height - 36, 30, 36);
-
-      // Player Dummy
+      drawDoor(doorX, corridor.y + corridor.height - 40, 34, 40);
       drawDummy(player);
 
-      // Death Flash
       if (deathFlashTimer > 0) {
         ctx.fillStyle = 'rgba(59, 34, 0, 0.45)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
