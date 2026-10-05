@@ -20,10 +20,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #3d3516;
+            background-color: #916000;
             background-image: 
-                linear-gradient(rgba(255, 204, 0, 0.08) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(255, 204, 0, 0.08) 2px, transparent 2px);
+                linear-gradient(rgba(0, 0, 0, 0.08) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.08) 2px, transparent 2px);
             background-size: 40px 40px;
             overflow: hidden;
             padding: 15px;
@@ -39,8 +39,8 @@
             height: 16px;
             background: repeating-linear-gradient(
                 45deg,
-                #29230d,
-                #29230d 8px,
+                #6b4700,
+                #6b4700 8px,
                 transparent 8px,
                 transparent 16px
             );
@@ -53,28 +53,28 @@
         .orb {
             position: absolute;
             z-index: 0;
-            opacity: 0.25;
+            opacity: 0.2;
             border-radius: 6px;
-            border: 4px solid #000;
+            border: 4px solid #4a3100;
         }
         .orb-1 {
             width: 90px;
             height: 90px;
-            background: #ffcc00;
+            background: #ffb356;
             top: 15%;
             left: 8%;
             transform: rotate(-12deg);
-            box-shadow: 6px 6px 0px #000;
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.3);
             animation: trollBob 4s infinite alternate ease-in-out;
         }
         .orb-2 {
             width: 110px;
             height: 110px;
-            background: #e6b800;
+            background: #d48b00;
             bottom: 15%;
             right: 8%;
             transform: rotate(15deg);
-            box-shadow: 8px 8px 0px #000;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.3);
             animation: trollBob 5s infinite alternate-reverse ease-in-out;
         }
 
@@ -83,17 +83,17 @@
             100% { transform: translateY(-18px) rotate(8deg); }
         }
 
-        /* Level Devil Platform Box (Normal Theme) */
+        /* Glass Box: Exactly matching the light color with seamless border */
         .glass-box {
             position: relative;
             z-index: 10;
             width: 100%;
             max-width: 680px;
-            background: #2b2522;
-            border: 5px solid #110e0d;
+            background: #ffb356;
+            border: 5px solid #ffb356;
             border-radius: 14px;
             padding: 30px 40px;
-            box-shadow: 10px 10px 0px #000000;
+            box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.35);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -110,9 +110,9 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 20px;
             font-weight: 700;
-            color: #ffcc00;
+            color: #523500;
             letter-spacing: 1px;
-            text-shadow: 3px 3px 0px #000;
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.4);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -126,10 +126,10 @@
             align-items: center;
             width: 70px;
             height: 70px;
-            background: #ffcc00;
-            border: 4px solid #110e0d;
+            background: #ffa133;
+            border: 4px solid #523500;
             border-radius: 10px;
-            box-shadow: 5px 5px 0px #000;
+            box-shadow: 4px 4px 0px #523500;
             font-size: 38px;
             animation: dummyIdle 1.2s infinite alternate steps(2);
         }
@@ -156,26 +156,26 @@
         .input-group input {
             width: 100%;
             padding: 12px 16px;
-            background: #1a1614;
-            border: 3px solid #110e0d;
+            background: #ffa742;
+            border: 3px solid #523500;
             border-radius: 8px;
-            color: #f7ede2;
+            color: #3b2500;
             font-size: 14px;
             font-weight: 700;
             outline: none;
-            box-shadow: 4px 4px 0px #000;
+            box-shadow: 3px 3px 0px #523500;
             transition: all 0.2s ease;
         }
 
         .input-group input::placeholder {
-            color: #8c827a;
+            color: #7d540f;
             font-weight: 600;
         }
 
         .input-group input:focus {
-            border-color: #ffcc00;
-            background: #141110;
-            box-shadow: 5px 5px 0px #ffcc00;
+            border-color: #3b2500;
+            background: #ffbe73;
+            box-shadow: 4px 4px 0px #3b2500;
         }
 
         .button-wrapper {
@@ -188,28 +188,28 @@
         #loginBtn {
             width: 100%;
             height: 100%;
-            background: #ffcc00;
-            color: #110e0d;
-            border: 3px solid #110e0d;
+            background: #523500;
+            color: #ffb356;
+            border: 3px solid #3b2500;
             border-radius: 8px;
             font-family: 'Press Start 2P', monospace;
             font-size: 12px;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 4px 4px 0px #000;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4);
             transition: all 0.15s ease;
             letter-spacing: 1px;
         }
 
         #loginBtn:hover {
-            background: #ffd633;
+            background: #694400;
             transform: translateY(-2px);
-            box-shadow: 6px 6px 0px #000;
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4);
         }
 
         #loginBtn:active {
             transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
+            box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
         }
 
         .footer-options {
@@ -217,11 +217,11 @@
             justify-content: space-between;
             align-items: center;
             padding-top: 10px;
-            border-top: 3px dashed #3a322e;
+            border-top: 3px dashed #b87c28;
         }
 
         .footer-options a {
-            color: #d8cec4;
+            color: #523500;
             text-decoration: none;
             font-size: 12px;
             font-weight: 700;
@@ -229,16 +229,16 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            background: #1e1917;
+            background: #ffa742;
             padding: 6px 10px;
-            border: 2px solid #110e0d;
+            border: 2px solid #523500;
             border-radius: 6px;
-            box-shadow: 2px 2px 0px #000;
+            box-shadow: 2px 2px 0px #523500;
         }
 
         .footer-options a:hover {
-            color: #ffcc00;
-            border-color: #ffcc00;
+            color: #000000;
+            background: #ffbe73;
         }
     </style>
 </head>
