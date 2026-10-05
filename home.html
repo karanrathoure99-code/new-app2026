@@ -290,7 +290,7 @@
             <div class="info-line">⚡ <b>Rule:</b> Zero patience, direct rage-quit!</div>
         </div>
 
-        <button class="play-btn" id="playGameBtn" onclick="startGame()">🚀 PLAY GAME  </button>
+        <button class="play-btn" id="playGameBtn" onclick="startGame()">🚀 PLAY GAME</button>
         <button class="logout-btn" onclick="logoutUser()">LOGOUT SESSION</button>
     </div>
 
@@ -318,7 +318,7 @@
         // Real-time Level Tracker
         let currentSavedLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
         document.getElementById('displayLevel').innerText = "LEVEL: " + currentSavedLevel;
-        document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME - LEVEL " + currentSavedLevel;
+        document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME";
 
         function playTechSound() {
             try {
@@ -396,7 +396,7 @@
 
                 document.getElementById('displayUsername').innerText = finalUsername;
                 document.getElementById('displayLevel').innerText = "LEVEL: " + actualUserLevel;
-                document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME - LEVEL " + actualUserLevel;
+                document.getElementById('playGameBtn').innerText = "🚀 PLAY GAME";
                 
                 updateRankInfo(actualUserLevel);
                 playBoyWelcomeVoice(finalUsername);
