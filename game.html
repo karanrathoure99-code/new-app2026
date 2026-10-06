@@ -1,665 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🤪 Z PAJAL - Level Devil Play</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-outer: #8f5b0d;      /* Brownish Outer Canvas Background */
-      --corridor-bg: #fca240;  /* Yellow-Orange Inner Floor */
-      --player-color: #111111;
-      --door-frame: #3d2402;
-      --door-fill: #cbd5e1;
+{
+  "hero": {
+    "x": 1,
+    "y": 13
+  },
+  "door": {
+    "x": 29,
+    "y": 13
+  },
+  "tiles": [
+    {
+      "x": 2,
+      "y": 14
+    },
+    {
+      "x": 3,
+      "y": 14
+    },
+    {
+      "x": 5,
+      "y": 14
+    },
+    {
+      "x": 7,
+      "y": 14
+    },
+    {
+      "x": 10,
+      "y": 14
+    },
+    {
+      "x": 11,
+      "y": 14
+    },
+    {
+      "x": 12,
+      "y": 14
+    },
+    {
+      "x": 14,
+      "y": 14
+    },
+    {
+      "x": 13,
+      "y": 14
+    },
+    {
+      "x": 17,
+      "y": 14
+    },
+    {
+      "x": 19,
+      "y": 14
+    },
+    {
+      "x": 18,
+      "y": 14
+    },
+    {
+      "x": 20,
+      "y": 14
+    },
+    {
+      "x": 21,
+      "y": 14
+    },
+    {
+      "x": 22,
+      "y": 14
+    },
+    {
+      "x": 23,
+      "y": 14
+    },
+    {
+      "x": 24,
+      "y": 14
+    },
+    {
+      "x": 25,
+      "y": 14
+    },
+    {
+      "x": 27,
+      "y": 14
+    },
+    {
+      "x": 28,
+      "y": 14
+    },
+    {
+      "x": 29,
+      "y": 14
+    },
+    {
+      "x": 30,
+      "y": 14
+    },
+    {
+      "x": 31,
+      "y": 14
+    },
+    {
+      "x": 0,
+      "y": 14
+    },
+    {
+      "x": 6,
+      "y": 14
+    },
+    {
+      "x": 16,
+      "y": 14
+    },
+    {
+      "x": 4,
+      "y": 14
+    },
+    {
+      "x": 1,
+      "y": 14
+    },
+    {
+      "x": 9,
+      "y": 14
+    },
+    {
+      "x": 15,
+      "y": 14
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-      font-family: 'Press Start 2P', monospace;
+  ],
+  "spikes": [
+    {
+      "x": 30,
+      "y": 13
+    },
+    {
+      "x": 31,
+      "y": 13
+    },
+    {
+      "x": 8,
+      "y": 14
     }
-
-    body {
-      width: 100vw;
-      height: 100vh;
-      background-color: var(--bg-outer);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      overflow: hidden;
-      padding: 8px 10px 14px 10px;
+  ],
+  "sawblades": [],
+  "springs": [],
+  "triggers": [],
+  "smallSpikes": [],
+  "coins": [],
+  "oneways": [
+    {
+      "x": 26,
+      "y": 14
     }
-
-    .top-header {
-      width: 100%;
-      max-width: 960px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 8px;
-    }
-
-    .level-badge {
-      background: #4a2d04;
-      color: #fca240;
-      font-size: 11px;
-      padding: 8px 14px;
-      border-radius: 4px;
-      border: none;
-      outline: none;
-      box-shadow: 0 4px 0 #281700;
-      letter-spacing: 1px;
-    }
-
-    .levels-btn {
-      background: #fca240;
-      color: #3b2200;
-      font-size: 10px;
-      padding: 8px 14px;
-      border-radius: 4px;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #b86e18;
-      transition: transform 0.08s ease;
-      text-decoration: none;
-      display: inline-block;
-      font-weight: bold;
-    }
-
-    .levels-btn:active {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #b86e18;
-    }
-
-    #gameCanvas {
-      background-color: var(--bg-outer);
-      image-rendering: pixelated;
-      display: block;
-      border-radius: 4px;
-      max-width: 98vw;
-      max-height: 72vh;
-    }
-
-    /* Mobile & Tablet Controls */
-    .controls-container {
-      width: 100%;
-      max-width: 960px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 16px;
-      z-index: 10;
-    }
-
-    .dpad {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .ctrl-btn {
-      width: 74px;
-      height: 52px;
-      background: rgba(252, 162, 64, 0.6);
-      border: 3px solid rgba(74, 45, 4, 0.7);
-      border-radius: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 22px;
-      color: #3b2200;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .ctrl-btn:active {
-      background: rgba(252, 162, 64, 0.95);
-      transform: scale(0.94);
-    }
-
-    @media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
-      .controls-container {
-        display: none !important;
-      }
-      body {
-        justify-content: center;
-        gap: 16px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="top-header">
-    <div class="level-badge" id="levelDisplay">LEVEL 1 / 2</div>
-    <a href="level.html" class="levels-btn">📑 LEVEL</a>
-  </div>
-
-  <canvas id="gameCanvas" width="960" height="400"></canvas>
-
-  <div class="controls-container" id="touchControls">
-    <div class="dpad">
-      <button class="ctrl-btn" id="btnLeft">◀</button>
-      <button class="ctrl-btn" id="btnDown">▼</button>
-      <button class="ctrl-btn" id="btnRight">▶</button>
-    </div>
-    <button class="ctrl-btn" id="btnJump">▲</button>
-  </div>
-
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const levelDisplay = document.getElementById('levelDisplay');
-
-    // Fullscreen on click/touch
-    async function triggerAutoFullscreen() {
-      try {
-        const docEl = document.documentElement;
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-          if (docEl.requestFullscreen) {
-            await docEl.requestFullscreen();
-          } else if (docEl.webkitRequestFullscreen) {
-            await docEl.webkitRequestFullscreen();
-          }
-        }
-        if (screen.orientation && screen.orientation.lock) {
-          await screen.orientation.lock('landscape').catch(() => {});
-        }
-      } catch (e) {}
-    }
-
-    window.addEventListener('click', triggerAutoFullscreen, { once: true });
-    window.addEventListener('touchstart', triggerAutoFullscreen, { once: true });
-
-    // Corridor Play Area
-    const corridor = {
-      x: 40,
-      y: 125,
-      width: 880,
-      height: 145
-    };
-
-    let deathFlashTimer = 0;
-    let currentLevel = 1;
-
-    let doorState = {
-      isClosing: false,
-      closeProgress: 0,
-      speed: 0.08
-    };
-
-    let transition = {
-      active: false,
-      progress: 0,
-      speed: 0.035,
-      nextLevel: 1
-    };
-
-    // LEVEL 1: Photo ni Safed Line mujab exact fake jamin
-    // Ground Y = 270 (125 + 145), Niche ni white line lagbhag Y = 328
-    const level1Data = {
-      playerStart: { x: 80 },
-      door: { x: 745 },
-      fakePit: {
-        x: 635,                                // Door ni barabar pahela
-        width: 82,                             // Jump kinare thi kare to j paar thay
-        height: 18,
-        startY: corridor.y + corridor.height - 18,
-        targetY: 326,                          // Photo ni niche ni white line
-        currentY: corridor.y + corridor.height - 18,
-        triggerDist: 60,                       // 2 kadam dur hoy tyare trigger thay
-        triggered: false,
-        dropSpeed: 5.5
-      }
-    };
-
-    // Player (Devil Sprite with Horns & Legs Animation)
-    const NORMAL_HEIGHT = 36;
-    const CROUCH_HEIGHT = 22;
-
-    const player = {
-      x: 80,
-      y: 0,
-      width: 24,
-      height: NORMAL_HEIGHT,
-      vx: 0,
-      vy: 0,
-      facing: 1,
-      walkCycle: 0,
-      speed: 3.8,
-      jumpPower: -9.8,
-      grounded: false,
-      isCrouching: false,
-      enteredDoor: false
-    };
-
-    const keys = {};
-    window.addEventListener('keydown', (e) => keys[e.code] = true);
-    window.addEventListener('keyup', (e) => keys[e.code] = false);
-
-    const setupBtn = (id, keyName) => {
-      const btn = document.getElementById(id);
-      if (!btn) return;
-      btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
-      btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
-      btn.addEventListener('mousedown', () => keys[keyName] = true);
-      btn.addEventListener('mouseup', () => keys[keyName] = false);
-    };
-    setupBtn('btnLeft', 'ArrowLeft');
-    setupBtn('btnRight', 'ArrowRight');
-    setupBtn('btnDown', 'ArrowDown');
-    setupBtn('btnJump', 'Space');
-
-    function playBeep(freq, duration) {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.value = freq;
-        gain.gain.value = 0.08;
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    function initLevel(lvlNum = 1) {
-      currentLevel = lvlNum;
-      levelDisplay.innerText = `LEVEL ${currentLevel} / 2`;
-
-      player.height = NORMAL_HEIGHT;
-      player.x = level1Data.playerStart.x;
-      player.y = corridor.y + corridor.height - player.height;
-      player.vx = 0;
-      player.vy = 0;
-      player.walkCycle = 0;
-      player.facing = 1;
-      player.isCrouching = false;
-      player.enteredDoor = false;
-
-      // Fake pit reset
-      const pit = level1Data.fakePit;
-      pit.currentY = pit.startY;
-      pit.triggered = false;
-
-      doorState.isClosing = false;
-      doorState.closeProgress = 0;
-    }
-
-    function startLevelTransition(nextLvl) {
-      transition.active = true;
-      transition.progress = 0;
-      transition.nextLevel = nextLvl;
-      playBeep(260, 0.25);
-    }
-
-    function triggerDeath() {
-      playBeep(180, 0.12);
-      deathFlashTimer = 16;
-      initLevel(currentLevel);
-    }
-
-    // Door Drawing with Fast Shutter
-    function drawDoor(x, y, w, h, closeProgress) {
-      ctx.save();
-      ctx.fillStyle = '#3d2402';
-      ctx.beginPath();
-      ctx.arc(x + w / 2, y + 14, w / 2, Math.PI, 0);
-      ctx.rect(x, y + 14, w, h - 14);
-      ctx.fill();
-
-      ctx.fillStyle = '#cbd5e1';
-      ctx.beginPath();
-      ctx.arc(x + w / 2, y + 16, (w - 8) / 2, Math.PI, 0);
-      ctx.rect(x + 4, y + 16, w - 8, h - 16);
-      ctx.fill();
-
-      if (closeProgress > 0) {
-        ctx.fillStyle = '#3d2402';
-        const shutterHeight = (h - 16) * Math.min(1, closeProgress);
-        ctx.fillRect(x + 4, y + 16, w - 8, shutterHeight);
-      }
-      ctx.restore();
-    }
-
-    // Player Devil Character
-    function drawDummy(p) {
-      ctx.save();
-      const cx = p.x + p.width / 2;
-      const f = p.facing;
-
-      ctx.fillStyle = '#111111';
-      ctx.strokeStyle = '#111111';
-      ctx.lineCap = 'round';
-
-      if (p.isCrouching) {
-        const headRadius = 7;
-        const headY = p.y + headRadius;
-
-        ctx.beginPath();
-        ctx.moveTo(cx - 5 * f, headY - 4);
-        ctx.lineTo(cx - 7 * f, headY - 10);
-        ctx.lineTo(cx - 2 * f, headY - 6);
-        ctx.moveTo(cx + 1 * f, headY - 6);
-        ctx.lineTo(cx + 4 * f, headY - 10);
-        ctx.lineTo(cx + 3 * f, headY - 4);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(cx, headY, headRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#fca240';
-        ctx.fillRect(cx + 2 * f, headY - 1, 2.5, 2.5);
-
-        ctx.fillStyle = '#111111';
-        ctx.fillRect(cx - 8, headY + 5, 16, p.height - (headRadius + 5));
-      } else {
-        const headRadius = 7.5;
-        const headY = p.y + headRadius + 3;
-
-        ctx.beginPath();
-        ctx.moveTo(cx - 5, headY - 4);
-        ctx.lineTo(cx - 7, headY - 11);
-        ctx.lineTo(cx - 2, headY - 6);
-        ctx.moveTo(cx + 2, headY - 6);
-        ctx.lineTo(cx + 7, headY - 11);
-        ctx.lineTo(cx + 5, headY - 4);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(cx, headY, headRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#fca240';
-        ctx.fillRect(cx + 2 * f, headY - 1, 2.5, 2.5);
-
-        ctx.fillStyle = '#111111';
-        const torsoTop = headY + headRadius - 1;
-        const torsoH = 11;
-        ctx.fillRect(cx - 7, torsoTop, 14, torsoH);
-
-        const hipY = torsoTop + torsoH;
-        ctx.lineWidth = 5;
-
-        if (!p.grounded) {
-          ctx.beginPath();
-          ctx.moveTo(cx - 3, hipY);
-          ctx.lineTo(cx - 8 * f, p.y + p.height - 2);
-          ctx.moveTo(cx + 3, hipY);
-          ctx.lineTo(cx + 7 * f, p.y + p.height - 4);
-          ctx.stroke();
-        } else if (Math.abs(p.vx) > 0.1) {
-          const swing = Math.sin(p.walkCycle) * 7.5;
-          ctx.beginPath();
-          ctx.moveTo(cx - 3, hipY);
-          ctx.lineTo(cx - 3 + swing, p.y + p.height);
-          ctx.moveTo(cx + 3, hipY);
-          ctx.lineTo(cx + 3 - swing, p.y + p.height);
-          ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.moveTo(cx - 4, hipY);
-          ctx.lineTo(cx - 4, p.y + p.height);
-          ctx.moveTo(cx + 4, hipY);
-          ctx.lineTo(cx + 4, p.y + p.height);
-          ctx.stroke();
-        }
-      }
-      ctx.restore();
-    }
-
-    // Devil Jaws & Eyes Level Transition
-    function renderDevilTransition() {
-      if (!transition.active) return;
-
-      transition.progress += transition.speed;
-
-      if (transition.progress >= 1 && transition.progress - transition.speed < 1) {
-        initLevel(transition.nextLevel);
-        playBeep(520, 0.15);
-      }
-
-      if (transition.progress >= 2) {
-        transition.active = false;
-        transition.progress = 0;
-        return;
-      }
-
-      const factor = transition.progress < 1 ? transition.progress : (2 - transition.progress);
-
-      ctx.save();
-      const w = canvas.width;
-      const h = canvas.height;
-      const midH = h / 2;
-      const curH = midH * factor;
-
-      ctx.fillStyle = '#4c0505';
-
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(w, 0);
-      ctx.lineTo(w, curH);
-      const spikes = 14;
-      const step = w / spikes;
-      for (let i = spikes; i >= 0; i--) {
-        const sx = i * step;
-        const sy = (i % 2 === 0) ? curH : curH + 28 * factor;
-        ctx.lineTo(sx, sy);
-      }
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(0, h);
-      ctx.lineTo(w, h);
-      ctx.lineTo(w, h - curH);
-      for (let i = spikes; i >= 0; i--) {
-        const sx = i * step;
-        const sy = (i % 2 === 0) ? (h - curH) : (h - curH - 28 * factor);
-        ctx.lineTo(sx, sy);
-      }
-      ctx.closePath();
-      ctx.fill();
-
-      if (factor > 0.65) {
-        const eyeAlpha = Math.min(1, (factor - 0.65) / 0.35);
-        ctx.globalAlpha = eyeAlpha;
-
-        const eyeCenterY = midH - 8;
-        const leftEyeX = w / 2 - 45;
-        const rightEyeX = w / 2 + 45;
-
-        ctx.fillStyle = '#ff1e1e';
-
-        ctx.beginPath();
-        ctx.moveTo(leftEyeX - 35, eyeCenterY - 14);
-        ctx.quadraticCurveTo(leftEyeX - 10, eyeCenterY - 4, leftEyeX + 18, eyeCenterY + 12);
-        ctx.quadraticCurveTo(leftEyeX - 5, eyeCenterY + 6, leftEyeX - 35, eyeCenterY - 14);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(rightEyeX + 35, eyeCenterY - 14);
-        ctx.quadraticCurveTo(rightEyeX + 10, eyeCenterY - 4, rightEyeX - 18, eyeCenterY + 12);
-        ctx.quadraticCurveTo(rightEyeX + 5, eyeCenterY + 6, rightEyeX + 35, eyeCenterY - 14);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffea75';
-        ctx.beginPath();
-        ctx.arc(leftEyeX - 5, eyeCenterY + 2, 4, 0, Math.PI * 2);
-        ctx.arc(rightEyeX + 5, eyeCenterY + 2, 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.restore();
-    }
-
-    function update() {
-      const groundY = corridor.y + corridor.height;
-      const pit = level1Data.fakePit;
-
-      // Door Close Sequence
-      if (doorState.isClosing && !transition.active) {
-        doorState.closeProgress += doorState.speed;
-        if (doorState.closeProgress >= 1) {
-          doorState.closeProgress = 1;
-          startLevelTransition(currentLevel === 1 ? 2 : 1);
-        }
-      }
-
-      // Movement
-      let move = 0;
-      if (!player.enteredDoor && !transition.active) {
-        const wantsCrouch = (keys['ArrowDown'] || keys['KeyS']) && player.grounded;
-        if (wantsCrouch && !player.isCrouching) {
-          player.isCrouching = true;
-          player.height = CROUCH_HEIGHT;
-          player.y = groundY - player.height;
-        } else if (!wantsCrouch && player.isCrouching) {
-          player.isCrouching = false;
-          player.height = NORMAL_HEIGHT;
-          player.y = groundY - player.height;
-        }
-
-        if (keys['ArrowRight'] || keys['KeyD']) move += 1;
-        if (keys['ArrowLeft'] || keys['KeyA']) move -= 1;
-
-        const currentSpeed = player.isCrouching ? player.speed * 0.5 : player.speed;
-        player.vx = move * currentSpeed;
-
-        if (move !== 0) {
-          player.facing = move > 0 ? 1 : -1;
-          player.walkCycle += 0.35;
-        } else {
-          player.walkCycle = 0;
-        }
-
-        if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && player.grounded && !player.isCrouching) {
-          player.vy = player.jumpPower;
-          player.grounded = false;
-          playBeep(450, 0.05);
-        }
-      } else {
-        player.vx = 0;
-      }
-
-      // Physics
-      player.vy += 0.44;
-      player.x += player.vx;
-      player.y += player.vy;
-
-      if (player.x < corridor.x) player.x = corridor.x;
-
-      // 2 Kadam Pahela Trigger
-      if (!pit.triggered && (pit.x - (player.x + player.width)) <= pit.triggerDist) {
-        pit.triggered = true;
-      }
-
-      // Jamin Niche Padvi (Photo ni white line targetY sudhi)
-      if (pit.triggered && pit.currentY < pit.targetY) {
-        pit.currentY += pit.dropSpeed;
-        if (pit.currentY > pit.targetY) pit.currentY = pit.targetY;
-      }
-
-      // Collision Calculation
-      const isOverPit = (player.x + player.width > pit.x && player.x < pit.x + pit.width);
-      let supportedGroundY = groundY;
-
-      if (isOverPit) {
-        // Pit area ma jamin padvani sathe niche jase
-        supportedGroundY = pit.currentY + pit.height;
-      }
-
-      const floorY = (isOverPit ? pit.currentY : groundY) - player.height;
-
-      if (player.y >= floorY && !isOverPit) {
-        player.y = floorY;
-        player.vy = 0;
-        player.grounded = true;
-      } else if (isOverPit && player.y >= floorY && pit.currentY === pit.startY) {
-        // Pahela normal ground par rahi sake
-        player.y = floorY;
-        player.vy = 0;
-        player.grounded = true;
-      } else {
-        player.grounded = false;
-      }
-
-      // Kado ma padva par death
-      if (player.y > canvas.height + 30 && !transition.active) {
-        triggerDeath();
-      }
-
-      // Door Pass
-      const doorW = 38;
-      const doorH = 46;
-      const doorY = groundY - doorH;
-      const doorX = level1Data.door.x;
-
-      if (!player.enteredDoor &&
-          player.x + player.width / 2 > doorX + 10 &&
-          player.x < doorX + doorW &&
-          player.y + player.height >= doorY) {
-        player.enteredDoor = true;
-        player.x = doorX + (doorW - player.width) / 2;
-        doorState.isClosing = true;
-        playBeep(320, 0.15);
-      }
-
-      // ================= DRAW SCENE =================
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Background Wall
-      ctx.fillStyle = '#8f5b0d';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Play Corridor (Main Orange Path)
-      ctx.fillStyle = '#fca240';
-      ctx.fillRect(corridor.x, corridor.y, corridor.width, corridor.height);
-
-      // Pit Cutout (Kado padya pachi niche background colour dekhay)
-      if (pit.triggered) {
-        ctx.fillStyle = '#8f5b0d';
-        ctx.fillRect(pit.x, corridor.y, pit.width, corridor.height + 150);
-      }
-
-      // Fake Floor (Pade tyare niche photo ni line par jaine ubhi raheshe - exact same light colour)
-      ctx.fillStyle = '#fca240';
-      ctx.fillRect(pit.x, pit.currentY, pit.width, pit.height);
-
-      // Door (Frame)
-      drawDoor(doorX, doorY, doorW, doorH, 0);
-
-      // Player
-      drawDummy(player);
-
-      // Door Shutter
-      if (doorState.closeProgress > 0) {
-        drawDoor(doorX, doorY, doorW, doorH, doorState.closeProgress);
-      }
-
-      // Death Flash
-      if (deathFlashTimer > 0) {
-        ctx.fillStyle = 'rgba(59, 34, 0, 0.45)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        deathFlashTimer--;
-      }
-
-      // Transition
-      renderDevilTransition();
-
-      requestAnimationFrame(update);
-    }
-
-    initLevel(1);
-    update();
-  </script>
-</body>
-</html>
+  ],
+  "crossSpikes": []
+}
