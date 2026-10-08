@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤪 Z PAJAL - Playable Troll Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🤪 Z PAJAL - Pure Devil Troll Levels</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Press Start 2P', monospace;
+            outline: none !important; /* Outlines completely removed */
+            -webkit-tap-highlight-color: transparent;
             user-select: none;
+            font-family: 'Press Start 2P', monospace;
         }
 
         body {
@@ -22,366 +24,729 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            padding: 10px;
+            padding: 8px;
         }
 
+        /* Arcade Frame Container */
         .arcade-cabinet {
             position: relative;
             background: #ffb356;
-            border: 5px solid #523500;
-            border-radius: 14px;
-            box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.45);
-            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 0px rgba(0, 0, 0, 0.45);
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 660px;
+            max-width: 720px;
             width: 100%;
         }
 
-        .hud {
+        /* Top HUD Bar */
+        .hud-header {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #ffa742;
-            border: 3px solid #523500;
             border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 12px;
-            font-size: 11px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 10px;
             color: #523500;
+            box-shadow: 0 2px 0px #523500;
         }
 
-        canvas {
-            background: #ffe3b3;
-            border: 4px solid #523500;
-            border-radius: 8px;
-            display: block;
-        }
-
-        .on-screen-controls {
-            margin-top: 14px;
+        .hud-info {
             display: flex;
             gap: 12px;
-            width: 100%;
-            justify-content: space-between;
+            align-items: center;
         }
 
-        .ctrl-group {
+        .hud-controls-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .hud-icon-btn {
+            background: #523500;
+            color: #ffb356;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 9px;
+            cursor: pointer;
+            box-shadow: 0 2px 0px #3b2500;
+            transition: transform 0.08s ease;
+        }
+
+        .hud-icon-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        /* Canvas Stage */
+        canvas {
+            background: #ffe2b3;
+            border-radius: 6px;
+            display: block;
+            box-shadow: 0 4px 0px #523500;
+        }
+
+        /* Mobile / Touch Controller Overlay (Hidden on pure desktop mouse systems) */
+        .mobile-touch-bar {
+            display: none;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding: 0 4px;
+        }
+
+        @media (pointer: coarse), (max-width: 900px) {
+            .mobile-touch-bar {
+                display: flex;
+            }
+        }
+
+        .touch-left-cluster {
             display: flex;
             gap: 8px;
         }
 
-        .ctrl-btn {
+        .touch-btn {
             background: #523500;
             color: #ffb356;
-            border: 3px solid #3b2500;
+            border: none;
             border-radius: 8px;
             padding: 12px 18px;
             font-size: 12px;
             cursor: pointer;
-            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 0px #3b2500;
+            touch-action: manipulation;
         }
 
-        .ctrl-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.4);
+        .touch-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0px #3b2500;
+            background: #734a00;
         }
 
-        /* Troll Message Overlay */
-        .overlay {
+        .jump-btn {
+            background: #8f1111;
+            color: #fff;
+            box-shadow: 0 4px 0px #540808;
+            padding: 12px 22px;
+        }
+
+        .jump-btn:active {
+            background: #aa1717;
+            box-shadow: 0 1px 0px #540808;
+        }
+
+        /* Overlay Modals */
+        .modal-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: #ffb356;
-            border: 4px solid #523500;
             border-radius: 10px;
-            box-shadow: 6px 6px 0px #000;
-            padding: 20px;
+            box-shadow: 0 10px 0px #000;
+            padding: 18px 24px;
             text-align: center;
             display: none;
             z-index: 50;
             width: 85%;
-            max-width: 400px;
+            max-width: 420px;
         }
 
-        .overlay h2 {
-            font-size: 14px;
+        .modal-overlay h2 {
+            font-size: 13px;
             margin-bottom: 10px;
         }
 
-        .overlay p {
+        .modal-overlay p {
             font-family: 'Chakra Petch', sans-serif;
             font-size: 15px;
             font-weight: 700;
             color: #523500;
             margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .modal-btn-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .dialog-btn {
+            background: #523500;
+            color: #ffb356;
+            border: none;
+            padding: 10px 14px;
+            font-size: 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 3px 0px #3b2500;
+        }
+
+        .dialog-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
         }
     </style>
 </head>
 <body>
 
     <div class="arcade-cabinet">
-        <div class="hud">
-            <span id="lvlDisplay">LVL: 1</span>
-            <span id="trollDisplay">RUNAWAY DOOR</span>
-            <span id="deathDisplay">DEATHS: 0</span>
-        </div>
-
-        <canvas id="gameCanvas" width="600" height="260"></canvas>
-
-        <!-- Touch / On-screen Buttons for Mobile -->
-        <div class="on-screen-controls">
-            <div class="ctrl-group">
-                <button class="ctrl-btn" id="btnLeft">◀ LEFT</button>
-                <button class="ctrl-btn" id="btnRight">RIGHT ▶</button>
+        <!-- Top HUD -->
+        <div class="hud-header">
+            <div class="hud-info">
+                <span id="hudLevelText">LVL: 1</span>
+                <span id="hudLevelName">RUNAWAY DOOR</span>
+                <span id="hudDeaths">💀 0</span>
             </div>
-            <button class="ctrl-btn" id="btnJump" style="background: #911212; color: #fff;">JUMP ⬆</button>
+            <div class="hud-controls-group">
+                <button class="hud-icon-btn" onclick="restartCurrentLevel()" title="Restart">🔄 RESTART</button>
+                <button class="hud-icon-btn" onclick="backToLevelsList()" title="Select Level">📜 LEVELS</button>
+                <button class="hud-icon-btn" onclick="enableLandscapeFullscreen()" title="Fullscreen">⛶</button>
+            </div>
         </div>
 
-        <!-- Failure Card -->
-        <div class="overlay" id="failBox">
-            <h2 style="color: #911212;">💀 TROLLED!</h2>
-            <p id="failMsg">Darwaaza dekh kar itna excited mat ho!</p>
-            <button class="ctrl-btn" onclick="retry()">RETRY LEVEL 🔄</button>
+        <!-- Canvas Game Screen -->
+        <canvas id="gameCanvas" width="640" height="280"></canvas>
+
+        <!-- Touch Controls (Left: Move, Right: Jump) -->
+        <div class="mobile-touch-bar">
+            <div class="touch-left-cluster">
+                <button class="touch-btn" id="tLeftBtn">◀ LEFT</button>
+                <button class="touch-btn" id="tRightBtn">RIGHT ▶</button>
+            </div>
+            <button class="touch-btn jump-btn" id="tJumpBtn">JUMP ⬆</button>
         </div>
 
-        <!-- Victory Card -->
-        <div class="overlay" id="winBox">
-            <h2 style="color: #116b0d;">🎉 LEVEL SURVIVED!</h2>
-            <p>Agla trap dimaag hila dega!</p>
-            <button class="ctrl-btn" onclick="next()">NEXT LEVEL ➡️</button>
+        <!-- Failure Modal -->
+        <div class="modal-overlay" id="failModal">
+            <h2 style="color: #8f1111;">💀 TROLLED!</h2>
+            <p id="failQuote">Kaisa laga prank?</p>
+            <div class="modal-btn-row">
+                <button class="dialog-btn" onclick="restartCurrentLevel()">RETRY 🔄</button>
+                <button class="dialog-btn" onclick="backToLevelsList()">LEVELS 📜</button>
+            </div>
+        </div>
+
+        <!-- Win Modal -->
+        <div class="modal-overlay" id="winModal">
+            <h2 style="color: #116b0d;">🎉 STAGE CLEARED!</h2>
+            <p id="winQuote">Ye toh shuruat thi, aage bacho!</p>
+            <div class="modal-btn-row">
+                <button class="dialog-btn" onclick="loadNextLevel()">NEXT ➡️</button>
+                <button class="dialog-btn" onclick="backToLevelsList()">LEVELS 📜</button>
+            </div>
         </div>
     </div>
 
+    <!-- Fullscreen & Landscape API Integration -->
+    <script>
+        async function enableLandscapeFullscreen() {
+            const docElement = document.documentElement;
+            try {
+                if (!document.fullscreenElement) {
+                    if (docElement.requestFullscreen) {
+                        await docElement.requestFullscreen();
+                    } else if (docElement.webkitRequestFullscreen) {
+                        await docElement.webkitRequestFullscreen();
+                    } else if (docElement.msRequestFullscreen) {
+                        await docElement.msRequestFullscreen();
+                    }
+                }
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('landscape');
+                }
+            } catch (err) {
+                // Ignore mobile restriction warnings
+            }
+        }
+
+        window.addEventListener('click', enableLandscapeFullscreen, { once: true });
+        window.addEventListener('touchstart', enableLandscapeFullscreen, { once: true });
+    </script>
+
+    <!-- Game Engine & 10 Increasingly Difficult Troll Levels -->
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const lvlDisplay = document.getElementById('lvlDisplay');
-        const trollDisplay = document.getElementById('trollDisplay');
-        const deathDisplay = document.getElementById('deathDisplay');
-        const failBox = document.getElementById('failBox');
-        const winBox = document.getElementById('winBox');
-        const failMsg = document.getElementById('failMsg');
+        const hudLevelText = document.getElementById('hudLevelText');
+        const hudLevelName = document.getElementById('hudLevelName');
+        const hudDeaths = document.getElementById('hudDeaths');
+        const failModal = document.getElementById('failModal');
+        const winModal = document.getElementById('winModal');
+        const failQuote = document.getElementById('failQuote');
 
         let deathCount = 0;
-        let currentLvl = 1;
-        let isOver = false;
+        let isDead = false;
 
         // Player Physical Entity
-        let player = {
+        let p = {
             x: 40,
-            y: 190,
-            w: 20,
-            h: 20,
+            y: 200,
+            w: 22,
+            h: 22,
             vx: 0,
             vy: 0,
-            speed: 3.6,
-            jumpForce: -8.6,
+            speed: 3.8,
+            jumpStrength: -8.8,
             onGround: false
         };
 
-        // Level Details
-        let door = { x: 520, y: 180, w: 26, h: 36 };
-        let spikes = [];
-        let fakeFloor = null;
-        let doorRan = false;
-
-        function loadLevel(lvl) {
-            currentLvl = lvl;
-            isOver = false;
-            doorRan = false;
-            player.x = 40;
-            player.y = 190;
-            player.vx = 0;
-            player.vy = 0;
-            failBox.style.display = "none";
-            winBox.style.display = "none";
-
-            if (lvl === 1) {
-                // Trap: Door runs away to the left when you get close
-                door = { x: 520, y: 180, w: 26, h: 36 };
-                spikes = [{ x: 280, y: 204, w: 32, h: 14 }];
-                fakeFloor = null;
-                lvlDisplay.innerText = "LVL: 1";
-                trollDisplay.innerText = "RUNAWAY DOOR";
-            } else if (lvl === 2) {
-                // Trap: Floor collapses under you in the middle
-                door = { x: 520, y: 180, w: 26, h: 36 };
-                spikes = [];
-                fakeFloor = { x: 230, y: 218, w: 90, h: 42, active: true };
-                lvlDisplay.innerText = "LVL: 2";
-                trollDisplay.innerText = "HOLE IN REALITY";
+        // 10 Progressively Harder Levels
+        const levels = [
+            {
+                id: 1,
+                name: "THE RUNAWAY DOOR",
+                quote: "Darwaaza dekh ke itna aage mat bhago!",
+                floorY: 240,
+                door: { x: 550, y: 190, w: 26, h: 36 },
+                spikes: [{ x: 300, y: 226, w: 30, h: 14 }],
+                logic: (lvl) => {
+                    // Door slides back to starting point when near
+                    if (p.x > 400 && !lvl.doorTrolled) {
+                        lvl.door.x -= 8;
+                        if (lvl.door.x <= 40) {
+                            lvl.door.x = 40;
+                            lvl.doorTrolled = true;
+                        }
+                    }
+                }
+            },
+            {
+                id: 2,
+                name: "INVISIBLE BUMP",
+                quote: "Sir pe chot lagi? Hawa mein invisible pathar tha!",
+                floorY: 240,
+                door: { x: 550, y: 190, w: 26, h: 36 },
+                spikes: [{ x: 290, y: 226, w: 50, h: 14 }],
+                blocks: [{ x: 295, y: 130, w: 40, h: 18, revealed: false }],
+                logic: (lvl) => {
+                    lvl.blocks.forEach(b => {
+                        if (p.x + p.w > b.x && p.x < b.x + b.w && p.y <= b.y + b.h && p.y >= b.y) {
+                            b.revealed = true;
+                            p.vy = 4; // Bumps head down into spike
+                        }
+                    });
+                }
+            },
+            {
+                id: 3,
+                name: "MISSILE SURPRISE",
+                quote: "Spike ne sniper ban kar drop maar diya!",
+                floorY: 240,
+                door: { x: 550, y: 190, w: 26, h: 36 },
+                spikes: [{ x: 340, y: 226, w: 26, h: 14, flying: false }],
+                logic: (lvl) => {
+                    let s = lvl.spikes[0];
+                    if (!p.onGround && p.x > 180) s.flying = true;
+                    if (s.flying) {
+                        s.x -= 6.5;
+                        s.y -= 1.8;
+                    }
+                }
+            },
+            {
+                id: 4,
+                name: "COLLAPSING FLOOR",
+                quote: "Pairon ke neeche se zameen hi gayab ho gayi!",
+                floorY: 240,
+                door: { x: 550, y: 190, w: 26, h: 36 },
+                fakeGround: { x: 240, y: 240, w: 120, active: true },
+                spikes: [],
+                logic: (lvl) => {
+                    if (p.x > 220 && p.x < 360 && lvl.fakeGround.active) {
+                        lvl.fakeGround.active = false;
+                    }
+                }
+            },
+            {
+                id: 5,
+                name: "REVERSE CONFUSION",
+                quote: "Ungli Right pe thi par player spike mein gaya!",
+                floorY: 240,
+                door: { x: 550, y: 190, w: 26, h: 36 },
+                spikes: [{ x: 440, y: 226, w: 32, h: 14 }],
+                isInverted: false,
+                logic: (lvl) => {
+                    if (p.x > 260 && !lvl.isInverted) {
+                        lvl.isInverted = true;
+                        hudLevelName.innerText = "CONTROLS REVERSED! 😈";
+                    }
+                }
+            },
+            {
+                id: 6,
+                name: "DECEPTIVE EXIT",
+                quote: "Jo dikhta hai wo door nahi, dhoka tha!",
+                floorY: 240,
+                door: { x: 550, y: 190, w: 26, h: 36, isFake: true },
+                realDoor: { x: 30, y: 190, w: 26, h: 36, visible: false },
+                spikes: [{ x: 260, y: 226, w: 30, h: 14 }],
+                logic: (lvl) => {
+                    if (p.x > 480 && lvl.door.isFake) {
+                        lvl.door.turnedSpike = true;
+                        lvl.realDoor.visible = true;
+                    }
+                }
+            },
+            {
+                id: 7,
+                name: "SINKING PIT & CEILING",
+                quote: "Upar aasmaan niche patal, dono mein spike!",
+                floorY: 240,
+                door: { x: 560, y: 190, w: 26, h: 36 },
+                spikes: [
+                    { x: 320, y: 226, w: 30, h: 14 },
+                    { x: 280, y: 50, w: 80, h: 14 } // Ceiling Spike
+                ],
+                logic: (lvl) => {
+                    // High jump hits ceiling spike, short jump falls in ground spike
+                    if (p.y < 65 && p.x > 270 && p.x < 370) {
+                        triggerFail("Ceiling ke spikes ne sir phod diya!");
+                    }
+                }
+            },
+            {
+                id: 8,
+                name: "THE TELEPORTING PLATFORM",
+                quote: "Platform pe bharosa karke pachta gaye!",
+                floorY: 240,
+                door: { x: 560, y: 120, w: 26, h: 36 },
+                spikes: [{ x: 0, y: 226, w: 640, h: 14 }], // Entire floor is spike!
+                movingPlat: { x: 140, y: 180, w: 60, h: 14, targetX: 420 },
+                logic: (lvl) => {
+                    // Landing on plat shifts it backwards abruptly
+                    let pl = lvl.movingPlat;
+                    if (p.x + p.w > pl.x && p.x < pl.x + pl.w && p.y + p.h >= pl.y && p.y + p.h <= pl.y + 10) {
+                        p.y = pl.y - p.h;
+                        p.vy = 0;
+                        p.onGround = true;
+                        pl.x -= 3; // slips under player
+                    }
+                }
+            },
+            {
+                id: 9,
+                name: "THE MULTI-TRIPWIRE",
+                quote: "Air trap ke baare mein socha nahi tha na?",
+                floorY: 240,
+                door: { x: 560, y: 190, w: 26, h: 36 },
+                spikes: [
+                    { x: 220, y: 226, w: 26, h: 14 },
+                    { x: 420, y: 226, w: 26, h: 14 }
+                ],
+                ghostSpike: { x: 320, y: 150, w: 26, h: 14, active: false },
+                logic: (lvl) => {
+                    // Mid-air jump spawns a floating spike right in the trajectory
+                    if (!p.onGround && p.x > 260 && p.x < 380) {
+                        lvl.ghostSpike.active = true;
+                    }
+                    if (lvl.ghostSpike.active) {
+                        let gs = lvl.ghostSpike;
+                        if (p.x < gs.x + gs.w && p.x + p.w > gs.x && p.y < gs.y + gs.h && p.y + p.h > gs.y) {
+                            triggerFail("Hawa mein udta hua spike aa gaya!");
+                        }
+                    }
+                }
+            },
+            {
+                id: 10,
+                name: "FINAL DEVIL GAUNTLET",
+                quote: "Sabhi traps ek sath! Tumse sach mein na ho payega!",
+                floorY: 240,
+                door: { x: 560, y: 190, w: 26, h: 36 },
+                spikes: [
+                    { x: 200, y: 226, w: 26, h: 14 },
+                    { x: 380, y: 226, w: 26, h: 14, flying: false }
+                ],
+                inverted: false,
+                logic: (lvl) => {
+                    // Trap 1: Flying spike triggers
+                    if (!p.onGround && p.x > 140) lvl.spikes[1].flying = true;
+                    if (lvl.spikes[1].flying) {
+                        lvl.spikes[1].x -= 7;
+                    }
+                    // Trap 2: Inverted controls near gate
+                    if (p.x > 440 && !lvl.inverted) {
+                        lvl.inverted = true;
+                        hudLevelName.innerText = "CONTROLS REVERSED!";
+                    }
+                }
             }
+        ];
+
+        // Read query param or localStorage for chosen level
+        const urlParams = new URLSearchParams(window.location.search);
+        let chosenLvl = parseInt(urlParams.get('level')) || parseInt(localStorage.getItem('currentPlayLevel')) || 1;
+        let activeIdx = Math.max(0, Math.min(levels.length - 1, chosenLvl - 1));
+        let activeLevel = null;
+
+        function loadLevel(idx) {
+            activeIdx = idx;
+            activeLevel = JSON.parse(JSON.stringify(levels[idx]));
+            isDead = false;
+
+            p.x = 40;
+            p.y = activeLevel.floorY - p.h;
+            p.vx = 0;
+            p.vy = 0;
+            p.onGround = true;
+
+            hudLevelText.innerText = "LVL: " + activeLevel.id;
+            hudLevelName.innerText = activeLevel.name;
+
+            failModal.style.display = "none";
+            winModal.style.display = "none";
         }
 
-        // Keyboard Controls
+        // Input Setup (Keyboard + Touch)
         const keys = {};
         window.addEventListener('keydown', (e) => {
             keys[e.key.toLowerCase()] = true;
-            if (e.key === "ArrowLeft") keys['a'] = true;
-            if (e.key === "ArrowRight") keys['d'] = true;
-            if (e.key === "ArrowUp" || e.key === " ") keys['w'] = true;
+            if (e.key === 'ArrowLeft') keys['left'] = true;
+            if (e.key === 'ArrowRight') keys['right'] = true;
+            if (e.key === 'ArrowUp' || e.key === ' ') keys['jump'] = true;
         });
 
         window.addEventListener('keyup', (e) => {
             keys[e.key.toLowerCase()] = false;
-            if (e.key === "ArrowLeft") keys['a'] = false;
-            if (e.key === "ArrowRight") keys['d'] = false;
-            if (e.key === "ArrowUp" || e.key === " ") keys['w'] = false;
+            if (e.key === 'ArrowLeft') keys['left'] = false;
+            if (e.key === 'ArrowRight') keys['right'] = false;
+            if (e.key === 'ArrowUp' || e.key === ' ') keys['jump'] = false;
         });
 
-        // Touch Control Bindings
-        setupBtn('btnLeft', 'a');
-        setupBtn('btnRight', 'd');
-        setupBtn('btnJump', 'w');
-
-        function setupBtn(id, key) {
-            const el = document.getElementById(id);
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
-            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-            el.addEventListener('mousedown', () => { keys[key] = true; });
-            el.addEventListener('mouseup', () => { keys[key] = false; });
+        // Touch Control Helpers
+        function bindTouch(id, keyProp) {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyProp] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyProp] = false; });
+            btn.addEventListener('mousedown', () => { keys[keyProp] = true; });
+            btn.addEventListener('mouseup', () => { keys[keyProp] = false; });
         }
 
-        function triggerDeath(msg) {
-            if (isOver) return;
-            isOver = true;
+        bindTouch('tLeftBtn', 'left');
+        bindTouch('tRightBtn', 'right');
+        bindTouch('tJumpBtn', 'jump');
+
+        function triggerFail(customMsg) {
+            if (isDead) return;
+            isDead = true;
             deathCount++;
-            deathDisplay.innerText = "DEATHS: " + deathCount;
-            failMsg.innerText = msg;
-            failBox.style.display = "block";
+            hudDeaths.innerText = "💀 " + deathCount;
+            failQuote.innerText = customMsg || activeLevel.quote;
+            failModal.style.display = "block";
         }
 
         function triggerWin() {
-            if (isOver) return;
-            isOver = true;
-            winBox.style.display = "block";
+            if (isDead) return;
+            isDead = true;
+            winModal.style.display = "block";
+            // Save progress
+            let currentSaved = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+            if (activeLevel.id + 1 > currentSaved) {
+                localStorage.setItem('saveLevel_TumseNaHoPayga', activeLevel.id + 1);
+            }
         }
 
-        window.retry = () => loadLevel(currentLvl);
-        window.next = () => loadLevel(currentLvl === 1 ? 2 : 1);
+        // Navigation Actions
+        window.restartCurrentLevel = function() {
+            loadLevel(activeIdx);
+        };
 
-        // Core Physics Update
+        window.loadNextLevel = function() {
+            if (activeIdx + 1 < levels.length) {
+                loadLevel(activeIdx + 1);
+            } else {
+                alert("CONGRATULATIONS! Tumne saare devil troll levels paar kar liye!");
+                backToLevelsList();
+            }
+        };
+
+        window.backToLevelsList = function() {
+            window.location.href = "level.html";
+        };
+
+        // Physics & Engine Update
         function update() {
-            if (isOver) return;
+            if (isDead) return;
 
-            // Horizontal Movement
-            player.vx = 0;
-            if (keys['a']) player.vx = -player.speed;
-            if (keys['d']) player.vx = player.speed;
+            let moveDir = 0;
+            if (keys['a'] || keys['left']) moveDir -= 1;
+            if (keys['d'] || keys['right']) moveDir += 1;
+
+            if (activeLevel.isInverted || activeLevel.inverted) {
+                moveDir = -moveDir;
+            }
+
+            p.vx = moveDir * p.speed;
 
             // Jump
-            if (keys['w'] && player.onGround) {
-                player.vy = player.jumpForce;
-                player.onGround = false;
+            if ((keys['w'] || keys['jump']) && p.onGround) {
+                p.vy = p.jumpStrength;
+                p.onGround = false;
             }
 
             // Gravity
-            player.vy += 0.44;
-            player.x += player.vx;
-            player.y += player.vy;
+            p.vy += 0.44;
+            p.x += p.vx;
+            p.y += p.vy;
 
-            // Ground & Floor Logic
-            let floorY = 218;
+            // Execute level troll logic
+            activeLevel.logic(activeLevel);
 
-            // Level 2 Trap: Floor vanishes
-            if (fakeFloor && fakeFloor.active) {
-                if (player.x > 210 && player.x < 310) {
-                    fakeFloor.active = false; // Floor disappear
+            // Ground calculation
+            let curFloorY = activeLevel.floorY;
+            if (activeLevel.fakeGround && !activeLevel.fakeGround.active) {
+                if (p.x + p.w > activeLevel.fakeGround.x && p.x < activeLevel.fakeGround.x + activeLevel.fakeGround.w) {
+                    curFloorY = 320; // Fall down into void
                 }
             }
 
-            if (fakeFloor && !fakeFloor.active && player.x + player.w > fakeFloor.x && player.x < fakeFloor.x + fakeFloor.w) {
-                floorY = 320; // Player falls through the void
-            }
-
-            if (player.y + player.h >= floorY) {
-                player.y = floorY - player.h;
-                player.vy = 0;
-                player.onGround = true;
+            if (p.y + p.h >= curFloorY) {
+                p.y = curFloorY - p.h;
+                p.vy = 0;
+                p.onGround = true;
             }
 
             // Void Death
-            if (player.y > 270) {
-                triggerDeath("Pairon tale zameen khisak gayi! 😂");
+            if (p.y > 280) {
+                triggerFail("Neeche void mein gir gaye! 😂");
             }
 
-            // Level 1 Trap: Runaway door
-            if (currentLvl === 1 && player.x > 380 && !doorRan) {
-                door.x -= 8;
-                if (door.x <= 40) {
-                    door.x = 40;
-                    doorRan = true; // Teleported behind player
+            // Spikes Collisions
+            if (activeLevel.spikes) {
+                activeLevel.spikes.forEach(s => {
+                    if (p.x < s.x + s.w && p.x + p.w > s.x && p.y < s.y + s.h && p.y + p.h > s.y) {
+                        triggerFail();
+                    }
+                });
+            }
+
+            // Door Handling
+            let d = activeLevel.door;
+            if (p.x < d.x + d.w && p.x + p.w > d.x && p.y < d.y + d.h && p.y + p.h > d.y) {
+                if (d.turnedSpike) {
+                    triggerFail("Gate toh spike ban gaya! Asli gate starting point pe hai!");
+                } else if (!d.isFake) {
+                    triggerWin();
                 }
             }
 
-            // Spikes collision
-            spikes.forEach(s => {
-                if (player.x < s.x + s.w && player.x + player.w > s.x &&
-                    player.y < s.y + s.h && player.y + player.h > s.y) {
-                    triggerDeath("Spike par pair rakh diya!");
+            // Real door overlap (Level 6)
+            if (activeLevel.realDoor && activeLevel.realDoor.visible) {
+                let rd = activeLevel.realDoor;
+                if (p.x < rd.x + rd.w && p.x + p.w > rd.x && p.y < rd.y + rd.h && p.y + p.h > rd.y) {
+                    triggerWin();
                 }
-            });
-
-            // Door Goal collision
-            if (player.x < door.x + door.w && player.x + player.w > door.x &&
-                player.y < door.y + door.h && player.y + player.h > door.y) {
-                triggerWin();
             }
         }
 
-        // Canvas Rendering
+        // Render Canvas
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Ground
+            // Draw Floor
             ctx.fillStyle = "#523500";
-            if (fakeFloor && !fakeFloor.active) {
-                ctx.fillRect(0, 218, fakeFloor.x, 42);
-                ctx.fillRect(fakeFloor.x + fakeFloor.w, 218, canvas.width, 42);
+            if (activeLevel.fakeGround && !activeLevel.fakeGround.active) {
+                ctx.fillRect(0, activeLevel.floorY, activeLevel.fakeGround.x, 40);
+                ctx.fillRect(activeLevel.fakeGround.x + activeLevel.fakeGround.w, activeLevel.floorY, canvas.width, 40);
             } else {
-                ctx.fillRect(0, 218, canvas.width, 42);
+                ctx.fillRect(0, activeLevel.floorY, canvas.width, 40);
             }
 
-            // Spikes
-            spikes.forEach(s => {
-                ctx.fillStyle = "#a81313";
+            // Moving platform (Level 8)
+            if (activeLevel.movingPlat) {
+                let pl = activeLevel.movingPlat;
+                ctx.fillStyle = "#ffb356";
+                ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
+            }
+
+            // Draw Spikes
+            if (activeLevel.spikes) {
+                activeLevel.spikes.forEach(s => {
+                    ctx.fillStyle = "#8f1111";
+                    ctx.beginPath();
+                    ctx.moveTo(s.x, s.y + s.h);
+                    ctx.lineTo(s.x + s.w / 2, s.y);
+                    ctx.lineTo(s.x + s.w, s.y + s.h);
+                    ctx.fill();
+                });
+            }
+
+            // Ghost mid-air spike (Level 9)
+            if (activeLevel.ghostSpike && activeLevel.ghostSpike.active) {
+                let gs = activeLevel.ghostSpike;
+                ctx.fillStyle = "#8f1111";
                 ctx.beginPath();
-                ctx.moveTo(s.x, s.y + s.h);
-                ctx.lineTo(s.x + s.w / 2, s.y);
-                ctx.lineTo(s.x + s.w, s.y + s.h);
+                ctx.moveTo(gs.x, gs.y + gs.h);
+                ctx.lineTo(gs.x + gs.w / 2, gs.y);
+                ctx.lineTo(gs.x + gs.w, gs.y + gs.h);
                 ctx.fill();
-            });
+            }
 
-            // Exit Door
-            ctx.fillStyle = "#3b2500";
-            ctx.fillRect(door.x, door.y, door.w, door.h);
-            ctx.fillStyle = "#2db300";
-            ctx.fillRect(door.x + 3, door.y + 3, door.w - 6, door.h - 6);
+            // Invisible blocks if hit
+            if (activeLevel.blocks) {
+                activeLevel.blocks.forEach(b => {
+                    if (b.revealed) {
+                        ctx.fillStyle = "#3b2500";
+                        ctx.fillRect(b.x, b.y, b.w, b.h);
+                        ctx.fillStyle = "#ffb356";
+                        ctx.fillText("?", b.x + 14, b.y + 13);
+                    }
+                });
+            }
 
-            // Character (Devil)
+            // Draw Exit Door
+            let d = activeLevel.door;
+            if (d.turnedSpike) {
+                ctx.fillStyle = "#8f1111";
+                ctx.fillRect(d.x, d.y, d.w, d.h);
+                ctx.fillStyle = "#fff";
+                ctx.fillText("😈", d.x + 4, d.y + 22);
+            } else {
+                ctx.fillStyle = "#3b2500";
+                ctx.fillRect(d.x, d.y, d.w, d.h);
+                ctx.fillStyle = "#2db300";
+                ctx.fillRect(d.x + 3, d.y + 3, d.w - 6, d.h - 6);
+            }
+
+            // Draw Real Door (Level 6)
+            if (activeLevel.realDoor && activeLevel.realDoor.visible) {
+                let rd = activeLevel.realDoor;
+                ctx.fillStyle = "#3b2500";
+                ctx.fillRect(rd.x, rd.y, rd.w, rd.h);
+                ctx.fillStyle = "#2db300";
+                ctx.fillRect(rd.x + 3, rd.y + 3, rd.w - 6, rd.h - 6);
+            }
+
+            // Devil Player
             ctx.fillStyle = "#523500";
-            ctx.fillRect(player.x, player.y, player.w, player.h);
+            ctx.fillRect(p.x, p.y, p.w, p.h);
             ctx.fillStyle = "#d11a1a";
-            ctx.fillRect(player.x + 2, player.y - 4, 4, 4);
-            ctx.fillRect(player.x + 14, player.y - 4, 4, 4);
+            ctx.fillRect(p.x + 2, p.y - 4, 4, 4);
+            ctx.fillRect(p.x + p.w - 6, p.y - 4, 4, 4);
             ctx.fillStyle = "#fff";
-            ctx.fillRect(player.x + 4, player.y + 6, 3, 3);
-            ctx.fillRect(player.x + 13, player.y + 6, 3, 3);
+            ctx.fillRect(p.x + 4, p.y + 6, 3, 3);
+            ctx.fillRect(p.x + 14, p.y + 6, 3, 3);
         }
 
-        function loop() {
+        function gameLoop() {
             update();
             draw();
-            requestAnimationFrame(loop);
+            requestAnimationFrame(gameLoop);
         }
 
-        loadLevel(1);
-        loop();
+        loadLevel(activeIdx);
+        gameLoop();
     </script>
 </body>
 </html>
