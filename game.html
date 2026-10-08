@@ -3,1308 +3,658 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Complete Game (Levels 1-15)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>🤪 Z PAJAL - Play Level</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Press Start 2P', monospace;
             user-select: none;
-            -webkit-user-select: none;
         }
 
-        html, body {
+        body {
             width: 100vw;
             height: 100vh;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: #020205;
-            background: radial-gradient(circle at center, #0f1020 0%, #05050a 70%, #020203 100%);
+            background: #916000;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #ffffff;
-            position: relative;
-        }
-
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: 0;
-            opacity: 0.45;
-            animation: float 12s infinite alternate ease-in-out;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 450px; height: 450px;
-            background: linear-gradient(135deg, #ff007f, #7928ca);
-            top: -120px; left: -100px;
-        }
-        .orb-2 {
-            width: 520px; height: 520px;
-            background: linear-gradient(135deg, #00f0ff, #0072ff);
-            bottom: -150px; right: -100px;
-            animation-delay: -4s;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) scale(1) rotate(0deg); }
-            100% { transform: translateY(30px) scale(1.1) rotate(5deg); }
+            overflow: hidden;
+            padding: 10px;
         }
 
         .game-wrapper {
-            width: 1280px;
-            height: 720px;
+            position: relative;
+            background: #ffb356;
+            border: 5px solid #523500;
+            border-radius: 12px;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.4);
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            padding: 10px;
-            position: relative;
-            z-index: 10;
-            transform: scale(var(--scale-factor, 1));
-            transform-origin: center center;
-            flex-shrink: 0;
-            box-sizing: border-box;
+            align-items: center;
+            max-width: 720px;
+            width: 100%;
         }
 
-        .game-hud {
+        /* Top HUD Bar */
+        .hud-bar {
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(15, 15, 25, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 240, 255, 0.25);
-            border-radius: 16px;
-            padding: 8px 22px;
-            margin-bottom: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            z-index: 20;
+            background: #ffa742;
+            border: 3px solid #523500;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            font-size: 10px;
+            color: #523500;
         }
 
-        .hud-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            font-weight: 900;
-            color: #00f0ff;
-            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
-            letter-spacing: 1px;
+        .hud-moves.danger {
+            color: #d11a1a;
+            animation: blink 0.5s infinite;
         }
 
-        .hud-stats {
-            display: flex;
-            gap: 22px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-            align-items: center;
+        @keyframes blink {
+            50% { opacity: 0.3; }
         }
 
-        #scoreDisplay {
-            color: #ffd700;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
-        }
-
-        #shieldDisplay {
-            color: #00ffcc;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
-            letter-spacing: 0.5px;
-        }
-
-        .hud-right-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .arena-container {
-            flex: 1;
-            background: rgba(10, 10, 18, 0.92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 2px solid rgba(0, 240, 255, 0.3);
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0, 240, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding-bottom: 8px;
-        }
-
-        .distractor-bg {
-            position: absolute;
-            inset: 0;
-            background: 
-                radial-gradient(circle at 50% 50%, rgba(255, 0, 127, 0.08) 0%, rgba(0, 240, 255, 0.05) 50%, transparent 80%),
-                linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            animation: pulseBg 7s ease-in-out infinite alternate;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        @keyframes pulseBg {
-            0% { opacity: 0.65; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.02); }
-        }
-
-        #gameCanvas {
-            width: 100%;
-            height: 410px;
+        /* Canvas Game Box */
+        canvas {
+            background: #ffe2b3;
+            border: 4px solid #523500;
+            border-radius: 6px;
             display: block;
-            position: relative;
-            z-index: 2;
         }
 
-        .controls-overlay {
-            position: relative;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            margin-top: 4px;
-            padding: 0 8px;
-            pointer-events: auto;
-            background: transparent;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 30;
-        }
-
-        .control-group {
-            display: flex;
-            gap: 8px;
-            pointer-events: auto;
-            align-items: center;
-        }
-
-        .control-group.right-group {
-            display: flex;
-            flex-direction: row;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .ctrl-btn {
-            background: rgba(20, 20, 35, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1.5px solid rgba(0, 240, 255, 0.25);
-            border-bottom: 3px solid rgba(0, 240, 255, 0.45);
-            color: #ffffff;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            width: 95px;
-            height: 70px;
-            font-size: 16px;
-            border-radius: 14px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            touch-action: manipulation;
-            position: relative;
-            transition: all 0.15s ease;
-        }
-
-        .ctrl-btn:active, .ctrl-btn.pressed {
-            transform: translateY(2px) scale(0.97);
-            background: linear-gradient(135deg, rgba(255, 0, 127, 0.35), rgba(121, 40, 202, 0.35));
-            border-color: #ff007f;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
-        }
-
-        .btn-logo {
-            font-size: 12px;
-            font-weight: 900;
-            color: #00f0ff;
-            margin-bottom: 2px;
-            text-shadow: 0 0 6px rgba(0, 240, 255, 0.6);
-        }
-
-        .btn-label {
-            font-size: 11px;
-            font-weight: 700;
-            line-height: 1;
-            color: rgba(255, 255, 255, 0.75);
-            letter-spacing: 0.5px;
-        }
-
-        .back-btn, .prev-lvl-btn, .next-lvl-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            padding: 5px 12px;
-            border-radius: 10px;
-            font-size: 11px;
-            cursor: pointer;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover, .prev-lvl-btn:hover, .next-lvl-btn:hover:not(:disabled) {
-            color: #00f0ff;
-            border-color: #00f0ff;
-            background: rgba(0, 240, 255, 0.15);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-        }
-
-        .next-lvl-btn:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            border-color: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.3);
-            box-shadow: none;
-        }
-
-        #notificationModal {
+        /* Modal Overlay for Ego / Death Popups */
+        .overlay-card {
             position: absolute;
-            top: 25%;
+            top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: rgba(15, 15, 30, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid #00f0ff;
-            padding: 16px 30px;
-            border-radius: 16px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
-            color: #00f0ff;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+            transform: translate(-50%, -50%);
+            background: #ffb356;
+            border: 4px solid #523500;
+            border-radius: 10px;
+            box-shadow: 6px 6px 0px #000;
+            padding: 16px 20px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 25px rgba(0, 240, 255, 0.3);
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: none;
+            z-index: 20;
+            width: 85%;
+            max-width: 400px;
         }
-        #notificationModal.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
+
+        .overlay-card h2 {
+            font-size: 13px;
+            color: #911212;
+            margin-bottom: 8px;
+        }
+
+        .overlay-card p {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #523500;
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        .modal-btn {
+            background: #523500;
+            color: #ffb356;
+            border: 2px solid #3b2500;
+            padding: 10px 14px;
+            font-size: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Controls Instructions */
+        .controls-hint {
+            margin-top: 8px;
+            font-size: 8px;
+            color: #523500;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
-    <div id="notificationModal">🎉 Level Cleared!</div>
-
-    <div class="game-wrapper" id="gameWrapper">
-        <div class="game-hud">
-            <div class="hud-title" id="levelTitle">⚡ LEVEL 1 ⚡</div>
-            <div class="hud-stats">
-                <span id="scoreDisplay">COINS: 0</span>
-                <span id="shieldDisplay">SHIELD: OFF</span>
-            </div>
-            <div class="hud-right-group">
-                <button class="prev-lvl-btn" onclick="goToPrevLevel()">◀ BACK</button>
-                <button class="next-lvl-btn" id="nextLvlBtn" onclick="goToNextUnlockedLevel()">NEXT ▶</button>
-                <button class="back-btn" onclick="goHome()">QUIT</button>
-            </div>
+    <div class="game-wrapper">
+        <div class="hud-bar">
+            <span id="hudLevel">LVL: 1</span>
+            <span id="hudTitle">EGO CHECK</span>
+            <span id="hudMoves" class="hud-moves">MOVES: 15</span>
         </div>
 
-        <div class="arena-container">
-            <div class="distractor-bg"></div>
-            <canvas id="gameCanvas"></canvas>
+        <canvas id="gameCanvas" width="600" height="300"></canvas>
 
-            <div class="controls-overlay" id="mobileControls">
-                <div class="control-group">
-                    <button class="ctrl-btn" id="leftBtnM">◀</button>
-                    <button class="ctrl-btn" id="rightBtnM">▶</button>
-                </div>
-                <div class="control-group right-group">
-                    <button class="ctrl-btn" id="jumpBtnM">
-                        <span class="btn-logo">Z</span>
-                        <span class="btn-label">JUMP</span>
-                    </button>
-                    <button class="ctrl-btn" id="rightDownBtnM">
-                        <span class="btn-logo">Z</span>
-                        <span class="btn-label">DOWN</span>
-                    </button>
-                    <button class="ctrl-btn" id="shieldBtnM">
-                        <span class="btn-logo">Z</span>
-                        <span class="btn-label">SHLD</span>
-                    </button>
-                </div>
-            </div>
+        <div class="controls-hint">Controls: [A][D] ya Left/Right Arrow | [SPACE] ya [W] Jump</div>
+
+        <!-- Failure Modal -->
+        <div class="overlay-card" id="failModal">
+            <h2>💀 YOU FAILED!</h2>
+            <p id="failQuote">Koshish achhi thi, par tumse na ho payega!</p>
+            <button class="modal-btn" onclick="retryLevel()">🔄 RETRY LEVEL</button>
+        </div>
+
+        <!-- Victory Modal -->
+        <div class="overlay-card" id="winModal">
+            <h2 style="color: #0b6e1b;">🎉 LEVEL CLEARED!</h2>
+            <p id="winQuote">Tukka lag gaya ya dimaag lagaya?</p>
+            <button class="modal-btn" onclick="nextLevel()">NEXT LEVEL ➡️</button>
         </div>
     </div>
 
     <script>
-        function handleScreenFit(e) {
-            if (e.target.closest('button') || e.target.closest('.ctrl-btn') || e.target.closest('.game-hud')) return;
-            if (!document.fullscreenElement) {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen().catch(() => {});
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    document.documentElement.webkitRequestFullscreen();
-                }
-            }
-            if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(() => {});
-            }
-        }
-
-        window.addEventListener('click', handleScreenFit);
-        window.addEventListener('touchstart', handleScreenFit);
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let canvasWidth = 1280;
-        let canvasHeight = 410;
+        const hudLevel = document.getElementById('hudLevel');
+        const hudTitle = document.getElementById('hudTitle');
+        const hudMoves = document.getElementById('hudMoves');
+        const failModal = document.getElementById('failModal');
+        const winModal = document.getElementById('winModal');
+        const failQuote = document.getElementById('failQuote');
 
-        function resizeCanvas() {
-            const screenW = window.innerWidth;
-            const screenH = window.innerHeight;
+        // Tile Type Legend:
+        // 0: Empty, 1: Solid Floor, 2: Spike, 3: Vanishing Floor, 4: Door, 5: Key
+        const TILE_SIZE = 30; // 20 columns x 10 rows = 600 x 300
 
-            const scaleX = screenW / 1280;
-            const scaleY = screenH / 720;
-            const scale = Math.min(scaleX, scaleY) * 0.98;
-
-            document.documentElement.style.setProperty('--scale-factor', scale);
-            canvasWidth = 1280;
-            canvasHeight = 410;
-
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = canvasWidth * dpr;
-            canvas.height = canvasHeight * dpr;
-            ctx.scale(dpr, dpr);
-            
-            canvas.style.width = canvasWidth + 'px';
-            canvas.style.height = canvasHeight + 'px';
-
-            updateGameLayout();
-        }
-
-        let savedMaxLevel = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
-        if (savedMaxLevel > 15) savedMaxLevel = 15;
-        let currentLevel = savedMaxLevel;
-
-        let isDoorOpen = true; 
-        let score = 0;
-        let shieldActive = false;
-        let isExploding = false;
-        let isRebuilding = false;
-        let rebuildTimer = 0;
-        let respawnAuraTimer = 0;
-        let isSlowMo = false;
-        let fragments = [];
-        let particles = [];
-        let floatingTexts = [];
-
-        // Traps & Obstacles
-        let surfaceSpikes = [];       
-        let hiddenPlatformSpikes = [];
-        let secretBlocks = [];        
-        let globalTick = 0;
-
-        let player = {
-            x: 40,
-            y: 100,
-            width: 13.0,     
-            height: 40.5,    
-            vx: 0,
-            vy: 0,
-            speed: 4.5,       
-            jumpForce: -7.8,  
-            gravity: 0.38,    
-            isGrounded: false,
-            animTimer: 0
-        };
-
-        let platforms = [];
-        let coins = [];
-        let goal = { x: 0, y: 0, w: 38, h: 52 };
-
-        const trollTaunts = [
-            "Hahaha! Bomb coin chhu liya na? 💣💥",
-            "Aukaat se bahar hai ye hard mode! 📉🔥",
-            "Itna aasan samajh rakha tha kya? 🤡",
-            "2nd surface ke kante yaad hain ya bhool gaye? 📌💀",
-            "Main character banne chale the, bomb se udd gaye! 🤖",
-            "Floor timings se fast nikalna tha! ⚡🍼"
+        // 10 Detailed Rage Levels
+        const levels = [
+            {
+                id: 1,
+                title: "BABY STEP?",
+                moves: 12,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 18, y: 7 },
+                trap: "none",
+                failQuote: "Level 1 mein kaun marta hai bhai?! 🤦‍♂️",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 2,
+                title: "THE GHOST DOOR",
+                moves: 15,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 17, y: 7 },
+                trap: "teleport_door", // Door jumps away on close distance
+                failQuote: "Aage dekh ke daudo mat, door tumse darta hai!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 3,
+                title: "CRUMBLING HOPE",
+                moves: 14,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 18, y: 7 },
+                trap: "collapse_fast",
+                failQuote: "Ruk kyun gaye? Zameen khisak gayi na!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 4,
+                title: "REVERSE PSYCHE",
+                moves: 16,
+                playerStart: { x: 2, y: 7 },
+                door: { x: 17, y: 7 },
+                trap: "inverted_controls",
+                failQuote: "Left ka matlab Right hota hai, samjhe Einstein?",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1],
+                    [1,0,0,0,2,1,1,2,0,0,2,1,1,2,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 5,
+                title: "THE LEAP OF DOUBT",
+                moves: 10,
+                playerStart: { x: 1, y: 3 },
+                door: { x: 18, y: 7 },
+                trap: "rising_spikes",
+                failQuote: "Niche dekh kar koodna tha!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 6,
+                title: "STALKED BY TIME",
+                moves: 9,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 18, y: 7 },
+                trap: "exact_moves", // User must finish on exact 0 moves
+                failQuote: "Ek move faltu chala aur game khatam!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 7,
+                title: "THE PHANTOM PLATFORM",
+                moves: 14,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 18, y: 3 },
+                trap: "fake_block",
+                failQuote: "Jo dikhta hai wo hota nahi!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 8,
+                title: "CEILING CRUSH",
+                moves: 12,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 18, y: 7 },
+                trap: "falling_ceiling",
+                failQuote: "Sir bacha ke chalna tha!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 9,
+                title: "GREED TRAP",
+                moves: 16,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 18, y: 7 },
+                trap: "fake_key",
+                failQuote: "Chabi ke chakkar mein phas gaye!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            {
+                id: 10,
+                title: "DEVIL FINALE: RUN!",
+                moves: 20,
+                playerStart: { x: 1, y: 7 },
+                door: { x: 18, y: 7 },
+                trap: "collapsing_world",
+                failQuote: "Speed nahi hai toh Silver rank par hi raho!",
+                map: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,3,3,2,3,3,2,3,3,2,3,3,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            }
         ];
 
-        function showTrollTaunt(customMsg) {
-            let msg = customMsg || trollTaunts[Math.floor(Math.random() * trollTaunts.length)];
-            const modal = document.getElementById('notificationModal');
-            modal.innerText = msg;
-            modal.classList.add('show');
-            setTimeout(() => modal.classList.remove('show'), 1500);
-        }
+        let currentLevelIdx = 0;
+        let activeLevel = null;
+        let mapData = [];
+        let player = { x: 0, y: 0, vx: 0, vy: 0, w: 20, h: 20, onGround: false };
+        let remainingMoves = 0;
+        let isGameOver = false;
+        let doorPos = { x: 0, y: 0 };
+        let doorMoved = false;
 
-        // NEXT BUTTON STATE UPDATE FUNCTION
-        function updateNavigationButtons() {
-            const nextBtn = document.getElementById('nextLvlBtn');
-            if (nextBtn) {
-                // Agar player piche ki level par hai toh NEXT button active hoga
-                if (currentLevel < savedMaxLevel) {
-                    nextBtn.disabled = false;
-                    nextBtn.style.color = '#00f0ff';
-                    nextBtn.style.borderColor = 'rgba(0, 240, 255, 0.4)';
-                } else {
-                    // Agar player aakhiri unlocked level par hai toh disable
-                    nextBtn.disabled = true;
-                    nextBtn.style.color = 'rgba(255, 255, 255, 0.3)';
-                    nextBtn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                }
-            }
-        }
+        function initLevel(index) {
+            currentLevelIdx = index;
+            activeLevel = JSON.parse(JSON.stringify(levels[index]));
+            mapData = activeLevel.map;
+            remainingMoves = activeLevel.moves;
+            isGameOver = false;
+            doorMoved = false;
 
-        function updateGameLayout() {
-            score = 0;
-            isDoorOpen = true;
-            const surfaceTop = canvasHeight - 40;
-            const surfaceHeight = 40;
-
-            const levelNames = {
-                1: "⚡『 🪙 BASIC RUN: SURVIVE THE GROUND 』- Lvl 1 ⚡",
-                2: "🎯『 💎 FIRST HIDDEN FLOOR TRAP 』- Lvl 2 ⚡",
-                3: "🚀『 💰 ELEVATED STEPPING STONES 』- Lvl 3 ⚡",
-                4: "🔥『 🏆 DUAL TIER PUZZLE 』- Lvl 4 ⚡",
-                5: "👑『 ✨ BALANCED STEPS CHALLENGE 』- Lvl 5 ⚡",
-                6: "🔥『 +35% HARD: BOMB COIN ROULETTE 』- Lvl 6 ⚡",
-                7: "📌『 STEALTH 2ND SURFACE SPIKES 』- Lvl 7 ⚡",
-                8: "🌀『 DANGEROUS HIGH JUMP PUZZLE 』- Lvl 8 ⚡",
-                9: "☠️『 TRIPLE SPIKE RUN & EXPLOSIVES 』- Lvl 9 ⚡",
-                10: "🕳️『 ULTRA FAST STEPPING CHALLENGE 』- Lvl 10 ⚡",
-                11: "⚡『 SURPRISE HIGH LEDGE TRAPS 』- Lvl 11 ⚡",
-                12: "⏱️『 BLITZ FAST GROUND KANTE 』- Lvl 12 ⚡",
-                13: "🛰️『 DOUBLE 2ND SURFACE RAZORS 』- Lvl 13 ⚡",
-                14: "💣『 RAPID SPEED SPIKE CYCLES 』- Lvl 14 ⚡",
-                15: "👑『 HELL MATRIX: ULTIMATE SURVIVAL 』- Lvl 15 ⚡"
+            doorPos = {
+                x: activeLevel.door.x * TILE_SIZE,
+                y: activeLevel.door.y * TILE_SIZE
             };
 
-            document.getElementById('levelTitle').innerText = levelNames[currentLevel] || `⚡ LEVEL ${currentLevel} ⚡`;
-            document.getElementById('scoreDisplay').innerText = `COINS: ${score}`;
-
-            platforms = [];
-            surfaceSpikes = [];
-            hiddenPlatformSpikes = [];
-            secretBlocks = [];
-
-            platforms.push({ x: 0, y: surfaceTop, w: canvasWidth, h: surfaceHeight, type: 'ground' });
-
-            const levelsWithHidden2ndSpikes = [7, 8, 9, 10, 11, 13, 15];
-            const hasHidden2ndSpikes = levelsWithHidden2ndSpikes.includes(currentLevel);
-
-            if (!hasHidden2ndSpikes && currentLevel >= 6) {
-                surfaceSpikes.push({ x: 340, y: surfaceTop - 18, w: 80, h: 18, period: 70, offset: 0 });
-                surfaceSpikes.push({ x: 680, y: surfaceTop - 18, w: 80, h: 18, period: 70, offset: 35 });
-                surfaceSpikes.push({ x: 960, y: surfaceTop - 18, w: 70, h: 18, period: 70, offset: 15 });
-            }
-
-            const boxPositions = {
-                1: { x: 450, y: surfaceTop - 90 },
-                2: { x: 650, y: surfaceTop - 100 },
-                3: { x: 380, y: surfaceTop - 120 },
-                4: { x: 700, y: surfaceTop - 110 },
-                5: { x: 500, y: surfaceTop - 130 },
-                6: { x: 360, y: surfaceTop - 120 },
-                7: { x: 720, y: surfaceTop - 110 },
-                8: { x: 180, y: surfaceTop - 90 },
-                9: { x: 880, y: surfaceTop - 130 },
-                10: { x: 540, y: surfaceTop - 140 },
-                11: { x: 420, y: surfaceTop - 100 },
-                12: { x: 820, y: surfaceTop - 115 },
-                13: { x: 620, y: surfaceTop - 135 },
-                14: { x: 280, y: surfaceTop - 95 },
-                15: { x: 760, y: surfaceTop - 145 }
-            };
-
-            let bPos = boxPositions[currentLevel] || { x: 500, y: surfaceTop - 110 };
-            secretBlocks.push({ x: bPos.x, y: bPos.y, w: 36, h: 22, hit: false });
-
-            if (currentLevel === 1) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.45), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-            } 
-            else if (currentLevel === 2) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.7), y: surfaceTop, w: 90, h: surfaceHeight, type: 'hiddenTrap', triggered: false });
-            }
-            else if (currentLevel === 3) {
-                let sY = surfaceTop - 50;
-                platforms.push({ x: 220, y: sY, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 480, y: sY, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 740, y: sY, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 1000, y: sY, w: 80, h: 16, type: 'secondSurface' });
-            }
-            else if (currentLevel === 4) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.3), y: surfaceTop - 55, w: 120, h: 18, type: 'secondSurface' });
-                platforms.push({ x: Math.floor(canvasWidth * 0.65), y: surfaceTop - 65, w: 120, h: 18, type: 'secondSurface' });
-            }
-            else if (currentLevel === 5) {
-                platforms.push({ x: Math.floor(canvasWidth * 0.2), y: surfaceTop - 50, w: 100, h: 18, type: 'secondSurface' });
-                platforms.push({ x: Math.floor(canvasWidth * 0.5), y: surfaceTop - 65, w: 100, h: 18, type: 'secondSurface' });
-                platforms.push({ x: Math.floor(canvasWidth * 0.8), y: surfaceTop - 55, w: 100, h: 18, type: 'secondSurface' });
-            }
-            else if (currentLevel === 6) {
-                platforms.push({ x: 280, y: surfaceTop - 60, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 620, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
-            } 
-            else if (currentLevel === 7) {
-                platforms.push({ x: 260, y: surfaceTop - 60, w: 85, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 620, y: surfaceTop - 70, w: 85, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 630, y: surfaceTop - 70 - 18, w: 65, h: 18, revealed: false });
-            }
-            else if (currentLevel === 8) {
-                platforms.push({ x: 220, y: surfaceTop - 55, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 500, y: surfaceTop - 75, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 780, y: surfaceTop - 60, w: 80, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 510, y: surfaceTop - 75 - 18, w: 60, h: 18, revealed: false });
-            }
-            else if (currentLevel === 9) {
-                platforms.push({ x: 300, y: surfaceTop - 70, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 680, y: surfaceTop - 75, w: 90, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 310, y: surfaceTop - 70 - 18, w: 70, h: 18, revealed: false });
-            }
-            else if (currentLevel === 10) {
-                platforms.push({ x: 240, y: surfaceTop - 60, w: 75, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 520, y: surfaceTop - 80, w: 75, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 800, y: surfaceTop - 60, w: 75, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 810, y: surfaceTop - 60 - 18, w: 55, h: 18, revealed: false });
-            }
-            else if (currentLevel === 11) {
-                platforms.push({ x: 360, y: surfaceTop - 65, w: 100, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 700, y: surfaceTop - 65, w: 100, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 380, y: surfaceTop - 65 - 18, w: 70, h: 18, revealed: false });
-            }
-            else if (currentLevel === 12) {
-                platforms.push({ x: 300, y: surfaceTop - 60, w: 85, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 650, y: surfaceTop - 75, w: 85, h: 16, type: 'secondSurface' });
-            }
-            else if (currentLevel === 13) {
-                platforms.push({ x: 320, y: surfaceTop - 65, w: 90, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 660, y: surfaceTop - 80, w: 90, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 675, y: surfaceTop - 80 - 18, w: 60, h: 18, revealed: false });
-            }
-            else if (currentLevel === 14) {
-                platforms.push({ x: 280, y: surfaceTop - 55, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 560, y: surfaceTop - 80, w: 80, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 840, y: surfaceTop - 65, w: 80, h: 16, type: 'secondSurface' });
-            }
-            else if (currentLevel === 15) {
-                platforms.push({ x: 320, y: surfaceTop - 65, w: 85, h: 16, type: 'secondSurface' });
-                platforms.push({ x: 660, y: surfaceTop - 75, w: 85, h: 16, type: 'secondSurface' });
-                hiddenPlatformSpikes.push({ x: 335, y: surfaceTop - 65 - 18, w: 60, h: 18, revealed: false });
-                hiddenPlatformSpikes.push({ x: 675, y: surfaceTop - 75 - 18, w: 60, h: 18, revealed: false });
-            }
-
-            coins = [];
-            let totalCoins = 4;
-            let bombIndex = (currentLevel >= 6) ? Math.floor(Math.random() * totalCoins) : -1;
-
-            let startMargin = 220;
-            let endMargin = 260;
-            let usableWidth = canvasWidth - startMargin - endMargin;
-            let coinSpacing = usableWidth / (totalCoins - 1);
-
-            for (let i = 0; i < totalCoins; i++) {
-                let isBomb = (i === bombIndex);
-                coins.push({
-                    x: startMargin + i * coinSpacing,
-                    y: surfaceTop - 30 - (i % 2 === 0 ? 0 : 25),
-                    collected: false,
-                    radius: 5,
-                    isBomb: isBomb,
-                    floatOffset: Math.random() * Math.PI
-                });
-            }
-
-            player.x = 40;
-            player.y = (currentLevel === 3) ? (surfaceTop - 90) : 100;
+            player.x = activeLevel.playerStart.x * TILE_SIZE + 5;
+            player.y = activeLevel.playerStart.y * TILE_SIZE;
             player.vx = 0;
             player.vy = 0;
 
-            goal.y = surfaceTop - goal.h;
-            goal.x = canvasWidth - goal.w - 8;
+            hudLevel.innerText = "LVL: " + activeLevel.id;
+            hudTitle.innerText = activeLevel.title;
+            hudMoves.innerText = "MOVES: " + remainingMoves;
+            hudMoves.classList.remove('danger');
 
-            updateNavigationButtons();
+            failModal.style.display = "none";
+            winModal.style.display = "none";
         }
 
-        function goToPrevLevel() {
-            if (currentLevel > 1) {
-                currentLevel--;
-                updateGameLayout();
-            } else {
-                const modal = document.getElementById('notificationModal');
-                modal.innerText = "⚠️ Yeh pehla level hai!";
-                modal.classList.add('show');
-                setTimeout(() => modal.classList.remove('show'), 1500);
+        // Controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            if (isGameOver) return;
+
+            let key = e.key.toLowerCase();
+            if (keys[key]) return; // prevent holding move abuse
+            keys[key] = true;
+
+            let moveCost = false;
+
+            // Inverted trap check
+            let leftKey = activeLevel.trap === "inverted_controls" ? ('d' || 'arrowright') : ('a' || 'arrowleft');
+            let rightKey = activeLevel.trap === "inverted_controls" ? ('a' || 'arrowleft') : ('d' || 'arrowright');
+
+            if (e.key === 'ArrowLeft' || key === 'a') {
+                player.vx = activeLevel.trap === "inverted_controls" ? 3.5 : -3.5;
+                moveCost = true;
+            } else if (e.key === 'ArrowRight' || key === 'd') {
+                player.vx = activeLevel.trap === "inverted_controls" ? -3.5 : 3.5;
+                moveCost = true;
             }
-        }
 
-        // NEXT BUTTON CLICK HANDLER (FORWARD SIRF UNLOCKED LEVEL TAK)
-        function goToNextUnlockedLevel() {
-            if (currentLevel < savedMaxLevel) {
-                currentLevel++;
-                updateGameLayout();
+            if ((key === 'w' || key === ' ' || e.key === 'ArrowUp') && player.onGround) {
+                player.vy = -8.5;
+                player.onGround = false;
+                moveCost = true;
             }
-        }
 
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('orientationchange', resizeCanvas);
-        resizeCanvas();
-
-        let keys = { left: false, right: false, down: false };
-        let audioCtx = null;
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
-        window.addEventListener('click', initAudio);
-        window.addEventListener('touchstart', initAudio);
-        window.addEventListener('keydown', initAudio);
-
-        function playSound(type) {
-            try {
-                initAudio();
-                if (!audioCtx) return;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
-
-                if (type === 'jump') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(200, now);
-                    osc.frequency.exponentialRampToValueAtTime(500, now + 0.15);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (type === 'coin') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(659.25, now);
-                    osc.frequency.setValueAtTime(987.77, now + 0.08);
-                    gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
-                } else if (type === 'secret') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.setValueAtTime(659.25, now + 0.1);
-                    osc.frequency.setValueAtTime(783.99, now + 0.2);
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-                    osc.start(now);
-                    osc.stop(now + 0.35);
-                } else if (type === 'blast') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(140, now);
-                    osc.frequency.exponentialRampToValueAtTime(15, now + 0.5);
-                    gain.gain.setValueAtTime(0.6, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    osc.start(now);
-                    osc.stop(now + 0.5);
-                } else if (type === 'reboot') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-                    osc.start(now);
-                    osc.stop(now + 0.35);
-                } else if (type === 'win') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.setValueAtTime(554.37, now + 0.1);
-                    osc.frequency.setValueAtTime(659.25, now + 0.2);
-                    osc.frequency.setValueAtTime(880, now + 0.3);
-                    gain.gain.setValueAtTime(0.35, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-                    osc.start(now);
-                    osc.stop(now + 0.6);
+            if (moveCost) {
+                remainingMoves--;
+                hudMoves.innerText = "MOVES: " + remainingMoves;
+                if (remainingMoves <= 3) hudMoves.classList.add('danger');
+                if (remainingMoves < 0) {
+                    triggerFail("Moves khatam! Zero patience, zero calculation!");
                 }
-            } catch (e) {}
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            let key = e.key.toLowerCase();
+            keys[key] = false;
+            if (key === 'a' || key === 'd' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                player.vx = 0;
+            }
+        });
+
+        function triggerFail(customText) {
+            if (isGameOver) return;
+            isGameOver = true;
+            failQuote.innerText = customText || activeLevel.failQuote;
+            failModal.style.display = "block";
         }
 
-        const bindButton = (id, onStart, onEnd) => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            const handleStart = (e) => {
-                if (e) e.preventDefault();
-                initAudio();
-                btn.classList.add('pressed');
-                onStart();
-            };
-            const handleEnd = (e) => {
-                if (e) e.preventDefault();
-                btn.classList.remove('pressed');
-                onEnd();
-            };
-            btn.addEventListener('touchstart', handleStart, { passive: false });
-            btn.addEventListener('touchend', handleEnd, { passive: false });
-            btn.addEventListener('touchcancel', handleEnd, { passive: false });
-            btn.addEventListener('mousedown', handleStart);
-            btn.addEventListener('mouseup', handleEnd);
-            btn.addEventListener('mouseleave', handleEnd);
+        function triggerWin() {
+            if (isGameOver) return;
+            isGameOver = true;
+            winModal.style.display = "block";
+            // LocalStorage level save
+            let nextId = activeLevel.id + 1;
+            let saved = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
+            if (nextId > saved) {
+                localStorage.setItem('saveLevel_TumseNaHoPayga', nextId);
+            }
+        }
+
+        window.retryLevel = function() {
+            initLevel(currentLevelIdx);
         };
 
-        bindButton('leftBtnM', () => keys.left = true, () => keys.left = false);
-        bindButton('rightBtnM', () => keys.right = true, () => keys.right = false);
-        bindButton('rightDownBtnM', () => keys.down = true, () => keys.down = false);
-
-        function triggerJump() {
-            if (player.isGrounded && !isExploding && !isRebuilding) {
-                player.vy = player.jumpForce; 
-                player.isGrounded = false;
-                playSound('jump');
-                for (let i = 0; i < 6; i++) {
-                    particles.push({
-                        x: player.x + player.width / 2,
-                        y: player.y + player.height,
-                        vx: (Math.random() - 0.5) * 2.5,
-                        vy: -Math.random() * 1.8,
-                        size: Math.random() * 3 + 1,
-                        color: 'rgba(0, 240, 255, 0.8)',
-                        life: 25
-                    });
-                }
+        window.nextLevel = function() {
+            if (currentLevelIdx + 1 < levels.length) {
+                initLevel(currentLevelIdx + 1);
+            } else {
+                alert("CONGRATULATIONS! Phase 1 clear kar liya! Phase 2 jald aayega!");
             }
-        }
+        };
 
-        const jumpBtnM = document.getElementById('jumpBtnM');
-        if (jumpBtnM) {
-            jumpBtnM.addEventListener('touchstart', (e) => { e.preventDefault(); triggerJump(); }, { passive: false });
-            jumpBtnM.addEventListener('mousedown', triggerJump);
-        }
-
-        const shieldBtnM = document.getElementById('shieldBtnM');
-        if (shieldBtnM) {
-            const activateShield = (e) => {
-                if (e) e.preventDefault();
-                initAudio();
-                shieldBtnM.classList.add('pressed');
-                shieldActive = true;
-                const el = document.getElementById('shieldDisplay');
-                el.innerText = "SHIELD: ON";
-                el.style.color = "#ff007f";
-                el.style.textShadow = "0 0 10px rgba(255, 0, 127, 0.8)";
-            };
-            const deactivateShield = (e) => {
-                if (e) e.preventDefault();
-                shieldBtnM.classList.remove('pressed');
-                shieldActive = false;
-                const el = document.getElementById('shieldDisplay');
-                el.innerText = "SHIELD: OFF";
-                el.style.color = "#00ffcc";
-                el.style.textShadow = "0 0 8px rgba(0, 255, 204, 0.4)";
-            };
-            shieldBtnM.addEventListener('touchstart', activateShield, { passive: false });
-            shieldBtnM.addEventListener('touchend', deactivateShield, { passive: false });
-            shieldBtnM.addEventListener('mousedown', activateShield);
-            shieldBtnM.addEventListener('mouseup', deactivateShield);
-        }
-
-        window.addEventListener('keydown', e => {
-            initAudio();
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
-            if (e.key === 'Shift') {
-                shieldActive = true;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: ON";
-                document.getElementById('shieldDisplay').style.color = "#ff007f";
-            }
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
-                e.preventDefault();
-                triggerJump();
-            }
-        });
-
-        window.addEventListener('keyup', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-            if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
-            if (e.key === 'Shift') {
-                shieldActive = false;
-                document.getElementById('shieldDisplay').innerText = "SHIELD: OFF";
-                document.getElementById('shieldDisplay').style.color = "#00ffcc";
-            }
-        });
-
-        function triggerExplosion() {
-            if (currentLevel < 6 && currentLevel !== 3 && currentLevel !== 4 && currentLevel !== 5 && shieldActive) return;
-            if (isExploding || isRebuilding) return;
-            isExploding = true;
-            isSlowMo = true;
-            playSound('blast');
-            if (currentLevel >= 6) showTrollTaunt();
-
-            let spawnX = (currentLevel === 3) ? 50 : 40;
-            let spawnY = (currentLevel === 3) ? (canvasHeight - 40 - 90) : 100;
-
-            fragments = [];
-            const colors = ['#00f0ff', '#ff007f', '#00ffcc', '#ffffff', '#7928ca'];
-            for (let i = 0; i < 30; i++) {
-                fragments.push({
-                    x: player.x + Math.random() * player.width,
-                    y: player.y + Math.random() * player.height,
-                    originX: spawnX + player.width / 2,
-                    originY: spawnY + player.height / 2,
-                    vx: (Math.random() - 0.5) * 12,
-                    vy: (Math.random() - 0.6) * 12,
-                    color: colors[i % colors.length],
-                    size: Math.random() * 4 + 2
-                });
-            }
-
-            setTimeout(() => {
-                isExploding = false;
-                isRebuilding = true;
-                rebuildTimer = 1.0;
-                playSound('reboot');
-
-                setTimeout(() => {
-                    isRebuilding = false;
-                    isSlowMo = false;
-                    respawnAuraTimer = 35;
-                    updateGameLayout();
-                }, 800);
-            }, 850);
-        }
-
-        function checkCoins() {
-            coins.forEach(c => {
-                if (!c.collected && Math.hypot((player.x + player.width/2) - c.x, (player.y + player.height/2) - c.y) < 22) {
-                    c.collected = true;
-
-                    if (c.isBomb) {
-                        floatingTexts.push({ text: '💣 BOOM! TRAP COIN!', x: c.x - 40, y: c.y - 20, alpha: 1, vy: -1 });
-                        triggerExplosion();
-                        return;
-                    }
-
-                    score += 1;
-                    playSound('coin');
-                    floatingTexts.push({ text: '+1', x: c.x, y: c.y - 10, alpha: 1, vy: -1 });
-                }
-            });
-        }
-
-        let levelWon = false;
-
+        // Physics & Game Loop
         function update() {
-            let timeFactor = isSlowMo ? 0.25 : 1.0;
-            globalTick++;
+            if (isGameOver) return;
 
-            if (isExploding) {
-                fragments.forEach(f => {
-                    f.x += f.vx * timeFactor;
-                    f.y += f.vy * timeFactor;
-                    f.vy += 0.35 * timeFactor;
-                });
-                return;
-            }
-
-            if (isRebuilding) {
-                fragments.forEach(f => {
-                    f.x += (f.originX - f.x) * 0.18;
-                    f.y += (f.originY - f.y) * 0.18;
-                });
-                return;
-            }
-
-            if (respawnAuraTimer > 0) respawnAuraTimer--;
-
-            if (keys.left) {
-                player.vx = -player.speed;
-                player.animTimer += 0.18;
-            } else if (keys.right) {
-                player.vx = player.speed;
-                player.animTimer += 0.18;
-            } else {
-                player.vx = 0;
-                player.animTimer = 0;
-            }
-
-            if (keys.down) player.height = 24.3;
-            else player.height = 40.5;
-
+            // Gravity
+            player.vy += 0.45;
             player.x += player.vx;
-            if (player.x < 0) player.x = 0;
-            if (player.x > canvasWidth - player.width) player.x = canvasWidth - player.width;
-
-            player.vy += player.gravity;
+            checkHorizontalCollisions();
             player.y += player.vy;
+            checkVerticalCollisions();
 
-            player.isGrounded = false;
-
-            platforms.forEach(p => {
-                if (p.type === 'hiddenTrap') {
-                    let playerCenterX = player.x + player.width / 2;
-                    if (!p.triggered && playerCenterX >= p.x && playerCenterX <= p.x + p.w && player.y + player.height >= p.y - 5) {
-                        p.triggered = true;
-                        setTimeout(() => triggerExplosion(), 80);
-                        return;
-                    }
-                    if (p.triggered) return;
+            // Trap Mechanics
+            if (activeLevel.trap === "teleport_door" && !doorMoved) {
+                // If player comes within 100px of the door, door shifts to start
+                let dist = Math.hypot(player.x - doorPos.x, player.y - doorPos.y);
+                if (dist < 100) {
+                    doorPos.x = 2 * TILE_SIZE; // teleport behind player
+                    doorMoved = true;
                 }
+            }
 
-                if (
-                    player.x + player.width > p.x &&
-                    player.x < p.x + p.w &&
-                    player.y + player.height >= p.y &&
-                    player.y + player.height - player.vy <= p.y + 12
-                ) {
-                    player.y = p.y - player.height;
-                    player.vy = 0;
-                    player.isGrounded = true;
-
-                    if (p.type === 'secondSurface') {
-                        hiddenPlatformSpikes.forEach(sp => {
-                            if (player.x + player.width > sp.x && player.x < sp.x + sp.w) {
-                                sp.revealed = true;
-                                triggerExplosion();
-                            }
-                        });
-                    }
+            // Door overlap check
+            if (
+                player.x < doorPos.x + TILE_SIZE &&
+                player.x + player.w > doorPos.x &&
+                player.y < doorPos.y + TILE_SIZE &&
+                player.y + player.h > doorPos.y
+            ) {
+                if (activeLevel.trap === "exact_moves" && remainingMoves !== 0) {
+                    triggerFail("Gate tabhi khulega jab EXACT 0 moves bachenge!");
+                    return;
                 }
-            });
+                triggerWin();
+            }
+        }
 
-            secretBlocks.forEach(sb => {
-                if (!sb.hit) {
-                    if (
-                        player.x + player.width > sb.x &&
-                        player.x < sb.x + sb.w &&
-                        player.y <= sb.y + sb.h &&
-                        player.y - player.vy >= sb.y
-                    ) {
-                        sb.hit = true;
-                        player.vy = 3;
-                        playSound('secret');
-                        floatingTexts.push({ text: 'LUCKY SURPRISE! 🎁✨', x: sb.x - 40, y: sb.y - 20, alpha: 1, vy: -1 });
+        function checkHorizontalCollisions() {
+            let leftTile = Math.floor(player.x / TILE_SIZE);
+            let rightTile = Math.floor((player.x + player.w) / TILE_SIZE);
+            let topTile = Math.floor(player.y / TILE_SIZE);
+            let bottomTile = Math.floor((player.y + player.h - 1) / TILE_SIZE);
 
-                        coins.push({
-                            x: sb.x + 18,
-                            y: sb.y - 35,
-                            collected: false,
-                            radius: 5,
-                            isBomb: false,
-                            floatOffset: 0
-                        });
-                    }
-                }
-            });
-
-            surfaceSpikes.forEach(sp => {
-                let cycle = (globalTick + sp.offset) % sp.period;
-                let active = cycle < (sp.period / 2);
-                if (active) {
-                    if (
-                        player.x + player.width > sp.x + 4 &&
-                        player.x < sp.x + sp.w - 4 &&
-                        player.y + player.height >= sp.y + 4
-                    ) {
-                        triggerExplosion();
-                    }
-                }
-            });
-
-            if (player.y > canvasHeight + 100) triggerExplosion();
-
-            checkCoins();
-
-            let gateInsideLeft = goal.x + 6;
-            let gateInsideRight = goal.x + goal.w - 6;
-            let isDummyCompletelyInsideGate = (player.x >= gateInsideLeft && (player.x + player.width) <= gateInsideRight);
-            let isDummyTouchingGateVertically = (player.y + player.height >= goal.y && player.y <= goal.y + goal.h);
-
-            if (isDummyTouchingGateVertically && (player.x + player.width >= goal.x && player.x <= goal.x + goal.w)) {
-                if (!levelWon) {
-                    if (isDummyCompletelyInsideGate) {
-                        levelWon = true;
-                        playSound('win');
-                        const modal = document.getElementById('notificationModal');
-
-                        if (currentLevel < 15) {
-                            modal.innerText = `🎉 LEVEL ${currentLevel} CLEARED! DUMMY ESCAPED! 🤪`;
-                            modal.classList.add('show');
-
-                            let nextLvl = currentLevel + 1;
-                            if (nextLvl > savedMaxLevel) {
-                                savedMaxLevel = nextLvl;
-                                localStorage.setItem('saveLevel_TumseNaHoPayga', savedMaxLevel);
-                            }
-
-                            setTimeout(() => {
-                                modal.classList.remove('show');
-                                currentLevel = nextLvl;
-                                levelWon = false;
-                                updateGameLayout();
-                            }, 2000);
-                        } else {
-                            localStorage.setItem('saveLevel_TumseNaHoPayga', 15);
-                            modal.innerText = "🏆 TU TOH SACH MEIN PRO NIKLA! ALL 15 LEVELS CLEARED! 👑";
-                            modal.classList.add('show');
-                            setTimeout(() => {
-                                window.location.href = "index.html";
-                            }, 2500);
-                        }
-                    } else {
-                        if (Math.random() < 0.08) {
-                            floatingTexts.push({ text: 'ENTER FULLY INSIDE GATE! 🚪🏃', x: goal.x - 80, y: goal.y - 20, alpha: 1, vy: -0.5 });
+            for (let r = topTile; r <= bottomTile; r++) {
+                for (let c = leftTile; c <= rightTile; c++) {
+                    if (r >= 0 && r < 10 && c >= 0 && c < 20) {
+                        let tile = mapData[r][c];
+                        if (tile === 1) { // Wall
+                            if (player.vx > 0) player.x = c * TILE_SIZE - player.w;
+                            else if (player.vx < 0) player.x = (c + 1) * TILE_SIZE;
+                        } else if (tile === 2) { // Spike
+                            triggerFail();
                         }
                     }
                 }
             }
+        }
 
-            document.getElementById('scoreDisplay').innerText = `COINS: ${score}`;
+        function checkVerticalCollisions() {
+            let leftTile = Math.floor(player.x / TILE_SIZE);
+            let rightTile = Math.floor((player.x + player.w - 1) / TILE_SIZE);
+            let topTile = Math.floor(player.y / TILE_SIZE);
+            let bottomTile = Math.floor((player.y + player.h) / TILE_SIZE);
 
-            for (let i = floatingTexts.length - 1; i >= 0; i--) {
-                let ft = floatingTexts[i];
-                ft.y += ft.vy;
-                ft.alpha -= 0.03;
-                if (ft.alpha <= 0) floatingTexts.splice(i, 1);
+            player.onGround = false;
+
+            for (let r = topTile; r <= bottomTile; r++) {
+                for (let c = leftTile; c <= rightTile; c++) {
+                    if (r >= 0 && r < 10 && c >= 0 && c < 20) {
+                        let tile = mapData[r][c];
+                        if (tile === 1 || tile === 3) { // Solid or Crumble
+                            if (player.vy > 0) {
+                                player.y = r * TILE_SIZE - player.h;
+                                player.vy = 0;
+                                player.onGround = true;
+
+                                // Crumble floor handling
+                                if (tile === 3) {
+                                    setTimeout(() => {
+                                        if (mapData[r] && mapData[r][c]) mapData[r][c] = 0;
+                                    }, 200);
+                                }
+                            } else if (player.vy < 0) {
+                                player.y = (r + 1) * TILE_SIZE;
+                                player.vy = 0;
+                            }
+                        } else if (tile === 2) {
+                            triggerFail();
+                        }
+                    }
+                }
             }
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            platforms.forEach(p => {
-                if (p.type === 'hiddenTrap' && p.triggered) return;
-                ctx.fillStyle = '#0c0d18';
-                ctx.fillRect(p.x, p.y, p.w, p.h);
+            // Draw Tiles
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 20; c++) {
+                    let tile = mapData[r][c];
+                    let tx = c * TILE_SIZE;
+                    let ty = r * TILE_SIZE;
 
-                ctx.strokeStyle = '#00f0ff';
-                ctx.lineWidth = 2;
-                ctx.shadowColor = '#00f0ff';
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x + p.w, p.y);
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-            });
-
-            secretBlocks.forEach(sb => {
-                ctx.save();
-                ctx.fillStyle = sb.hit ? 'rgba(255, 255, 255, 0.1)' : '#1f1035';
-                ctx.fillRect(sb.x, sb.y, sb.w, sb.h);
-                ctx.strokeStyle = sb.hit ? '#555555' : '#ffd700';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(sb.x, sb.y, sb.w, sb.h);
-
-                if (!sb.hit) {
-                    ctx.font = 'bold 12px Orbitron, sans-serif';
-                    ctx.fillStyle = '#ffd700';
-                    ctx.fillText('?', sb.x + 13, sb.y + 16);
-                }
-                ctx.restore();
-            });
-
-            surfaceSpikes.forEach(sp => {
-                let cycle = (globalTick + sp.offset) % sp.period;
-                let active = cycle < (sp.period / 2);
-
-                if (active) {
-                    ctx.save();
-                    ctx.fillStyle = '#ff0055';
-                    ctx.shadowColor = '#ff0055';
-                    ctx.shadowBlur = 10;
-                    let numSpikes = Math.floor(sp.w / 14);
-                    for (let i = 0; i < numSpikes; i++) {
-                        let sx = sp.x + i * 14;
+                    if (tile === 1) {
+                        ctx.fillStyle = "#523500";
+                        ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                        ctx.fillStyle = "#ffa742";
+                        ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    } else if (tile === 2) { // Spike
+                        ctx.fillStyle = "#911212";
                         ctx.beginPath();
-                        ctx.moveTo(sx, sp.y + sp.h);
-                        ctx.lineTo(sx + 7, sp.y);
-                        ctx.lineTo(sx + 14, sp.y + sp.h);
-                        ctx.closePath();
+                        ctx.moveTo(tx, ty + TILE_SIZE);
+                        ctx.lineTo(tx + TILE_SIZE / 2, ty + 6);
+                        ctx.lineTo(tx + TILE_SIZE, ty + TILE_SIZE);
                         ctx.fill();
+                    } else if (tile === 3) { // Crumble floor
+                        ctx.fillStyle = "#c27d00";
+                        ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                        ctx.strokeStyle = "#523500";
+                        ctx.strokeRect(tx + 1, ty + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                    } else if (tile === 5) { // Key
+                        ctx.fillStyle = "#ffd700";
+                        ctx.fillRect(tx + 8, ty + 8, 14, 14);
                     }
-                    ctx.restore();
-                } else {
-                    ctx.fillStyle = 'rgba(255, 0, 85, 0.2)';
-                    ctx.fillRect(sp.x, sp.y + sp.h - 3, sp.w, 3);
                 }
-            });
-
-            hiddenPlatformSpikes.forEach(sp => {
-                if (sp.revealed) {
-                    ctx.save();
-                    ctx.fillStyle = '#ff0055';
-                    ctx.shadowColor = '#ff0055';
-                    ctx.shadowBlur = 12;
-                    let numSpikes = Math.floor(sp.w / 12);
-                    for (let i = 0; i < numSpikes; i++) {
-                        let sx = sp.x + i * 12;
-                        ctx.beginPath();
-                        ctx.moveTo(sx, sp.y + sp.h);
-                        ctx.lineTo(sx + 6, sp.y);
-                        ctx.lineTo(sx + 12, sp.y + sp.h);
-                        ctx.closePath();
-                        ctx.fill();
-                    }
-                    ctx.restore();
-                }
-            });
-
-            coins.forEach(c => {
-                if (!c.collected) {
-                    c.floatOffset += 0.08;
-                    let floatY = c.y + Math.sin(c.floatOffset) * 3;
-                    ctx.beginPath();
-                    ctx.arc(c.x, floatY, c.radius + 3, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(0, 240, 255, 0.25)';
-                    ctx.fill();
-
-                    ctx.beginPath();
-                    ctx.arc(c.x, floatY, c.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = '#00f0ff';
-                    ctx.shadowColor = '#00f0ff';
-                    ctx.shadowBlur = 10;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                }
-            });
-
-            let gx = goal.x, gy = goal.y, gw = goal.w, gh = goal.h;
-            ctx.fillStyle = 'rgba(0, 255, 204, 0.15)';
-            ctx.fillRect(gx - 4, gy - 4, gw + 8, gh + 8);
-            ctx.fillStyle = '#031c19';
-            ctx.fillRect(gx, gy, gw, gh);
-
-            let portalGrad = ctx.createLinearGradient(gx, gy, gx + gw, gy + gh);
-            portalGrad.addColorStop(0, '#00ffcc');
-            portalGrad.addColorStop(0.5, '#0072ff');
-            portalGrad.addColorStop(1, '#7928ca');
-            ctx.fillStyle = portalGrad;
-            ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 4);
-
-            ctx.strokeStyle = '#00ffcc';
-            ctx.lineWidth = 2.5;
-            ctx.strokeRect(gx, gy, gw, gh);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(gx + gw / 2 - 1, gy + 8, 2, gh - 16);
-
-            if (isExploding || isRebuilding) {
-                fragments.forEach(f => {
-                    ctx.save();
-                    ctx.fillStyle = f.color;
-                    ctx.shadowColor = f.color;
-                    ctx.shadowBlur = 8;
-                    ctx.fillRect(f.x, f.y, f.size, f.size);
-                    if (isRebuilding) {
-                        ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(f.x, f.y);
-                        ctx.lineTo(f.originX, f.originY);
-                        ctx.stroke();
-                    }
-                    ctx.restore();
-                });
-            } else {
-                let px = player.x, py = player.y;
-
-                if (respawnAuraTimer > 0) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(px + player.width / 2, py + player.height / 2, 38 - respawnAuraTimer, 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(0, 240, 255, ${respawnAuraTimer / 35})`;
-                    ctx.lineWidth = 2.5;
-                    ctx.stroke();
-                    ctx.restore();
-                }
-
-                if (shieldActive) {
-                    ctx.beginPath();
-                    ctx.arc(px + player.width/2, py + player.height/2, 23, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 0, 127, 0.25)';
-                    ctx.fill();
-                    ctx.strokeStyle = '#ff007f';
-                    ctx.lineWidth = 2;
-                    ctx.shadowColor = '#ff007f';
-                    ctx.shadowBlur = 14;
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
-                }
-
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                ctx.beginPath();
-                ctx.ellipse(px + player.width/2 + 1, py + player.height + 2, player.width/1.2, 2.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                let legSwing = (player.vx !== 0 || !player.isGrounded) ? Math.sin(player.animTimer) * 4 : 0;
-                let isJumpingOrAirborne = !player.isGrounded;
-                let jumpStretch = isJumpingOrAirborne ? -2 : 0;
-
-                let headRadius = 4.5;
-                let headX = px + player.width/2;
-                let headY = py + 5 + jumpStretch;
-
-                let headGrad = ctx.createRadialGradient(headX - 1, headY - 1, 0.5, headX, headY, headRadius);
-                headGrad.addColorStop(0, '#ffffff');
-                headGrad.addColorStop(1, '#a0c4ff');
-
-                ctx.fillStyle = headGrad;
-                ctx.beginPath();
-                ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
-                ctx.fill();
-
-                let torsoWidth = 6.3;
-                let torsoX = px + (player.width - torsoWidth) / 2;
-                let chestGrad = ctx.createLinearGradient(torsoX, py + 10 + jumpStretch, torsoX + torsoWidth, py + 10 + jumpStretch);
-                chestGrad.addColorStop(0, '#00f0ff');
-                chestGrad.addColorStop(1, '#7928ca');
-                ctx.fillStyle = chestGrad;
-                ctx.fillRect(torsoX, py + 10 + jumpStretch, torsoWidth, 13);
-
-                ctx.fillStyle = '#ff007f';
-                ctx.fillRect(torsoX - 1, py + 23 + jumpStretch, torsoWidth + 2, 2.2);
-
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX - 3.5, py + 12 + jumpStretch, 2.2, 10);
-                ctx.fillRect(torsoX + torsoWidth + 0.8, py + 12 + jumpStretch, 2.2, 10);
-
-                let legHeight = player.height === 24.3 ? 7 : 12;
-                ctx.fillStyle = '#00f0ff';
-                ctx.fillRect(torsoX + 0.8 + legSwing, py + 25.2 + jumpStretch, 2.2, legHeight);
-                ctx.fillRect(torsoX + torsoWidth - 3 - legSwing, py + 25.2 + jumpStretch, 2.2, legHeight);
             }
 
-            floatingTexts.forEach(ft => {
-                ctx.save();
-                ctx.globalAlpha = ft.alpha;
-                ctx.font = 'bold 12px Orbitron, sans-serif';
-                ctx.fillStyle = '#00f0ff';
-                ctx.shadowColor = '#00f0ff';
-                ctx.shadowBlur = 8;
-                ctx.fillText(ft.text, ft.x - 8, ft.y);
-                ctx.restore();
-            });
+            // Draw Exit Door
+            ctx.fillStyle = "#000";
+            ctx.fillRect(doorPos.x + 4, doorPos.y + 2, 22, 28);
+            ctx.fillStyle = "#38b000";
+            ctx.fillRect(doorPos.x + 6, doorPos.y + 4, 18, 26);
+
+            // Draw Devil Player
+            ctx.fillStyle = "#523500";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+            // Player Horns
+            ctx.fillStyle = "#d11a1a";
+            ctx.fillRect(player.x + 2, player.y - 4, 4, 4);
+            ctx.fillRect(player.x + 14, player.y - 4, 4, 4);
+            // Eyes
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(player.x + 4, player.y + 5, 4, 4);
+            ctx.fillRect(player.x + 12, player.y + 5, 4, 4);
         }
 
-        function loop() {
+        function gameLoop() {
             update();
-            draw();
-            requestAnimationFrame(loop);
+            render();
+            requestAnimationFrame(gameLoop);
         }
-        loop();
 
-        function goHome() {
-            window.location.href = "index.html";
-        }
+        // Initialize Level 1
+        initLevel(0);
+        gameLoop();
     </script>
 </body>
 </html>
