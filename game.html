@@ -11,8 +11,9 @@
             padding: 0;
             box-sizing: border-box;
             outline: none !important;
-            -webkit-tap-highlight-color: transparent;
+            border: none;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
             font-family: 'Press Start 2P', monospace;
         }
 
@@ -27,7 +28,7 @@
             padding: 8px;
         }
 
-        .game-frame {
+        .arcade-container {
             position: relative;
             background: #ffb356;
             border-radius: 12px;
@@ -40,8 +41,7 @@
             width: 100%;
         }
 
-        /* Top HUD */
-        .hud-row {
+        .top-hud {
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -55,7 +55,7 @@
             box-shadow: 0 2px 0px #523500;
         }
 
-        .hud-actions {
+        .hud-btns {
             display: flex;
             gap: 6px;
         }
@@ -63,7 +63,6 @@
         .hud-btn {
             background: #523500;
             color: #ffb356;
-            border: none;
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 8px;
@@ -76,20 +75,18 @@
             box-shadow: none;
         }
 
-        /* Canvas Screen */
-        canvas {
+        /* Fixed Dimensions Canvas */
+        #gameCanvas {
             background: #ffe2b3;
             border-radius: 8px;
             display: block;
             box-shadow: 0 4px 0px #523500;
             width: 100%;
             max-width: 600px;
-            height: auto;
-            aspect-ratio: 600 / 260;
+            height: 260px;
         }
 
-        /* Responsive Mobile Touch Controllers */
-        .touch-container {
+        .touch-pad {
             display: flex;
             width: 100%;
             justify-content: space-between;
@@ -103,10 +100,9 @@
             gap: 10px;
         }
 
-        .touch-key {
+        .touch-btn {
             background: #523500;
             color: #ffb356;
-            border: none;
             border-radius: 10px;
             padding: 14px 20px;
             font-size: 12px;
@@ -115,26 +111,26 @@
             touch-action: manipulation;
         }
 
-        .touch-key:active {
+        .touch-btn:active {
             transform: translateY(3px);
             box-shadow: 0 1px 0px #3b2500;
             background: #6e4600;
         }
 
-        .touch-jump {
+        .jump-btn {
             background: #8f1111;
             color: #fff;
             box-shadow: 0 4px 0px #540808;
             padding: 14px 24px;
         }
 
-        .touch-jump:active {
+        .jump-btn:active {
             background: #b51717;
             box-shadow: 0 1px 0px #540808;
         }
 
-        /* Popups */
-        .popup-card {
+        /* Modal Overlays */
+        .modal {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -150,12 +146,12 @@
             max-width: 380px;
         }
 
-        .popup-card h2 {
+        .modal h2 {
             font-size: 13px;
             margin-bottom: 8px;
         }
 
-        .popup-card p {
+        .modal p {
             font-family: 'Chakra Petch', sans-serif;
             font-size: 15px;
             font-weight: 700;
@@ -163,10 +159,9 @@
             margin-bottom: 14px;
         }
 
-        .popup-btn {
+        .modal-action-btn {
             background: #523500;
             color: #ffb356;
-            border: none;
             padding: 10px 14px;
             font-size: 9px;
             border-radius: 6px;
@@ -175,7 +170,7 @@
             margin: 0 4px;
         }
 
-        .popup-btn:active {
+        .modal-action-btn:active {
             transform: translateY(2px);
             box-shadow: none;
         }
@@ -183,50 +178,47 @@
 </head>
 <body>
 
-    <div class="game-frame">
-        <div class="hud-row">
+    <div class="arcade-container">
+        <div class="top-hud">
             <div>
-                <span id="levelDisplay">LVL: 1</span>
-                <span style="margin-left: 10px;" id="deathDisplay">💀 0</span>
+                <span id="lvlLabel">LVL: 1</span>
+                <span style="margin-left: 10px;" id="deathLabel">💀 0</span>
             </div>
-            <div class="hud-actions">
+            <div class="hud-btns">
                 <button class="hud-btn" onclick="retryLevel()">🔄 RESTART</button>
                 <button class="hud-btn" onclick="goToMenu()">📜 LEVELS</button>
                 <button class="hud-btn" onclick="toggleScreen()">⛶ FULL</button>
             </div>
         </div>
 
-        <!-- Real 2D Canvas Game Screen -->
-        <canvas id="canvas" width="600" height="260"></canvas>
+        <canvas id="gameCanvas" width="600" height="260"></canvas>
 
-        <!-- Touch Buttons for Mobile -->
-        <div class="touch-container">
+        <div class="touch-pad">
             <div class="left-controls">
-                <button class="touch-key" id="leftBtn">◀ LEFT</button>
-                <button class="touch-key" id="rightBtn">RIGHT ▶</button>
+                <button class="touch-btn" id="btnLeft">◀ LEFT</button>
+                <button class="touch-btn" id="btnRight">RIGHT ▶</button>
             </div>
-            <button class="touch-key touch-jump" id="jumpBtn">JUMP ⬆</button>
+            <button class="touch-btn jump-btn" id="btnJump">JUMP ⬆</button>
         </div>
 
-        <!-- Fail Screen -->
-        <div class="popup-card" id="failBox">
+        <!-- Failure Modal -->
+        <div class="modal" id="failModal">
             <h2 style="color: #8f1111;">💀 TROLLED!</h2>
-            <p id="failText">Spike par gir gaye!</p>
-            <button class="popup-btn" onclick="retryLevel()">RETRY 🔄</button>
-            <button class="popup-btn" onclick="goToMenu()">LEVELS 📜</button>
+            <p id="failQuote">Koshish achhi thi!</p>
+            <button class="modal-action-btn" onclick="retryLevel()">RETRY 🔄</button>
+            <button class="modal-action-btn" onclick="goToMenu()">LEVELS 📜</button>
         </div>
 
-        <!-- Victory Screen -->
-        <div class="popup-card" id="winBox">
+        <!-- Win Modal -->
+        <div class="modal" id="winModal">
             <h2 style="color: #116b0d;">🎉 STAGE CLEARED!</h2>
-            <p>Sahi bache! Agla level dimaag kharab karega!</p>
-            <button class="popup-btn" onclick="nextStage()">NEXT ➡️</button>
-            <button class="popup-btn" onclick="goToMenu()">LEVELS 📜</button>
+            <p>Agla level aur hard hoga!</p>
+            <button class="modal-action-btn" onclick="nextStage()">NEXT ➡️</button>
+            <button class="modal-action-btn" onclick="goToMenu()">LEVELS 📜</button>
         </div>
     </div>
 
     <script>
-        // Fullscreen & Landscape API
         async function toggleScreen() {
             const el = document.documentElement;
             try {
@@ -242,48 +234,47 @@
         window.addEventListener('click', toggleScreen, { once: true });
         window.addEventListener('touchstart', toggleScreen, { once: true });
 
-        const canvas = document.getElementById('canvas');
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const levelDisplay = document.getElementById('levelDisplay');
-        const deathDisplay = document.getElementById('deathDisplay');
-        const failBox = document.getElementById('failBox');
-        const winBox = document.getElementById('winBox');
-        const failText = document.getElementById('failText');
+        const lvlLabel = document.getElementById('lvlLabel');
+        const deathLabel = document.getElementById('deathLabel');
+        const failModal = document.getElementById('failModal');
+        const winModal = document.getElementById('winModal');
+        const failQuote = document.getElementById('failQuote');
 
         let deaths = 0;
         let isDead = false;
 
-        // Player Physical Entity
-        let p = {
+        // Player properties
+        let player = {
             x: 40,
-            y: 180,
+            y: 190,
             w: 22,
             h: 22,
             vx: 0,
             vy: 0,
             speed: 3.8,
-            jumpStrength: -9.2,
+            jumpStrength: -9.0,
             onGround: false
         };
 
-        // 3 Real Playable Troll Levels
-        const stages = [
+        // 3 Troll Levels
+        const levels = [
             {
                 id: 1,
                 name: "THE RUNAWAY DOOR",
-                quote: "Door ke paas gaye aur door piche bhag gaya! 😂",
+                quote: "Door ke paas jaoge toh wo bhag kar peeche shuruat mein chala jayega!",
                 floorY: 220,
-                spikes: [{ x: 270, y: 204, w: 32, h: 16 }],
+                spikes: [{ x: 280, y: 204, w: 32, h: 16 }],
                 door: { x: 530, y: 172, w: 28, h: 48 },
-                trolled: false,
-                run: (lvl) => {
-                    // Jab player door ke kareeb pahunchta hai, door piche bhagta hai
-                    if (p.x > 380 && !lvl.trolled) {
+                doorMoved: false,
+                trollAction: (lvl) => {
+                    if (player.x > 380 && !lvl.doorMoved) {
                         lvl.door.x -= 9;
                         if (lvl.door.x <= 40) {
                             lvl.door.x = 40;
-                            lvl.trolled = true;
+                            lvl.doorMoved = true;
                         }
                     }
                 }
@@ -291,17 +282,16 @@
             {
                 id: 2,
                 name: "INVISIBLE BRICK",
-                quote: "Hawa mein sir adrishya pathar se thok liya!",
+                quote: "Hawa mein adrishya block se sir takra gaya!",
                 floorY: 220,
                 spikes: [{ x: 280, y: 204, w: 46, h: 16 }],
                 blocks: [{ x: 285, y: 120, w: 36, h: 20, shown: false }],
                 door: { x: 530, y: 172, w: 28, h: 48 },
-                run: (lvl) => {
-                    // Spike ke upar hawa mein invisible block sir pe lagta hai
+                trollAction: (lvl) => {
                     lvl.blocks.forEach(b => {
-                        if (p.x + p.w > b.x && p.x < b.x + b.w && p.y <= b.y + b.h && p.y >= b.y) {
+                        if (player.x + player.w > b.x && player.x < b.x + b.w && player.y <= b.y + b.h && player.y >= b.y) {
                             b.shown = true;
-                            p.vy = 4.5;
+                            player.vy = 4.5;
                         }
                     });
                 }
@@ -309,40 +299,42 @@
             {
                 id: 3,
                 name: "COLLAPSING FLOOR",
-                quote: "Daudne se pehle socha nahi? Zameen gayab!",
+                quote: "Beech ki zameen gayab ho gayi!",
                 floorY: 220,
-                fakeGround: { x: 220, y: 220, w: 140, h: 40, active: true },
+                fakeFloor: { x: 220, y: 220, w: 140, h: 40, active: true },
                 spikes: [],
                 door: { x: 530, y: 172, w: 28, h: 48 },
-                run: (lvl) => {
-                    // Beech ki zameen par pair padte hi zameen toot jati hai
-                    if (p.x > 200 && p.x < 360 && lvl.fakeGround.active) {
-                        lvl.fakeGround.active = false;
+                trollAction: (lvl) => {
+                    if (player.x > 200 && player.x < 360 && lvl.fakeFloor.active) {
+                        lvl.fakeFloor.active = false;
                     }
                 }
             }
         ];
 
-        let curIndex = 0;
+        // Safe URL level detection
+        const urlParams = new URLSearchParams(window.location.search);
+        let paramLvl = parseInt(urlParams.get('level')) || 1;
+        let activeIdx = Math.max(0, Math.min(levels.length - 1, paramLvl - 1));
         let curLevel = null;
 
         function loadLevel(idx) {
-            curIndex = idx;
-            curLevel = JSON.parse(JSON.stringify(stages[idx]));
+            activeIdx = idx;
+            curLevel = JSON.parse(JSON.stringify(levels[idx]));
             isDead = false;
 
-            p.x = 40;
-            p.y = 180;
-            p.vx = 0;
-            p.vy = 0;
-            p.onGround = true;
+            player.x = 40;
+            player.y = curLevel.floorY - player.h;
+            player.vx = 0;
+            player.vy = 0;
+            player.onGround = true;
 
-            levelDisplay.innerText = "LVL: " + curLevel.id;
-            failBox.style.display = "none";
-            winBox.style.display = "none";
+            lvlLabel.innerText = "LVL: " + curLevel.id;
+            failModal.style.display = "none";
+            winModal.style.display = "none";
         }
 
-        // Keyboard Inputs
+        // Input Setup
         const keys = { left: false, right: false, jump: false };
         window.addEventListener('keydown', (e) => {
             if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") keys.left = true;
@@ -356,114 +348,113 @@
             if (e.key === "ArrowUp" || e.key.toLowerCase() === "w" || e.key === " ") keys.jump = false;
         });
 
-        // Touch Control Helper
-        function setupTouch(id, keyName) {
-            const btn = document.getElementById(id);
-            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
-            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
-            btn.addEventListener('mousedown', () => { keys[keyName] = true; });
-            btn.addEventListener('mouseup', () => { keys[keyName] = false; });
+        function bindBtn(id, keyProp) {
+            const b = document.getElementById(id);
+            b.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyProp] = true; });
+            b.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyProp] = false; });
+            b.addEventListener('mousedown', () => { keys[keyProp] = true; });
+            b.addEventListener('mouseup', () => { keys[keyProp] = false; });
         }
-        setupTouch('leftBtn', 'left');
-        setupTouch('rightBtn', 'right');
-        setupTouch('jumpBtn', 'jump');
+
+        bindBtn('btnLeft', 'left');
+        bindBtn('btnRight', 'right');
+        bindBtn('btnJump', 'jump');
 
         function triggerDeath(msg) {
             if (isDead) return;
             isDead = true;
             deaths++;
-            deathDisplay.innerText = "💀 " + deaths;
-            failText.innerText = msg || curLevel.quote;
-            failBox.style.display = "block";
+            deathLabel.innerText = "💀 " + deaths;
+            failQuote.innerText = msg || curLevel.quote;
+            failModal.style.display = "block";
         }
 
         function triggerWin() {
             if (isDead) return;
             isDead = true;
-            winBox.style.display = "block";
+            winModal.style.display = "block";
         }
 
-        window.retryLevel = () => loadLevel(curIndex);
+        window.retryLevel = () => loadLevel(activeIdx);
         window.nextStage = () => {
-            if (curIndex + 1 < stages.length) loadLevel(curIndex + 1);
-            else { alert("SHABASH! Teeno level clear kar liye!"); loadLevel(0); }
+            if (activeIdx + 1 < levels.length) loadLevel(activeIdx + 1);
+            else { alert("SHABASH! Saare Levels Clear!"); loadLevel(0); }
         };
         window.goToMenu = () => { window.location.href = "level.html"; };
 
-        // Game Physics Loop
         function update() {
-            if (isDead) return;
+            if (isDead || !curLevel) return;
 
-            // Horizontal Move
-            p.vx = 0;
-            if (keys.left) p.vx = -p.speed;
-            if (keys.right) p.vx = p.speed;
+            // Move
+            player.vx = 0;
+            if (keys.left) player.vx = -player.speed;
+            if (keys.right) player.vx = player.speed;
 
             // Jump
-            if (keys.jump && p.onGround) {
-                p.vy = p.jumpStrength;
-                p.onGround = false;
+            if (keys.jump && player.onGround) {
+                player.vy = player.jumpStrength;
+                player.onGround = false;
             }
 
             // Gravity
-            p.vy += 0.44;
-            p.x += p.vx;
-            p.y += p.vy;
+            player.vy += 0.44;
+            player.x += player.vx;
+            player.y += player.vy;
 
-            // Execute Stage Trap Script
-            curLevel.run(curLevel);
+            // Run Level Troll Function
+            curLevel.trollAction(curLevel);
 
-            // Ground Collision
+            // Floor & Platform Collision
             let groundY = curLevel.floorY;
-
-            // Level 3 Fake Ground
-            if (curLevel.fakeGround && !curLevel.fakeGround.active) {
-                if (p.x + p.w > curLevel.fakeGround.x && p.x < curLevel.fakeGround.x + curLevel.fakeGround.w) {
-                    groundY = 320; // Player neeche void mein gir jata hai
+            if (curLevel.fakeFloor && !curLevel.fakeFloor.active) {
+                if (player.x + player.w > curLevel.fakeFloor.x && player.x < curLevel.fakeFloor.x + curLevel.fakeFloor.w) {
+                    groundY = 320; // Fall into void
                 }
             }
 
-            if (p.y + p.h >= groundY) {
-                p.y = groundY - p.h;
-                p.vy = 0;
-                p.onGround = true;
+            if (player.y + player.h >= groundY) {
+                player.y = groundY - player.h;
+                player.vy = 0;
+                player.onGround = true;
             }
 
             // Void Death
-            if (p.y > 270) {
+            if (player.y > 270) {
                 triggerDeath("Zameen toot gayi aur tum gir gaye! 😂");
             }
 
-            // Spike Hit Collision
+            // Spike Collision
             if (curLevel.spikes) {
                 curLevel.spikes.forEach(s => {
-                    if (p.x < s.x + s.w && p.x + p.w > s.x && p.y < s.y + s.h && p.y + p.h > s.y) {
+                    if (player.x < s.x + s.w && player.x + player.w > s.x && player.y < s.y + s.h && player.y + player.h > s.y) {
                         triggerDeath();
                     }
                 });
             }
 
-            // Green Door Collision
+            // Door Collision
             let d = curLevel.door;
-            if (p.x < d.x + d.w && p.x + p.w > d.x && p.y < d.y + d.h && p.y + p.h > d.y) {
+            if (player.x < d.x + d.w && player.x + player.w > d.x && player.y < d.y + d.h && player.y + player.h > d.y) {
                 triggerWin();
             }
         }
 
-        // Canvas Visual Drawing
         function draw() {
+            // Clear Frame
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Zameen (Solid Ground)
+            if (!curLevel) return;
+
+            // 1. Zameen (Solid Brown Floor)
             ctx.fillStyle = "#523500";
-            if (curLevel.fakeGround && !curLevel.fakeGround.active) {
-                ctx.fillRect(0, 220, curLevel.fakeGround.x, 40);
-                ctx.fillRect(curLevel.fakeGround.x + curLevel.fakeGround.w, 220, canvas.width, 40);
+            if (curLevel.fakeFloor && !curLevel.fakeFloor.active) {
+                ctx.fillRect(0, 220, curLevel.fakeFloor.x, 40);
+                ctx.fillRect(curLevel.fakeFloor.x + curLevel.fakeFloor.w, 220, canvas.width, 40);
             } else {
                 ctx.fillRect(0, 220, canvas.width, 40);
             }
 
-            // 2. Hidden blocks (Level 2)
+            // 2. Invisible/Revealed Blocks (Level 2)
             if (curLevel.blocks) {
                 curLevel.blocks.forEach(b => {
                     if (b.shown) {
@@ -487,24 +478,24 @@
                 });
             }
 
-            // 4. Green Exit Door
+            // 4. Green Exit Gate
             let d = curLevel.door;
             ctx.fillStyle = "#523500";
             ctx.fillRect(d.x, d.y, d.w, d.h);
             ctx.fillStyle = "#2db300";
             ctx.fillRect(d.x + 3, d.y + 3, d.w - 6, d.h - 6);
 
-            // 5. Devil Player Character
+            // 5. Player Devil (Visible Character)
             ctx.fillStyle = "#523500";
-            ctx.fillRect(p.x, p.y, p.w, p.h);
+            ctx.fillRect(player.x, player.y, player.w, player.h);
             // Red Horns
             ctx.fillStyle = "#8f1111";
-            ctx.fillRect(p.x + 2, p.y - 4, 4, 4);
-            ctx.fillRect(p.x + p.w - 6, p.y - 4, 4, 4);
+            ctx.fillRect(player.x + 2, player.y - 4, 4, 4);
+            ctx.fillRect(player.x + player.w - 6, player.y - 4, 4, 4);
             // White Eyes
             ctx.fillStyle = "#fff";
-            ctx.fillRect(p.x + 4, p.y + 6, 3, 3);
-            ctx.fillRect(p.x + 14, p.y + 6, 3, 3);
+            ctx.fillRect(player.x + 4, player.y + 6, 3, 3);
+            ctx.fillRect(player.x + 14, player.y + 6, 3, 3);
         }
 
         function gameLoop() {
@@ -513,9 +504,9 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Pehla level shuru karein
-        loadLevel(0);
-        gameLoop();
+        // Start Level Immediately
+        loadLevel(activeIdx);
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>
