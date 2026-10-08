@@ -3,658 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Play Level</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
+    <title>🤪 Z PAJAL - Mind Troll Levels</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Press+Start+2P&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Chakra Petch', 'Poppins', sans-serif;
             user-select: none;
         }
 
         body {
             width: 100vw;
             height: 100vh;
-            background: #916000;
             display: flex;
             justify-content: center;
             align-items: center;
+            background: #916000;
             overflow: hidden;
             padding: 10px;
         }
 
-        .game-wrapper {
+        .dashboard-container {
             position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 680px;
             background: #ffb356;
             border: 5px solid #523500;
-            border-radius: 12px;
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.4);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 720px;
-            width: 100%;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.35);
+            text-align: center;
         }
 
-        /* Top HUD Bar */
-        .hud-bar {
-            width: 100%;
+        .hud-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #ffa742;
             border: 3px solid #523500;
             border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            font-size: 10px;
+            padding: 8px 14px;
+            margin-bottom: 16px;
+        }
+
+        .level-badge {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
             color: #523500;
+            font-weight: 800;
         }
 
-        .hud-moves.danger {
-            color: #d11a1a;
-            animation: blink 0.5s infinite;
+        .attempts-badge {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            color: #8a1f00;
         }
 
-        @keyframes blink {
-            50% { opacity: 0.3; }
-        }
-
-        /* Canvas Game Box */
-        canvas {
-            background: #ffe2b3;
+        /* Puzzle Arena Box */
+        .puzzle-arena {
+            background: #ffe3b3;
             border: 4px solid #523500;
-            border-radius: 6px;
-            display: block;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Modal Overlay for Ego / Death Popups */
-        .overlay-card {
+        .puzzle-question {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 13px;
+            color: #523500;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .puzzle-elements {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Arcade Interactive Buttons */
+        .troll-btn {
+            background: #ffa742;
+            border: 3px solid #523500;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #523500;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #523500;
+            transition: all 0.1s ease;
+        }
+
+        .troll-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #523500;
+        }
+
+        /* Draggable Items */
+        .drag-box {
+            background: #523500;
+            color: #ffb356;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            cursor: grab;
+            position: relative;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+        }
+
+        /* Feedback / Ego Overlay */
+        .popup-modal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: #ffb356;
             border: 4px solid #523500;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
             border-radius: 10px;
-            box-shadow: 6px 6px 0px #000;
             padding: 16px 20px;
-            text-align: center;
             display: none;
-            z-index: 20;
-            width: 85%;
-            max-width: 400px;
+            z-index: 100;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
         }
 
-        .overlay-card h2 {
-            font-size: 13px;
-            color: #911212;
-            margin-bottom: 8px;
+        .popup-modal h3 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            margin-bottom: 10px;
         }
 
-        .overlay-card p {
-            font-family: 'Chakra Petch', sans-serif;
+        .popup-modal p {
             font-size: 14px;
             font-weight: 700;
             color: #523500;
             margin-bottom: 14px;
-            line-height: 1.4;
         }
 
-        .modal-btn {
+        .action-btn {
             background: #523500;
             color: #ffb356;
             border: 2px solid #3b2500;
-            padding: 10px 14px;
-            font-size: 10px;
+            padding: 8px 14px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
             border-radius: 6px;
             cursor: pointer;
-            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Controls Instructions */
-        .controls-hint {
-            margin-top: 8px;
-            font-size: 8px;
-            color: #523500;
-            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
-    <div class="game-wrapper">
-        <div class="hud-bar">
-            <span id="hudLevel">LVL: 1</span>
-            <span id="hudTitle">EGO CHECK</span>
-            <span id="hudMoves" class="hud-moves">MOVES: 15</span>
+    <div class="dashboard-container">
+        <div class="hud-header">
+            <span class="level-badge" id="hudLevelText">LEVEL: 1</span>
+            <span class="attempts-badge" id="hudFails">FAILS: 0</span>
         </div>
 
-        <canvas id="gameCanvas" width="600" height="300"></canvas>
-
-        <div class="controls-hint">Controls: [A][D] ya Left/Right Arrow | [SPACE] ya [W] Jump</div>
-
-        <!-- Failure Modal -->
-        <div class="overlay-card" id="failModal">
-            <h2>💀 YOU FAILED!</h2>
-            <p id="failQuote">Koshish achhi thi, par tumse na ho payega!</p>
-            <button class="modal-btn" onclick="retryLevel()">🔄 RETRY LEVEL</button>
+        <div class="puzzle-arena" id="arena">
+            <div class="puzzle-question" id="questionText">Loading...</div>
+            <div class="puzzle-elements" id="elementsArea"></div>
         </div>
 
-        <!-- Victory Modal -->
-        <div class="overlay-card" id="winModal">
-            <h2 style="color: #0b6e1b;">🎉 LEVEL CLEARED!</h2>
-            <p id="winQuote">Tukka lag gaya ya dimaag lagaya?</p>
-            <button class="modal-btn" onclick="nextLevel()">NEXT LEVEL ➡️</button>
+        <!-- Failure Card -->
+        <div class="popup-modal" id="failModal">
+            <h3 style="color: #9c1212;">💀 EGO HURT!</h3>
+            <p id="failDesc">Aapka dimaag ghutne mein hai kya?</p>
+            <button class="action-btn" onclick="retryCurrentLevel()">TRY AGAIN</button>
+        </div>
+
+        <!-- Win Card -->
+        <div class="popup-modal" id="winModal">
+            <h3 style="color: #166904;">🎉 LEVEL CLEAR</h3>
+            <p id="winDesc">Tukke se clear ho gaya!</p>
+            <button class="action-btn" onclick="goToNextLevel()">NEXT CHALLENGE ➡️</button>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        let currentLevel = 1;
+        let failCount = 0;
 
-        const hudLevel = document.getElementById('hudLevel');
-        const hudTitle = document.getElementById('hudTitle');
-        const hudMoves = document.getElementById('hudMoves');
+        const hudLevelText = document.getElementById('hudLevelText');
+        const hudFails = document.getElementById('hudFails');
+        const questionText = document.getElementById('questionText');
+        const elementsArea = document.getElementById('elementsArea');
         const failModal = document.getElementById('failModal');
         const winModal = document.getElementById('winModal');
-        const failQuote = document.getElementById('failQuote');
+        const failDesc = document.getElementById('failDesc');
+        const winDesc = document.getElementById('winDesc');
 
-        // Tile Type Legend:
-        // 0: Empty, 1: Solid Floor, 2: Spike, 3: Vanishing Floor, 4: Door, 5: Key
-        const TILE_SIZE = 30; // 20 columns x 10 rows = 600 x 300
-
-        // 10 Detailed Rage Levels
-        const levels = [
+        const trollPuzzles = [
             {
-                id: 1,
-                title: "BABY STEP?",
-                moves: 12,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 18, y: 7 },
-                trap: "none",
-                failQuote: "Level 1 mein kaun marta hai bhai?! 🤦‍♂️",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 1,
+                q: "Sabse BADI cheez par click karo!",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <button class="troll-btn" onclick="fail('Hathi real mein bada hota hai, par screen pe chhota hai!')" style="font-size: 16px;">🐘 Hathi</button>
+                        <button class="troll-btn" onclick="fail('Dikhne mein tarbooz bada hai par sawaal bada hai!')" style="font-size: 26px;">🍉 Tarbooz</button>
+                        <button class="troll-btn" onclick="fail('Apple toh chhota hi hai!')" style="font-size: 12px;">🍎 Seb</button>
+                    `;
+                    // Secret Trick: Question text ke 'BADI' word pe click karna tha
+                    questionText.innerHTML = `Sabse <span style="font-size: 18px; color: #b82800; cursor: pointer;" onclick="win('Sawaal mein \'BADI\' word sabse bada tha! IQ 200!')">BADI</span> cheez par click karo!`;
+                }
             },
             {
-                id: 2,
-                title: "THE GHOST DOOR",
-                moves: 15,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 17, y: 7 },
-                trap: "teleport_door", // Door jumps away on close distance
-                failQuote: "Aage dekh ke daudo mat, door tumse darta hai!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 2,
+                q: "Gate ka Taala kholo!",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <div id="dragKey" class="drag-box" draggable="true" ondragstart="drag(event)">🔑 CHABI</div>
+                        <div id="doorTarget" ondrop="drop(event)" ondragover="allowDrop(event)" style="border: 3px dashed #523500; padding: 20px; font-size: 24px; border-radius: 8px;">🔒 TAALA</div>
+                    `;
+                }
             },
             {
-                id: 3,
-                title: "CRUMBLING HOPE",
-                moves: 14,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 18, y: 7 },
-                trap: "collapse_fast",
-                failQuote: "Ruk kyun gaye? Zameen khisak gayi na!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,3,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 3,
+                q: "Green Button ko 5 baar dabao!",
+                setup: () => {
+                    let clicks = 0;
+                    elementsArea.innerHTML = `
+                        <button class="troll-btn" id="trollColorBtn" style="background: #2cb02c; color: white;">CLICK ME</button>
+                    `;
+                    const btn = document.getElementById('trollColorBtn');
+                    btn.onclick = () => {
+                        clicks++;
+                        if (clicks === 4) {
+                            btn.style.background = "#d62828"; // 5th click pe red ban jayega
+                            btn.innerText = "DON'T CLICK";
+                        }
+                        if (clicks === 5) {
+                            // Agar 5th baar click kiya jab wo green nahi tha
+                            fail("Maine GREEN button dabane ko kaha tha, Red nahi! Ego crushed!");
+                        }
+                    };
+                    // Level clear secret: 4 clicks ke baad wait karna hai 2 sec, wo wapas green hoga
+                    setTimeout(() => {
+                        if (clicks === 4) {
+                            btn.style.background = "#2cb02c";
+                            btn.onclick = () => win("Dhairya (Patience) hi sab kuch hai!");
+                        }
+                    }, 3500);
+                }
             },
             {
-                id: 4,
-                title: "REVERSE PSYCHE",
-                moves: 16,
-                playerStart: { x: 2, y: 7 },
-                door: { x: 17, y: 7 },
-                trap: "inverted_controls",
-                failQuote: "Left ka matlab Right hota hai, samjhe Einstein?",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1],
-                    [1,0,0,0,2,1,1,2,0,0,2,1,1,2,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 4,
+                q: "Right side ke Arrow par click karo!",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <button class="troll-btn" onclick="fail('Ye Left point kar raha hai!')">⬅️ RIGHT</button>
+                        <button class="troll-btn" onclick="win('Dimaag chala liya!')">➡️ LEFT</button>
+                    `;
+                }
             },
             {
-                id: 5,
-                title: "THE LEAP OF DOUBT",
-                moves: 10,
-                playerStart: { x: 1, y: 3 },
-                door: { x: 18, y: 7 },
-                trap: "rising_spikes",
-                failQuote: "Niche dekh kar koodna tha!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 5,
+                q: "Phone screen ko andhere mein daalo (Turn Off Light)!",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <div style="font-size: 40px; cursor: pointer;" id="sunEmoji" onclick="fail('Suraj pe click karne se raat nahi hoti!')">☀️</div>
+                        <div style="font-size: 40px; display: none;" id="moonEmoji">🌙</div>
+                    `;
+                    // Secret: Suraj ko screen ke bahar (drag karke ya swipe karke) chhipana hai
+                    let sun = document.getElementById('sunEmoji');
+                    sun.onclick = () => {
+                        sun.style.display = "none";
+                        win("Suraj gayab = Andhera! Waah champion!");
+                    };
+                }
             },
             {
-                id: 6,
-                title: "STALKED BY TIME",
-                moves: 9,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 18, y: 7 },
-                trap: "exact_moves", // User must finish on exact 0 moves
-                failQuote: "Ek move faltu chala aur game khatam!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 6,
+                q: "Score: 10 + 10 = ?",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <button class="troll-btn" onclick="fail('Calculator kharab nahi hai, tum galat ho!')">20</button>
+                        <button class="troll-btn" onclick="fail('Galat calculation!')">1010</button>
+                        <button class="troll-btn" onclick="fail('Bilkul galat!')">100</button>
+                    `;
+                    // Secret: HUD mein jo "LEVEL: 6" likha hai usko tap karna hai
+                    hudLevelText.style.cursor = "pointer";
+                    hudLevelText.onclick = () => win("Maths nahi, Out of the box sochna tha!");
+                }
             },
             {
-                id: 7,
-                title: "THE PHANTOM PLATFORM",
-                moves: 14,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 18, y: 3 },
-                trap: "fake_block",
-                failQuote: "Jo dikhta hai wo hota nahi!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 7,
+                q: "Car ko start karke aage bhagao!",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <div id="carItem" style="font-size: 40px; transition: 0.5s;">🚗</div>
+                        <div style="width: 100%; margin-top: 15px;">
+                            <button class="troll-btn" onclick="fail('Fuel khatam hai car mein!')">ACCELERATE</button>
+                        </div>
+                    `;
+                    let car = document.getElementById('carItem');
+                    car.onclick = () => {
+                        car.style.transform = "translateX(150px)";
+                        setTimeout(() => win("Push start kiya! Smart move!"), 400);
+                    };
+                }
             },
             {
-                id: 8,
-                title: "CEILING CRUSH",
-                moves: 12,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 18, y: 7 },
-                trap: "falling_ceiling",
-                failQuote: "Sir bacha ke chalna tha!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 8,
+                q: "Sabse pehle kaunsa cup bharega?",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <button class="troll-btn" onclick="fail('Cup 1 ka pipe toh band tha!')">CUP 1</button>
+                        <button class="troll-btn" onclick="fail('Cup 2 mein leak hai!')">CUP 2</button>
+                        <button class="troll-btn" onclick="win('Kyunki Cup 3 seedha tap ke niche hai!')">CUP 3</button>
+                    `;
+                }
             },
             {
-                id: 9,
-                title: "GREED TRAP",
-                moves: 16,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 18, y: 7 },
-                trap: "fake_key",
-                failQuote: "Chabi ke chakkar mein phas gaye!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 9,
+                q: "Screen par chhupe hue Devil ko dhoondo!",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <div style="font-size: 26px;">🌲 🌳 🏠 🌳 🌲</div>
+                    `;
+                    // Secret: HUD header mein jo avatar/text hai wahan devil chhipa hai
+                    let arena = document.getElementById('arena');
+                    arena.onclick = (e) => {
+                        if (e.target === arena) {
+                            win("Devil toh tumhare samne hi chhipa tha!");
+                        }
+                    };
+                }
             },
             {
-                id: 10,
-                title: "DEVIL FINALE: RUN!",
-                moves: 20,
-                playerStart: { x: 1, y: 7 },
-                door: { x: 18, y: 7 },
-                trap: "collapsing_world",
-                failQuote: "Speed nahi hai toh Silver rank par hi raho!",
-                map: [
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                    [1,0,3,3,2,3,3,2,3,3,2,3,3,0,0,0,0,0,0,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-                ]
+                lvl: 10,
+                q: "FINAL BOSS: Game ko Harakar dikhao!",
+                setup: () => {
+                    elementsArea.innerHTML = `
+                        <button class="troll-btn" id="runawayBtn" style="position: relative;">I GIVE UP</button>
+                        <button class="troll-btn" onclick="fail('Jeet itni asani se nahi milti!')">WIN GAME</button>
+                    `;
+                    const runaway = document.getElementById('runawayBtn');
+                    runaway.onmouseover = runaway.ontouchstart = () => {
+                        runaway.style.transform = `translate(${Math.random() * 80 - 40}px, ${Math.random() * 80 - 40}px)`;
+                    };
+                    runaway.onclick = () => win("Haar manna hi is game ko jeetna tha! Ego completely shattered!");
+                }
             }
         ];
 
-        let currentLevelIdx = 0;
-        let activeLevel = null;
-        let mapData = [];
-        let player = { x: 0, y: 0, vx: 0, vy: 0, w: 20, h: 20, onGround: false };
-        let remainingMoves = 0;
-        let isGameOver = false;
-        let doorPos = { x: 0, y: 0 };
-        let doorMoved = false;
-
-        function initLevel(index) {
-            currentLevelIdx = index;
-            activeLevel = JSON.parse(JSON.stringify(levels[index]));
-            mapData = activeLevel.map;
-            remainingMoves = activeLevel.moves;
-            isGameOver = false;
-            doorMoved = false;
-
-            doorPos = {
-                x: activeLevel.door.x * TILE_SIZE,
-                y: activeLevel.door.y * TILE_SIZE
-            };
-
-            player.x = activeLevel.playerStart.x * TILE_SIZE + 5;
-            player.y = activeLevel.playerStart.y * TILE_SIZE;
-            player.vx = 0;
-            player.vy = 0;
-
-            hudLevel.innerText = "LVL: " + activeLevel.id;
-            hudTitle.innerText = activeLevel.title;
-            hudMoves.innerText = "MOVES: " + remainingMoves;
-            hudMoves.classList.remove('danger');
-
+        function loadPuzzle(lvlNum) {
             failModal.style.display = "none";
             winModal.style.display = "none";
+            hudLevelText.onclick = null;
+            hudLevelText.style.cursor = "default";
+
+            let puzzle = trollPuzzles[lvlNum - 1];
+            hudLevelText.innerText = "LEVEL: " + puzzle.lvl;
+            questionText.innerText = puzzle.q;
+            elementsArea.innerHTML = "";
+            puzzle.setup();
         }
 
-        // Controls
-        const keys = {};
-        window.addEventListener('keydown', (e) => {
-            if (isGameOver) return;
-
-            let key = e.key.toLowerCase();
-            if (keys[key]) return; // prevent holding move abuse
-            keys[key] = true;
-
-            let moveCost = false;
-
-            // Inverted trap check
-            let leftKey = activeLevel.trap === "inverted_controls" ? ('d' || 'arrowright') : ('a' || 'arrowleft');
-            let rightKey = activeLevel.trap === "inverted_controls" ? ('a' || 'arrowleft') : ('d' || 'arrowright');
-
-            if (e.key === 'ArrowLeft' || key === 'a') {
-                player.vx = activeLevel.trap === "inverted_controls" ? 3.5 : -3.5;
-                moveCost = true;
-            } else if (e.key === 'ArrowRight' || key === 'd') {
-                player.vx = activeLevel.trap === "inverted_controls" ? -3.5 : 3.5;
-                moveCost = true;
-            }
-
-            if ((key === 'w' || key === ' ' || e.key === 'ArrowUp') && player.onGround) {
-                player.vy = -8.5;
-                player.onGround = false;
-                moveCost = true;
-            }
-
-            if (moveCost) {
-                remainingMoves--;
-                hudMoves.innerText = "MOVES: " + remainingMoves;
-                if (remainingMoves <= 3) hudMoves.classList.add('danger');
-                if (remainingMoves < 0) {
-                    triggerFail("Moves khatam! Zero patience, zero calculation!");
-                }
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            let key = e.key.toLowerCase();
-            keys[key] = false;
-            if (key === 'a' || key === 'd' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                player.vx = 0;
-            }
-        });
-
-        function triggerFail(customText) {
-            if (isGameOver) return;
-            isGameOver = true;
-            failQuote.innerText = customText || activeLevel.failQuote;
+        window.fail = function(msg) {
+            failCount++;
+            hudFails.innerText = "FAILS: " + failCount;
+            failDesc.innerText = msg;
             failModal.style.display = "block";
-        }
+        };
 
-        function triggerWin() {
-            if (isGameOver) return;
-            isGameOver = true;
+        window.win = function(msg) {
+            winDesc.innerText = msg;
             winModal.style.display = "block";
-            // LocalStorage level save
-            let nextId = activeLevel.id + 1;
-            let saved = parseInt(localStorage.getItem('saveLevel_TumseNaHoPayga')) || 1;
-            if (nextId > saved) {
-                localStorage.setItem('saveLevel_TumseNaHoPayga', nextId);
-            }
-        }
-
-        window.retryLevel = function() {
-            initLevel(currentLevelIdx);
         };
 
-        window.nextLevel = function() {
-            if (currentLevelIdx + 1 < levels.length) {
-                initLevel(currentLevelIdx + 1);
+        window.retryCurrentLevel = function() {
+            loadPuzzle(currentLevel);
+        };
+
+        window.goToNextLevel = function() {
+            if (currentLevel < trollPuzzles.length) {
+                currentLevel++;
+                loadPuzzle(currentLevel);
             } else {
-                alert("CONGRATULATIONS! Phase 1 clear kar liya! Phase 2 jald aayega!");
+                alert("UNBELIEVABLE! Aapne Z PAJAL ke saare Mind Troll levels paar kar liye!");
             }
         };
 
-        // Physics & Game Loop
-        function update() {
-            if (isGameOver) return;
+        // Drag and drop mechanics for Level 2
+        window.allowDrop = function(ev) { ev.preventDefault(); };
+        window.drag = function(ev) { ev.dataTransfer.setData("text", ev.target.id); };
+        window.drop = function(ev) {
+            ev.preventDefault();
+            win("Chabi se taala khul gaya! Dimag tez hai aapka!");
+        };
 
-            // Gravity
-            player.vy += 0.45;
-            player.x += player.vx;
-            checkHorizontalCollisions();
-            player.y += player.vy;
-            checkVerticalCollisions();
-
-            // Trap Mechanics
-            if (activeLevel.trap === "teleport_door" && !doorMoved) {
-                // If player comes within 100px of the door, door shifts to start
-                let dist = Math.hypot(player.x - doorPos.x, player.y - doorPos.y);
-                if (dist < 100) {
-                    doorPos.x = 2 * TILE_SIZE; // teleport behind player
-                    doorMoved = true;
-                }
-            }
-
-            // Door overlap check
-            if (
-                player.x < doorPos.x + TILE_SIZE &&
-                player.x + player.w > doorPos.x &&
-                player.y < doorPos.y + TILE_SIZE &&
-                player.y + player.h > doorPos.y
-            ) {
-                if (activeLevel.trap === "exact_moves" && remainingMoves !== 0) {
-                    triggerFail("Gate tabhi khulega jab EXACT 0 moves bachenge!");
-                    return;
-                }
-                triggerWin();
-            }
-        }
-
-        function checkHorizontalCollisions() {
-            let leftTile = Math.floor(player.x / TILE_SIZE);
-            let rightTile = Math.floor((player.x + player.w) / TILE_SIZE);
-            let topTile = Math.floor(player.y / TILE_SIZE);
-            let bottomTile = Math.floor((player.y + player.h - 1) / TILE_SIZE);
-
-            for (let r = topTile; r <= bottomTile; r++) {
-                for (let c = leftTile; c <= rightTile; c++) {
-                    if (r >= 0 && r < 10 && c >= 0 && c < 20) {
-                        let tile = mapData[r][c];
-                        if (tile === 1) { // Wall
-                            if (player.vx > 0) player.x = c * TILE_SIZE - player.w;
-                            else if (player.vx < 0) player.x = (c + 1) * TILE_SIZE;
-                        } else if (tile === 2) { // Spike
-                            triggerFail();
-                        }
-                    }
-                }
-            }
-        }
-
-        function checkVerticalCollisions() {
-            let leftTile = Math.floor(player.x / TILE_SIZE);
-            let rightTile = Math.floor((player.x + player.w - 1) / TILE_SIZE);
-            let topTile = Math.floor(player.y / TILE_SIZE);
-            let bottomTile = Math.floor((player.y + player.h) / TILE_SIZE);
-
-            player.onGround = false;
-
-            for (let r = topTile; r <= bottomTile; r++) {
-                for (let c = leftTile; c <= rightTile; c++) {
-                    if (r >= 0 && r < 10 && c >= 0 && c < 20) {
-                        let tile = mapData[r][c];
-                        if (tile === 1 || tile === 3) { // Solid or Crumble
-                            if (player.vy > 0) {
-                                player.y = r * TILE_SIZE - player.h;
-                                player.vy = 0;
-                                player.onGround = true;
-
-                                // Crumble floor handling
-                                if (tile === 3) {
-                                    setTimeout(() => {
-                                        if (mapData[r] && mapData[r][c]) mapData[r][c] = 0;
-                                    }, 200);
-                                }
-                            } else if (player.vy < 0) {
-                                player.y = (r + 1) * TILE_SIZE;
-                                player.vy = 0;
-                            }
-                        } else if (tile === 2) {
-                            triggerFail();
-                        }
-                    }
-                }
-            }
-        }
-
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Tiles
-            for (let r = 0; r < 10; r++) {
-                for (let c = 0; c < 20; c++) {
-                    let tile = mapData[r][c];
-                    let tx = c * TILE_SIZE;
-                    let ty = r * TILE_SIZE;
-
-                    if (tile === 1) {
-                        ctx.fillStyle = "#523500";
-                        ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = "#ffa742";
-                        ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                    } else if (tile === 2) { // Spike
-                        ctx.fillStyle = "#911212";
-                        ctx.beginPath();
-                        ctx.moveTo(tx, ty + TILE_SIZE);
-                        ctx.lineTo(tx + TILE_SIZE / 2, ty + 6);
-                        ctx.lineTo(tx + TILE_SIZE, ty + TILE_SIZE);
-                        ctx.fill();
-                    } else if (tile === 3) { // Crumble floor
-                        ctx.fillStyle = "#c27d00";
-                        ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
-                        ctx.strokeStyle = "#523500";
-                        ctx.strokeRect(tx + 1, ty + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-                    } else if (tile === 5) { // Key
-                        ctx.fillStyle = "#ffd700";
-                        ctx.fillRect(tx + 8, ty + 8, 14, 14);
-                    }
-                }
-            }
-
-            // Draw Exit Door
-            ctx.fillStyle = "#000";
-            ctx.fillRect(doorPos.x + 4, doorPos.y + 2, 22, 28);
-            ctx.fillStyle = "#38b000";
-            ctx.fillRect(doorPos.x + 6, doorPos.y + 4, 18, 26);
-
-            // Draw Devil Player
-            ctx.fillStyle = "#523500";
-            ctx.fillRect(player.x, player.y, player.w, player.h);
-            // Player Horns
-            ctx.fillStyle = "#d11a1a";
-            ctx.fillRect(player.x + 2, player.y - 4, 4, 4);
-            ctx.fillRect(player.x + 14, player.y - 4, 4, 4);
-            // Eyes
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(player.x + 4, player.y + 5, 4, 4);
-            ctx.fillRect(player.x + 12, player.y + 5, 4, 4);
-        }
-
-        function gameLoop() {
-            update();
-            render();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Initialize Level 1
-        initLevel(0);
-        gameLoop();
+        // Start Level 1
+        loadPuzzle(1);
     </script>
 </body>
 </html>
