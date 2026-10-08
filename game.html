@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Devil Grid Levels</title>
+    <title>🤪 Z PAJAL - UI Sabotage</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -25,38 +25,41 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            padding: 10px;
+            padding: 8px;
         }
 
-        .cabinet {
+        /* Arcade Frame */
+        .arcade-cabinet {
             position: relative;
             background: #ffb356;
             border-radius: 14px;
-            box-shadow: 0 8px 0px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.45);
             padding: 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 600px;
+            max-width: 620px;
             width: 100%;
+            height: 95vh;
+            max-height: 480px;
         }
 
-        /* Top HUD */
-        .hud {
+        /* Top HUD Bar */
+        .hud-bar {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #ffa742;
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 10px 14px;
             margin-bottom: 10px;
             font-size: 10px;
             color: #523500;
-            box-shadow: 0 2px 0px #523500;
+            box-shadow: 0 3px 0px #523500;
         }
 
-        .hud-actions {
+        .hud-tools {
             display: flex;
             gap: 6px;
         }
@@ -76,74 +79,118 @@
             box-shadow: none;
         }
 
-        /* 6x4 Grid Board */
-        .grid-board {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 6px;
-            background: #ffe2b3;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 4px 0px #523500;
+        /* Active Puzzle Sandbox Chamber */
+        .puzzle-chamber {
+            position: relative;
             width: 100%;
-            max-width: 540px;
-            aspect-ratio: 6 / 4;
-        }
-
-        .tile {
-            background: #ffa742;
-            border-radius: 6px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            box-shadow: 0 3px 0px #523500;
-            transition: background 0.15s ease, transform 0.08s ease;
-        }
-
-        .tile.wall {
-            background: #523500;
-        }
-
-        .tile.spike-revealed {
-            background: #911212 !important;
-        }
-
-        .tile.crumb-fall {
-            background: transparent !important;
-            box-shadow: none !important;
-        }
-
-        /* D-Pad Controller */
-        .controller-area {
+            flex-grow: 1;
+            background: #ffe2b3;
+            border-radius: 10px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.25);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 6px;
-            margin-top: 12px;
-            width: 100%;
+            padding: 10px;
         }
 
-        .dpad-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .ctrl-btn {
+        /* Puzzle Interactive Objects */
+        .devil-entity {
+            width: 48px;
+            height: 48px;
             background: #523500;
             color: #ffb356;
             border-radius: 10px;
-            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 0px #3b2500;
+            position: absolute;
+            transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .target-gate {
+            width: 54px;
+            height: 64px;
+            background: #2db300;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 18px;
+            box-shadow: 0 4px 0px #186600;
+            position: absolute;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .troll-block {
+            background: #ffa742;
+            color: #523500;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 0px #523500;
+            font-size: 11px;
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .troll-block:active {
+            transform: scale(0.95);
+        }
+
+        /* Status Text Box */
+        .clue-box {
+            font-family: 'Chakra Petch', sans-serif;
+            background: #ffa742;
+            color: #523500;
+            font-weight: 700;
             font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 0px #523500;
+            position: absolute;
+            top: 10px;
+            text-align: center;
+        }
+
+        /* Bottom Controls Bar */
+        .bottom-action-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 0 4px;
+        }
+
+        .control-btn {
+            background: #523500;
+            color: #ffb356;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-size: 11px;
             cursor: pointer;
             box-shadow: 0 4px 0px #3b2500;
             touch-action: manipulation;
         }
 
-        .ctrl-btn:active {
+        .control-btn:active {
             transform: translateY(3px);
             box-shadow: 0 1px 0px #3b2500;
-            background: #734a00;
+        }
+
+        .danger-btn {
+            background: #8f1111;
+            color: #fff;
+            box-shadow: 0 4px 0px #540808;
         }
 
         /* Modals */
@@ -153,19 +200,19 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: #ffb356;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 10px 0px rgba(0, 0, 0, 0.5);
-            padding: 18px 24px;
+            padding: 20px;
             text-align: center;
             display: none;
-            z-index: 50;
+            z-index: 100;
             width: 85%;
-            max-width: 380px;
+            max-width: 360px;
         }
 
         .popup-modal h2 {
             font-size: 13px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .popup-modal p {
@@ -173,73 +220,69 @@
             font-size: 14px;
             font-weight: 700;
             color: #523500;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
-        .popup-action {
+        .modal-btn {
             background: #523500;
             color: #ffb356;
-            padding: 10px 14px;
+            padding: 10px 16px;
             font-size: 9px;
             border-radius: 6px;
             cursor: pointer;
             box-shadow: 0 3px 0px #3b2500;
             margin: 0 4px;
         }
-
-        .popup-action:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
     </style>
 </head>
 <body>
 
-    <div class="cabinet">
-        <div class="hud">
+    <div class="arcade-cabinet">
+        <div class="hud-bar">
             <div>
-                <span id="lvlDisplay">LVL: 1</span>
-                <span style="margin-left: 10px;" id="deathDisplay">💀 0</span>
+                <span id="lvlLabel">LVL: 1</span>
+                <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
             </div>
-            <div class="hud-actions">
-                <button class="hud-btn" onclick="retryStage()">🔄 RESTART</button>
-                <button class="hud-btn" onclick="goToMenu()">📜 LEVELS</button>
+            <div class="hud-tools">
+                <button class="hud-btn" id="restartBtn" onclick="onRestartClick()">🔄 RESTART</button>
+                <button class="hud-btn" onclick="goToLevels()">📜 LEVELS</button>
                 <button class="hud-btn" onclick="toggleScreen()">⛶ FULL</button>
             </div>
         </div>
 
-        <!-- 6x4 Grid Area -->
-        <div class="grid-board" id="gridBoard"></div>
-
-        <!-- D-Pad Controls for Mobile & Desktop -->
-        <div class="controller-area">
-            <button class="ctrl-btn" onclick="movePlayer(0, -1)">⬆ UP</button>
-            <div class="dpad-row">
-                <button class="ctrl-btn" onclick="movePlayer(-1, 0)">◀ LEFT</button>
-                <button class="ctrl-btn" onclick="movePlayer(0, 1)">DOWN ⬇</button>
-                <button class="ctrl-btn" onclick="movePlayer(1, 0)">RIGHT ▶</button>
-            </div>
+        <!-- The Room / Chamber -->
+        <div class="puzzle-chamber" id="chamber">
+            <div class="clue-box" id="clueText">Devil ko Gate tak pahunchao!</div>
+            <!-- Dynamic elements spawn here -->
+            <div class="devil-entity" id="devil">😈</div>
+            <div class="target-gate" id="gate">🚪</div>
         </div>
 
-        <!-- Failure Modal -->
-        <div class="popup-modal" id="failBox">
-            <h2 style="color: #911212;">💀 TROLLED!</h2>
-            <p id="failDesc">Trap mein pair rakh diya!</p>
-            <button class="popup-action" onclick="retryStage()">RETRY 🔄</button>
-            <button class="popup-action" onclick="goToMenu()">LEVELS 📜</button>
+        <!-- Bottom Controller Bar -->
+        <div class="bottom-action-bar">
+            <button class="control-btn" id="leftBtn" onclick="triggerAction('left')">◀ PUSH</button>
+            <button class="control-btn danger-btn" id="trollActionBtn" onclick="triggerAction('special')">DO NOT TOUCH ⚡</button>
+            <button class="control-btn" id="rightBtn" onclick="triggerAction('right')">PULL ▶</button>
         </div>
 
-        <!-- Victory Modal -->
-        <div class="popup-modal" id="winBox">
-            <h2 style="color: #116b0d;">🎉 STAGE CLEARED!</h2>
-            <p>Agla level aur ganda hone wala hai!</p>
-            <button class="popup-action" onclick="nextStage()">NEXT ➡️</button>
-            <button class="popup-action" onclick="goToMenu()">LEVELS 📜</button>
+        <!-- Popups -->
+        <div class="popup-modal" id="failModal">
+            <h2 style="color: #8f1111;">💀 TROLLED!</h2>
+            <p id="failDesc">Trap mein phas gaye!</p>
+            <button class="modal-btn" onclick="reloadStage()">RETRY 🔄</button>
+            <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
+        </div>
+
+        <div class="popup-modal" id="winModal">
+            <h2 style="color: #116b0d;">🎉 LEVEL CLEARED!</h2>
+            <p id="winDesc">Dimaag tez nikla aapka!</p>
+            <button class="modal-btn" onclick="nextStage()">NEXT ➡️</button>
+            <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
         </div>
     </div>
 
     <script>
-        // Fullscreen & Landscape API
+        // Fullscreen & Orientation Lock
         async function toggleScreen() {
             const el = document.documentElement;
             try {
@@ -255,227 +298,203 @@
         window.addEventListener('click', toggleScreen, { once: true });
         window.addEventListener('touchstart', toggleScreen, { once: true });
 
-        const gridBoard = document.getElementById('gridBoard');
-        const lvlDisplay = document.getElementById('lvlDisplay');
-        const deathDisplay = document.getElementById('deathDisplay');
-        const failBox = document.getElementById('failBox');
-        const winBox = document.getElementById('winBox');
+        const chamber = document.getElementById('chamber');
+        const devil = document.getElementById('devil');
+        const gate = document.getElementById('gate');
+        const clueText = document.getElementById('clueText');
+        const lvlLabel = document.getElementById('lvlLabel');
+        const failsLabel = document.getElementById('failsLabel');
+        const failModal = document.getElementById('failModal');
+        const winModal = document.getElementById('winModal');
         const failDesc = document.getElementById('failDesc');
+        const trollActionBtn = document.getElementById('trollActionBtn');
 
-        let deaths = 0;
-        let isOver = false;
-        let playerPos = { r: 0, c: 0 };
-        let doorPos = { r: 3, c: 5 };
+        let curLvl = 1;
+        let failCount = 0;
+        let isStageOver = false;
 
-        // 6 Unique Progressive Devil Grid Levels
-        const stages = [
+        // Custom Never-Seen-Before Levels Logic
+        const levels = [
             {
                 id: 1,
-                name: "THE RUNAWAY DOOR",
-                quote: "Door ke paas jaoge toh wo bhag kar shuruat mein aa jayega!",
-                start: { r: 1, c: 0 },
-                door: { r: 1, c: 5 },
-                traps: [{ r: 1, c: 3 }],
-                walls: [],
-                onStep: (lvl) => {
-                    // Troll: Gate bhagta hai
-                    if (playerPos.r === 1 && playerPos.c === 4 && !lvl.trolled) {
-                        lvl.door = { r: 1, c: 0 }; // jumps to start
-                        lvl.trolled = true;
+                name: "THE REVERSED PULL",
+                clue: "Door tak seedha nahi ja sakte!",
+                init: () => {
+                    devil.style.left = "40px";
+                    devil.style.top = "120px";
+                    gate.style.left = "80%";
+                    gate.style.top = "110px";
+                    trollActionBtn.innerText = "DO NOT TOUCH ⚡";
+                },
+                onAction: (act) => {
+                    let curLeft = parseInt(devil.style.left) || 40;
+                    if (act === 'right') {
+                        // Troll: Pushing right throws him left!
+                        devil.style.left = (curLeft - 30) + "px";
+                        if (curLeft <= 20) triggerFail("Peeche wall se takra kar crush ho gaye!");
+                    } else if (act === 'left') {
+                        // Pulling left actually pushes right
+                        devil.style.left = (curLeft + 60) + "px";
+                        if (parseInt(devil.style.left) >= 320) triggerWin();
+                    } else if (act === 'special') {
+                        triggerFail("Likhha tha na: DO NOT TOUCH!");
                     }
                 }
             },
             {
                 id: 2,
-                name: "INVISIBLE MINEFIELD",
-                quote: "Seedhe chalne ki sochi thi? Invisible trap tha!",
-                start: { r: 3, c: 0 },
-                door: { r: 0, c: 5 },
-                traps: [{ r: 3, c: 2 }, { r: 2, c: 4 }, { r: 1, c: 1 }],
-                walls: [{ r: 1, c: 3 }, { r: 2, c: 3 }],
-                onStep: () => {}
+                name: "THE ESCAPE BUTTON",
+                clue: "Gate ko rok kar dikhao!",
+                init: () => {
+                    devil.style.left = "40px";
+                    devil.style.top = "120px";
+                    gate.style.left = "75%";
+                    gate.style.top = "110px";
+                    trollActionBtn.innerText = "FREEZE TIME ❄️";
+                },
+                onAction: (act) => {
+                    if (act === 'right') {
+                        let curLeft = parseInt(devil.style.left) || 40;
+                        devil.style.left = (curLeft + 40) + "px";
+                        // Gate bhaagta hai
+                        let gLeft = parseInt(gate.style.left) || 75;
+                        gate.style.left = "20px";
+                        triggerFail("Gate aapke peeche bhaag gaya!");
+                    } else if (act === 'special') {
+                        // Freeze gate
+                        gate.style.background = "#0088cc";
+                        gate.innerText = "🧊";
+                        clueText.innerText = "Gate jam chuka hai! Ab aage badho!";
+                        trollActionBtn.onclick = null;
+                        devil.style.left = "75%";
+                        setTimeout(triggerWin, 400);
+                    }
+                }
             },
             {
                 id: 3,
-                name: "CRUMBLING TILES",
-                quote: "Ek kadam aage badhte hi piche ki zameen gayab!",
-                start: { r: 0, c: 0 },
-                door: { r: 3, c: 5 },
-                traps: [],
-                walls: [],
-                crumble: true,
-                stepped: [],
-                onStep: (lvl) => {
-                    // Piche ka block vanish
-                    lvl.stepped.push({ r: playerPos.r, c: playerPos.c });
+                name: "RESTART IS THE KEY",
+                clue: "Koi rasta nahi bacha? Restart karo!",
+                init: () => {
+                    devil.style.left = "40px";
+                    devil.style.top = "120px";
+                    gate.style.display = "none"; // Gate invisible hai
+                    trollActionBtn.innerText = "SUICIDE 💀";
+                },
+                onAction: (act) => {
+                    if (act === 'special' || act === 'left' || act === 'right') {
+                        triggerFail("Galat button! Kuch alag socho!");
+                    }
+                },
+                onRestart: () => {
+                    // Troll secret: Top Restart button dabane se gate spawn hoga!
+                    gate.style.display = "flex";
+                    gate.style.left = "50%";
+                    gate.style.top = "110px";
+                    devil.style.left = "50%";
+                    setTimeout(triggerWin, 300);
+                    return true; // Cancel normal restart
                 }
             },
             {
                 id: 4,
-                name: "REVERSE CONFUSION",
-                quote: "Right dabaya tha, left trap mein kyun gaye?",
-                start: { r: 0, c: 0 },
-                door: { r: 3, c: 5 },
-                traps: [{ r: 0, c: 2 }, { r: 1, c: 3 }, { r: 2, c: 1 }],
-                walls: [{ r: 1, c: 1 }, { r: 2, c: 4 }],
-                reversed: true,
-                onStep: () => {}
+                name: "DRAG THE UNTOUCHABLE",
+                clue: "Devil ko haath lagao aur chalao!",
+                init: () => {
+                    devil.style.left = "30px";
+                    devil.style.top = "120px";
+                    gate.style.left = "78%";
+                    gate.style.top = "120px";
+                    gate.style.display = "flex";
+                    trollActionBtn.innerText = "TELEPORT 🌀";
+
+                    // Drag mechanics
+                    devil.onpointerdown = (e) => {
+                        devil.style.left = "78%";
+                        setTimeout(triggerWin, 350);
+                    };
+                },
+                onAction: (act) => {
+                    if (act === 'special') triggerFail("Teleport fail ho gaya!");
+                }
             },
             {
                 id: 5,
-                name: "THE FAKE EXIT",
-                quote: "Samne wala door fake nikla! Asli door corner mein tha!",
-                start: { r: 2, c: 0 },
-                door: { r: 2, c: 5 }, // Fake door
-                realDoor: { r: 0, c: 0 },
-                traps: [{ r: 2, c: 5 }], // Touching fake door dies
-                walls: [{ r: 1, c: 2 }, { r: 3, c: 2 }],
-                onStep: (lvl) => {
-                    if (playerPos.c > 3 && !lvl.swapped) {
-                        lvl.swapped = true;
-                        lvl.door = lvl.realDoor;
-                    }
+                name: "THE HUD HIJACK",
+                clue: "Target screen ke bahar hai!",
+                init: () => {
+                    devil.style.left = "40px";
+                    devil.style.top = "120px";
+                    gate.style.display = "none";
+                    clueText.innerText = "Top HUD mein 'LEVELS' button hi asli Gate hai!";
+                    
+                    // Top Levels button becomes target
+                    const lvlBtn = document.querySelector('.hud-tools button:nth-child(2)');
+                    lvlBtn.style.background = "#2db300";
+                    lvlBtn.onclick = (e) => {
+                        e.preventDefault();
+                        triggerWin();
+                    };
+                },
+                onAction: () => {
+                    triggerFail("Chamber ke andar dhoondhna bekaar hai!");
                 }
             }
         ];
 
-        let curIdx = 0;
-        let activeStage = null;
+        function loadStage(lvlNum) {
+            curLvl = lvlNum;
+            isStageOver = false;
+            lvlLabel.innerText = "LVL: " + curLvl;
+            failModal.style.display = "none";
+            winModal.style.display = "none";
 
-        function loadStage(idx) {
-            curIdx = idx;
-            activeStage = JSON.parse(JSON.stringify(stages[idx]));
-            isOver = false;
+            devil.onpointerdown = null;
+            const lvlBtn = document.querySelector('.hud-tools button:nth-child(2)');
+            lvlBtn.style.background = "#523500";
+            lvlBtn.onclick = goToLevels;
 
-            playerPos = { ...activeStage.start };
-            doorPos = { ...activeStage.door };
-
-            lvlDisplay.innerText = "LVL: " + activeStage.id;
-            failBox.style.display = "none";
-            winBox.style.display = "none";
-
-            renderGrid();
+            let stage = levels[curLvl - 1];
+            clueText.innerText = stage.clue;
+            stage.init();
         }
 
-        function renderGrid() {
-            gridBoard.innerHTML = "";
-            for (let r = 0; r < 4; r++) {
-                for (let c = 0; c < 6; c++) {
-                    const tile = document.createElement('div');
-                    tile.className = "tile";
-
-                    // Check Wall
-                    let isWall = activeStage.walls.some(w => w.r === r && w.c === c);
-                    if (isWall) {
-                        tile.classList.add('wall');
-                    }
-
-                    // Check Crumbled
-                    if (activeStage.crumble && activeStage.stepped) {
-                        let isCrumb = activeStage.stepped.some(s => s.r === r && s.c === c && !(s.r === playerPos.r && s.c === playerPos.c));
-                        if (isCrumb) {
-                            tile.classList.add('crumb-fall');
-                        }
-                    }
-
-                    // Render Door
-                    if (doorPos.r === r && doorPos.c === c) {
-                        tile.innerText = "🚪";
-                    }
-
-                    // Render Player
-                    if (playerPos.r === r && playerPos.c === c) {
-                        tile.innerText = "😈";
-                    }
-
-                    gridBoard.appendChild(tile);
-                }
-            }
-        }
-
-        window.movePlayer = function(dc, dr) {
-            if (isOver) return;
-
-            // Reverse Trap check
-            if (activeStage.reversed) {
-                dc = -dc;
-                dr = -dr;
-            }
-
-            let newR = playerPos.r + dr;
-            let newC = playerPos.c + dc;
-
-            // Boundaries check
-            if (newR < 0 || newR >= 4 || newC < 0 || newC >= 6) return;
-
-            // Wall check
-            if (activeStage.walls.some(w => w.r === newR && w.c === newC)) return;
-
-            // Crumbled tile check
-            if (activeStage.crumble && activeStage.stepped) {
-                if (activeStage.stepped.some(s => s.r === newR && s.c === newC)) {
-                    triggerFail("Tooti hui zameen par wapas pair rakh diya!");
-                    return;
-                }
-            }
-
-            playerPos.r = newR;
-            playerPos.c = newC;
-
-            // Execute Stage Trap
-            activeStage.onStep(activeStage);
-            doorPos = { ...activeStage.door };
-
-            // Trap Trigger
-            let hitTrap = activeStage.traps.some(t => t.r === playerPos.r && t.c === playerPos.c);
-            if (hitTrap) {
-                renderGrid();
-                triggerFail();
-                return;
-            }
-
-            // Door Goal Trigger
-            if (playerPos.r === doorPos.r && playerPos.c === doorPos.c) {
-                renderGrid();
-                triggerWin();
-                return;
-            }
-
-            renderGrid();
+        window.triggerAction = function(act) {
+            if (isStageOver) return;
+            levels[curLvl - 1].onAction(act);
         };
 
-        // Keyboard arrow/WASD support
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') movePlayer(0, -1);
-            if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') movePlayer(0, 1);
-            if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') movePlayer(-1, 0);
-            if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') movePlayer(1, 0);
-        });
+        window.onRestartClick = function() {
+            if (levels[curLvl - 1].onRestart) {
+                let handled = levels[curLvl - 1].onRestart();
+                if (handled) return;
+            }
+            reloadStage();
+        };
 
-        function triggerFail(customText) {
-            if (isOver) return;
-            isOver = true;
-            deaths++;
-            deathDisplay.innerText = "💀 " + deaths;
-            failDesc.innerText = customText || activeStage.quote;
-            failBox.style.display = "block";
+        function triggerFail(msg) {
+            if (isStageOver) return;
+            isStageOver = true;
+            failCount++;
+            failsLabel.innerText = "FAILS: " + failCount;
+            failDesc.innerText = msg;
+            failModal.style.display = "block";
         }
 
         function triggerWin() {
-            if (isOver) return;
-            isOver = true;
-            winBox.style.display = "block";
+            if (isStageOver) return;
+            isStageOver = true;
+            winModal.style.display = "block";
         }
 
-        window.retryStage = () => loadStage(curIdx);
+        window.reloadStage = () => loadStage(curLvl);
         window.nextStage = () => {
-            if (curIdx + 1 < stages.length) loadStage(curIdx + 1);
-            else { alert("SHABASH! Saare Devil Grid Levels Clear!"); loadStage(0); }
+            if (curLvl < levels.length) loadStage(curLvl + 1);
+            else { alert("LEGEND! Saare Out-of-the-Box levels khatam!"); goToLevels(); }
         };
-        window.goToMenu = () => { window.location.href = "level.html"; };
+        window.goToLevels = () => { window.location.href = "level.html"; };
 
-        // Start
-        loadStage(0);
+        loadStage(1);
     </script>
 </body>
 </html>
