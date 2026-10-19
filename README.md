@@ -1,4 +1,4 @@
-# 🤪 Z PAJAL
+# 🤪 Z PAZAL
 
 Duniya ka sabse "aasan" aur "relaxing" game. Agar aapka din bahut accha ja raha hai aur aap usko barbaad karna chahte hain, toh **Z PAGAL** aapke liye hi bana hai! Yeh game aapka dimaag kharab karne ki 100% guarantee leta hai.
 
