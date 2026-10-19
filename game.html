@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Animated Dummy Maze</title>
+    <title>🤪 Z PAJAL - 3D Dummy Maze</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -83,107 +83,109 @@
             overflow: hidden;
         }
 
-        /* Maze Walls */
+        /* Maze Matchstick Walls (Dense paths like reference image) */
         .maze-wall {
             position: absolute;
-            background: #d4a373;
-            border-radius: 4px;
-            box-shadow: 0 2px 0px #8c6239;
+            background: linear-gradient(90deg, #d4a373, #faedcd);
+            border-radius: 3px;
+            box-shadow: 0 3px 0px #8c6239, inset 0 1px 2px rgba(255,255,255,0.6);
         }
 
-        /* Animated Dummy Character Styles */
+        /* 50% Smaller & 3D Animated Dummy Character */
         .dummy-character {
             position: absolute;
-            width: 30px;
-            height: 46px;
-            bottom: 10px;
-            left: 15px;
+            width: 15px;
+            height: 23px;
+            bottom: 8px;
+            left: 10px;
             z-index: 10;
+            transform-style: preserve-3d;
             transition: bottom 0.2s ease, left 0.1s linear;
         }
 
         .dummy-head {
             position: absolute;
             top: 0;
-            left: 7px;
-            width: 16px;
-            height: 16px;
-            background: #523500;
+            left: 3.5px;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle at 3px 3px, #ffdbac, #523500);
             border-radius: 50%;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
         }
 
         .dummy-body {
             position: absolute;
-            top: 15px;
-            left: 12px;
-            width: 6px;
-            height: 18px;
-            background: #523500;
-            border-radius: 3px;
+            top: 7px;
+            left: 6px;
+            width: 3px;
+            height: 9px;
+            background: #3b2500;
+            border-radius: 1.5px;
         }
 
         .dummy-arm-left, .dummy-arm-right {
             position: absolute;
-            top: 17px;
-            width: 10px;
-            height: 4px;
+            top: 8px;
+            width: 5px;
+            height: 2px;
             background: #523500;
-            border-radius: 2px;
+            border-radius: 1px;
         }
-        .dummy-arm-left { left: 2px; }
-        .dummy-arm-right { right: 2px; }
+        .dummy-arm-left { left: 1px; }
+        .dummy-arm-right { right: 1px; }
 
         .dummy-leg-left, .dummy-leg-right {
             position: absolute;
             bottom: 0;
-            width: 5px;
-            height: 14px;
+            width: 2.5px;
+            height: 7px;
             background: #523500;
-            border-radius: 2px;
+            border-radius: 1px;
             transform-origin: top center;
         }
-        .dummy-leg-left { left: 8px; }
-        .dummy-leg-right { right: 8px; }
+        .dummy-leg-left { left: 4px; }
+        .dummy-leg-right { right: 4px; }
 
-        /* Walking Animation Class for Legs */
+        /* Walking Animation */
         .walking .dummy-leg-left {
-            animation: walkLegLeft 0.3s infinite alternate ease-in-out;
+            animation: walkLegLeft 0.25s infinite alternate ease-in-out;
         }
         .walking .dummy-leg-right {
-            animation: walkLegRight 0.3s infinite alternate ease-in-out;
+            animation: walkLegRight 0.25s infinite alternate ease-in-out;
         }
 
         @keyframes walkLegLeft {
-            0% { transform: rotate(-25deg); }
-            100% { transform: rotate(25deg); }
+            0% { transform: rotate(-30deg); }
+            100% { transform: rotate(30deg); }
         }
         @keyframes walkLegRight {
-            0% { transform: rotate(25deg); }
-            100% { transform: rotate(-25deg); }
+            0% { transform: rotate(30deg); }
+            100% { transform: rotate(-30deg); }
         }
 
-        /* Jumping Animation Class for Full Body */
-        .jumping .dummy-arm-left { transform: rotate(-45deg); }
-        .jumping .dummy-arm-right { transform: rotate(45deg); }
-        .jumping .dummy-leg-left { transform: rotate(-30deg); }
-        .jumping .dummy-leg-right { transform: rotate(30deg); }
+        /* Jumping Animation */
+        .jumping .dummy-arm-left { transform: rotate(-50deg); }
+        .jumping .dummy-arm-right { transform: rotate(50deg); }
+        .jumping .dummy-leg-left { transform: rotate(-35deg); }
+        .jumping .dummy-leg-right { transform: rotate(35deg); }
 
-        /* Target Gate (Top Right Corner) */
+        /* 50% Smaller Target Gate (Top Right Corner) */
         .target-gate {
-            width: 44px;
-            height: 50px;
-            background: #2db300;
-            border-radius: 6px;
+            width: 22px;
+            height: 25px;
+            background: linear-gradient(135deg, #2db300, #186600);
+            border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: #fff;
-            font-size: 16px;
+            font-size: 10px;
             position: absolute;
-            top: 10px;
-            right: 15px;
+            top: 8px;
+            right: 10px;
             z-index: 5;
-            box-shadow: 0 3px 0px #186600;
+            box-shadow: 0 2px 0px #0e3b00;
         }
 
         .clue-box {
@@ -191,12 +193,12 @@
             background: #ffa742;
             color: #523500;
             font-weight: 700;
-            font-size: 10px;
-            padding: 4px 8px;
-            border-radius: 6px;
+            font-size: 9px;
+            padding: 3px 6px;
+            border-radius: 4px;
             position: absolute;
-            top: 6px;
-            left: 6px;
+            top: 5px;
+            left: 5px;
             z-index: 20;
         }
 
@@ -275,18 +277,19 @@
 
         <!-- Maze Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box">Dummy ko rasto se jump karake Gate tak le jao!</div>
+            <div class="clue-box">Jump karke stiks par chadh kar Gate tak jao!</div>
             
-            <!-- Maze Walls -->
-            <div class="maze-wall" style="width: 12px; height: 140px; bottom: 0px; left: 70px;"></div>
-            <div class="maze-wall" style="width: 110px; height: 12px; bottom: 130px; left: 70px;"></div>
-            <div class="maze-wall" style="width: 12px; height: 110px; bottom: 20px; left: 170px;"></div>
-            <div class="maze-wall" style="width: 130px; height: 12px; top: 110px; left: 120px;"></div>
-            <div class="maze-wall" style="width: 12px; height: 130px; top: 20px; left: 260px;"></div>
-            <div class="maze-wall" style="width: 100px; height: 12px; top: 160px; left: 260px;"></div>
-            <div class="maze-wall" style="width: 12px; height: 90px; bottom: 10px; left: 380px;"></div>
+            <!-- Dense Matchstick Maze Walls with jump gaps -->
+            <div class="maze-wall" style="width: 8px; height: 110px; bottom: 0px; left: 55px;"></div>
+            <div class="maze-wall" style="width: 90px; height: 8px; bottom: 100px; left: 55px;"></div>
+            <div class="maze-wall" style="width: 8px; height: 90px; bottom: 15px; left: 145px;"></div>
+            <div class="maze-wall" style="width: 100px; height: 8px; top: 90px; left: 100px;"></div>
+            <div class="maze-wall" style="width: 8px; height: 100px; top: 15px; left: 210px;"></div>
+            <div class="maze-wall" style="width: 80px; height: 8px; top: 130px; left: 210px;"></div>
+            <div class="maze-wall" style="width: 8px; height: 75px; bottom: 10px; left: 310px;"></div>
+            <div class="maze-wall" style="width: 70px; height: 8px; top: 60px; left: 310px;"></div>
 
-            <!-- Animated Dummy Character -->
+            <!-- 3D Animated Smaller Dummy Character -->
             <div class="dummy-character" id="dummy">
                 <div class="dummy-head"></div>
                 <div class="dummy-body"></div>
@@ -296,28 +299,28 @@
                 <div class="dummy-leg-right"></div>
             </div>
 
-            <!-- Target Gate (Top Right Corner) -->
+            <!-- 50% Smaller Target Gate (Top Right Corner) -->
             <div class="target-gate" id="gate">🚪</div>
         </div>
 
-        <!-- Direction & Jump Controls -->
+        <!-- Controls -->
         <div class="bottom-action-bar">
-            <button class="control-btn" onclick="movePlayer(-15, 0)">◀ LEFT</button>
+            <button class="control-btn" onclick="movePlayer(-12, 0)">◀ LEFT</button>
             <button class="control-btn danger-btn" onclick="jumpPlayer()">JUMP ⬆️</button>
-            <button class="control-btn" onclick="movePlayer(15, 0)">RIGHT ▶</button>
+            <button class="control-btn" onclick="movePlayer(12, 0)">RIGHT ▶</button>
         </div>
 
         <!-- Win Modal -->
         <div class="popup-modal" id="winModal">
             <h2 style="color: #116b0d; font-size: 12px; margin-bottom: 8px;">🎉 JEET GAYE!</h2>
-            <p style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px;">डिफ़रेंट डमी कैरेक्टर सफलतापूर्वक गेट तक पहुँच गया!</p>
+            <p style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px;">3D डमी कैरेक्टर सफलतापूर्वक गेट तक पहुँच गया!</p>
             <button class="modal-btn" onclick="location.reload()">AGAIN 🔄</button>
         </div>
     </div>
 
     <script>
-        let posX = 15;
-        let posY = 10;
+        let posX = 10;
+        let posY = 8;
         const dummy = document.getElementById('dummy');
         const winModal = document.getElementById('winModal');
         let isOver = false;
@@ -325,38 +328,36 @@
 
         function movePlayer(dx, dy) {
             if (isOver) return;
-            posX = Math.max(5, Math.min(posX + dx, 420));
-            
+            posX = Math.max(2, Math.min(posX + dx, 380));
             dummy.style.left = posX + 'px';
             
-            // Add walking animation on legs
+            // Walking animation on legs
             dummy.classList.add('walking');
             clearTimeout(walkTimeout);
             walkTimeout = setTimeout(() => {
                 dummy.classList.remove('walking');
-            }, 200);
+            }, 180);
 
             checkWin();
         }
 
         function jumpPlayer() {
             if (isOver) return;
-            // Jump motion
             dummy.classList.add('jumping');
-            posY = 100; // Jump height
+            posY = 75; // Jump height to clear gaps & stick levels
             dummy.style.bottom = posY + 'px';
 
             setTimeout(() => {
-                posY = 10; // Fall back down
+                posY = 8; // Fall back down
                 dummy.style.bottom = posY + 'px';
                 dummy.classList.remove('jumping');
                 checkWin();
-            }, 350);
+            }, 300);
         }
 
         function checkWin() {
-            // Check if reached top-right corner gate area
-            if (posX >= 360 && posY >= 50) {
+            // Check top-right corner gate area
+            if (posX >= 330 && posY >= 40) {
                 isOver = true;
                 winModal.style.display = "block";
             }
