@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - UI Sabotage</title>
+    <title>🤪 Z PAJAL - Animated Dummy Maze</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -28,7 +28,6 @@
             padding: 8px;
         }
 
-        /* Arcade Frame */
         .arcade-cabinet {
             position: relative;
             background: #ffb356;
@@ -41,10 +40,9 @@
             max-width: 620px;
             width: 100%;
             height: 95vh;
-            max-height: 480px;
+            max-height: 520px;
         }
 
-        /* Top HUD Bar */
         .hud-bar {
             width: 100%;
             display: flex;
@@ -74,78 +72,134 @@
             box-shadow: 0 2px 0px #3b2500;
         }
 
-        .hud-btn:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
-
-        /* Active Puzzle Sandbox Chamber */
+        /* Maze Chamber */
         .puzzle-chamber {
             position: relative;
             width: 100%;
             flex-grow: 1;
-            background: #ffe2b3;
+            background: #fff8eb;
             border-radius: 10px;
             box-shadow: inset 0 3px 6px rgba(0,0,0,0.25);
             overflow: hidden;
         }
 
-        /* Puzzle Interactive Objects */
-        .devil-entity {
-            width: 48px;
-            height: 48px;
-            background: #523500;
-            color: #ffb356;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            box-shadow: 0 4px 0px #3b2500;
+        /* Maze Walls */
+        .maze-wall {
             position: absolute;
-            bottom: 15px;
-            left: 20px;
-            transition: bottom 0.25s ease-out, left 0.15s ease-out;
-            cursor: pointer;
-            z-index: 10;
+            background: #d4a373;
+            border-radius: 4px;
+            box-shadow: 0 2px 0px #8c6239;
         }
 
+        /* Animated Dummy Character Styles */
+        .dummy-character {
+            position: absolute;
+            width: 30px;
+            height: 46px;
+            bottom: 10px;
+            left: 15px;
+            z-index: 10;
+            transition: bottom 0.2s ease, left 0.1s linear;
+        }
+
+        .dummy-head {
+            position: absolute;
+            top: 0;
+            left: 7px;
+            width: 16px;
+            height: 16px;
+            background: #523500;
+            border-radius: 50%;
+        }
+
+        .dummy-body {
+            position: absolute;
+            top: 15px;
+            left: 12px;
+            width: 6px;
+            height: 18px;
+            background: #523500;
+            border-radius: 3px;
+        }
+
+        .dummy-arm-left, .dummy-arm-right {
+            position: absolute;
+            top: 17px;
+            width: 10px;
+            height: 4px;
+            background: #523500;
+            border-radius: 2px;
+        }
+        .dummy-arm-left { left: 2px; }
+        .dummy-arm-right { right: 2px; }
+
+        .dummy-leg-left, .dummy-leg-right {
+            position: absolute;
+            bottom: 0;
+            width: 5px;
+            height: 14px;
+            background: #523500;
+            border-radius: 2px;
+            transform-origin: top center;
+        }
+        .dummy-leg-left { left: 8px; }
+        .dummy-leg-right { right: 8px; }
+
+        /* Walking Animation Class for Legs */
+        .walking .dummy-leg-left {
+            animation: walkLegLeft 0.3s infinite alternate ease-in-out;
+        }
+        .walking .dummy-leg-right {
+            animation: walkLegRight 0.3s infinite alternate ease-in-out;
+        }
+
+        @keyframes walkLegLeft {
+            0% { transform: rotate(-25deg); }
+            100% { transform: rotate(25deg); }
+        }
+        @keyframes walkLegRight {
+            0% { transform: rotate(25deg); }
+            100% { transform: rotate(-25deg); }
+        }
+
+        /* Jumping Animation Class for Full Body */
+        .jumping .dummy-arm-left { transform: rotate(-45deg); }
+        .jumping .dummy-arm-right { transform: rotate(45deg); }
+        .jumping .dummy-leg-left { transform: rotate(-30deg); }
+        .jumping .dummy-leg-right { transform: rotate(30deg); }
+
+        /* Target Gate (Top Right Corner) */
         .target-gate {
-            width: 54px;
-            height: 64px;
+            width: 44px;
+            height: 50px;
             background: #2db300;
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             color: #fff;
-            font-size: 18px;
-            box-shadow: 0 4px 0px #186600;
+            font-size: 16px;
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: 10px;
+            right: 15px;
             z-index: 5;
+            box-shadow: 0 3px 0px #186600;
         }
 
-        /* Status Text Box */
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
             background: #ffa742;
             color: #523500;
             font-weight: 700;
-            font-size: 11px;
+            font-size: 10px;
             padding: 4px 8px;
             border-radius: 6px;
-            box-shadow: 0 2px 0px #523500;
             position: absolute;
-            top: 15px;
-            left: 15px;
-            text-align: center;
+            top: 6px;
+            left: 6px;
             z-index: 20;
         }
 
-        /* Bottom Controls Bar */
         .bottom-action-bar {
             width: 100%;
             display: flex;
@@ -153,22 +207,24 @@
             align-items: center;
             margin-top: 10px;
             padding: 0 4px;
+            gap: 6px;
         }
 
         .control-btn {
+            flex: 1;
             background: #523500;
             color: #ffb356;
-            padding: 14px 22px;
-            border-radius: 10px;
-            font-size: 11px;
+            padding: 12px 6px;
+            border-radius: 8px;
+            font-size: 9px;
             cursor: pointer;
             box-shadow: 0 4px 0px #3b2500;
-            touch-action: manipulation;
+            text-align: center;
         }
 
         .control-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0px #3b2500;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #3b2500;
         }
 
         .danger-btn {
@@ -177,7 +233,6 @@
             box-shadow: 0 4px 0px #540808;
         }
 
-        /* Modals */
         .popup-modal {
             position: absolute;
             top: 50%;
@@ -185,37 +240,23 @@
             transform: translate(-50%, -50%);
             background: #ffb356;
             border-radius: 12px;
-            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.5);
             padding: 20px;
             text-align: center;
             display: none;
             z-index: 100;
             width: 85%;
-            max-width: 360px;
-        }
-
-        .popup-modal h2 {
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-
-        .popup-modal p {
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: #523500;
-            margin-bottom: 16px;
+            max-width: 300px;
+            box-shadow: 0 10px 0px rgba(0,0,0,0.5);
         }
 
         .modal-btn {
             background: #523500;
             color: #ffb356;
-            padding: 10px 16px;
-            font-size: 9px;
+            padding: 8px 12px;
+            font-size: 8px;
             border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 3px 0px #3b2500;
-            margin: 0 4px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -224,134 +265,102 @@
     <div class="arcade-cabinet">
         <div class="hud-bar">
             <div>
-                <span id="lvlLabel">LVL: 1</span>
+                <span id="lvlLabel">MAZE: 1</span>
                 <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
             </div>
             <div class="hud-tools">
-                <button class="hud-btn" id="restartBtn" onclick="onRestartClick()">🔄 RESTART</button>
-                <button class="hud-btn" onclick="goToLevels()">📜 LEVELS</button>
-                <button class="hud-btn" onclick="toggleScreen()">⛶ FULL</button>
+                <button class="hud-btn" onclick="location.reload()">🔄 RESTART</button>
             </div>
         </div>
 
-        <!-- The Room / Chamber -->
+        <!-- Maze Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="clueText">Character ko jump karke Gate tak le jao!</div>
-            <div class="devil-entity" id="devil">😈</div>
+            <div class="clue-box">Dummy ko rasto se jump karake Gate tak le jao!</div>
+            
+            <!-- Maze Walls -->
+            <div class="maze-wall" style="width: 12px; height: 140px; bottom: 0px; left: 70px;"></div>
+            <div class="maze-wall" style="width: 110px; height: 12px; bottom: 130px; left: 70px;"></div>
+            <div class="maze-wall" style="width: 12px; height: 110px; bottom: 20px; left: 170px;"></div>
+            <div class="maze-wall" style="width: 130px; height: 12px; top: 110px; left: 120px;"></div>
+            <div class="maze-wall" style="width: 12px; height: 130px; top: 20px; left: 260px;"></div>
+            <div class="maze-wall" style="width: 100px; height: 12px; top: 160px; left: 260px;"></div>
+            <div class="maze-wall" style="width: 12px; height: 90px; bottom: 10px; left: 380px;"></div>
+
+            <!-- Animated Dummy Character -->
+            <div class="dummy-character" id="dummy">
+                <div class="dummy-head"></div>
+                <div class="dummy-body"></div>
+                <div class="dummy-arm-left"></div>
+                <div class="dummy-arm-right"></div>
+                <div class="dummy-leg-left"></div>
+                <div class="dummy-leg-right"></div>
+            </div>
+
+            <!-- Target Gate (Top Right Corner) -->
             <div class="target-gate" id="gate">🚪</div>
         </div>
 
-        <!-- Bottom Controller Bar -->
+        <!-- Direction & Jump Controls -->
         <div class="bottom-action-bar">
-            <button class="control-btn" id="leftBtn" onclick="triggerAction('left')">◀ LEFT</button>
-            <button class="control-btn danger-btn" id="trollActionBtn" onclick="triggerAction('jump')">JUMP ⬆️</button>
-            <button class="control-btn" id="rightBtn" onclick="triggerAction('right')">RIGHT ▶</button>
+            <button class="control-btn" onclick="movePlayer(-15, 0)">◀ LEFT</button>
+            <button class="control-btn danger-btn" onclick="jumpPlayer()">JUMP ⬆️</button>
+            <button class="control-btn" onclick="movePlayer(15, 0)">RIGHT ▶</button>
         </div>
 
-        <!-- Popups -->
-        <div class="popup-modal" id="failModal">
-            <h2 style="color: #8f1111;">💀 OOPS!</h2>
-            <p id="failDesc">Aap wahan tak nahi pahunch paaye!</p>
-            <button class="modal-btn" onclick="reloadStage()">RETRY 🔄</button>
-            <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
-        </div>
-
+        <!-- Win Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 style="color: #116b0d;">🎉 LEVEL CLEARED!</h2>
-            <p id="winDesc">आपने कैरेक्टर को गेट तक पहुँचा दिया!</p>
-            <button class="modal-btn" onclick="reloadStage()">PLAY AGAIN 🔄</button>
-            <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
+            <h2 style="color: #116b0d; font-size: 12px; margin-bottom: 8px;">🎉 JEET GAYE!</h2>
+            <p style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px;">डिफ़रेंट डमी कैरेक्टर सफलतापूर्वक गेट तक पहुँच गया!</p>
+            <button class="modal-btn" onclick="location.reload()">AGAIN 🔄</button>
         </div>
     </div>
 
     <script>
-        async function toggleScreen() {
-            const el = document.documentElement;
-            try {
-                if (!document.fullscreenElement) {
-                    if (el.requestFullscreen) await el.requestFullscreen();
-                    else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
-                }
-                if (screen.orientation && screen.orientation.lock) {
-                    await screen.orientation.lock('landscape');
-                }
-            } catch (e) {}
-        }
-        window.addEventListener('click', toggleScreen, { once: true });
-        window.addEventListener('touchstart', toggleScreen, { once: true });
-
-        const devil = document.getElementById('devil');
-        const gate = document.getElementById('gate');
-        const clueText = document.getElementById('clueText');
-        const lvlLabel = document.getElementById('lvlLabel');
-        const failsLabel = document.getElementById('failsLabel');
-        const failModal = document.getElementById('failModal');
+        let posX = 15;
+        let posY = 10;
+        const dummy = document.getElementById('dummy');
         const winModal = document.getElementById('winModal');
-        const failDesc = document.getElementById('failDesc');
+        let isOver = false;
+        let walkTimeout;
 
-        let failCount = 0;
-        let isStageOver = false;
-        let posX = 20; // Starting Left position
+        function movePlayer(dx, dy) {
+            if (isOver) return;
+            posX = Math.max(5, Math.min(posX + dx, 420));
+            
+            dummy.style.left = posX + 'px';
+            
+            // Add walking animation on legs
+            dummy.classList.add('walking');
+            clearTimeout(walkTimeout);
+            walkTimeout = setTimeout(() => {
+                dummy.classList.remove('walking');
+            }, 200);
 
-        function loadStage() {
-            isStageOver = false;
-            posX = 20;
-            devil.style.left = posX + "px";
-            devil.style.bottom = "15px";
-            failModal.style.display = "none";
-            winModal.style.display = "none";
-            clueText.innerText = "Right jaakar Jump karo!";
+            checkWin();
         }
 
-        window.triggerAction = function(act) {
-            if (isStageOver) return;
+        function jumpPlayer() {
+            if (isOver) return;
+            // Jump motion
+            dummy.classList.add('jumping');
+            posY = 100; // Jump height
+            dummy.style.bottom = posY + 'px';
 
-            if (act === 'right') {
-                posX = Math.min(posX + 45, 360);
-                devil.style.left = posX + "px";
-            } else if (act === 'left') {
-                posX = Math.max(posX - 45, 20);
-                devil.style.left = posX + "px";
-            } else if (act === 'jump') {
-                // JUMP animation & reach check
-                devil.style.bottom = "180px";
-                setTimeout(() => {
-                    if (!isStageOver) {
-                        // Agar right side (posX >= 250) ke paas hai toh jeet gaya
-                        if (posX >= 250) {
-                            triggerWin();
-                        } else {
-                            devil.style.bottom = "15px";
-                            triggerFail("Gate tak nahi pahunch paaye!");
-                        }
-                    }
-                }, 300);
+            setTimeout(() => {
+                posY = 10; // Fall back down
+                dummy.style.bottom = posY + 'px';
+                dummy.classList.remove('jumping');
+                checkWin();
+            }, 350);
+        }
+
+        function checkWin() {
+            // Check if reached top-right corner gate area
+            if (posX >= 360 && posY >= 50) {
+                isOver = true;
+                winModal.style.display = "block";
             }
-        };
-
-        window.onRestartClick = function() {
-            loadStage();
-        };
-
-        function triggerFail(msg) {
-            if (isStageOver) return;
-            isStageOver = true;
-            failCount++;
-            failsLabel.innerText = "FAILS: " + failCount;
-            failDesc.innerText = msg;
-            failModal.style.display = "block";
         }
-
-        function triggerWin() {
-            if (isStageOver) return;
-            isStageOver = true;
-            winModal.style.display = "block";
-        }
-
-        window.reloadStage = () => loadStage();
-        window.goToLevels = () => { window.location.href = "level.html"; };
-
-        loadStage();
     </script>
 </body>
 </html>
