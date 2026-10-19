@@ -88,11 +88,6 @@
             border-radius: 10px;
             box-shadow: inset 0 3px 6px rgba(0,0,0,0.25);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
         }
 
         /* Puzzle Interactive Objects */
@@ -108,7 +103,9 @@
             font-size: 24px;
             box-shadow: 0 4px 0px #3b2500;
             position: absolute;
-            transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            bottom: 15px;
+            left: 20px;
+            transition: bottom 0.25s ease-out, left 0.15s ease-out;
             cursor: pointer;
             z-index: 10;
         }
@@ -126,7 +123,8 @@
             font-size: 18px;
             box-shadow: 0 4px 0px #186600;
             position: absolute;
-            cursor: pointer;
+            top: 15px;
+            right: 20px;
             z-index: 5;
         }
 
@@ -136,13 +134,15 @@
             background: #ffa742;
             color: #523500;
             font-weight: 700;
-            font-size: 13px;
-            padding: 6px 12px;
+            font-size: 11px;
+            padding: 4px 8px;
             border-radius: 6px;
             box-shadow: 0 2px 0px #523500;
             position: absolute;
-            top: 10px;
+            top: 15px;
+            left: 15px;
             text-align: center;
+            z-index: 20;
         }
 
         /* Bottom Controls Bar */
@@ -236,8 +236,7 @@
 
         <!-- The Room / Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="clueText">Character ko jump karke Gate tak pahunchao!</div>
-            <!-- Dynamic elements -->
+            <div class="clue-box" id="clueText">Character ko jump karke Gate tak le jao!</div>
             <div class="devil-entity" id="devil">😈</div>
             <div class="target-gate" id="gate">🚪</div>
         </div>
@@ -252,21 +251,20 @@
         <!-- Popups -->
         <div class="popup-modal" id="failModal">
             <h2 style="color: #8f1111;">💀 OOPS!</h2>
-            <p id="failDesc">Aap gir gaye!</p>
+            <p id="failDesc">Aap wahan tak nahi pahunch paaye!</p>
             <button class="modal-btn" onclick="reloadStage()">RETRY 🔄</button>
             <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
         </div>
 
         <div class="popup-modal" id="winModal">
             <h2 style="color: #116b0d;">🎉 LEVEL CLEARED!</h2>
-            <p id="winDesc">आपने गेट तक पहुंचा दिया!</p>
+            <p id="winDesc">आपने कैरेक्टर को गेट तक पहुँचा दिया!</p>
             <button class="modal-btn" onclick="reloadStage()">PLAY AGAIN 🔄</button>
             <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
         </div>
     </div>
 
     <script>
-        // Fullscreen & Orientation Lock
         async function toggleScreen() {
             const el = document.documentElement;
             try {
@@ -282,7 +280,6 @@
         window.addEventListener('click', toggleScreen, { once: true });
         window.addEventListener('touchstart', toggleScreen, { once: true });
 
-        const chamber = document.getElementById('chamber');
         const devil = document.getElementById('devil');
         const gate = document.getElementById('gate');
         const clueText = document.getElementById('clueText');
@@ -291,79 +288,49 @@
         const failModal = document.getElementById('failModal');
         const winModal = document.getElementById('winModal');
         const failDesc = document.getElementById('failDesc');
-        const trollActionBtn = document.getElementById('trollActionBtn');
 
-        let curLvl = 1;
         let failCount = 0;
         let isStageOver = false;
+        let posX = 20; // Starting Left position
 
-        // Sirf Level 1 टेस्टिंग के लिए
-        const levels = [
-            {
-                id: 1,
-                name: "JUMP TO THE GATE",
-                clue: "Character ko jump karake upar-dahine gate tak le jao!",
-                init: () => {
-                    // कैरेक्टर सबसे नीचे (Bottom)
-                    devil.style.left = "40px";
-                    devil.style.bottom = "20px";
-                    devil.style.top = "auto";
-                    
-                    // गेट सबसे ऊपर, दाहिने कोने (Top Right Corner) में[cite: 1]
-                    gate.style.right = "20px";
-                    gate.style.top = "50px";
-                    gate.style.left = "auto";
-                    
-                    trollActionBtn.innerText = "JUMP ⬆️";
-                },
-                onAction: (act) => {
-                    let curLeft = parseInt(devil.style.left) || 40;
-                    let curBottom = parseInt(devil.style.bottom) || 20;
-
-                    if (act === 'right') {
-                        devil.style.left = Math.min(curLeft + 30, 320) + "px";
-                    } else if (act === 'left') {
-                        devil.style.left = Math.max(curLeft - 30, 20) + "px";
-                    } else if (act === 'jump') {
-                        // जंप करने पर कैरेक्टर ऊपर जाएगा
-                        devil.style.bottom = (curBottom + 80) + "px";
-                        setTimeout(() => {
-                            if (!isStageOver) {
-                                // चेक करें कि क्या कैरेक्टर गेट के पास पहुँच गया है
-                                let finalLeft = parseInt(devil.style.left) || 40;
-                                let finalBottom = parseInt(devil.style.bottom) || 20;
-                                if (finalLeft >= 240 && finalBottom >= 80) {
-                                    triggerWin();
-                                } else {
-                                    // वापस नीचे गिरना
-                                    devil.style.bottom = "20px";
-                                }
-                            }
-                        }, 400);
-                    }
-                }
-            }
-        ];
-
-        function loadStage(lvlNum) {
-            curLvl = lvlNum;
+        function loadStage() {
             isStageOver = false;
-            lvlLabel.innerText = "LVL: " + curLvl;
+            posX = 20;
+            devil.style.left = posX + "px";
+            devil.style.bottom = "15px";
             failModal.style.display = "none";
             winModal.style.display = "none";
-
-            let stage = levels[0];
-            clueText.innerText = stage.clue;
-            stage.init();
+            clueText.innerText = "Right jaakar Jump karo!";
         }
 
         window.triggerAction = function(act) {
             if (isStageOver) return;
-            levels[0].onAction(act);
+
+            if (act === 'right') {
+                posX = Math.min(posX + 45, 360);
+                devil.style.left = posX + "px";
+            } else if (act === 'left') {
+                posX = Math.max(posX - 45, 20);
+                devil.style.left = posX + "px";
+            } else if (act === 'jump') {
+                // JUMP animation & reach check
+                devil.style.bottom = "180px";
+                setTimeout(() => {
+                    if (!isStageOver) {
+                        // Agar right side (posX >= 250) ke paas hai toh jeet gaya
+                        if (posX >= 250) {
+                            triggerWin();
+                        } else {
+                            devil.style.bottom = "15px";
+                            triggerFail("Gate tak nahi pahunch paaye!");
+                        }
+                    }
+                }, 300);
+            }
         };
 
         window.onRestartClick = function() {
-            reloadStage();
+            loadStage();
         };
 
         function triggerFail(msg) {
@@ -381,10 +348,10 @@
             winModal.style.display = "block";
         }
 
-        window.reloadStage = () => loadStage(1);
+        window.reloadStage = () => loadStage();
         window.goToLevels = () => { window.location.href = "level.html"; };
 
-        loadStage(1);
+        loadStage();
     </script>
 </body>
 </html>
