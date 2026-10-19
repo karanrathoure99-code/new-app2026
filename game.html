@@ -130,22 +130,6 @@
             z-index: 5;
         }
 
-        .troll-block {
-            background: #ffa742;
-            color: #523500;
-            padding: 12px 18px;
-            border-radius: 8px;
-            box-shadow: 0 4px 0px #523500;
-            font-size: 11px;
-            position: absolute;
-            cursor: pointer;
-            transition: transform 0.15s ease;
-        }
-
-        .troll-block:active {
-            transform: scale(0.95);
-        }
-
         /* Status Text Box */
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
@@ -252,31 +236,31 @@
 
         <!-- The Room / Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="clueText">Devil ko Gate tak pahunchao!</div>
-            <!-- Dynamic elements spawn here -->
+            <div class="clue-box" id="clueText">Character ko jump karke Gate tak pahunchao!</div>
+            <!-- Dynamic elements -->
             <div class="devil-entity" id="devil">😈</div>
             <div class="target-gate" id="gate">🚪</div>
         </div>
 
         <!-- Bottom Controller Bar -->
         <div class="bottom-action-bar">
-            <button class="control-btn" id="leftBtn" onclick="triggerAction('left')">◀ PUSH</button>
-            <button class="control-btn danger-btn" id="trollActionBtn" onclick="triggerAction('special')">DO NOT TOUCH ⚡</button>
-            <button class="control-btn" id="rightBtn" onclick="triggerAction('right')">PULL ▶</button>
+            <button class="control-btn" id="leftBtn" onclick="triggerAction('left')">◀ LEFT</button>
+            <button class="control-btn danger-btn" id="trollActionBtn" onclick="triggerAction('jump')">JUMP ⬆️</button>
+            <button class="control-btn" id="rightBtn" onclick="triggerAction('right')">RIGHT ▶</button>
         </div>
 
         <!-- Popups -->
         <div class="popup-modal" id="failModal">
-            <h2 style="color: #8f1111;">💀 TROLLED!</h2>
-            <p id="failDesc">Trap mein phas gaye!</p>
+            <h2 style="color: #8f1111;">💀 OOPS!</h2>
+            <p id="failDesc">Aap gir gaye!</p>
             <button class="modal-btn" onclick="reloadStage()">RETRY 🔄</button>
             <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
         </div>
 
         <div class="popup-modal" id="winModal">
             <h2 style="color: #116b0d;">🎉 LEVEL CLEARED!</h2>
-            <p id="winDesc">Dimaag tez nikla aapka!</p>
-            <button class="modal-btn" onclick="nextStage()">NEXT ➡️</button>
+            <p id="winDesc">आपने गेट तक पहुंचा दिया!</p>
+            <button class="modal-btn" onclick="reloadStage()">PLAY AGAIN 🔄</button>
             <button class="modal-btn" onclick="goToLevels()">LEVELS 📜</button>
         </div>
     </div>
@@ -313,131 +297,50 @@
         let failCount = 0;
         let isStageOver = false;
 
-        // Custom Never-Seen-Before Levels Logic
+        // Sirf Level 1 टेस्टिंग के लिए
         const levels = [
             {
                 id: 1,
-                name: "THE REVERSED PULL",
-                clue: "Door tak seedha nahi ja sakte!",
+                name: "JUMP TO THE GATE",
+                clue: "Character ko jump karake upar-dahine gate tak le jao!",
                 init: () => {
+                    // कैरेक्टर सबसे नीचे (Bottom)
                     devil.style.left = "40px";
-                    devil.style.top = "120px";
-                    gate.style.left = "80%";
-                    gate.style.top = "110px";
-                    trollActionBtn.innerText = "DO NOT TOUCH ⚡";
+                    devil.style.bottom = "20px";
+                    devil.style.top = "auto";
+                    
+                    // गेट सबसे ऊपर, दाहिने कोने (Top Right Corner) में[cite: 1]
+                    gate.style.right = "20px";
+                    gate.style.top = "50px";
+                    gate.style.left = "auto";
+                    
+                    trollActionBtn.innerText = "JUMP ⬆️";
                 },
                 onAction: (act) => {
                     let curLeft = parseInt(devil.style.left) || 40;
-                    if (act === 'right') {
-                        // Troll: Pushing right throws him left!
-                        devil.style.left = (curLeft - 30) + "px";
-                        if (curLeft <= 20) triggerFail("Peeche wall se takra kar crush ho gaye!");
-                    } else if (act === 'left') {
-                        // Pulling left actually pushes right
-                        devil.style.left = (curLeft + 60) + "px";
-                        if (parseInt(devil.style.left) >= 320) triggerWin();
-                    } else if (act === 'special') {
-                        triggerFail("Likhha tha na: DO NOT TOUCH!");
-                    }
-                }
-            },
-            {
-                id: 2,
-                name: "THE ESCAPE BUTTON",
-                clue: "Gate ko rok kar dikhao!",
-                init: () => {
-                    devil.style.left = "40px";
-                    devil.style.top = "120px";
-                    gate.style.left = "75%";
-                    gate.style.top = "110px";
-                    trollActionBtn.innerText = "FREEZE TIME ❄️";
-                },
-                onAction: (act) => {
-                    if (act === 'right') {
-                        let curLeft = parseInt(devil.style.left) || 40;
-                        devil.style.left = (curLeft + 40) + "px";
-                        // Gate bhaagta hai
-                        let gLeft = parseInt(gate.style.left) || 75;
-                        gate.style.left = "20px";
-                        triggerFail("Gate aapke peeche bhaag gaya!");
-                    } else if (act === 'special') {
-                        // Freeze gate
-                        gate.style.background = "#0088cc";
-                        gate.innerText = "🧊";
-                        clueText.innerText = "Gate jam chuka hai! Ab aage badho!";
-                        trollActionBtn.onclick = null;
-                        devil.style.left = "75%";
-                        setTimeout(triggerWin, 400);
-                    }
-                }
-            },
-            {
-                id: 3,
-                name: "RESTART IS THE KEY",
-                clue: "Koi rasta nahi bacha? Restart karo!",
-                init: () => {
-                    devil.style.left = "40px";
-                    devil.style.top = "120px";
-                    gate.style.display = "none"; // Gate invisible hai
-                    trollActionBtn.innerText = "SUICIDE 💀";
-                },
-                onAction: (act) => {
-                    if (act === 'special' || act === 'left' || act === 'right') {
-                        triggerFail("Galat button! Kuch alag socho!");
-                    }
-                },
-                onRestart: () => {
-                    // Troll secret: Top Restart button dabane se gate spawn hoga!
-                    gate.style.display = "flex";
-                    gate.style.left = "50%";
-                    gate.style.top = "110px";
-                    devil.style.left = "50%";
-                    setTimeout(triggerWin, 300);
-                    return true; // Cancel normal restart
-                }
-            },
-            {
-                id: 4,
-                name: "DRAG THE UNTOUCHABLE",
-                clue: "Devil ko haath lagao aur chalao!",
-                init: () => {
-                    devil.style.left = "30px";
-                    devil.style.top = "120px";
-                    gate.style.left = "78%";
-                    gate.style.top = "120px";
-                    gate.style.display = "flex";
-                    trollActionBtn.innerText = "TELEPORT 🌀";
+                    let curBottom = parseInt(devil.style.bottom) || 20;
 
-                    // Drag mechanics
-                    devil.onpointerdown = (e) => {
-                        devil.style.left = "78%";
-                        setTimeout(triggerWin, 350);
-                    };
-                },
-                onAction: (act) => {
-                    if (act === 'special') triggerFail("Teleport fail ho gaya!");
-                }
-            },
-            {
-                id: 5,
-                name: "THE HUD HIJACK",
-                clue: "Target screen ke bahar hai!",
-                init: () => {
-                    devil.style.left = "40px";
-                    devil.style.top = "120px";
-                    gate.style.display = "none";
-                    clueText.innerText = "Top HUD mein 'LEVELS' button hi asli Gate hai!";
-                    
-                    // Top Levels button becomes target
-                    const lvlBtn = document.querySelector('.hud-tools button:nth-child(2)');
-                    lvlBtn.style.background = "#2db300";
-                    lvlBtn.onclick = (e) => {
-                        e.preventDefault();
-                        triggerWin();
-                    };
-                },
-                onAction: () => {
-                    triggerFail("Chamber ke andar dhoondhna bekaar hai!");
+                    if (act === 'right') {
+                        devil.style.left = Math.min(curLeft + 30, 320) + "px";
+                    } else if (act === 'left') {
+                        devil.style.left = Math.max(curLeft - 30, 20) + "px";
+                    } else if (act === 'jump') {
+                        // जंप करने पर कैरेक्टर ऊपर जाएगा
+                        devil.style.bottom = (curBottom + 80) + "px";
+                        setTimeout(() => {
+                            if (!isStageOver) {
+                                // चेक करें कि क्या कैरेक्टर गेट के पास पहुँच गया है
+                                let finalLeft = parseInt(devil.style.left) || 40;
+                                let finalBottom = parseInt(devil.style.bottom) || 20;
+                                if (finalLeft >= 240 && finalBottom >= 80) {
+                                    triggerWin();
+                                } else {
+                                    // वापस नीचे गिरना
+                                    devil.style.bottom = "20px";
+                                }
+                            }
+                        }, 400);
+                    }
                 }
             }
         ];
@@ -449,26 +352,17 @@
             failModal.style.display = "none";
             winModal.style.display = "none";
 
-            devil.onpointerdown = null;
-            const lvlBtn = document.querySelector('.hud-tools button:nth-child(2)');
-            lvlBtn.style.background = "#523500";
-            lvlBtn.onclick = goToLevels;
-
-            let stage = levels[curLvl - 1];
+            let stage = levels[0];
             clueText.innerText = stage.clue;
             stage.init();
         }
 
         window.triggerAction = function(act) {
             if (isStageOver) return;
-            levels[curLvl - 1].onAction(act);
+            levels[0].onAction(act);
         };
 
         window.onRestartClick = function() {
-            if (levels[curLvl - 1].onRestart) {
-                let handled = levels[curLvl - 1].onRestart();
-                if (handled) return;
-            }
             reloadStage();
         };
 
@@ -487,11 +381,7 @@
             winModal.style.display = "block";
         }
 
-        window.reloadStage = () => loadStage(curLvl);
-        window.nextStage = () => {
-            if (curLvl < levels.length) loadStage(curLvl + 1);
-            else { alert("LEGEND! Saare Out-of-the-Box levels khatam!"); goToLevels(); }
-        };
+        window.reloadStage = () => loadStage(1);
         window.goToLevels = () => { window.location.href = "level.html"; };
 
         loadStage(1);
