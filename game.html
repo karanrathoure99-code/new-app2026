@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - 3D Dummy Maze</title>
+    <title>🤪 Z PAJAL - The Guardian's Burden</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -20,7 +20,7 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #916000;
+            background: #4a154b;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -40,7 +40,7 @@
             max-width: 620px;
             width: 100%;
             height: 95vh;
-            max-height: 520px;
+            max-height: 550px;
         }
 
         .hud-bar {
@@ -72,7 +72,7 @@
             box-shadow: 0 2px 0px #3b2500;
         }
 
-        /* Maze Chamber */
+        /* Puzzle Chamber */
         .puzzle-chamber {
             position: relative;
             width: 100%;
@@ -83,53 +83,59 @@
             overflow: hidden;
         }
 
-        /* Maze Matchstick Walls (Dense paths like reference image) */
-        .maze-wall {
+        /* Obstacles & Traps */
+        .hazard {
             position: absolute;
-            background: linear-gradient(90deg, #d4a373, #faedcd);
-            border-radius: 3px;
-            box-shadow: 0 3px 0px #8c6239, inset 0 1px 2px rgba(255,255,255,0.6);
+            background: #d90429;
+            border-radius: 4px;
+            box-shadow: 0 2px 0px #780016;
         }
 
-        /* 50% Smaller & 3D Animated Dummy Character */
+        .platform {
+            position: absolute;
+            background: #8c6239;
+            border-radius: 3px;
+        }
+
+        /* Stubborn AI Kid Character */
         .dummy-character {
             position: absolute;
-            width: 15px;
-            height: 23px;
-            bottom: 8px;
-            left: 10px;
+            width: 18px;
+            height: 26px;
+            bottom: 12px;
+            left: 20px;
             z-index: 10;
             transform-style: preserve-3d;
-            transition: bottom 0.2s ease, left 0.1s linear;
+            transition: left 0.05s linear, bottom 0.15s ease;
         }
 
         .dummy-head {
             position: absolute;
             top: 0;
-            left: 3.5px;
-            width: 8px;
-            height: 8px;
-            background: radial-gradient(circle at 3px 3px, #ffdbac, #523500);
+            left: 4px;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 3px 3px, #ffdbac, #b5651d);
             border-radius: 50%;
             box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
         }
 
         .dummy-body {
             position: absolute;
-            top: 7px;
-            left: 6px;
-            width: 3px;
-            height: 9px;
-            background: #3b2500;
-            border-radius: 1.5px;
+            top: 9px;
+            left: 7px;
+            width: 4px;
+            height: 10px;
+            background: #d90429;
+            border-radius: 2px;
         }
 
         .dummy-arm-left, .dummy-arm-right {
             position: absolute;
-            top: 8px;
-            width: 5px;
+            top: 10px;
+            width: 6px;
             height: 2px;
-            background: #523500;
+            background: #b5651d;
             border-radius: 1px;
         }
         .dummy-arm-left { left: 1px; }
@@ -138,68 +144,46 @@
         .dummy-leg-left, .dummy-leg-right {
             position: absolute;
             bottom: 0;
-            width: 2.5px;
+            width: 3px;
             height: 7px;
-            background: #523500;
+            background: #003049;
             border-radius: 1px;
-            transform-origin: top center;
         }
-        .dummy-leg-left { left: 4px; }
-        .dummy-leg-right { right: 4px; }
+        .dummy-leg-left { left: 5px; }
+        .dummy-leg-right { right: 5px; }
 
-        /* Walking Animation */
-        .walking .dummy-leg-left {
-            animation: walkLegLeft 0.25s infinite alternate ease-in-out;
-        }
-        .walking .dummy-leg-right {
-            animation: walkLegRight 0.25s infinite alternate ease-in-out;
-        }
-
-        @keyframes walkLegLeft {
-            0% { transform: rotate(-30deg); }
-            100% { transform: rotate(30deg); }
-        }
-        @keyframes walkLegRight {
-            0% { transform: rotate(30deg); }
-            100% { transform: rotate(-30deg); }
-        }
-
-        /* Jumping Animation */
-        .jumping .dummy-arm-left { transform: rotate(-50deg); }
-        .jumping .dummy-arm-right { transform: rotate(50deg); }
-        .jumping .dummy-leg-left { transform: rotate(-35deg); }
-        .jumping .dummy-leg-right { transform: rotate(35deg); }
-
-        /* 50% Smaller Target Gate (Top Right Corner) */
+        /* Target Gate */
         .target-gate {
-            width: 22px;
-            height: 25px;
+            width: 26px;
+            height: 30px;
             background: linear-gradient(135deg, #2db300, #186600);
             border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: #fff;
-            font-size: 10px;
+            font-size: 11px;
             position: absolute;
-            top: 8px;
-            right: 10px;
+            bottom: 12px;
+            right: 15px;
             z-index: 5;
             box-shadow: 0 2px 0px #0e3b00;
         }
 
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
-            background: #ffa742;
-            color: #523500;
+            background: #d90429;
+            color: #fff;
             font-weight: 700;
-            font-size: 9px;
-            padding: 3px 6px;
+            font-size: 8px;
+            padding: 4px 8px;
             border-radius: 4px;
             position: absolute;
-            top: 5px;
-            left: 5px;
+            top: 6px;
+            left: 6px;
             z-index: 20;
+            text-align: center;
+            width: calc(100% - 12px);
         }
 
         .bottom-action-bar {
@@ -218,7 +202,7 @@
             color: #ffb356;
             padding: 12px 6px;
             border-radius: 8px;
-            font-size: 9px;
+            font-size: 8px;
             cursor: pointer;
             box-shadow: 0 4px 0px #3b2500;
             text-align: center;
@@ -267,29 +251,26 @@
     <div class="arcade-cabinet">
         <div class="hud-bar">
             <div>
-                <span id="lvlLabel">MAZE: 1</span>
+                <span id="lvlLabel">LEVEL: AI TODDLER</span>
                 <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
             </div>
             <div class="hud-tools">
-                <button class="hud-btn" onclick="location.reload()">🔄 RESTART</button>
+                <button class="hud-btn" onclick="resetGame()">🔄 RESTART</button>
             </div>
         </div>
 
         <!-- Maze Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box">Jump karke stiks par chadh kar Gate tak jao!</div>
+            <div class="clue-box" id="aiStatus">AI Kid: "Mujhe kahin nahi jana, main ziddi hoon!"</div>
             
-            <!-- Dense Matchstick Maze Walls with jump gaps -->
-            <div class="maze-wall" style="width: 8px; height: 110px; bottom: 0px; left: 55px;"></div>
-            <div class="maze-wall" style="width: 90px; height: 8px; bottom: 100px; left: 55px;"></div>
-            <div class="maze-wall" style="width: 8px; height: 90px; bottom: 15px; left: 145px;"></div>
-            <div class="maze-wall" style="width: 100px; height: 8px; top: 90px; left: 100px;"></div>
-            <div class="maze-wall" style="width: 8px; height: 100px; top: 15px; left: 210px;"></div>
-            <div class="maze-wall" style="width: 80px; height: 8px; top: 130px; left: 210px;"></div>
-            <div class="maze-wall" style="width: 8px; height: 75px; bottom: 10px; left: 310px;"></div>
-            <div class="maze-wall" style="width: 70px; height: 8px; top: 60px; left: 310px;"></div>
+            <!-- Traps & Pits -->
+            <div class="hazard" style="width: 45px; height: 12px; bottom: 12px; left: 140px;"></div>
+            <div class="hazard" style="width: 50px; height: 12px; bottom: 12px; left: 280px;"></div>
 
-            <!-- 3D Animated Smaller Dummy Character -->
+            <!-- Platforms -->
+            <div class="platform" style="width: 70px; height: 8px; bottom: 60px; left: 190px;"></div>
+
+            <!-- Stubborn AI Kid Character -->
             <div class="dummy-character" id="dummy">
                 <div class="dummy-head"></div>
                 <div class="dummy-body"></div>
@@ -299,68 +280,128 @@
                 <div class="dummy-leg-right"></div>
             </div>
 
-            <!-- 50% Smaller Target Gate (Top Right Corner) -->
+            <!-- Target Gate -->
             <div class="target-gate" id="gate">🚪</div>
         </div>
 
-        <!-- Controls -->
+        <!-- Controls (Interference buttons that annoy the AI) -->
         <div class="bottom-action-bar">
-            <button class="control-btn" onclick="movePlayer(-12, 0)">◀ LEFT</button>
-            <button class="control-btn danger-btn" onclick="jumpPlayer()">JUMP ⬆️</button>
-            <button class="control-btn" onclick="movePlayer(12, 0)">RIGHT ▶</button>
+            <button class="control-btn" onclick="forcePush(-15)">PULL BACK ◀</button>
+            <button class="control-btn danger-btn" onclick="makeKidJump()">FORCE JUMP ⬆️</button>
+            <button class="control-btn" onclick="forcePush(15)">PUSH FORWARD ▶</button>
         </div>
 
-        <!-- Win Modal -->
+        <!-- Win / Fail Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 style="color: #116b0d; font-size: 12px; margin-bottom: 8px;">🎉 JEET GAYE!</h2>
-            <p style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px;">3D डमी कैरेक्टर सफलतापूर्वक गेट तक पहुँच गया!</p>
-            <button class="modal-btn" onclick="location.reload()">AGAIN 🔄</button>
+            <h2 id="modalTitle" style="color: #116b0d; font-size: 12px; margin-bottom: 8px;">🎉 BACHA BACH GAYA!</h2>
+            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px;">नासमझ AI बच्चे को आखिरकार गेट तक पहुँचा दिया!</p>
+            <button class="modal-btn" onclick="resetGame()">AGAIN 🔄</button>
         </div>
     </div>
 
     <script>
-        let posX = 10;
-        let posY = 8;
+        let posX = 20;
+        let posY = 12;
+        let isJumping = false;
+        let fails = 0;
+        let isOver = false;
+        
         const dummy = document.getElementById('dummy');
         const winModal = document.getElementById('winModal');
-        let isOver = false;
-        let walkTimeout;
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+        const aiStatus = document.getElementById('aiStatus');
+        const failsLabel = document.getElementById('failsLabel');
 
-        function movePlayer(dx, dy) {
+        // AI Kid keeps moving on his own stupidity!
+        let aiBrain = setInterval(() => {
             if (isOver) return;
-            posX = Math.max(2, Math.min(posX + dx, 380));
-            dummy.style.left = posX + 'px';
-            
-            // Walking animation on legs
-            dummy.classList.add('walking');
-            clearTimeout(walkTimeout);
-            walkTimeout = setTimeout(() => {
-                dummy.classList.remove('walking');
-            }, 180);
 
-            checkWin();
+            // AI sometimes ignores you or moves backwards out of spite
+            let stubbornMove = Math.random() < 0.35 ? -3 : 2; 
+            posX += stubbornMove;
+            
+            // Boundaries
+            posX = Math.max(10, Math.min(posX, 430));
+            dummy.style.left = posX + 'px';
+
+            // Random sarcastic AI dialogues
+            if (Math.random() < 0.05) {
+                const dialogues = [
+                    'AI Kid: "Mujhe ye game pasand nahi!"',
+                    'AI Kid: "Main nahi chalunga, mujhe neend aa rahi hai!"',
+                    'AI Kid: "Haha, dekho main khai ki taraf ja raha hoon!"',
+                    'AI Kid: "Developer kitना bewakoof hai jo mujhe control kar raha hai!"'
+                ];
+                aiStatus.innerText = dialogues[Math.floor(Math.random() * dialogues.length)];
+            }
+
+            checkHazards();
+        }, 50);
+
+        function forcePush(val) {
+            if (isOver) return;
+            // Player tries to help, but AI resists and goes opposite or trips!
+            posX += val * -0.5; // Troll physics: pushing forward might drag him backward!
+            aiStatus.innerText = 'AI Kid: "Meri marzi, main ulta jaunga!"';
         }
 
-        function jumpPlayer() {
-            if (isOver) return;
-            dummy.classList.add('jumping');
-            posY = 75; // Jump height to clear gaps & stick levels
+        function makeKidJump() {
+            if (isOver || isJumping) return;
+            isJumping = true;
+            posY = 70;
             dummy.style.bottom = posY + 'px';
+            aiStatus.innerText = 'AI Kid: "Mujhe koodna nahi pasand, aaaaah!"';
 
             setTimeout(() => {
-                posY = 8; // Fall back down
+                posY = 12;
                 dummy.style.bottom = posY + 'px';
-                dummy.classList.remove('jumping');
-                checkWin();
-            }, 300);
+                isJumping = false;
+                checkHazards();
+            }, 350);
         }
 
-        function checkWin() {
-            // Check top-right corner gate area
-            if (posX >= 330 && posY >= 40) {
-                isOver = true;
-                winModal.style.display = "block";
+        function checkHazards() {
+            // Check if fallen in pit (Hazards are at x: 140-185 and 280-330)
+            let chamberWidth = document.getElementById('chamber').clientWidth;
+            if (posX > 135 && posX < 185 && posY <= 15) {
+                triggerFail("AI Kid khai mein gir gaya!");
+            } else if (posX > 275 && posX < 330 && posY <= 15) {
+                triggerFail("AI Kid kaante par chad gaya!");
+            } else if (posX >= 410) {
+                triggerWin();
             }
+        }
+
+        function triggerFail(reason) {
+            if (isOver) return;
+            isOver = true;
+            fails++;
+            failsLabel.innerText = "FAILS: " + fails;
+            
+            modalTitle.style.color = "#d90429";
+            modalTitle.innerText = "💀 KHATAM! (FAIL)";
+            modalDesc.innerText = reason + " आपका ईगो हर्ट हुआ ना? फिर से ट्राई करो!";
+            winModal.style.display = "block";
+        }
+
+        function triggerWin() {
+            if (isOver) return;
+            isOver = true;
+            modalTitle.style.color = "#116b0d";
+            modalTitle.innerText = "🎉 GAIBE JEET GAYE!";
+            modalDesc.innerText = "असंभव को संभव कर दिखाया! इस नासमझ AI को बचा लिया!";
+            winModal.style.display = "block";
+        }
+
+        function resetGame() {
+            posX = 20;
+            posY = 12;
+            isOver = false;
+            dummy.style.left = posX + 'px';
+            dummy.style.bottom = posY + 'px';
+            winModal.style.display = "none";
+            aiStatus.innerText = "AI Kid: 'Mujhe firse harane aaye ho?'";
         }
     </script>
 </body>
