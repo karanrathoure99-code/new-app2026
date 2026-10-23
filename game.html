@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Multi-Level Maze with Animations</title>
+    <title>🤪 Z PAJAL - Level Devil Ultimate Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -20,7 +20,7 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #1a0f00;
+            background: #0d0221;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,9 +30,9 @@
 
         .arcade-cabinet {
             position: relative;
-            background: #d4a373;
+            background: #7209b7;
             border-radius: 14px;
-            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.7);
             padding: 14px;
             display: flex;
             flex-direction: column;
@@ -41,7 +41,7 @@
             width: 100%;
             height: 95vh;
             max-height: 560px;
-            border: 2px solid #523500;
+            border: 2px solid #f72585;
         }
 
         .hud-bar {
@@ -49,13 +49,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #faedcd;
+            background: #3a0ca3;
             border-radius: 8px;
             padding: 10px 14px;
             margin-bottom: 10px;
             font-size: 10px;
-            color: #523500;
-            box-shadow: 0 3px 0px #bc6c25;
+            color: #4cc9f0;
+            box-shadow: 0 3px 0px #170242;
         }
 
         .hud-tools {
@@ -64,13 +64,13 @@
         }
 
         .hud-btn {
-            background: #bc6c25;
+            background: #f72585;
             color: #fff;
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 2px 0px #854d0e;
+            box-shadow: 0 2px 0px #b5179e;
         }
 
         /* Puzzle Chamber */
@@ -78,18 +78,27 @@
             position: relative;
             width: 100%;
             flex-grow: 1;
-            background: #fefae0;
+            background: #f8f9fa;
             border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
             overflow: hidden;
         }
 
         /* Maze Walls */
         .maze-wall {
             position: absolute;
-            background: #523500;
+            background: #3a0ca3;
             border-radius: 2px;
-            box-shadow: 0 2px 0px #2b1c00;
+            box-shadow: 0 2px 0px #170242;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Level Devil Surprise Traps */
+        .devil-trap {
+            position: absolute;
+            background: #f72585;
+            border-radius: 2px;
+            box-shadow: 0 0 8px #f72585;
         }
 
         /* Animated Character */
@@ -117,7 +126,7 @@
             left: 5px;
             width: 4px;
             height: 8px;
-            background: #d90429;
+            background: #4cc9f0;
             border-radius: 1px;
         }
 
@@ -126,7 +135,7 @@
             top: 8px;
             width: 5px;
             height: 2px;
-            background: #523500;
+            background: #3a0ca3;
             border-radius: 1px;
             transition: transform 0.1s ease;
         }
@@ -138,7 +147,7 @@
             bottom: 0;
             width: 2.5px;
             height: 7px;
-            background: #333;
+            background: #170242;
             border-radius: 1px;
             transition: transform 0.1s ease;
         }
@@ -146,16 +155,16 @@
         .dummy-leg-right { right: 3px; transform-origin: top center; }
 
         /* Walking Animation Classes */
-        .walking-left .dummy-leg-left { transform: rotate(30deg); }
-        .walking-left .dummy-leg-right { transform: rotate(-30deg); }
-        .walking-right .dummy-leg-left { transform: rotate(-30deg); }
-        .walking-right .dummy-leg-right { transform: rotate(30deg); }
+        .walking-left .dummy-leg-left { transform: rotate(35deg); }
+        .walking-left .dummy-leg-right { transform: rotate(-35deg); }
+        .walking-right .dummy-leg-left { transform: rotate(-35deg); }
+        .walking-right .dummy-leg-right { transform: rotate(35deg); }
 
         /* Jumping Animation Class */
-        .jumping .dummy-arm-left { transform: rotate(-45deg); }
-        .jumping .dummy-arm-right { transform: rotate(45deg); }
-        .jumping .dummy-leg-left { transform: rotate(-20deg); }
-        .jumping .dummy-leg-right { transform: rotate(20deg); }
+        .jumping .dummy-arm-left { transform: rotate(-50deg); }
+        .jumping .dummy-arm-right { transform: rotate(50deg); }
+        .jumping .dummy-leg-left { transform: rotate(-25deg); }
+        .jumping .dummy-leg-right { transform: rotate(25deg); }
 
         /* Trophy */
         .trophy-target {
@@ -167,7 +176,7 @@
 
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
-            background: #d90429;
+            background: #f72585;
             color: #fff;
             font-weight: 700;
             font-size: 8px;
@@ -191,19 +200,20 @@
         }
 
         .control-btn {
-            background: #bc6c25;
-            color: #fff;
+            background: #4cc9f0;
+            color: #170242;
             padding: 10px 4px;
             border-radius: 8px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 0px #854d0e;
+            box-shadow: 0 4px 0px #3a0ca3;
             text-align: center;
+            font-weight: bold;
         }
 
         .control-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0px #854d0e;
+            box-shadow: 0 2px 0px #3a0ca3;
         }
 
         .popup-modal {
@@ -211,8 +221,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #faedcd;
-            border: 2px solid #bc6c25;
+            background: #f8f9fa;
+            border: 2px solid #7209b7;
             border-radius: 12px;
             padding: 20px;
             text-align: center;
@@ -220,11 +230,11 @@
             z-index: 100;
             width: 85%;
             max-width: 300px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.7);
         }
 
         .modal-btn {
-            background: #bc6c25;
+            background: #7209b7;
             color: #fff;
             padding: 8px 12px;
             font-size: 8px;
@@ -249,9 +259,8 @@
 
         <!-- Puzzle Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="msgBox">भूल-भुलैया पार करके 🏆 ट्रॉफी तक पहुँचो!</div>
+            <div class="clue-box" id="msgBox">Level Devil: रास्तों पर भरोसा मत करो!</div>
             
-            <!-- Dynamic Walls & Trophy will be loaded via JavaScript for each Level -->
             <div id="levelContent"></div>
 
             <!-- Character -->
@@ -277,8 +286,8 @@
 
         <!-- Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 id="modalTitle" style="color: #bc6c25; font-size: 12px; margin-bottom: 8px;">🎉 LEVEL CLEARED!</h2>
-            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #523500;">अगले लेवल पर चलते हैं!</p>
+            <h2 id="modalTitle" style="color: #7209b7; font-size: 12px; margin-bottom: 8px;">🎉 LEVEL CLEARED!</h2>
+            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #170242;">अगले लेवल पर चलते हैं!</p>
             <button class="modal-btn" id="nextBtn" onclick="nextLevel()">AGAIN 🔄</button>
         </div>
     </div>
@@ -297,40 +306,44 @@
         const failsLabel = document.getElementById('failsLabel');
         const lvlLabel = document.getElementById('lvlLabel');
         const levelContent = document.getElementById('levelContent');
+        const msgBox = document.getElementById('msgBox');
 
-        // 🗺️ LEVELS CONFIGURATION (यहाँ आप आसानी से नए लेवल्स जोड़ सकते हैं!)
+        // 😈 LEVEL DEVIL & MULTI-LEVEL CONFIGURATION
         const levelsData = {
             1: {
                 startPos: { x: 15, y: 15 },
                 trophyPos: { top: '220px', right: '30px' },
                 walls: [
-                    { width: '10px', height: '170px', top: '40px', left: '70px' },
-                    { width: '160px', height: '10px', top: '110px', left: '70px' },
-                    { width: '10px', height: '130px', top: '40px', left: '230px' },
-                    { width: '140px', height: '10px', top: '160px', left: '230px' }
+                    { width: '10px', height: '170px', top: '40px', left: '70px', fake: false },
+                    { width: '160px', height: '10px', top: '110px', left: '70px', fake: true, hint: "ओह! यहाँ की दीवार अचानक गायब हो गई!" },
+                    { width: '10px', height: '130px', top: '40px', left: '230px', fake: false },
+                    { width: '140px', height: '10px', top: '160px', left: '230px', fake: false }
+                ],
+                devilTraps: [
+                    { width: '30px', height: '10px', top: '100px', left: '150px' }
                 ]
             },
             2: {
                 startPos: { x: 15, y: 250 },
                 trophyPos: { top: '20px', right: '30px' },
                 walls: [
-                    { width: '220px', height: '10px', top: '180px', left: '30px' },
-                    { width: '10px', height: '140px', top: '40px', left: '250px' },
-                    { width: '180px', height: '10px', top: '80px', left: '150px' },
-                    { width: '10px', height: '100px', top: '90px', left: '100px' }
+                    { width: '220px', height: '10px', top: '180px', left: '30px', fake: false },
+                    { width: '10px', height: '140px', top: '40px', left: '250px', fake: true, hint: "सतर्क रहो! डेविल ट्रैप एक्टिव हो गया!" },
+                    { width: '180px', height: '10px', top: '80px', left: '150px', fake: false }
+                ],
+                devilTraps: [
+                    { width: '10px', height: '40px', top: '100px', left: '200px' }
                 ]
             },
             3: {
                 startPos: { x: 280, y: 15 },
                 trophyPos: { bottom: '20px', left: '30px' },
                 walls: [
-                    { width: '10px', height: '200px', top: '20px', left: '200px' },
-                    { width: '150px', height: '10px', top: '120px', left: '50px' },
-                    { width: '10px', height: '130px', top: '120px', left: '100px' },
-                    { width: '120px', height: '10px', top: '200px', left: '150px' }
-                ]
+                    { width: '10px', height: '200px', top: '20px', left: '200px', fake: false },
+                    { width: '150px', height: '10px', top: '120px', left: '50px', fake: true, hint: "ट्रॉफी आपको देखकर भाग रही है!" }
+                ],
+                devilTraps: []
             }
-            // 💡 नया लेवल जोड़ने के लिए यहाँ बस { 4: { ... } } जोड़ सकते हैं!
         };
 
         function loadLevel(lvl) {
@@ -344,11 +357,14 @@
             dummy.style.left = posX + 'px';
             dummy.style.top = posY + 'px';
 
-            // Render Walls & Trophy dynamically
             let html = `<div class="trophy-target" id="trophy" style="${data.trophyPos.top ? 'top:'+data.trophyPos.top : 'bottom:'+data.trophyPos.bottom}; ${data.trophyPos.right ? 'right:'+data.trophyPos.right : 'left:'+data.trophyPos.left}">🏆</div>`;
             
-            data.walls.forEach(w => {
-                html += `<div class="maze-wall" style="width:${w.width}; height:${w.height}; top:${w.top}; left:${w.left};"></div>`;
+            data.walls.forEach((w, index) => {
+                html += `<div class="maze-wall" id="wall_${index}" style="width:${w.width}; height:${w.height}; top:${w.top}; left:${w.left};"></div>`;
+            });
+
+            data.devilTraps.forEach((t, index) => {
+                html += `<div class="devil-trap" id="trap_${index}" style="width:${t.width}; height:${t.height}; top:${t.top}; left:${t.left};"></div>`;
             });
 
             levelContent.innerHTML = html;
@@ -362,7 +378,6 @@
             posX += dx;
             posY += dy;
 
-            // Boundaries
             let chamber = document.getElementById('chamber');
             posX = Math.max(5, Math.min(posX, chamber.clientWidth - 20));
             posY = Math.max(5, Math.min(posY, chamber.clientHeight - 25));
@@ -370,7 +385,7 @@
             dummy.style.left = posX + 'px';
             dummy.style.top = posY + 'px';
 
-            // Leg Animation during movement
+            // Animation Trigger
             if (dx > 0) {
                 dummy.className = "dummy-character walking-right";
             } else if (dx < 0) {
@@ -383,6 +398,22 @@
                 if(!isOver) dummy.className = "dummy-character";
             }, 150);
 
+            // Level Devil Fake Wall Mechanic
+            let data = levelsData[currentLevel];
+            data.walls.forEach((w, index) => {
+                if (w.fake) {
+                    let wallEl = document.getElementById(`wall_${index}`);
+                    if (wallEl) {
+                        let wRect = wallEl.getBoundingClientRect();
+                        let dRect = dummy.getBoundingClientRect();
+                        if (Math.abs(dRect.left - wRect.left) < 45 && Math.abs(dRect.top - wRect.top) < 45) {
+                            wallEl.style.opacity = '0';
+                            msgBox.innerText = w.hint;
+                        }
+                    }
+                }
+            });
+
             checkCollisions();
         }
 
@@ -392,23 +423,41 @@
             
             let hitWall = false;
             walls.forEach(wall => {
-                const wRect = wall.getBoundingClientRect();
-                if (!(dRect.right < wRect.left || 
-                      dRect.left > wRect.right || 
-                      dRect.bottom < wRect.top || 
-                      dRect.top > wRect.bottom)) {
+                if (wall.style.opacity !== '0') {
+                    const wRect = wall.getBoundingClientRect();
+                    if (!(dRect.right < wRect.left || 
+                          dRect.left > wRect.right || 
+                          dRect.bottom < wRect.top || 
+                          dRect.top > wRect.bottom)) {
+                        hitWall = true;
+                    }
+                }
+            });
+
+            const traps = document.querySelectorAll('.devil-trap');
+            traps.forEach(trap => {
+                const tRect = trap.getBoundingClientRect();
+                if (!(dRect.right < tRect.left || 
+                      dRect.left > tRect.right || 
+                      dRect.bottom < tRect.top || 
+                      dRect.top > tRect.bottom)) {
                     hitWall = true;
                 }
             });
 
             if (hitWall) {
-                triggerFail("दीवार से टकरा गए!");
+                triggerFail("Level Devil के ट्रैप ने पकड़ लिया!");
                 return;
             }
 
-            // Check Trophy
             const trophy = document.getElementById('trophy');
             if (trophy) {
+                if (currentLevel === 3 && posX > 150 && Math.random() < 0.25) {
+                    trophy.style.top = (Math.random() * 150 + 20) + 'px';
+                    trophy.style.left = (Math.random() * 150 + 50) + 'px';
+                    msgBox.innerText = "हाहा! ट्रॉफी अपनी जगह बदल रही है!";
+                }
+
                 const tRect = trophy.getBoundingClientRect();
                 if (!(dRect.right < tRect.left || 
                       dRect.left > tRect.right || 
@@ -425,9 +474,9 @@
             fails++;
             failsLabel.innerText = "FAILS: " + fails;
 
-            modalTitle.style.color = "#d90429";
-            modalTitle.innerText = "💀 KHATAM! (FAIL)";
-            modalDesc.innerText = reason + " ईगो हर्ट हुआ? दोबारा कोशिश करो!";
+            modalTitle.style.color = "#f72585";
+            modalTitle.innerText = "💀 TROLLED! (FAIL)";
+            modalDesc.innerText = reason + " ईगो हर्ट हुआ? फिर से कोशिश करो!";
             document.getElementById('nextBtn').innerText = "AGAIN 🔄";
             document.getElementById('nextBtn').onclick = () => loadLevel(currentLevel);
             winModal.style.display = "block";
@@ -436,16 +485,16 @@
         function triggerWin() {
             if (isOver) return;
             isOver = true;
-            modalTitle.style.color = "#38b000";
+            modalTitle.style.color = "#4cc9f0";
             modalTitle.innerText = "🎉 LEVEL CLEARED!";
-            modalDesc.innerText = "शानदार! आपने यह लेवल पार कर लिया।";
+            modalDesc.innerText = "अद्भुत! आपने इस खतरनाक लेवल को पार कर लिया।";
             document.getElementById('nextBtn').innerText = "NEXT LEVEL ➡️";
             document.getElementById('nextBtn').onclick = () => {
                 if(levelsData[currentLevel + 1]) {
                     loadLevel(currentLevel + 1);
                 } else {
                     modalTitle.innerText = "🏆 GAME COMPLETED!";
-                    modalDesc.innerText = "आपने सारे लेवल्स जीत लिए!";
+                    modalDesc.innerText = "आपने सभी Level Devil लेवल्स जीत लिए!";
                     document.getElementById('nextBtn').innerText = "RESTART GAME 🔄";
                     document.getElementById('nextBtn').onclick = () => loadLevel(1);
                     winModal.style.display = "block";
@@ -458,7 +507,6 @@
             loadLevel(currentLevel);
         }
 
-        // Initialize Level 1 on load
         loadLevel(1);
     </script>
 </body>
