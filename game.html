@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Schrödinger's Quantum Trap</title>
+    <title>🤪 Z PAJAL - The Gaslighting Trap</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -20,7 +20,7 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #0b090a;
+            background: #18001d;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,9 +30,9 @@
 
         .arcade-cabinet {
             position: relative;
-            background: #161a1d;
+            background: #7b2cbf;
             border-radius: 14px;
-            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.6);
             padding: 14px;
             display: flex;
             flex-direction: column;
@@ -41,7 +41,7 @@
             width: 100%;
             height: 95vh;
             max-height: 550px;
-            border: 2px solid #e5383b;
+            border: 2px solid #e0aaff;
         }
 
         .hud-bar {
@@ -49,13 +49,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #212529;
+            background: #5a189a;
             border-radius: 8px;
             padding: 10px 14px;
             margin-bottom: 10px;
             font-size: 10px;
-            color: #f8f9fa;
-            box-shadow: 0 3px 0px #000;
+            color: #e0aaff;
+            box-shadow: 0 3px 0px #3c096c;
         }
 
         .hud-tools {
@@ -64,13 +64,13 @@
         }
 
         .hud-btn {
-            background: #e5383b;
-            color: #fff;
+            background: #3c096c;
+            color: #e0aaff;
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 2px 0px #a4161a;
+            box-shadow: 0 2px 0px #240046;
         }
 
         /* Puzzle Chamber */
@@ -78,25 +78,17 @@
             position: relative;
             width: 100%;
             flex-grow: 1;
-            background: #03071e;
+            background: #240046;
             border-radius: 10px;
             box-shadow: inset 0 3px 6px rgba(0,0,0,0.8);
             overflow: hidden;
         }
 
-        /* Quantum Hazards & Walls that Shift */
         .hazard {
             position: absolute;
-            background: #e5383b;
+            background: #ff5400;
             border-radius: 4px;
-            box-shadow: 0 0 8px #e5383b;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-
-        .platform {
-            position: absolute;
-            background: #4d908e;
-            border-radius: 3px;
+            box-shadow: 0 0 8px #ff5400;
         }
 
         /* Character */
@@ -117,9 +109,8 @@
             left: 4px;
             width: 10px;
             height: 10px;
-            background: radial-gradient(circle at 3px 3px, #fff, #4d908e);
+            background: radial-gradient(circle at 3px 3px, #fff, #7b2cbf);
             border-radius: 50%;
-            box-shadow: 0 0 5px #4d908e;
         }
 
         .dummy-body {
@@ -128,7 +119,7 @@
             left: 7px;
             width: 4px;
             height: 10px;
-            background: #4d908e;
+            background: #e0aaff;
             border-radius: 2px;
         }
 
@@ -158,7 +149,7 @@
         .target-gate {
             width: 26px;
             height: 30px;
-            background: linear-gradient(135deg, #43aa8b, #257960);
+            background: linear-gradient(135deg, #38b000, #007200);
             border-radius: 4px;
             display: flex;
             justify-content: center;
@@ -169,12 +160,12 @@
             bottom: 12px;
             right: 15px;
             z-index: 5;
-            box-shadow: 0 0 10px #43aa8b;
+            box-shadow: 0 0 10px #38b000;
         }
 
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
-            background: #e5383b;
+            background: #ff5400;
             color: #fff;
             font-weight: 700;
             font-size: 8px;
@@ -201,27 +192,27 @@
 
         .control-btn {
             flex: 1;
-            background: #212529;
-            color: #f8f9fa;
+            background: #5a189a;
+            color: #e0aaff;
             padding: 12px 6px;
             border-radius: 8px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 0px #000;
+            box-shadow: 0 4px 0px #3c096c;
             text-align: center;
-            border: 1px solid #4d908e;
+            border: 1px solid #7b2cbf;
         }
 
         .control-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0px #000;
+            box-shadow: 0 2px 0px #3c096c;
         }
 
         .danger-btn {
-            background: #e5383b;
+            background: #ff5400;
             color: #fff;
-            border: 1px solid #ff4d4d;
-            box-shadow: 0 4px 0px #a4161a;
+            border: 1px solid #ff751a;
+            box-shadow: 0 4px 0px #cc4400;
         }
 
         .popup-modal {
@@ -229,8 +220,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #161a1d;
-            border: 2px solid #e5383b;
+            background: #3c096c;
+            border: 2px solid #e0aaff;
             border-radius: 12px;
             padding: 20px;
             text-align: center;
@@ -242,7 +233,7 @@
         }
 
         .modal-btn {
-            background: #4d908e;
+            background: #7b2cbf;
             color: #fff;
             padding: 8px 12px;
             font-size: 8px;
@@ -257,7 +248,7 @@
     <div class="arcade-cabinet">
         <div class="hud-bar">
             <div>
-                <span id="lvlLabel">LEVEL: QUANTUM SHIFT</span>
+                <span id="lvlLabel">LEVEL: OUT OF BODY</span>
                 <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
             </div>
             <div class="hud-tools">
@@ -267,11 +258,9 @@
 
         <!-- Maze Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="quantumText">Quantum State: रास्ते देखते ही गायब/बदल जाते हैं!</div>
+            <div class="clue-box" id="gaslightText">Mission: ऐप छोड़कर फोन की Home Screen चेक करो!</div>
             
-            <!-- Quantum Hazards (Ye chup-chap apni jagah badal lenge) -->
-            <div class="hazard" id="trap1" style="width: 40px; height: 12px; bottom: 12px; left: 130px;"></div>
-            <div class="hazard" id="trap2" style="width: 40px; height: 12px; bottom: 12px; left: 260px;"></div>
+            <div class="hazard" style="width: 45px; height: 12px; bottom: 12px; left: 150px;"></div>
 
             <!-- Character -->
             <div class="dummy-character" id="dummy">
@@ -290,14 +279,14 @@
         <!-- Controls -->
         <div class="bottom-action-bar">
             <button class="control-btn" onclick="movePlayer(-15)">◀ LEFT</button>
-            <button class="control-btn danger-btn" onclick="quantumJump()">QUANTUM JUMP ⬆️</button>
+            <button class="control-btn danger-btn" onclick="jumpPlayer()">JUMP ⬆️</button>
             <button class="control-btn" onclick="movePlayer(15)">RIGHT ▶</button>
         </div>
 
         <!-- Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 id="modalTitle" style="color: #43aa8b; font-size: 12px; margin-bottom: 8px;">🎉 LEVEL CLEARED!</h2>
-            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #f8f9fa;">क्वांटम ट्रैप को पार कर लिया!</p>
+            <h2 id="modalTitle" style="color: #38b000; font-size: 12px; margin-bottom: 8px;">🎉 SURVIVED!</h2>
+            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #e0aaff;">तुमने गेम के दायरे को ही तोड़ दिया!</p>
             <button class="modal-btn" onclick="resetGame()">AGAIN 🔄</button>
         </div>
     </div>
@@ -313,28 +302,15 @@
         const modalTitle = document.getElementById('modalTitle');
         const modalDesc = document.getElementById('modalDesc');
         const failsLabel = document.getElementById('failsLabel');
-        const trap1 = document.getElementById('trap1');
-        const trap2 = document.getElementById('trap2');
-        const quantumText = document.getElementById('quantumText');
+        const gaslightText = document.getElementById('gaslightText');
 
-        // Quantum physics gimmick: Hazards teleport or change positions unpredictably!
-        let quantumEngine = setInterval(() => {
-            if (isOver) return;
-
-            // Randomly teleport traps when player moves
-            if (Math.random() < 0.4) {
-                let randomPos1 = Math.floor(Math.random() * 120) + 100;
-                let randomPos2 = Math.floor(Math.random() * 120) + 240;
-                trap1.style.left = randomPos1 + 'px';
-                trap2.style.left = randomPos2 + 'px';
-                
-                quantumText.innerText = "⚠️ Quantum Fluctuation! काँटों की जगह बदल गई!";
-                setTimeout(() => {
-                    quantumText.innerText = "Quantum State: सावधानी से आगे बढ़ो!";
-                }, 800);
+        // NEW: Detect when the user minimizes the game or switches tabs (Visibility API)
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && !isOver) {
+                // Player fell for the trap and left the game/tab!
+                triggerFail("तुम गेम छोड़कर होम स्क्रीन देखने चले गए! तुम्हें लगा वहाँ कोई सीक्रेट की है?");
             }
-            checkCollisions();
-        }, 600);
+        });
 
         function movePlayer(val) {
             if (isOver) return;
@@ -344,7 +320,7 @@
             checkCollisions();
         }
 
-        function quantumJump() {
+        function jumpPlayer() {
             if (isOver) return;
             posY = 75;
             dummy.style.bottom = posY + 'px';
@@ -357,13 +333,9 @@
         }
 
         function checkCollisions() {
-            let t1Left = parseInt(trap1.style.left);
-            let t2Left = parseInt(trap2.style.left);
-
-            // Check if hit moving/teleporting traps
-            if (((posX >= t1Left - 10 && posX <= t1Left + 35) || 
-                 (posX >= t2Left - 10 && posX <= t2Left + 35)) && posY <= 15) {
-                triggerFail("आप क्वांटम काँटे पर आ गिरे!");
+            // Pit is around 150px to 195px
+            if (posX >= 140 && posX <= 195 && posY <= 15) {
+                triggerFail("बिना सोचे-समझे सीधे खाई में कूद पड़े!");
             } else if (posX >= 410) {
                 triggerWin();
             }
@@ -375,18 +347,18 @@
             fails++;
             failsLabel.innerText = "FAILS: " + fails;
             
-            modalTitle.style.color = "#e5383b";
-            modalTitle.innerText = "💀 QUANTUM DESTRUCTION!";
-            modalDesc.innerText = reason + " ईगो हर्ट हुआ? क्वांटम फिजिक्स इतनी आसान नहीं है!";
+            modalTitle.style.color = "#ff5400";
+            modalTitle.innerText = "💀 GASLIT & DEAD!";
+            modalDesc.innerText = reason + " प्लेयर का ईगो पूरी तरह टूट गया ना? फिर से ट्राई करो!";
             winModal.style.display = "block";
         }
 
         function triggerWin() {
             if (isOver) return;
             isOver = true;
-            modalTitle.style.color = "#43aa8b";
-            modalTitle.innerText = "🎉 GENIUS!";
-            modalDesc.innerText = तुमने क्वांटम दुनिया को हरा दिया!";
+            modalTitle.style.color = "#38b000";
+            modalTitle.innerText = "🎉 ABSOLUTE GENIUS!";
+            modalDesc.innerText = "तुमने इस साइकोलॉजिकल टॉर्चर को पार कर लिया!";
             winModal.style.display = "block";
         }
 
@@ -396,10 +368,8 @@
             isOver = false;
             dummy.style.left = posX + 'px';
             dummy.style.bottom = posY + 'px';
-            trap1.style.left = '130px';
-            trap2.style.left = '260px';
             winModal.style.display = "none";
-            quantumText.innerText = "Quantum State: रास्ते देखते ही गायब/बदल जाते हैं!";
+            gaslightText.innerText = "Mission: ऐप छोड़कर फोन की Home Screen चेक करो!";
         }
     </script>
 </body>
