@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Level Devil Ultimate Edition</title>
+    <title>🤪 Z PAJAL - Ultimate Level Devil Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -20,7 +20,7 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #0d0221;
+            background: #0f051d;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,9 +30,9 @@
 
         .arcade-cabinet {
             position: relative;
-            background: #7209b7;
+            background: #240046;
             border-radius: 14px;
-            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.8);
             padding: 14px;
             display: flex;
             flex-direction: column;
@@ -40,8 +40,8 @@
             max-width: 620px;
             width: 100%;
             height: 95vh;
-            max-height: 560px;
-            border: 2px solid #f72585;
+            max-height: 570px;
+            border: 3px solid #7b2cbf;
         }
 
         .hud-bar {
@@ -49,13 +49,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #3a0ca3;
+            background: #3c096c;
             border-radius: 8px;
             padding: 10px 14px;
             margin-bottom: 10px;
             font-size: 10px;
-            color: #4cc9f0;
-            box-shadow: 0 3px 0px #170242;
+            color: #e0aaff;
+            box-shadow: 0 3px 0px #10002b;
         }
 
         .hud-tools {
@@ -64,13 +64,13 @@
         }
 
         .hud-btn {
-            background: #f72585;
+            background: #ff5400;
             color: #fff;
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 2px 0px #b5179e;
+            box-shadow: 0 2px 0px #993300;
         }
 
         /* Puzzle Chamber */
@@ -78,42 +78,51 @@
             position: relative;
             width: 100%;
             flex-grow: 1;
-            background: #f8f9fa;
+            background: #10002b;
             border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.9);
             overflow: hidden;
+            border: 2px solid #5a189a;
         }
 
-        /* Maze Walls */
-        .maze-wall {
+        /* Maze & Devil Walls */
+        .devil-wall {
             position: absolute;
-            background: #3a0ca3;
+            background: #7b2cbf;
             border-radius: 2px;
-            box-shadow: 0 2px 0px #170242;
-            transition: opacity 0.2s ease;
+            box-shadow: 0 2px 0px #3c096c;
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
-        /* Level Devil Surprise Traps */
-        .devil-trap {
+        /* Spikes / Traps */
+        .devil-spike {
             position: absolute;
-            background: #f72585;
-            border-radius: 2px;
-            box-shadow: 0 0 8px #f72585;
+            background: #ff3333;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            box-shadow: 0 0 6px #ff0000;
+        }
+
+        /* Moving Hazard Blocks */
+        .moving-hazard {
+            position: absolute;
+            background: #ff5400;
+            border-radius: 3px;
+            box-shadow: 0 0 8px #ff5400;
         }
 
         /* Animated Character */
         .dummy-character {
             position: absolute;
-            width: 14px;
-            height: 22px;
-            z-index: 10;
-            transition: top 0.05s linear, left 0.05s linear;
+            width: 16px;
+            height: 24px;
+            z-index: 20;
+            transition: top 0.04s linear, left 0.04s linear;
         }
 
         .dummy-head {
             position: absolute;
             top: 0;
-            left: 3px;
+            left: 4px;
             width: 8px;
             height: 8px;
             background: #ffdbac;
@@ -122,72 +131,71 @@
 
         .dummy-body {
             position: absolute;
-            top: 7px;
-            left: 5px;
+            top: 8px;
+            left: 6px;
             width: 4px;
-            height: 8px;
-            background: #4cc9f0;
+            height: 9px;
+            background: #ff5400;
             border-radius: 1px;
         }
 
         .dummy-arm-left, .dummy-arm-right {
             position: absolute;
-            top: 8px;
+            top: 9px;
             width: 5px;
             height: 2px;
-            background: #3a0ca3;
+            background: #7b2cbf;
             border-radius: 1px;
             transition: transform 0.1s ease;
         }
-        .dummy-arm-left { left: 0px; transform-origin: right center; }
-        .dummy-arm-right { right: 0px; transform-origin: left center; }
+        .dummy-arm-left { left: 1px; transform-origin: right center; }
+        .dummy-arm-right { right: 1px; transform-origin: left center; }
 
         .dummy-leg-left, .dummy-leg-right {
             position: absolute;
             bottom: 0;
             width: 2.5px;
             height: 7px;
-            background: #170242;
+            background: #fff;
             border-radius: 1px;
             transition: transform 0.1s ease;
         }
-        .dummy-leg-left { left: 3px; transform-origin: top center; }
-        .dummy-leg-right { right: 3px; transform-origin: top center; }
+        .dummy-leg-left { left: 4px; transform-origin: top center; }
+        .dummy-leg-right { right: 4px; transform-origin: top center; }
 
-        /* Walking Animation Classes */
-        .walking-left .dummy-leg-left { transform: rotate(35deg); }
-        .walking-left .dummy-leg-right { transform: rotate(-35deg); }
+        /* Animation classes for Walking & Jumping */
         .walking-right .dummy-leg-left { transform: rotate(-35deg); }
         .walking-right .dummy-leg-right { transform: rotate(35deg); }
-
-        /* Jumping Animation Class */
+        .walking-left .dummy-leg-left { transform: rotate(35deg); }
+        .walking-left .dummy-leg-right { transform: rotate(-35deg); }
         .jumping .dummy-arm-left { transform: rotate(-50deg); }
         .jumping .dummy-arm-right { transform: rotate(50deg); }
-        .jumping .dummy-leg-left { transform: rotate(-25deg); }
-        .jumping .dummy-leg-right { transform: rotate(25deg); }
+        .jumping .dummy-leg-left { transform: rotate(-20deg); }
+        .jumping .dummy-leg-right { transform: rotate(20deg); }
 
-        /* Trophy */
+        /* Trophy / Goal */
         .trophy-target {
             position: absolute;
-            font-size: 18px;
-            z-index: 5;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+            font-size: 20px;
+            z-index: 10;
+            filter: drop-shadow(0 0 6px #ffcc00);
         }
 
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
-            background: #f72585;
+            background: #7b2cbf;
             color: #fff;
             font-weight: 700;
             font-size: 8px;
-            padding: 4px 8px;
+            padding: 5px 8px;
             border-radius: 4px;
             position: absolute;
             top: 6px;
             left: 6px;
-            z-index: 20;
+            z-index: 30;
             text-align: center;
             width: calc(100% - 12px);
+            border: 1px solid #e0aaff;
         }
 
         .bottom-action-bar {
@@ -200,20 +208,20 @@
         }
 
         .control-btn {
-            background: #4cc9f0;
-            color: #170242;
+            background: #7b2cbf;
+            color: #fff;
             padding: 10px 4px;
             border-radius: 8px;
-            font-size: 8px;
+            font-size: 9px;
             cursor: pointer;
-            box-shadow: 0 4px 0px #3a0ca3;
+            box-shadow: 0 4px 0px #3c096c;
             text-align: center;
             font-weight: bold;
         }
 
         .control-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0px #3a0ca3;
+            box-shadow: 0 2px 0px #3c096c;
         }
 
         .popup-modal {
@@ -221,8 +229,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #f8f9fa;
-            border: 2px solid #7209b7;
+            background: #240046;
+            border: 2px solid #ff5400;
             border-radius: 12px;
             padding: 20px;
             text-align: center;
@@ -230,11 +238,11 @@
             z-index: 100;
             width: 85%;
             max-width: 300px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.7);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.9);
         }
 
         .modal-btn {
-            background: #7209b7;
+            background: #ff5400;
             color: #fff;
             padding: 8px 12px;
             font-size: 8px;
@@ -259,7 +267,7 @@
 
         <!-- Puzzle Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="msgBox">Level Devil: रास्तों पर भरोसा मत करो!</div>
+            <div class="clue-box" id="msgBox">Level Devil: रास्तों और दीवारों पर भरोसा मत करो!</div>
             
             <div id="levelContent"></div>
 
@@ -277,18 +285,18 @@
         <!-- Controls -->
         <div class="bottom-action-bar">
             <div></div>
-            <button class="control-btn" onmousedown="moveChar(0, -10)" ontouchstart="moveChar(0, -10)">⬆️ UP</button>
+            <button class="control-btn" onmousedown="moveChar(0, -12)" ontouchstart="moveChar(0, -12)">⬆️ UP</button>
             <div></div>
-            <button class="control-btn" onmousedown="moveChar(-10, 0)" ontouchstart="moveChar(-10, 0)">⬅️ LEFT</button>
-            <button class="control-btn" onmousedown="moveChar(0, 10)" ontouchstart="moveChar(0, 10)">⬇️ DOWN</button>
-            <button class="control-btn" onmousedown="moveChar(10, 0)" ontouchstart="moveChar(10, 0)">➡️ RIGHT</button>
+            <button class="control-btn" onmousedown="moveChar(-12, 0)" ontouchstart="moveChar(-12, 0)">⬅️ LEFT</button>
+            <button class="control-btn" onmousedown="moveChar(0, 12)" ontouchstart="moveChar(0, 12)">⬇️ DOWN</button>
+            <button class="control-btn" onmousedown="moveChar(12, 0)" ontouchstart="moveChar(12, 0)">➡️ RIGHT</button>
         </div>
 
         <!-- Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 id="modalTitle" style="color: #7209b7; font-size: 12px; margin-bottom: 8px;">🎉 LEVEL CLEARED!</h2>
-            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #170242;">अगले लेवल पर चलते हैं!</p>
-            <button class="modal-btn" id="nextBtn" onclick="nextLevel()">AGAIN 🔄</button>
+            <h2 id="modalTitle" style="color: #ff5400; font-size: 12px; margin-bottom: 8px;">🎉 PASSED!</h2>
+            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #e0aaff;">अगले लेवल पर चलते हैं!</p>
+            <button class="modal-btn" id="nextBtn" onclick="nextLevel()">NEXT ➡️</button>
         </div>
     </div>
 
@@ -308,69 +316,100 @@
         const levelContent = document.getElementById('levelContent');
         const msgBox = document.getElementById('msgBox');
 
-        // 😈 LEVEL DEVIL & MULTI-LEVEL CONFIGURATION
-        const levelsData = {
+        // 😈 ULTIMATE LEVELS DATABASE (Level Devil + Maze + Traps + Running Trophy)
+        const devilLevels = {
             1: {
                 startPos: { x: 15, y: 15 },
-                trophyPos: { top: '220px', right: '30px' },
+                trophyPos: { top: '220px', right: '25px' },
+                hint: "लेवल 1: पास जाते ही सामने वाली दीवार गायब हो जाएगी!",
                 walls: [
-                    { width: '10px', height: '170px', top: '40px', left: '70px', fake: false },
-                    { width: '160px', height: '10px', top: '110px', left: '70px', fake: true, hint: "ओह! यहाँ की दीवार अचानक गायब हो गई!" },
-                    { width: '10px', height: '130px', top: '40px', left: '230px', fake: false },
-                    { width: '140px', height: '10px', top: '160px', left: '230px', fake: false }
+                    { width: '15px', height: '170px', top: '30px', left: '70px', fake: false },
+                    { width: '160px', height: '15px', top: '100px', left: '70px', fake: true },
+                    { width: '15px', height: '140px', top: '30px', left: '240px', fake: false }
                 ],
-                devilTraps: [
-                    { width: '30px', height: '10px', top: '100px', left: '150px' }
-                ]
+                spikes: [
+                    { width: '25px', height: '20px', top: '150px', left: '150px' }
+                ],
+                movingBlocks: []
             },
             2: {
                 startPos: { x: 15, y: 250 },
-                trophyPos: { top: '20px', right: '30px' },
+                trophyPos: { top: '25px', right: '25px' },
+                hint: "लेवल 2: घूमते हुए खतरों और छिपे हुए काँटों से बचो!",
                 walls: [
-                    { width: '220px', height: '10px', top: '180px', left: '30px', fake: false },
-                    { width: '10px', height: '140px', top: '40px', left: '250px', fake: true, hint: "सतर्क रहो! डेविल ट्रैप एक्टिव हो गया!" },
-                    { width: '180px', height: '10px', top: '80px', left: '150px', fake: false }
+                    { width: '240px', height: '15px', top: '170px', left: '30px', fake: false },
+                    { width: '15px', height: '150px', top: '40px', left: '270px', fake: true }
                 ],
-                devilTraps: [
-                    { width: '10px', height: '40px', top: '100px', left: '200px' }
+                spikes: [
+                    { width: '25px', height: '20px', top: '140px', left: '100px' },
+                    { width: '25px', height: '20px', top: '140px', left: '180px' }
+                ],
+                movingBlocks: [
+                    { width: '20px', height: '20px', top: '80px', left: '120px', range: 80, speed: 3 }
                 ]
             },
             3: {
                 startPos: { x: 280, y: 15 },
-                trophyPos: { bottom: '20px', left: '30px' },
+                trophyPos: { bottom: '25px', left: '25px' },
+                hint: "लेवल 3: यहाँ ट्रॉफी आपको देखकर खुद अपनी जगह बदल लेगी!",
                 walls: [
-                    { width: '10px', height: '200px', top: '20px', left: '200px', fake: false },
-                    { width: '150px', height: '10px', top: '120px', left: '50px', fake: true, hint: "ट्रॉफी आपको देखकर भाग रही है!" }
+                    { width: '15px', height: '210px', top: '20px', left: '180px', fake: false },
+                    { width: '140px', height: '15px', top: '130px', left: '40px', fake: true }
                 ],
-                devilTraps: []
+                spikes: [
+                    { width: '25px', height: '20px', top: '80px', left: '100px' }
+                ],
+                movingBlocks: [
+                    { width: '20px', height: '20px', top: '180px', left: '220px', range: 60, speed: 4 }
+                ]
             }
+            // 💡 आप यहाँ `4: { ... }` जोड़कर और भी नए लेवल्स बना सकते हैं!
         };
 
         function loadLevel(lvl) {
             currentLevel = lvl;
             lvlLabel.innerText = "LEVEL: " + currentLevel;
             
-            let data = levelsData[currentLevel] || levelsData[1];
+            let data = devilLevels[currentLevel] || devilLevels[1];
             posX = data.startPos.x;
             posY = data.startPos.y;
             
             dummy.style.left = posX + 'px';
             dummy.style.top = posY + 'px';
+            msgBox.innerText = data.hint;
 
             let html = `<div class="trophy-target" id="trophy" style="${data.trophyPos.top ? 'top:'+data.trophyPos.top : 'bottom:'+data.trophyPos.bottom}; ${data.trophyPos.right ? 'right:'+data.trophyPos.right : 'left:'+data.trophyPos.left}">🏆</div>`;
             
             data.walls.forEach((w, index) => {
-                html += `<div class="maze-wall" id="wall_${index}" style="width:${w.width}; height:${w.height}; top:${w.top}; left:${w.left};"></div>`;
+                html += `<div class="devil-wall" id="wall_${index}" style="width:${w.width}; height:${w.height}; top:${w.top}; left:${w.left};"></div>`;
             });
 
-            data.devilTraps.forEach((t, index) => {
-                html += `<div class="devil-trap" id="trap_${index}" style="width:${t.width}; height:${t.height}; top:${t.top}; left:${t.left};"></div>`;
+            data.spikes.forEach((s, index) => {
+                html += `<div class="devil-spike" id="spike_${index}" style="width:${s.width}; height:${s.height}; top:${s.top}; left:${s.left};"></div>`;
+            });
+
+            data.movingBlocks.forEach((m, index) => {
+                html += `<div class="moving-hazard" id="moving_${index}" data-base="${m.left}" data-range="${m.range}" data-speed="${m.speed}" style="width:${m.width}; height:${m.height}; top:${m.top}; left:${m.left};"></div>`;
             });
 
             levelContent.innerHTML = html;
             winModal.style.display = "none";
             isOver = false;
         }
+
+        // Moving blocks loop
+        setInterval(() => {
+            if (isOver) return;
+            const movingBlocks = document.querySelectorAll('.moving-hazard');
+            movingBlocks.forEach(block => {
+                let base = parseInt(block.dataset.base);
+                let range = parseInt(block.dataset.range);
+                let speed = parseFloat(block.dataset.speed);
+                let time = Date.now() * 0.005 * speed;
+                let newLeft = base + Math.sin(time) * range;
+                block.style.left = newLeft + 'px';
+            });
+        }, 30);
 
         function moveChar(dx, dy) {
             if (isOver) return;
@@ -385,7 +424,7 @@
             dummy.style.left = posX + 'px';
             dummy.style.top = posY + 'px';
 
-            // Animation Trigger
+            // Animation
             if (dx > 0) {
                 dummy.className = "dummy-character walking-right";
             } else if (dx < 0) {
@@ -398,71 +437,77 @@
                 if(!isOver) dummy.className = "dummy-character";
             }, 150);
 
-            // Level Devil Fake Wall Mechanic
-            let data = levelsData[currentLevel];
-            data.walls.forEach((w, index) => {
-                if (w.fake) {
-                    let wallEl = document.getElementById(`wall_${index}`);
-                    if (wallEl) {
-                        let wRect = wallEl.getBoundingClientRect();
-                        let dRect = dummy.getBoundingClientRect();
-                        if (Math.abs(dRect.left - wRect.left) < 45 && Math.abs(dRect.top - wRect.top) < 45) {
-                            wallEl.style.opacity = '0';
-                            msgBox.innerText = w.hint;
+            // Fake Wall / Vanishing Wall Trick
+            let data = devilLevels[currentLevel];
+            if(data && data.walls) {
+                data.walls.forEach((w, index) => {
+                    if (w.fake) {
+                        let wallEl = document.getElementById(`wall_${index}`);
+                        if (wallEl) {
+                            let wRect = wallEl.getBoundingClientRect();
+                            let dRect = dummy.getBoundingClientRect();
+                            if (Math.abs(dRect.left - wRect.left) < 50 && Math.abs(dRect.top - wRect.top) < 50) {
+                                wallEl.style.opacity = '0';
+                                msgBox.innerText = "⚠️ धोखा! रास्ता गायब हो गया!";
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
 
             checkCollisions();
         }
 
         function checkCollisions() {
             const dRect = dummy.getBoundingClientRect();
-            const walls = document.querySelectorAll('.maze-wall');
             
-            let hitWall = false;
+            // Check Walls
+            const walls = document.querySelectorAll('.devil-wall');
+            let hit = false;
             walls.forEach(wall => {
                 if (wall.style.opacity !== '0') {
-                    const wRect = wall.getBoundingClientRect();
-                    if (!(dRect.right < wRect.left || 
-                          dRect.left > wRect.right || 
-                          dRect.bottom < wRect.top || 
-                          dRect.top > wRect.bottom)) {
-                        hitWall = true;
+                    let wRect = wall.getBoundingClientRect();
+                    if (!(dRect.right < wRect.left || dRect.left > wRect.right || dRect.bottom < wRect.top || dRect.top > wRect.bottom)) {
+                        hit = true;
                     }
                 }
             });
 
-            const traps = document.querySelectorAll('.devil-trap');
-            traps.forEach(trap => {
-                const tRect = trap.getBoundingClientRect();
-                if (!(dRect.right < tRect.left || 
-                      dRect.left > tRect.right || 
-                      dRect.bottom < tRect.top || 
-                      dRect.top > tRect.bottom)) {
-                    hitWall = true;
+            // Check Spikes
+            const spikes = document.querySelectorAll('.devil-spike');
+            spikes.forEach(spike => {
+                let sRect = spike.getBoundingClientRect();
+                if (!(dRect.right < sRect.left || dRect.left > sRect.right || dRect.bottom < sRect.top || dRect.top > sRect.bottom)) {
+                    hit = true;
                 }
             });
 
-            if (hitWall) {
-                triggerFail("Level Devil के ट्रैप ने पकड़ लिया!");
+            // Check Moving Blocks
+            const movings = document.querySelectorAll('.moving-hazard');
+            movings.forEach(m => {
+                let mRect = m.getBoundingClientRect();
+                if (!(dRect.right < mRect.left || dRect.left > mRect.right || dRect.bottom < mRect.top || dRect.top > mRect.bottom)) {
+                    hit = true;
+                }
+            });
+
+            if (hit) {
+                triggerFail("Level Devil के ट्रैप में फंस गए!");
                 return;
             }
 
+            // Check Trophy
             const trophy = document.getElementById('trophy');
             if (trophy) {
-                if (currentLevel === 3 && posX > 150 && Math.random() < 0.25) {
+                // Troll in Level 3: Trophy runs away!
+                if (currentLevel === 3 && posX > 100 && Math.random() < 0.25) {
                     trophy.style.top = (Math.random() * 150 + 20) + 'px';
-                    trophy.style.left = (Math.random() * 150 + 50) + 'px';
-                    msgBox.innerText = "हाहा! ट्रॉफी अपनी जगह बदल रही है!";
+                    trophy.style.left = (Math.random() * 150 + 30) + 'px';
+                    msgBox.innerText = "🏆 हाहा! ट्रॉफी भाग रही है!";
                 }
 
-                const tRect = trophy.getBoundingClientRect();
-                if (!(dRect.right < tRect.left || 
-                      dRect.left > tRect.right || 
-                      dRect.bottom < tRect.top || 
-                      dRect.top > tRect.bottom)) {
+                let tRect = trophy.getBoundingClientRect();
+                if (!(dRect.right < tRect.left || dRect.left > tRect.right || dRect.bottom < tRect.top || dRect.top > tRect.bottom)) {
                     triggerWin();
                 }
             }
@@ -474,9 +519,9 @@
             fails++;
             failsLabel.innerText = "FAILS: " + fails;
 
-            modalTitle.style.color = "#f72585";
-            modalTitle.innerText = "💀 TROLLED! (FAIL)";
-            modalDesc.innerText = reason + " ईगो हर्ट हुआ? फिर से कोशिश करो!";
+            modalTitle.style.color = "#ff3333";
+            modalTitle.innerText = "💀 WASTED!";
+            modalDesc.innerText = reason + " ईगो हर्ट हुआ? फिर से ट्राई करो!";
             document.getElementById('nextBtn').innerText = "AGAIN 🔄";
             document.getElementById('nextBtn').onclick = () => loadLevel(currentLevel);
             winModal.style.display = "block";
@@ -485,17 +530,17 @@
         function triggerWin() {
             if (isOver) return;
             isOver = true;
-            modalTitle.style.color = "#4cc9f0";
+            modalTitle.style.color = "#00ffcc";
             modalTitle.innerText = "🎉 LEVEL CLEARED!";
-            modalDesc.innerText = "अद्भुत! आपने इस खतरनाक लेवल को पार कर लिया।";
+            modalDesc.innerText = "शानदार! आपने डेविल लेवल पार कर लिया।";
             document.getElementById('nextBtn').innerText = "NEXT LEVEL ➡️";
             document.getElementById('nextBtn').onclick = () => {
-                if(levelsData[currentLevel + 1]) {
+                if(devilLevels[currentLevel + 1]) {
                     loadLevel(currentLevel + 1);
                 } else {
                     modalTitle.innerText = "🏆 GAME COMPLETED!";
-                    modalDesc.innerText = "आपने सभी Level Devil लेवल्स जीत लिए!";
-                    document.getElementById('nextBtn').innerText = "RESTART GAME 🔄";
+                    modalDesc.innerText = "आपने सारे Level Devil लेवल्स जीत लिए!";
+                    document.getElementById('nextBtn').innerText = "RESTART 🔄";
                     document.getElementById('nextBtn').onclick = () => loadLevel(1);
                     winModal.style.display = "block";
                 }
