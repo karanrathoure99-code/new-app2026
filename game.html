@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - The Gaslighting Trap</title>
+    <title>🤪 Z PAJAL - Troll Maze & Trophy</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -20,7 +20,7 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #18001d;
+            background: #2b0900;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,7 +30,7 @@
 
         .arcade-cabinet {
             position: relative;
-            background: #7b2cbf;
+            background: #d4a373;
             border-radius: 14px;
             box-shadow: 0 10px 0px rgba(0, 0, 0, 0.6);
             padding: 14px;
@@ -41,7 +41,7 @@
             width: 100%;
             height: 95vh;
             max-height: 550px;
-            border: 2px solid #e0aaff;
+            border: 2px solid #523500;
         }
 
         .hud-bar {
@@ -49,13 +49,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #5a189a;
+            background: #faedcd;
             border-radius: 8px;
             padding: 10px 14px;
             margin-bottom: 10px;
             font-size: 10px;
-            color: #e0aaff;
-            box-shadow: 0 3px 0px #3c096c;
+            color: #523500;
+            box-shadow: 0 3px 0px #bc6c25;
         }
 
         .hud-tools {
@@ -64,72 +64,71 @@
         }
 
         .hud-btn {
-            background: #3c096c;
-            color: #e0aaff;
+            background: #bc6c25;
+            color: #fff;
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 2px 0px #240046;
+            box-shadow: 0 2px 0px #854d0e;
         }
 
-        /* Puzzle Chamber */
+        /* Puzzle Chamber (Maze Box) */
         .puzzle-chamber {
             position: relative;
             width: 100%;
             flex-grow: 1;
-            background: #240046;
+            background: #fefae0;
             border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.8);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
             overflow: hidden;
         }
 
-        .hazard {
+        /* Maze Walls (भूल-भुलैया की दीवारें) */
+        .maze-wall {
             position: absolute;
-            background: #ff5400;
-            border-radius: 4px;
-            box-shadow: 0 0 8px #ff5400;
+            background: #bc6c25;
+            border-radius: 3px;
+            box-shadow: 0 2px 0px #854d0e;
         }
 
-        /* Character */
+        /* Character (शुरुआत वाला डमी) */
         .dummy-character {
             position: absolute;
-            width: 18px;
-            height: 26px;
-            bottom: 12px;
-            left: 20px;
+            width: 16px;
+            height: 22px;
+            bottom: 10px;
+            left: 15px;
             z-index: 10;
-            transform-style: preserve-3d;
-            transition: left 0.05s linear, bottom 0.15s ease;
+            transition: left 0.05s linear, bottom 0.05s linear;
         }
 
         .dummy-head {
             position: absolute;
             top: 0;
-            left: 4px;
+            left: 3px;
             width: 10px;
             height: 10px;
-            background: radial-gradient(circle at 3px 3px, #fff, #7b2cbf);
+            background: radial-gradient(circle at 3px 3px, #ffdbac, #bc6c25);
             border-radius: 50%;
         }
 
         .dummy-body {
             position: absolute;
             top: 9px;
-            left: 7px;
+            left: 6px;
             width: 4px;
-            height: 10px;
-            background: #e0aaff;
+            height: 9px;
+            background: #d90429;
             border-radius: 2px;
         }
 
         .dummy-arm-left, .dummy-arm-right {
             position: absolute;
             top: 10px;
-            width: 6px;
+            width: 5px;
             height: 2px;
-            background: #fff;
-            border-radius: 1px;
+            background: #bc6c25;
         }
         .dummy-arm-left { left: 1px; }
         .dummy-arm-right { right: 1px; }
@@ -137,35 +136,28 @@
         .dummy-leg-left, .dummy-leg-right {
             position: absolute;
             bottom: 0;
-            width: 3px;
-            height: 7px;
-            background: #fff;
-            border-radius: 1px;
+            width: 2.5px;
+            height: 6px;
+            background: #3a5a40;
         }
-        .dummy-leg-left { left: 5px; }
-        .dummy-leg-right { right: 5px; }
+        .dummy-leg-left { left: 4px; }
+        .dummy-leg-right { right: 4px; }
 
-        /* Target Gate */
-        .target-gate {
-            width: 26px;
-            height: 30px;
-            background: linear-gradient(135deg, #38b000, #007200);
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 11px;
+        /* Trophy (आखिरी मंजिल - ट्रॉफी) */
+        .trophy-target {
             position: absolute;
-            bottom: 12px;
+            top: 15px;
             right: 15px;
+            font-size: 20px;
             z-index: 5;
-            box-shadow: 0 0 10px #38b000;
+            cursor: pointer;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+            transition: all 0.3s ease;
         }
 
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
-            background: #ff5400;
+            background: #d90429;
             color: #fff;
             font-weight: 700;
             font-size: 8px;
@@ -177,42 +169,31 @@
             z-index: 20;
             text-align: center;
             width: calc(100% - 12px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .bottom-action-bar {
             width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
             margin-top: 10px;
             padding: 0 4px;
-            gap: 6px;
         }
 
         .control-btn {
-            flex: 1;
-            background: #5a189a;
-            color: #e0aaff;
-            padding: 12px 6px;
+            background: #bc6c25;
+            color: #fff;
+            padding: 10px 4px;
             border-radius: 8px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 0px #3c096c;
+            box-shadow: 0 4px 0px #854d0e;
             text-align: center;
-            border: 1px solid #7b2cbf;
         }
 
         .control-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0px #3c096c;
-        }
-
-        .danger-btn {
-            background: #ff5400;
-            color: #fff;
-            border: 1px solid #ff751a;
-            box-shadow: 0 4px 0px #cc4400;
+            box-shadow: 0 2px 0px #854d0e;
         }
 
         .popup-modal {
@@ -220,8 +201,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #3c096c;
-            border: 2px solid #e0aaff;
+            background: #faedcd;
+            border: 2px solid #bc6c25;
             border-radius: 12px;
             padding: 20px;
             text-align: center;
@@ -229,11 +210,11 @@
             z-index: 100;
             width: 85%;
             max-width: 300px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.9);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
         .modal-btn {
-            background: #7b2cbf;
+            background: #bc6c25;
             color: #fff;
             padding: 8px 12px;
             font-size: 8px;
@@ -248,7 +229,7 @@
     <div class="arcade-cabinet">
         <div class="hud-bar">
             <div>
-                <span id="lvlLabel">LEVEL: OUT OF BODY</span>
+                <span id="lvlLabel">LEVEL: TROLL MAZE</span>
                 <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
             </div>
             <div class="hud-tools">
@@ -258,11 +239,16 @@
 
         <!-- Maze Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="gaslightText">Mission: ऐप छोड़कर फोन की Home Screen चेक करो!</div>
+            <div class="clue-box" id="msgBox">भूल-भुलैया पार करके ऊपर कोने वाली Trophy तक पहुँचो!</div>
             
-            <div class="hazard" style="width: 45px; height: 12px; bottom: 12px; left: 150px;"></div>
+            <!-- Maze Matchstick Walls (भूल-भुलैया की दीवारें) -->
+            <div class="maze-wall" style="width: 10px; height: 160px; bottom: 0; left: 80px;"></div>
+            <div class="maze-wall" style="width: 140px; height: 10px; top: 90px; left: 80px;"></div>
+            <div class="maze-wall" style="width: 10px; height: 130px; top: 20px; left: 220px;"></div>
+            <div class="maze-wall" style="width: 120px; height: 10px; bottom: 80px; left: 220px;"></div>
+            <div class="maze-wall" style="width: 10px; height: 140px; bottom: 0; left: 340px;"></div>
 
-            <!-- Character -->
+            <!-- Character (Start Position) -->
             <div class="dummy-character" id="dummy">
                 <div class="dummy-head"></div>
                 <div class="dummy-body"></div>
@@ -272,72 +258,84 @@
                 <div class="dummy-leg-right"></div>
             </div>
 
-            <!-- Target Gate -->
-            <div class="target-gate" id="gate">🚪</div>
+            <!-- Trophy (End Goal) -->
+            <div class="trophy-target" id="trophy" style="top: 20px; right: 20px;">🏆</div>
         </div>
 
-        <!-- Controls -->
+        <!-- Controls (Directional Pad for Maze) -->
         <div class="bottom-action-bar">
-            <button class="control-btn" onclick="movePlayer(-15)">◀ LEFT</button>
-            <button class="control-btn danger-btn" onclick="jumpPlayer()">JUMP ⬆️</button>
-            <button class="control-btn" onclick="movePlayer(15)">RIGHT ▶</button>
+            <div></div>
+            <button class="control-btn" onclick="moveChar(0, -12)">⬆️ UP</button>
+            <div></div>
+            <button class="control-btn" onclick="moveChar(-12, 0)">⬅️ LEFT</button>
+            <button class="control-btn" onclick="moveChar(0, 12)">⬇️ DOWN</button>
+            <button class="control-btn" onclick="moveChar(12, 0)">➡️ RIGHT</button>
         </div>
 
         <!-- Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 id="modalTitle" style="color: #38b000; font-size: 12px; margin-bottom: 8px;">🎉 SURVIVED!</h2>
-            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #e0aaff;">तुमने गेम के दायरे को ही तोड़ दिया!</p>
+            <h2 id="modalTitle" style="color: #bc6c25; font-size: 12px; margin-bottom: 8px;">🎉 JEET GAYE!</h2>
+            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #523500;">ट्रॉफी मिल गई!</p>
             <button class="modal-btn" onclick="resetGame()">AGAIN 🔄</button>
         </div>
     </div>
 
     <script>
-        let posX = 20;
-        let posY = 12;
+        let posX = 15;
+        let posY = 10;
         let fails = 0;
         let isOver = false;
-        
+
         const dummy = document.getElementById('dummy');
+        const trophy = document.getElementById('trophy');
         const winModal = document.getElementById('winModal');
         const modalTitle = document.getElementById('modalTitle');
         const modalDesc = document.getElementById('modalDesc');
         const failsLabel = document.getElementById('failsLabel');
-        const gaslightText = document.getElementById('gaslightText');
+        const msgBox = document.getElementById('msgBox');
 
-        // NEW: Detect when the user minimizes the game or switches tabs (Visibility API)
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden && !isOver) {
-                // Player fell for the trap and left the game/tab!
-                triggerFail("तुम गेम छोड़कर होम स्क्रीन देखने चले गए! तुम्हें लगा वहाँ कोई सीक्रेट की है?");
+        function moveChar(dx, dy) {
+            if (isOver) return;
+
+            // TROLL TWIST: जब प्लेयर ट्रॉफी के पास पहुँचने वाला होगा, ट्रॉफी थोड़ा खिसक जाएगी!
+            if (posX > 300 && Math.random() < 0.3) {
+                trophy.style.top = (Math.random() * 150 + 20) + 'px';
+                trophy.style.right = (Math.random() * 150 + 20) + 'px';
+                msgBox.innerText = "हाहा! ट्रॉफी भाग गई! पकड़ कर दिखाओ!";
             }
-        });
 
-        function movePlayer(val) {
-            if (isOver) return;
-            posX += val;
-            posX = Math.max(10, Math.min(posX, 430));
+            posX = Math.max(5, Math.min(posX + dx, 410));
+            posY = Math.max(5, Math.min(posY + dy, 260));
+
             dummy.style.left = posX + 'px';
-            checkCollisions();
-        }
-
-        function jumpPlayer() {
-            if (isOver) return;
-            posY = 75;
             dummy.style.bottom = posY + 'px';
 
-            setTimeout(() => {
-                posY = 12;
-                dummy.style.bottom = posY + 'px';
-                checkCollisions();
-            }, 300);
+            checkMazeRules();
         }
 
-        function checkCollisions() {
-            // Pit is around 150px to 195px
-            if (posX >= 140 && posX <= 195 && posY <= 15) {
-                triggerFail("बिना सोचे-समझे सीधे खाई में कूद पड़े!");
-            } else if (posX >= 410) {
-                triggerWin();
+        function checkMazeRules() {
+            // दीवारों से टकराने पर फेल (Maze Collision)
+            // Wall 1: left 80
+            if (posX >= 70 && posX <= 90 && posY <= 160) {
+                triggerFail("दीवार से टकरा गए! भूल-भुलैया इतनी आसान नहीं है।");
+            }
+            // Wall 2: top horizontal at 90px from top
+            else if (posX >= 80 && posX <= 220 && posY >= 120 && posY <= 140) {
+                triggerFail("गलत रास्ता! यहाँ से आगे जाना मना है।");
+            }
+            // Wall 3: left 220
+            else if (posX >= 210 && posX <= 230 && posY >= 100) {
+                triggerFail("ट्रैप में फंस गए!");
+            }
+            // Check Trophy Touch
+            else {
+                let tRect = trophy.getBoundingClientRect();
+                let dRect = dummy.getBoundingClientRect();
+                
+                // If character reaches near top-right where trophy is
+                if (posX >= 360 && posY >= 200) {
+                    triggerWin();
+                }
             }
         }
 
@@ -346,10 +344,10 @@
             isOver = true;
             fails++;
             failsLabel.innerText = "FAILS: " + fails;
-            
-            modalTitle.style.color = "#ff5400";
-            modalTitle.innerText = "💀 GASLIT & DEAD!";
-            modalDesc.innerText = reason + " प्लेयर का ईगो पूरी तरह टूट गया ना? फिर से ट्राई करो!";
+
+            modalTitle.style.color = "#d90429";
+            modalTitle.innerText = "💀 KHATAM! (FAIL)";
+            modalDesc.innerText = reason + " ईगो हर्ट हुआ? दोबारा कोशिश करो!";
             winModal.style.display = "block";
         }
 
@@ -357,19 +355,21 @@
             if (isOver) return;
             isOver = true;
             modalTitle.style.color = "#38b000";
-            modalTitle.innerText = "🎉 ABSOLUTE GENIUS!";
-            modalDesc.innerText = "तुमने इस साइकोलॉजिकल टॉर्चर को पार कर लिया!";
+            modalTitle.innerText = "🏆 CHAMPION!";
+            modalDesc.innerText = "अद्भुत! तुमने इस खतरनाक भूल-भुलैया को पार कर लिया!";
             winModal.style.display = "block";
         }
 
         function resetGame() {
-            posX = 20;
-            posY = 12;
+            posX = 15;
+            posY = 10;
             isOver = false;
             dummy.style.left = posX + 'px';
             dummy.style.bottom = posY + 'px';
+            trophy.style.top = '20px';
+            trophy.style.right = '20px';
             winModal.style.display = "none";
-            gaslightText.innerText = "Mission: ऐप छोड़कर फोन की Home Screen चेक करो!";
+            msgBox.innerText = "भूल-भुलैया पार करके ऊपर कोने वाली Trophy तक पहुँचो!";
         }
     </script>
 </body>
