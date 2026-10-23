@@ -1,558 +1,307 @@
+```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - Ultimate Level Devil Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Table Creator & Progression Designer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            outline: none !important;
-            border: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Press Start 2P', monospace;
-        }
-
-        body {
-            width: 100vw;
-            height: 100vh;
-            background: #0f051d;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            padding: 8px;
-        }
-
-        .arcade-cabinet {
-            position: relative;
-            background: #240046;
-            border-radius: 14px;
-            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.8);
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 620px;
-            width: 100%;
-            height: 95vh;
-            max-height: 570px;
-            border: 3px solid #7b2cbf;
-        }
-
-        .hud-bar {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #3c096c;
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 10px;
-            font-size: 10px;
-            color: #e0aaff;
-            box-shadow: 0 3px 0px #10002b;
-        }
-
-        .hud-tools {
-            display: flex;
-            gap: 6px;
-        }
-
-        .hud-btn {
-            background: #ff5400;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 8px;
-            cursor: pointer;
-            box-shadow: 0 2px 0px #993300;
-        }
-
-        /* Puzzle Chamber */
-        .puzzle-chamber {
-            position: relative;
-            width: 100%;
-            flex-grow: 1;
-            background: #10002b;
-            border-radius: 10px;
-            box-shadow: inset 0 4px 8px rgba(0,0,0,0.9);
-            overflow: hidden;
-            border: 2px solid #5a189a;
-        }
-
-        /* Maze & Devil Walls */
-        .devil-wall {
-            position: absolute;
-            background: #7b2cbf;
-            border-radius: 2px;
-            box-shadow: 0 2px 0px #3c096c;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-
-        /* Spikes / Traps */
-        .devil-spike {
-            position: absolute;
-            background: #ff3333;
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            box-shadow: 0 0 6px #ff0000;
-        }
-
-        /* Moving Hazard Blocks */
-        .moving-hazard {
-            position: absolute;
-            background: #ff5400;
-            border-radius: 3px;
-            box-shadow: 0 0 8px #ff5400;
-        }
-
-        /* Animated Character */
-        .dummy-character {
-            position: absolute;
-            width: 16px;
-            height: 24px;
-            z-index: 20;
-            transition: top 0.04s linear, left 0.04s linear;
-        }
-
-        .dummy-head {
-            position: absolute;
-            top: 0;
-            left: 4px;
-            width: 8px;
-            height: 8px;
-            background: #ffdbac;
-            border-radius: 50%;
-        }
-
-        .dummy-body {
-            position: absolute;
-            top: 8px;
-            left: 6px;
-            width: 4px;
-            height: 9px;
-            background: #ff5400;
-            border-radius: 1px;
-        }
-
-        .dummy-arm-left, .dummy-arm-right {
-            position: absolute;
-            top: 9px;
-            width: 5px;
-            height: 2px;
-            background: #7b2cbf;
-            border-radius: 1px;
-            transition: transform 0.1s ease;
-        }
-        .dummy-arm-left { left: 1px; transform-origin: right center; }
-        .dummy-arm-right { right: 1px; transform-origin: left center; }
-
-        .dummy-leg-left, .dummy-leg-right {
-            position: absolute;
-            bottom: 0;
-            width: 2.5px;
-            height: 7px;
-            background: #fff;
-            border-radius: 1px;
-            transition: transform 0.1s ease;
-        }
-        .dummy-leg-left { left: 4px; transform-origin: top center; }
-        .dummy-leg-right { right: 4px; transform-origin: top center; }
-
-        /* Animation classes for Walking & Jumping */
-        .walking-right .dummy-leg-left { transform: rotate(-35deg); }
-        .walking-right .dummy-leg-right { transform: rotate(35deg); }
-        .walking-left .dummy-leg-left { transform: rotate(35deg); }
-        .walking-left .dummy-leg-right { transform: rotate(-35deg); }
-        .jumping .dummy-arm-left { transform: rotate(-50deg); }
-        .jumping .dummy-arm-right { transform: rotate(50deg); }
-        .jumping .dummy-leg-left { transform: rotate(-20deg); }
-        .jumping .dummy-leg-right { transform: rotate(20deg); }
-
-        /* Trophy / Goal */
-        .trophy-target {
-            position: absolute;
-            font-size: 20px;
-            z-index: 10;
-            filter: drop-shadow(0 0 6px #ffcc00);
-        }
-
-        .clue-box {
-            font-family: 'Chakra Petch', sans-serif;
-            background: #7b2cbf;
-            color: #fff;
-            font-weight: 700;
-            font-size: 8px;
-            padding: 5px 8px;
-            border-radius: 4px;
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            z-index: 30;
-            text-align: center;
-            width: calc(100% - 12px);
-            border: 1px solid #e0aaff;
-        }
-
-        .bottom-action-bar {
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 10px;
-            padding: 0 4px;
-        }
-
-        .control-btn {
-            background: #7b2cbf;
-            color: #fff;
-            padding: 10px 4px;
-            border-radius: 8px;
-            font-size: 9px;
-            cursor: pointer;
-            box-shadow: 0 4px 0px #3c096c;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .control-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0px #3c096c;
-        }
-
-        .popup-modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #240046;
-            border: 2px solid #ff5400;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            display: none;
-            z-index: 100;
-            width: 85%;
-            max-width: 300px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.9);
-        }
-
-        .modal-btn {
-            background: #ff5400;
-            color: #fff;
-            padding: 8px 12px;
-            font-size: 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
     </style>
 </head>
-<body>
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200 flex flex-col">
 
-    <div class="arcade-cabinet">
-        <div class="hud-bar">
+    <!-- Top Navigation Header -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 lg:px-8 py-4 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md flex items-center justify-center">
+                <i class="fa-solid fa-layer-group text-lg"></i>
+            </div>
             <div>
-                <span id="lvlLabel">LEVEL: 1</span>
-                <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
-            </div>
-            <div class="hud-tools">
-                <button class="hud-btn" onclick="resetGame()">🔄 RESTART</button>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">LevelTable Studio</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Professional Game Level Progression & Tier Designer</p>
             </div>
         </div>
 
-        <!-- Puzzle Chamber -->
-        <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="msgBox">Level Devil: रास्तों और दीवारों पर भरोसा मत करो!</div>
-            
-            <div id="levelContent"></div>
+        <!-- Global Action Controls -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <button onclick="openModal()" class="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm hover:shadow">
+                <i class="fa-solid fa-plus"></i>
+                <span class="hidden sm:inline">Add Level</span>
+            </button>
+            <button onclick="exportData()" class="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2 rounded-xl text-sm font-medium transition">
+                <i class="fa-solid fa-download"></i>
+                <span class="hidden md:inline">Export</span>
+            </button>
+            <label class="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2 rounded-xl text-sm font-medium transition cursor-pointer">
+                <i class="fa-solid fa-upload"></i>
+                <span class="hidden md:inline">Import</span>
+                <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+            </label>
+            <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Theme">
+                <i id="themeIcon" class="fa-solid fa-moon"></i>
+            </button>
+        </div>
+    </header>
 
-            <!-- Character -->
-            <div class="dummy-character" id="dummy">
-                <div class="dummy-head"></div>
-                <div class="dummy-body"></div>
-                <div class="dummy-arm-left"></div>
-                <div class="dummy-arm-right"></div>
-                <div class="dummy-leg-left"></div>
-                <div class="dummy-leg-right"></div>
+    <!-- Main Workspace -->
+    <main class="flex-1 overflow-hidden flex flex-col p-4 lg:p-8 max-w-7xl mx-auto w-full">
+        
+        <!-- Dashboard Metrics Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 shrink-0">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Levels</p>
+                    <h3 id="statTotal" class="text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                    <i class="fa-solid fa-list-ol text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Easy / Normal</p>
+                    <h3 id="statEasy" class="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">0</h3>
+                </div>
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                    <i class="fa-solid fa-face-smile text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Hard / Expert</p>
+                    <h3 id="statHard" class="text-2xl font-bold mt-1 text-amber-600 dark:text-amber-400">0</h3>
+                </div>
+                <div class="p-3 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
+                    <i class="fa-solid fa-fire text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Boss Levels</p>
+                    <h3 id="statBoss" class="text-2xl font-bold mt-1 text-rose-600 dark:text-rose-400">0</h3>
+                </div>
+                <div class="p-3 bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-xl">
+                    <i class="fa-solid fa-skull text-lg"></i>
+                </div>
             </div>
         </div>
 
-        <!-- Controls -->
-        <div class="bottom-action-bar">
-            <div></div>
-            <button class="control-btn" onmousedown="moveChar(0, -12)" ontouchstart="moveChar(0, -12)">⬆️ UP</button>
-            <div></div>
-            <button class="control-btn" onmousedown="moveChar(-12, 0)" ontouchstart="moveChar(-12, 0)">⬅️ LEFT</button>
-            <button class="control-btn" onmousedown="moveChar(0, 12)" ontouchstart="moveChar(0, 12)">⬇️ DOWN</button>
-            <button class="control-btn" onmousedown="moveChar(12, 0)" ontouchstart="moveChar(12, 0)">➡️ RIGHT</button>
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 mb-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div class="relative w-full sm:w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search levels by name, reward..." 
+                    class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            </div>
+
+            <div class="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                <select id="filterDifficulty" onchange="renderTable()" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    <option value="">All Difficulties</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Expert">Expert</option>
+                    <option value="Boss">Boss</option>
+                </select>
+
+                <select id="filterStatus" onchange="renderTable()" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    <option value="">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Coming Soon">Coming Soon</option>
+                    <option value="Locked">Locked</option>
+                    <option value="Deprecated">Deprecated</option>
+                </select>
+
+                <button onclick="resetFilters()" class="px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 transition" title="Reset Filters">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
         </div>
 
-        <!-- Modal -->
-        <div class="popup-modal" id="winModal">
-            <h2 id="modalTitle" style="color: #ff5400; font-size: 12px; margin-bottom: 8px;">🎉 PASSED!</h2>
-            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #e0aaff;">अगले लेवल पर चलते हैं!</p>
-            <button class="modal-btn" id="nextBtn" onclick="nextLevel()">NEXT ➡️</button>
+        <!-- Table Container -->
+        <div class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+            <div class="flex-1 overflow-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 dark:bg-slate-800/80 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                        <tr>
+                            <th class="py-3 px-4 w-16 text-center">#</th>
+                            <th class="py-3 px-4">Level Name</th>
+                            <th class="py-3 px-4">Difficulty</th>
+                            <th class="py-3 px-4">Rewards</th>
+                            <th class="py-3 px-4">Prerequisite</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="levelTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Rows Injected Here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center p-12 text-center">
+                <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center text-2xl mb-4">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h3 class="text-base font-semibold text-slate-700 dark:text-slate-300">No levels found</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">Try adjusting your search filters or create your first level to start building your game progression chart.</p>
+                <button onclick="openModal()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm">
+                    Create Level
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create / Edit Modal -->
+    <div id="levelModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300" id="modalContainer">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-800 dark:text-slate-100">Add New Level</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-xl transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="levelForm" onsubmit="saveLevel(event)" class="space-y-4 pt-4">
+                <input type="hidden" id="levelIndex" value="">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Level Number / ID</label>
+                        <input type="number" id="levNumber" required min="1" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Level Name</label>
+                        <input type="text" id="levName" required placeholder="e.g. Forest Sanctuary" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Difficulty</label>
+                        <select id="levDifficulty" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Expert">Expert</option>
+                            <option value="Boss">Boss</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Status</label>
+                        <select id="levStatus" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="Active" selected>Active</option>
+                            <option value="Coming Soon">Coming Soon</option>
+                            <option value="Locked">Locked</option>
+                            <option value="Deprecated">Deprecated</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Rewards & Loot (comma separated)</label>
+                    <input type="text" id="levRewards" placeholder="e.g. 500 Gold, 2x Crystal Gem" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Prerequisite Level</label>
+                    <select id="levPrerequisite" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="None">None (First Level)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition">Save Level</button>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Notification Message Box (In-app popup replacing alert) -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600 text-lg"></i>
+        <span id="toastMessage" class="text-sm font-medium">Action completed successfully.</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
     <script>
-        let currentLevel = 1;
-        let posX = 15;
-        let posY = 15;
-        let fails = 0;
-        let isOver = false;
+        // Default Sample Data if LocalStorage is empty
+        const defaultLevels = [
+            { number: 1, name: "Whispering Woods", difficulty: "Easy", rewards: "100 Gold, 1x Health Potion", prerequisite: "None", status: "Active" },
+            { number: 2, name: "Goblin Outpost", difficulty: "Easy", rewards: "250 Gold, Iron Sword", prerequisite: "Level 1", status: "Active" },
+            { number: 3, name: "Cursed Cavern", difficulty: "Medium", rewards: "500 Gold, Magic Ring", prerequisite: "Level 2", status: "Active" },
+            { number: 4, name: "Volcanic Caldera", difficulty: "Hard", rewards: "1200 Gold, Fire Armor", prerequisite: "Level 3", status: "Active" },
+            { number: 5, name: "Dragon's Lair (Boss)", difficulty: "Boss", rewards: "5000 Gold, Legendary Blade", prerequisite: "Level 4", status: "Coming Soon" }
+        ];
 
-        const dummy = document.getElementById('dummy');
-        const winModal = document.getElementById('winModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalDesc = document.getElementById('modalDesc');
-        const failsLabel = document.getElementById('failsLabel');
-        const lvlLabel = document.getElementById('lvlLabel');
-        const levelContent = document.getElementById('levelContent');
-        const msgBox = document.getElementById('msgBox');
+        let levels = JSON.parse(localStorage.getItem('levelTableData')) || defaultLevels;
 
-        // 😈 ULTIMATE LEVELS DATABASE (Level Devil + Maze + Traps + Running Trophy)
-        const devilLevels = {
-            1: {
-                startPos: { x: 15, y: 15 },
-                trophyPos: { top: '220px', right: '25px' },
-                hint: "लेवल 1: पास जाते ही सामने वाली दीवार गायब हो जाएगी!",
-                walls: [
-                    { width: '15px', height: '170px', top: '30px', left: '70px', fake: false },
-                    { width: '160px', height: '15px', top: '100px', left: '70px', fake: true },
-                    { width: '15px', height: '140px', top: '30px', left: '240px', fake: false }
-                ],
-                spikes: [
-                    { width: '25px', height: '20px', top: '150px', left: '150px' }
-                ],
-                movingBlocks: []
-            },
-            2: {
-                startPos: { x: 15, y: 250 },
-                trophyPos: { top: '25px', right: '25px' },
-                hint: "लेवल 2: घूमते हुए खतरों और छिपे हुए काँटों से बचो!",
-                walls: [
-                    { width: '240px', height: '15px', top: '170px', left: '30px', fake: false },
-                    { width: '15px', height: '150px', top: '40px', left: '270px', fake: true }
-                ],
-                spikes: [
-                    { width: '25px', height: '20px', top: '140px', left: '100px' },
-                    { width: '25px', height: '20px', top: '140px', left: '180px' }
-                ],
-                movingBlocks: [
-                    { width: '20px', height: '20px', top: '80px', left: '120px', range: 80, speed: 3 }
-                ]
-            },
-            3: {
-                startPos: { x: 280, y: 15 },
-                trophyPos: { bottom: '25px', left: '25px' },
-                hint: "लेवल 3: यहाँ ट्रॉफी आपको देखकर खुद अपनी जगह बदल लेगी!",
-                walls: [
-                    { width: '15px', height: '210px', top: '20px', left: '180px', fake: false },
-                    { width: '140px', height: '15px', top: '130px', left: '40px', fake: true }
-                ],
-                spikes: [
-                    { width: '25px', height: '20px', top: '80px', left: '100px' }
-                ],
-                movingBlocks: [
-                    { width: '20px', height: '20px', top: '180px', left: '220px', range: 60, speed: 4 }
-                ]
+        // Initialize App on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check dark mode preference
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').className = "fa-solid fa-sun";
             }
-            // 💡 आप यहाँ `4: { ... }` जोड़कर और भी नए लेवल्स बना सकते हैं!
-        };
+            renderTable();
+        });
 
-        function loadLevel(lvl) {
-            currentLevel = lvl;
-            lvlLabel.innerText = "LEVEL: " + currentLevel;
-            
-            let data = devilLevels[currentLevel] || devilLevels[1];
-            posX = data.startPos.x;
-            posY = data.startPos.y;
-            
-            dummy.style.left = posX + 'px';
-            dummy.style.top = posY + 'px';
-            msgBox.innerText = data.hint;
-
-            let html = `<div class="trophy-target" id="trophy" style="${data.trophyPos.top ? 'top:'+data.trophyPos.top : 'bottom:'+data.trophyPos.bottom}; ${data.trophyPos.right ? 'right:'+data.trophyPos.right : 'left:'+data.trophyPos.left}">🏆</div>`;
-            
-            data.walls.forEach((w, index) => {
-                html += `<div class="devil-wall" id="wall_${index}" style="width:${w.width}; height:${w.height}; top:${w.top}; left:${w.left};"></div>`;
-            });
-
-            data.spikes.forEach((s, index) => {
-                html += `<div class="devil-spike" id="spike_${index}" style="width:${s.width}; height:${s.height}; top:${s.top}; left:${s.left};"></div>`;
-            });
-
-            data.movingBlocks.forEach((m, index) => {
-                html += `<div class="moving-hazard" id="moving_${index}" data-base="${m.left}" data-range="${m.range}" data-speed="${m.speed}" style="width:${m.width}; height:${m.height}; top:${m.top}; left:${m.left};"></div>`;
-            });
-
-            levelContent.innerHTML = html;
-            winModal.style.display = "none";
-            isOver = false;
-        }
-
-        // Moving blocks loop
-        setInterval(() => {
-            if (isOver) return;
-            const movingBlocks = document.querySelectorAll('.moving-hazard');
-            movingBlocks.forEach(block => {
-                let base = parseInt(block.dataset.base);
-                let range = parseInt(block.dataset.range);
-                let speed = parseFloat(block.dataset.speed);
-                let time = Date.now() * 0.005 * speed;
-                let newLeft = base + Math.sin(time) * range;
-                block.style.left = newLeft + 'px';
-            });
-        }, 30);
-
-        function moveChar(dx, dy) {
-            if (isOver) return;
-
-            posX += dx;
-            posY += dy;
-
-            let chamber = document.getElementById('chamber');
-            posX = Math.max(5, Math.min(posX, chamber.clientWidth - 20));
-            posY = Math.max(5, Math.min(posY, chamber.clientHeight - 25));
-
-            dummy.style.left = posX + 'px';
-            dummy.style.top = posY + 'px';
-
-            // Animation
-            if (dx > 0) {
-                dummy.className = "dummy-character walking-right";
-            } else if (dx < 0) {
-                dummy.className = "dummy-character walking-left";
+        // Theme Toggle Function
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                icon.className = "fa-solid fa-moon";
             } else {
-                dummy.className = "dummy-character jumping";
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                icon.className = "fa-solid fa-sun";
+            }
+        }
+
+        // Show Custom Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toastNotification');
+            const msg = document.getElementById('toastMessage');
+            const icon = document.getElementById('toastIcon');
+
+            msg.textContent = message;
+            if (type === 'success') {
+                icon.className = "fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600 text-lg";
+            } else {
+                icon.className = "fa-solid fa-circle-exclamation text-rose-400 dark:text-rose-600 text-lg";
             }
 
+            toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => {
-                if(!isOver) dummy.className = "dummy-character";
-            }, 150);
-
-            // Fake Wall / Vanishing Wall Trick
-            let data = devilLevels[currentLevel];
-            if(data && data.walls) {
-                data.walls.forEach((w, index) => {
-                    if (w.fake) {
-                        let wallEl = document.getElementById(`wall_${index}`);
-                        if (wallEl) {
-                            let wRect = wallEl.getBoundingClientRect();
-                            let dRect = dummy.getBoundingClientRect();
-                            if (Math.abs(dRect.left - wRect.left) < 50 && Math.abs(dRect.top - wRect.top) < 50) {
-                                wallEl.style.opacity = '0';
-                                msgBox.innerText = "⚠️ धोखा! रास्ता गायब हो गया!";
-                            }
-                        }
-                    }
-                });
-            }
-
-            checkCollisions();
-        }
-
-        function checkCollisions() {
-            const dRect = dummy.getBoundingClientRect();
-            
-            // Check Walls
-            const walls = document.querySelectorAll('.devil-wall');
-            let hit = false;
-            walls.forEach(wall => {
-                if (wall.style.opacity !== '0') {
-                    let wRect = wall.getBoundingClientRect();
-                    if (!(dRect.right < wRect.left || dRect.left > wRect.right || dRect.bottom < wRect.top || dRect.top > wRect.bottom)) {
-                        hit = true;
-                    }
-                }
-            });
-
-            // Check Spikes
-            const spikes = document.querySelectorAll('.devil-spike');
-            spikes.forEach(spike => {
-                let sRect = spike.getBoundingClientRect();
-                if (!(dRect.right < sRect.left || dRect.left > sRect.right || dRect.bottom < sRect.top || dRect.top > sRect.bottom)) {
-                    hit = true;
-                }
-            });
-
-            // Check Moving Blocks
-            const movings = document.querySelectorAll('.moving-hazard');
-            movings.forEach(m => {
-                let mRect = m.getBoundingClientRect();
-                if (!(dRect.right < mRect.left || dRect.left > mRect.right || dRect.bottom < mRect.top || dRect.top > mRect.bottom)) {
-                    hit = true;
-                }
-            });
-
-            if (hit) {
-                triggerFail("Level Devil के ट्रैप में फंस गए!");
-                return;
-            }
-
-            // Check Trophy
-            const trophy = document.getElementById('trophy');
-            if (trophy) {
-                // Troll in Level 3: Trophy runs away!
-                if (currentLevel === 3 && posX > 100 && Math.random() < 0.25) {
-                    trophy.style.top = (Math.random() * 150 + 20) + 'px';
-                    trophy.style.left = (Math.random() * 150 + 30) + 'px';
-                    msgBox.innerText = "🏆 हाहा! ट्रॉफी भाग रही है!";
-                }
-
-                let tRect = trophy.getBoundingClientRect();
-                if (!(dRect.right < tRect.left || dRect.left > tRect.right || dRect.bottom < tRect.top || dRect.top > tRect.bottom)) {
-                    triggerWin();
-                }
-            }
-        }
-
-        function triggerFail(reason) {
-            if (isOver) return;
-            isOver = true;
-            fails++;
-            failsLabel.innerText = "FAILS: " + fails;
-
-            modalTitle.style.color = "#ff3333";
-            modalTitle.innerText = "💀 WASTED!";
-            modalDesc.innerText = reason + " ईगो हर्ट हुआ? फिर से ट्राई करो!";
-            document.getElementById('nextBtn').innerText = "AGAIN 🔄";
-            document.getElementById('nextBtn').onclick = () => loadLevel(currentLevel);
-            winModal.style.display = "block";
-        }
-
-        function triggerWin() {
-            if (isOver) return;
-            isOver = true;
-            modalTitle.style.color = "#00ffcc";
-            modalTitle.innerText = "🎉 LEVEL CLEARED!";
-            modalDesc.innerText = "शानदार! आपने डेविल लेवल पार कर लिया।";
-            document.getElementById('nextBtn').innerText = "NEXT LEVEL ➡️";
-            document.getElementById('nextBtn').onclick = () => {
-                if(devilLevels[currentLevel + 1]) {
-                    loadLevel(currentLevel + 1);
-                } else {
-                    modalTitle.innerText = "🏆 GAME COMPLETED!";
-                    modalDesc.innerText = "आपने सारे Level Devil लेवल्स जीत लिए!";
-                    document.getElementById('nextBtn').innerText = "RESTART 🔄";
-                    document.getElementById('nextBtn').onclick = () => loadLevel(1);
-                    winModal.style.display = "block";
-                }
-            };
-            winModal.style.display = "block";
-        }
-
-        function resetGame() {
-            loadLevel(currentLevel);
-        }
-
-        loadLevel(1);
-    </script>
-</body>
-</html>
+                toast.classL
