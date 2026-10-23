@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - The Guardian's Burden</title>
+    <title>🤪 Z PAJAL - Schrödinger's Quantum Trap</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -20,7 +20,7 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #4a154b;
+            background: #0b090a;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,9 +30,9 @@
 
         .arcade-cabinet {
             position: relative;
-            background: #ffb356;
+            background: #161a1d;
             border-radius: 14px;
-            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.8);
             padding: 14px;
             display: flex;
             flex-direction: column;
@@ -41,6 +41,7 @@
             width: 100%;
             height: 95vh;
             max-height: 550px;
+            border: 2px solid #e5383b;
         }
 
         .hud-bar {
@@ -48,13 +49,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #ffa742;
+            background: #212529;
             border-radius: 8px;
             padding: 10px 14px;
             margin-bottom: 10px;
             font-size: 10px;
-            color: #523500;
-            box-shadow: 0 3px 0px #523500;
+            color: #f8f9fa;
+            box-shadow: 0 3px 0px #000;
         }
 
         .hud-tools {
@@ -63,13 +64,13 @@
         }
 
         .hud-btn {
-            background: #523500;
-            color: #ffb356;
+            background: #e5383b;
+            color: #fff;
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 2px 0px #3b2500;
+            box-shadow: 0 2px 0px #a4161a;
         }
 
         /* Puzzle Chamber */
@@ -77,27 +78,28 @@
             position: relative;
             width: 100%;
             flex-grow: 1;
-            background: #fff8eb;
+            background: #03071e;
             border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.25);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.8);
             overflow: hidden;
         }
 
-        /* Obstacles & Traps */
+        /* Quantum Hazards & Walls that Shift */
         .hazard {
             position: absolute;
-            background: #d90429;
+            background: #e5383b;
             border-radius: 4px;
-            box-shadow: 0 2px 0px #780016;
+            box-shadow: 0 0 8px #e5383b;
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
         .platform {
             position: absolute;
-            background: #8c6239;
+            background: #4d908e;
             border-radius: 3px;
         }
 
-        /* Stubborn AI Kid Character */
+        /* Character */
         .dummy-character {
             position: absolute;
             width: 18px;
@@ -115,9 +117,9 @@
             left: 4px;
             width: 10px;
             height: 10px;
-            background: radial-gradient(circle at 3px 3px, #ffdbac, #b5651d);
+            background: radial-gradient(circle at 3px 3px, #fff, #4d908e);
             border-radius: 50%;
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            box-shadow: 0 0 5px #4d908e;
         }
 
         .dummy-body {
@@ -126,7 +128,7 @@
             left: 7px;
             width: 4px;
             height: 10px;
-            background: #d90429;
+            background: #4d908e;
             border-radius: 2px;
         }
 
@@ -135,7 +137,7 @@
             top: 10px;
             width: 6px;
             height: 2px;
-            background: #b5651d;
+            background: #fff;
             border-radius: 1px;
         }
         .dummy-arm-left { left: 1px; }
@@ -146,7 +148,7 @@
             bottom: 0;
             width: 3px;
             height: 7px;
-            background: #003049;
+            background: #fff;
             border-radius: 1px;
         }
         .dummy-leg-left { left: 5px; }
@@ -156,7 +158,7 @@
         .target-gate {
             width: 26px;
             height: 30px;
-            background: linear-gradient(135deg, #2db300, #186600);
+            background: linear-gradient(135deg, #43aa8b, #257960);
             border-radius: 4px;
             display: flex;
             justify-content: center;
@@ -167,12 +169,12 @@
             bottom: 12px;
             right: 15px;
             z-index: 5;
-            box-shadow: 0 2px 0px #0e3b00;
+            box-shadow: 0 0 10px #43aa8b;
         }
 
         .clue-box {
             font-family: 'Chakra Petch', sans-serif;
-            background: #d90429;
+            background: #e5383b;
             color: #fff;
             font-weight: 700;
             font-size: 8px;
@@ -184,6 +186,7 @@
             z-index: 20;
             text-align: center;
             width: calc(100% - 12px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .bottom-action-bar {
@@ -198,25 +201,27 @@
 
         .control-btn {
             flex: 1;
-            background: #523500;
-            color: #ffb356;
+            background: #212529;
+            color: #f8f9fa;
             padding: 12px 6px;
             border-radius: 8px;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 0px #3b2500;
+            box-shadow: 0 4px 0px #000;
             text-align: center;
+            border: 1px solid #4d908e;
         }
 
         .control-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0px #3b2500;
+            box-shadow: 0 2px 0px #000;
         }
 
         .danger-btn {
-            background: #8f1111;
+            background: #e5383b;
             color: #fff;
-            box-shadow: 0 4px 0px #540808;
+            border: 1px solid #ff4d4d;
+            box-shadow: 0 4px 0px #a4161a;
         }
 
         .popup-modal {
@@ -224,7 +229,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #ffb356;
+            background: #161a1d;
+            border: 2px solid #e5383b;
             border-radius: 12px;
             padding: 20px;
             text-align: center;
@@ -232,12 +238,12 @@
             z-index: 100;
             width: 85%;
             max-width: 300px;
-            box-shadow: 0 10px 0px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.9);
         }
 
         .modal-btn {
-            background: #523500;
-            color: #ffb356;
+            background: #4d908e;
+            color: #fff;
             padding: 8px 12px;
             font-size: 8px;
             border-radius: 6px;
@@ -251,7 +257,7 @@
     <div class="arcade-cabinet">
         <div class="hud-bar">
             <div>
-                <span id="lvlLabel">LEVEL: AI TODDLER</span>
+                <span id="lvlLabel">LEVEL: QUANTUM SHIFT</span>
                 <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
             </div>
             <div class="hud-tools">
@@ -261,16 +267,13 @@
 
         <!-- Maze Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="aiStatus">AI Kid: "Mujhe kahin nahi jana, main ziddi hoon!"</div>
+            <div class="clue-box" id="quantumText">Quantum State: रास्ते देखते ही गायब/बदल जाते हैं!</div>
             
-            <!-- Traps & Pits -->
-            <div class="hazard" style="width: 45px; height: 12px; bottom: 12px; left: 140px;"></div>
-            <div class="hazard" style="width: 50px; height: 12px; bottom: 12px; left: 280px;"></div>
+            <!-- Quantum Hazards (Ye chup-chap apni jagah badal lenge) -->
+            <div class="hazard" id="trap1" style="width: 40px; height: 12px; bottom: 12px; left: 130px;"></div>
+            <div class="hazard" id="trap2" style="width: 40px; height: 12px; bottom: 12px; left: 260px;"></div>
 
-            <!-- Platforms -->
-            <div class="platform" style="width: 70px; height: 8px; bottom: 60px; left: 190px;"></div>
-
-            <!-- Stubborn AI Kid Character -->
+            <!-- Character -->
             <div class="dummy-character" id="dummy">
                 <div class="dummy-head"></div>
                 <div class="dummy-body"></div>
@@ -284,17 +287,17 @@
             <div class="target-gate" id="gate">🚪</div>
         </div>
 
-        <!-- Controls (Interference buttons that annoy the AI) -->
+        <!-- Controls -->
         <div class="bottom-action-bar">
-            <button class="control-btn" onclick="forcePush(-15)">PULL BACK ◀</button>
-            <button class="control-btn danger-btn" onclick="makeKidJump()">FORCE JUMP ⬆️</button>
-            <button class="control-btn" onclick="forcePush(15)">PUSH FORWARD ▶</button>
+            <button class="control-btn" onclick="movePlayer(-15)">◀ LEFT</button>
+            <button class="control-btn danger-btn" onclick="quantumJump()">QUANTUM JUMP ⬆️</button>
+            <button class="control-btn" onclick="movePlayer(15)">RIGHT ▶</button>
         </div>
 
-        <!-- Win / Fail Modal -->
+        <!-- Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 id="modalTitle" style="color: #116b0d; font-size: 12px; margin-bottom: 8px;">🎉 BACHA BACH GAYA!</h2>
-            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px;">नासमझ AI बच्चे को आखिरकार गेट तक पहुँचा दिया!</p>
+            <h2 id="modalTitle" style="color: #43aa8b; font-size: 12px; margin-bottom: 8px;">🎉 LEVEL CLEARED!</h2>
+            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #f8f9fa;">क्वांटम ट्रैप को पार कर लिया!</p>
             <button class="modal-btn" onclick="resetGame()">AGAIN 🔄</button>
         </div>
     </div>
@@ -302,7 +305,6 @@
     <script>
         let posX = 20;
         let posY = 12;
-        let isJumping = false;
         let fails = 0;
         let isOver = false;
         
@@ -310,64 +312,58 @@
         const winModal = document.getElementById('winModal');
         const modalTitle = document.getElementById('modalTitle');
         const modalDesc = document.getElementById('modalDesc');
-        const aiStatus = document.getElementById('aiStatus');
         const failsLabel = document.getElementById('failsLabel');
+        const trap1 = document.getElementById('trap1');
+        const trap2 = document.getElementById('trap2');
+        const quantumText = document.getElementById('quantumText');
 
-        // AI Kid keeps moving on his own stupidity!
-        let aiBrain = setInterval(() => {
+        // Quantum physics gimmick: Hazards teleport or change positions unpredictably!
+        let quantumEngine = setInterval(() => {
             if (isOver) return;
 
-            // AI sometimes ignores you or moves backwards out of spite
-            let stubbornMove = Math.random() < 0.35 ? -3 : 2; 
-            posX += stubbornMove;
-            
-            // Boundaries
+            // Randomly teleport traps when player moves
+            if (Math.random() < 0.4) {
+                let randomPos1 = Math.floor(Math.random() * 120) + 100;
+                let randomPos2 = Math.floor(Math.random() * 120) + 240;
+                trap1.style.left = randomPos1 + 'px';
+                trap2.style.left = randomPos2 + 'px';
+                
+                quantumText.innerText = "⚠️ Quantum Fluctuation! काँटों की जगह बदल गई!";
+                setTimeout(() => {
+                    quantumText.innerText = "Quantum State: सावधानी से आगे बढ़ो!";
+                }, 800);
+            }
+            checkCollisions();
+        }, 600);
+
+        function movePlayer(val) {
+            if (isOver) return;
+            posX += val;
             posX = Math.max(10, Math.min(posX, 430));
             dummy.style.left = posX + 'px';
-
-            // Random sarcastic AI dialogues
-            if (Math.random() < 0.05) {
-                const dialogues = [
-                    'AI Kid: "Mujhe ye game pasand nahi!"',
-                    'AI Kid: "Main nahi chalunga, mujhe neend aa rahi hai!"',
-                    'AI Kid: "Haha, dekho main khai ki taraf ja raha hoon!"',
-                    'AI Kid: "Developer kitना bewakoof hai jo mujhe control kar raha hai!"'
-                ];
-                aiStatus.innerText = dialogues[Math.floor(Math.random() * dialogues.length)];
-            }
-
-            checkHazards();
-        }, 50);
-
-        function forcePush(val) {
-            if (isOver) return;
-            // Player tries to help, but AI resists and goes opposite or trips!
-            posX += val * -0.5; // Troll physics: pushing forward might drag him backward!
-            aiStatus.innerText = 'AI Kid: "Meri marzi, main ulta jaunga!"';
+            checkCollisions();
         }
 
-        function makeKidJump() {
-            if (isOver || isJumping) return;
-            isJumping = true;
-            posY = 70;
+        function quantumJump() {
+            if (isOver) return;
+            posY = 75;
             dummy.style.bottom = posY + 'px';
-            aiStatus.innerText = 'AI Kid: "Mujhe koodna nahi pasand, aaaaah!"';
 
             setTimeout(() => {
                 posY = 12;
                 dummy.style.bottom = posY + 'px';
-                isJumping = false;
-                checkHazards();
-            }, 350);
+                checkCollisions();
+            }, 300);
         }
 
-        function checkHazards() {
-            // Check if fallen in pit (Hazards are at x: 140-185 and 280-330)
-            let chamberWidth = document.getElementById('chamber').clientWidth;
-            if (posX > 135 && posX < 185 && posY <= 15) {
-                triggerFail("AI Kid khai mein gir gaya!");
-            } else if (posX > 275 && posX < 330 && posY <= 15) {
-                triggerFail("AI Kid kaante par chad gaya!");
+        function checkCollisions() {
+            let t1Left = parseInt(trap1.style.left);
+            let t2Left = parseInt(trap2.style.left);
+
+            // Check if hit moving/teleporting traps
+            if (((posX >= t1Left - 10 && posX <= t1Left + 35) || 
+                 (posX >= t2Left - 10 && posX <= t2Left + 35)) && posY <= 15) {
+                triggerFail("आप क्वांटम काँटे पर आ गिरे!");
             } else if (posX >= 410) {
                 triggerWin();
             }
@@ -379,18 +375,18 @@
             fails++;
             failsLabel.innerText = "FAILS: " + fails;
             
-            modalTitle.style.color = "#d90429";
-            modalTitle.innerText = "💀 KHATAM! (FAIL)";
-            modalDesc.innerText = reason + " आपका ईगो हर्ट हुआ ना? फिर से ट्राई करो!";
+            modalTitle.style.color = "#e5383b";
+            modalTitle.innerText = "💀 QUANTUM DESTRUCTION!";
+            modalDesc.innerText = reason + " ईगो हर्ट हुआ? क्वांटम फिजिक्स इतनी आसान नहीं है!";
             winModal.style.display = "block";
         }
 
         function triggerWin() {
             if (isOver) return;
             isOver = true;
-            modalTitle.style.color = "#116b0d";
-            modalTitle.innerText = "🎉 GAIBE JEET GAYE!";
-            modalDesc.innerText = "असंभव को संभव कर दिखाया! इस नासमझ AI को बचा लिया!";
+            modalTitle.style.color = "#43aa8b";
+            modalTitle.innerText = "🎉 GENIUS!";
+            modalDesc.innerText = तुमने क्वांटम दुनिया को हरा दिया!";
             winModal.style.display = "block";
         }
 
@@ -400,8 +396,10 @@
             isOver = false;
             dummy.style.left = posX + 'px';
             dummy.style.bottom = posY + 'px';
+            trap1.style.left = '130px';
+            trap2.style.left = '260px';
             winModal.style.display = "none";
-            aiStatus.innerText = "AI Kid: 'Mujhe firse harane aaye ho?'";
+            quantumText.innerText = "Quantum State: रास्ते देखते ही गायब/बदल जाते हैं!";
         }
     </script>
 </body>
