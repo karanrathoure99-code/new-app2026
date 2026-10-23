@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 Z PAJAL - True Maze Trophy Hunt</title>
+    <title>🤪 Z PAJAL - Multi-Level Maze with Animations</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -40,7 +40,7 @@
             max-width: 620px;
             width: 100%;
             height: 95vh;
-            max-height: 550px;
+            max-height: 560px;
             border: 2px solid #523500;
         }
 
@@ -84,7 +84,7 @@
             overflow: hidden;
         }
 
-        /* Maze Walls (भूल-भुलैया की ठोस दीवारें) */
+        /* Maze Walls */
         .maze-wall {
             position: absolute;
             background: #523500;
@@ -92,13 +92,11 @@
             box-shadow: 0 2px 0px #2b1c00;
         }
 
-        /* Character (छोटा डमी जो भूल-भुलैया के अंदर चलेगा) */
+        /* Animated Character */
         .dummy-character {
             position: absolute;
-            width: 12px;
-            height: 16px;
-            top: 15px;
-            left: 15px;
+            width: 14px;
+            height: 22px;
             z-index: 10;
             transition: top 0.05s linear, left 0.05s linear;
         }
@@ -106,7 +104,7 @@
         .dummy-head {
             position: absolute;
             top: 0;
-            left: 2px;
+            left: 3px;
             width: 8px;
             height: 8px;
             background: #ffdbac;
@@ -116,28 +114,52 @@
         .dummy-body {
             position: absolute;
             top: 7px;
-            left: 4px;
+            left: 5px;
             width: 4px;
-            height: 6px;
+            height: 8px;
             background: #d90429;
             border-radius: 1px;
         }
 
+        .dummy-arm-left, .dummy-arm-right {
+            position: absolute;
+            top: 8px;
+            width: 5px;
+            height: 2px;
+            background: #523500;
+            border-radius: 1px;
+            transition: transform 0.1s ease;
+        }
+        .dummy-arm-left { left: 0px; transform-origin: right center; }
+        .dummy-arm-right { right: 0px; transform-origin: left center; }
+
         .dummy-leg-left, .dummy-leg-right {
             position: absolute;
             bottom: 0;
-            width: 2px;
-            height: 3px;
+            width: 2.5px;
+            height: 7px;
             background: #333;
+            border-radius: 1px;
+            transition: transform 0.1s ease;
         }
-        .dummy-leg-left { left: 3px; }
-        .dummy-leg-right { right: 3px; }
+        .dummy-leg-left { left: 3px; transform-origin: top center; }
+        .dummy-leg-right { right: 3px; transform-origin: top center; }
 
-        /* Trophy (मंजिल - नीचे या दूसरे कोने पर) */
+        /* Walking Animation Classes */
+        .walking-left .dummy-leg-left { transform: rotate(30deg); }
+        .walking-left .dummy-leg-right { transform: rotate(-30deg); }
+        .walking-right .dummy-leg-left { transform: rotate(-30deg); }
+        .walking-right .dummy-leg-right { transform: rotate(30deg); }
+
+        /* Jumping Animation Class */
+        .jumping .dummy-arm-left { transform: rotate(-45deg); }
+        .jumping .dummy-arm-right { transform: rotate(45deg); }
+        .jumping .dummy-leg-left { transform: rotate(-20deg); }
+        .jumping .dummy-leg-right { transform: rotate(20deg); }
+
+        /* Trophy */
         .trophy-target {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
             font-size: 18px;
             z-index: 5;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
@@ -217,7 +239,7 @@
     <div class="arcade-cabinet">
         <div class="hud-bar">
             <div>
-                <span id="lvlLabel">LEVEL: TRUE MAZE</span>
+                <span id="lvlLabel">LEVEL: 1</span>
                 <span style="margin-left: 10px;" id="failsLabel">FAILS: 0</span>
             </div>
             <div class="hud-tools">
@@ -227,49 +249,44 @@
 
         <!-- Puzzle Chamber -->
         <div class="puzzle-chamber" id="chamber">
-            <div class="clue-box" id="msgBox">भूल-भुलैया के रास्तों से होते हुए 🏆 ट्रॉफी तक पहुँचो!</div>
+            <div class="clue-box" id="msgBox">भूल-भुलैया पार करके 🏆 ट्रॉफी तक पहुँचो!</div>
             
-            <!-- True Maze Walls (सटीक भूल-भुलैया की दीवारें जिनके बीच से रास्ता निकलेगा) -->
-            <!-- Vertical & Horizontal Walls creating actual corridors -->
-            <div class="maze-wall" style="width: 10px; height: 180px; top: 40px; left: 50px;" id="w1"></div>
-            <div class="maze-wall" style="width: 180px; height: 10px; top: 120px; left: 50px;" id="w2"></div>
-            <div class="maze-wall" style="width: 10px; height: 140px; top: 40px; left: 220px;" id="w3"></div>
-            <div class="maze-wall" style="width: 130px; height: 10px; top: 170px; left: 220px;" id="w4"></div>
-            <div class="maze-wall" style="width: 10px; height: 120px; bottom: 0; left: 340px;" id="w5"></div>
+            <!-- Dynamic Walls & Trophy will be loaded via JavaScript for each Level -->
+            <div id="levelContent"></div>
 
-            <!-- Character (Start Top-Left) -->
+            <!-- Character -->
             <div class="dummy-character" id="dummy">
                 <div class="dummy-head"></div>
                 <div class="dummy-body"></div>
+                <div class="dummy-arm-left"></div>
+                <div class="dummy-arm-right"></div>
                 <div class="dummy-leg-left"></div>
                 <div class="dummy-leg-right"></div>
             </div>
-
-            <!-- Trophy (End Bottom-Right) -->
-            <div class="trophy-target" id="trophy">🏆</div>
         </div>
 
         <!-- Controls -->
         <div class="bottom-action-bar">
             <div></div>
-            <button class="control-btn" onclick="moveChar(0, -8)">⬆️ UP</button>
+            <button class="control-btn" onmousedown="moveChar(0, -10)" ontouchstart="moveChar(0, -10)">⬆️ UP</button>
             <div></div>
-            <button class="control-btn" onclick="moveChar(-8, 0)">⬅️ LEFT</button>
-            <button class="control-btn" onclick="moveChar(0, 8)">⬇️ DOWN</button>
-            <button class="control-btn" onclick="moveChar(8, 0)">➡️ RIGHT</button>
+            <button class="control-btn" onmousedown="moveChar(-10, 0)" ontouchstart="moveChar(-10, 0)">⬅️ LEFT</button>
+            <button class="control-btn" onmousedown="moveChar(0, 10)" ontouchstart="moveChar(0, 10)">⬇️ DOWN</button>
+            <button class="control-btn" onmousedown="moveChar(10, 0)" ontouchstart="moveChar(10, 0)">➡️ RIGHT</button>
         </div>
 
         <!-- Modal -->
         <div class="popup-modal" id="winModal">
-            <h2 id="modalTitle" style="color: #bc6c25; font-size: 12px; margin-bottom: 8px;">🎉 JEET GAYE!</h2>
-            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #523500;">ट्रॉफी मिल गई!</p>
-            <button class="modal-btn" onclick="resetGame()">AGAIN 🔄</button>
+            <h2 id="modalTitle" style="color: #bc6c25; font-size: 12px; margin-bottom: 8px;">🎉 LEVEL CLEARED!</h2>
+            <p id="modalDesc" style="font-family: 'Chakra Petch'; font-size: 11px; margin-bottom: 10px; color: #523500;">अगले लेवल पर चलते हैं!</p>
+            <button class="modal-btn" id="nextBtn" onclick="nextLevel()">AGAIN 🔄</button>
         </div>
     </div>
 
     <script>
+        let currentLevel = 1;
         let posX = 15;
-        let posY = 15; // Top-left start
+        let posY = 15;
         let fails = 0;
         let isOver = false;
 
@@ -278,7 +295,66 @@
         const modalTitle = document.getElementById('modalTitle');
         const modalDesc = document.getElementById('modalDesc');
         const failsLabel = document.getElementById('failsLabel');
-        const msgBox = document.getElementById('msgBox');
+        const lvlLabel = document.getElementById('lvlLabel');
+        const levelContent = document.getElementById('levelContent');
+
+        // 🗺️ LEVELS CONFIGURATION (यहाँ आप आसानी से नए लेवल्स जोड़ सकते हैं!)
+        const levelsData = {
+            1: {
+                startPos: { x: 15, y: 15 },
+                trophyPos: { top: '220px', right: '30px' },
+                walls: [
+                    { width: '10px', height: '170px', top: '40px', left: '70px' },
+                    { width: '160px', height: '10px', top: '110px', left: '70px' },
+                    { width: '10px', height: '130px', top: '40px', left: '230px' },
+                    { width: '140px', height: '10px', top: '160px', left: '230px' }
+                ]
+            },
+            2: {
+                startPos: { x: 15, y: 250 },
+                trophyPos: { top: '20px', right: '30px' },
+                walls: [
+                    { width: '220px', height: '10px', top: '180px', left: '30px' },
+                    { width: '10px', height: '140px', top: '40px', left: '250px' },
+                    { width: '180px', height: '10px', top: '80px', left: '150px' },
+                    { width: '10px', height: '100px', top: '90px', left: '100px' }
+                ]
+            },
+            3: {
+                startPos: { x: 280, y: 15 },
+                trophyPos: { bottom: '20px', left: '30px' },
+                walls: [
+                    { width: '10px', height: '200px', top: '20px', left: '200px' },
+                    { width: '150px', height: '10px', top: '120px', left: '50px' },
+                    { width: '10px', height: '130px', top: '120px', left: '100px' },
+                    { width: '120px', height: '10px', top: '200px', left: '150px' }
+                ]
+            }
+            // 💡 नया लेवल जोड़ने के लिए यहाँ बस { 4: { ... } } जोड़ सकते हैं!
+        };
+
+        function loadLevel(lvl) {
+            currentLevel = lvl;
+            lvlLabel.innerText = "LEVEL: " + currentLevel;
+            
+            let data = levelsData[currentLevel] || levelsData[1];
+            posX = data.startPos.x;
+            posY = data.startPos.y;
+            
+            dummy.style.left = posX + 'px';
+            dummy.style.top = posY + 'px';
+
+            // Render Walls & Trophy dynamically
+            let html = `<div class="trophy-target" id="trophy" style="${data.trophyPos.top ? 'top:'+data.trophyPos.top : 'bottom:'+data.trophyPos.bottom}; ${data.trophyPos.right ? 'right:'+data.trophyPos.right : 'left:'+data.trophyPos.left}">🏆</div>`;
+            
+            data.walls.forEach(w => {
+                html += `<div class="maze-wall" style="width:${w.width}; height:${w.height}; top:${w.top}; left:${w.left};"></div>`;
+            });
+
+            levelContent.innerHTML = html;
+            winModal.style.display = "none";
+            isOver = false;
+        }
 
         function moveChar(dx, dy) {
             if (isOver) return;
@@ -286,18 +362,31 @@
             posX += dx;
             posY += dy;
 
-            // Screen Boundaries (चैंबर के अंदर ही रहे)
-            posX = Math.max(5, Math.min(posX, document.getElementById('chamber').clientWidth - 20));
-            posY = Math.max(5, Math.min(posY, document.getElementById('chamber').clientHeight - 20));
+            // Boundaries
+            let chamber = document.getElementById('chamber');
+            posX = Math.max(5, Math.min(posX, chamber.clientWidth - 20));
+            posY = Math.max(5, Math.min(posY, chamber.clientHeight - 25));
 
             dummy.style.left = posX + 'px';
             dummy.style.top = posY + 'px';
+
+            // Leg Animation during movement
+            if (dx > 0) {
+                dummy.className = "dummy-character walking-right";
+            } else if (dx < 0) {
+                dummy.className = "dummy-character walking-left";
+            } else {
+                dummy.className = "dummy-character jumping";
+            }
+
+            setTimeout(() => {
+                if(!isOver) dummy.className = "dummy-character";
+            }, 150);
 
             checkCollisions();
         }
 
         function checkCollisions() {
-            // Walls get bounding client rects for precise collision
             const dRect = dummy.getBoundingClientRect();
             const walls = document.querySelectorAll('.maze-wall');
             
@@ -313,17 +402,20 @@
             });
 
             if (hitWall) {
-                triggerFail("दीवार से टकरा गए! भूल-भुलैया के अंदर संभल कर चलो।");
+                triggerFail("दीवार से टकरा गए!");
                 return;
             }
 
-            // Check Trophy (Bottom-right area)
-            const tRect = document.getElementById('trophy').getBoundingClientRect();
-            if (!(dRect.right < tRect.left || 
-                  dRect.left > tRect.right || 
-                  dRect.bottom < tRect.top || 
-                  dRect.top > tRect.bottom)) {
-                triggerWin();
+            // Check Trophy
+            const trophy = document.getElementById('trophy');
+            if (trophy) {
+                const tRect = trophy.getBoundingClientRect();
+                if (!(dRect.right < tRect.left || 
+                      dRect.left > tRect.right || 
+                      dRect.bottom < tRect.top || 
+                      dRect.top > tRect.bottom)) {
+                    triggerWin();
+                }
             }
         }
 
@@ -335,7 +427,9 @@
 
             modalTitle.style.color = "#d90429";
             modalTitle.innerText = "💀 KHATAM! (FAIL)";
-            modalDesc.innerText = reason + " ईगो हर्ट हुआ? दोबारा ट्राई करो!";
+            modalDesc.innerText = reason + " ईगो हर्ट हुआ? दोबारा कोशिश करो!";
+            document.getElementById('nextBtn').innerText = "AGAIN 🔄";
+            document.getElementById('nextBtn').onclick = () => loadLevel(currentLevel);
             winModal.style.display = "block";
         }
 
@@ -343,20 +437,29 @@
             if (isOver) return;
             isOver = true;
             modalTitle.style.color = "#38b000";
-            modalTitle.innerText = "🏆 CHAMPION!";
-            modalDesc.innerText = "शानदार! तुमने भूल-भुलैया के रास्तों को पार करके ट्रॉफी जीत ली!";
+            modalTitle.innerText = "🎉 LEVEL CLEARED!";
+            modalDesc.innerText = "शानदार! आपने यह लेवल पार कर लिया।";
+            document.getElementById('nextBtn').innerText = "NEXT LEVEL ➡️";
+            document.getElementById('nextBtn').onclick = () => {
+                if(levelsData[currentLevel + 1]) {
+                    loadLevel(currentLevel + 1);
+                } else {
+                    modalTitle.innerText = "🏆 GAME COMPLETED!";
+                    modalDesc.innerText = "आपने सारे लेवल्स जीत लिए!";
+                    document.getElementById('nextBtn').innerText = "RESTART GAME 🔄";
+                    document.getElementById('nextBtn').onclick = () => loadLevel(1);
+                    winModal.style.display = "block";
+                }
+            };
             winModal.style.display = "block";
         }
 
         function resetGame() {
-            posX = 15;
-            posY = 15;
-            isOver = false;
-            dummy.style.left = posX + 'px';
-            dummy.style.top = posY + 'px';
-            winModal.style.display = "none";
-            msgBox.innerText = "भूल-भुलैया के रास्तों से होते हुए 🏆 ट्रॉफी तक पहुँचो!";
+            loadLevel(currentLevel);
         }
+
+        // Initialize Level 1 on load
+        loadLevel(1);
     </script>
 </body>
 </html>
