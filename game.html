@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Game Level Creator & Editor</title>
+    <title>Custom Game Level Editor - Drag to Draw</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -16,7 +16,7 @@
     <header class="max-w-5xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl mb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-bold text-indigo-400"><i class="fa-solid fa-paintbrush mr-2"></i>Custom Level Builder</h1>
-            <p class="text-xs text-slate-400">Design your own level and test-play it instantly!</p>
+            <p class="text-xs text-slate-400">Click & Drag to draw surfaces instantly!</p>
         </div>
 
         <!-- Mode Switcher & Controls -->
@@ -36,34 +36,30 @@
     <!-- Main Workspace -->
     <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-4 gap-4">
         
-        <!-- Sidebar Tools (Only active in Editor Mode) -->
+        <!-- Sidebar Tools -->
         <div id="sidebarTools" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col space-y-4">
             <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider border-b border-slate-800 pb-2">Select Tool</h3>
             
             <div class="space-y-2">
                 <button onclick="setSelectedTool('platform')" id="tool-platform" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-indigo-600/20 border border-indigo-500 text-indigo-300 transition tool-btn">
                     <i class="fa-solid fa-cube text-indigo-400 w-5"></i>
-                    <span>Platform Block</span>
+                    <span>Surface Block (1 Box)</span>
                 </button>
                 <button onclick="setSelectedTool('spike')" id="tool-spike" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-800/80 transition tool-btn">
                     <i class="fa-solid fa-triangle-exclamation text-rose-400 w-5"></i>
                     <span>Spike / Hazard</span>
                 </button>
-                <button onclick="setSelectedTool('coin')" id="tool-coin" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-800/80 transition tool-btn">
-                    <i class="fa-solid fa-coins text-amber-400 w-5"></i>
-                    <span>Gold Coin</span>
-                </button>
                 <button onclick="setSelectedTool('goal')" id="tool-goal" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-800/80 transition tool-btn">
                     <i class="fa-solid fa-flag-checkered text-emerald-400 w-5"></i>
-                    <span>Goal Flag</span>
+                    <span>Goal (2 Boxes)</span>
                 </button>
             </div>
 
             <div class="mt-auto bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-1.5">
-                <p class="font-semibold text-slate-300"><i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i> How to build:</p>
-                <p>• <b>Click</b> on the grid to place the selected item.</p>
+                <p class="font-semibold text-slate-300"><i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i> Controls:</p>
+                <p>• <b>Click & Drag</b> on grid to paint surfaces continuously.</p>
                 <p>• <b>Right-click</b> on any item to delete it.</p>
-                <p>• Switch to <b>Play Level</b> to test your creation!</p>
+                <p>• Switch to <b>Play Level</b> to test it!</p>
             </div>
         </div>
 
@@ -72,11 +68,6 @@
             <div class="relative">
                 <canvas id="gameCanvas" width="700" height="400" class="bg-slate-950 rounded-xl border border-slate-800 cursor-crosshair shadow-inner"></canvas>
                 
-                <!-- Play Mode HUD -->
-                <div id="playHud" class="absolute top-3 left-3 hidden items-center space-x-4 bg-slate-900/90 backdrop-blur-sm border border-slate-700 px-4 py-1.5 rounded-xl text-sm">
-                    <span>Score: <strong id="scoreVal" class="text-amber-400">0</strong></span>
-                </div>
-
                 <!-- Game Over / Victory Overlay -->
                 <div id="gameOverlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center text-center p-6">
                     <h2 id="overlayTitle" class="text-2xl font-bold mb-2 text-emerald-400">Victory!</h2>
@@ -91,36 +82,28 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Grid snap size
-        const GRID_SIZE = 20;
+        const GRID_SIZE = 20; // 1 Box size = 20x20 pixels
 
-        // Mode: 'editor' or 'play'
         let currentMode = 'editor';
-        let selectedTool = 'platform'; // 'platform', 'spike', 'coin', 'goal'
+        let selectedTool = 'platform'; // 'platform', 'spike', 'goal'
+        let isMouseDown = false;
 
-        // Level Elements Array
+        // Level Elements
         let levelData = {
             platforms: [
-                { x: 0, y: 380, w: 700, h: 20 }, // Default Ground
-                { x: 150, y: 300, w: 100, h: 20 },
-                { x: 300, y: 220, w: 120, h: 20 }
+                // Default floor
+                { x: 0, y: 380, w: 700, h: 20 }
             ],
-            spikes: [
-                { x: 260, y: 360, w: 20, h: 20 }
-            ],
-            coins: [
-                { x: 180, y: 260, radius: 8, collected: false },
-                { x: 350, y: 180, radius: 8, collected: false }
-            ],
-            goal: { x: 620, y: 320, w: 30, h: 60 }
+            spikes: [],
+            goal: { x: 640, y: 340, w: 20, h: 40 } // 2 boxes wide/tall proportion
         };
 
-        // Player State (for Play Mode)
+        // Player State
         let player = {
             x: 40,
             y: 330,
             width: 20,
-            height: 30,
+            height: 28,
             vx: 0,
             vy: 0,
             speed: 4,
@@ -128,7 +111,6 @@
             grounded: false
         };
         const gravity = 0.45;
-        let score = 0;
         let isGameOver = false;
         let isGameWon = false;
 
@@ -142,7 +124,6 @@
             const sidebar = document.getElementById('sidebarTools');
             const editorBtn = document.getElementById('editorModeBtn');
             const playBtn = document.getElementById('playModeBtn');
-            const hud = document.getElementById('playHud');
             const overlay = document.getElementById('gameOverlay');
 
             overlay.classList.add('hidden');
@@ -152,26 +133,20 @@
                 sidebar.classList.remove('opacity-50', 'pointer-events-none');
                 editorBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow-md transition";
                 playBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
-                hud.classList.add('hidden');
                 canvas.style.cursor = "crosshair";
             } else {
                 sidebar.classList.add('opacity-50', 'pointer-events-none');
                 playBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-emerald-600 text-white shadow-md transition";
                 editorBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
-                hud.classList.remove('hidden');
-                hud.classList.add('flex');
                 canvas.style.cursor = "default";
 
-                // Reset Player & Coins
+                // Reset Player
                 player.x = 40;
                 player.y = 330;
                 player.vx = 0;
                 player.vy = 0;
-                score = 0;
                 isGameOver = false;
                 isGameWon = false;
-                levelData.coins.forEach(c => c.collected = false);
-                document.getElementById('scoreVal').textContent = score;
             }
         }
 
@@ -185,33 +160,56 @@
             activeBtn.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-indigo-600/20 border border-indigo-500 text-indigo-300 transition tool-btn";
         }
 
-        // Clear All Level Elements
+        // Clear Level
         function clearLevel() {
-            if (confirm("Are you sure you want to clear your entire level?")) {
-                levelData.platforms = [{ x: 0, y: 380, w: 700, h: 20 }]; // Keep ground
+            if (confirm("Are you sure you want to clear your level?")) {
+                levelData.platforms = [];
                 levelData.spikes = [];
-                levelData.coins = [];
-                levelData.goal = { x: 620, y: 320, w: 30, h: 60 };
+                levelData.goal = { x: 640, y: 340, w: 20, h: 40 };
             }
         }
 
-        // Canvas Click Handler (Building)
-        canvas.addEventListener('click', e => {
-            if (currentMode !== 'editor') return;
-
+        // Handle Drawing Action at Coordinate
+        function applyToolAt(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
-            const clickX = Math.floor((e.clientX - rect.left) / GRID_SIZE) * GRID_SIZE;
-            const clickY = Math.floor((e.clientY - rect.top) / GRID_SIZE) * GRID_SIZE;
+            const gridX = Math.floor((clientX - rect.left) / GRID_SIZE) * GRID_SIZE;
+            const gridY = Math.floor((clientY - rect.top) / GRID_SIZE) * GRID_SIZE;
+
+            if (gridX < 0 || gridX >= canvas.width || gridY < 0 || gridY >= canvas.height) return;
 
             if (selectedTool === 'platform') {
-                levelData.platforms.push({ x: clickX, y: clickY, w: 60, h: 20 });
+                // Check if platform already exists at this exact grid cell to prevent stacking duplicates
+                const exists = levelData.platforms.some(p => p.x === gridX && p.y === gridY && p.w === GRID_SIZE && p.h === GRID_SIZE);
+                if (!exists) {
+                    levelData.platforms.push({ x: gridX, y: gridY, w: GRID_SIZE, h: GRID_SIZE });
+                }
             } else if (selectedTool === 'spike') {
-                levelData.spikes.push({ x: clickX, y: clickY, w: 20, h: 20 });
-            } else if (selectedTool === 'coin') {
-                levelData.coins.push({ x: clickX + 10, y: clickY + 10, radius: 8, collected: false });
+                const exists = levelData.spikes.some(s => s.x === gridX && s.y === gridY);
+                if (!exists) {
+                    levelData.spikes.push({ x: gridX, y: gridY, w: GRID_SIZE, h: GRID_SIZE });
+                }
             } else if (selectedTool === 'goal') {
-                levelData.goal = { x: clickX, y: clickY, w: 30, h: 60 };
+                // Goal is 2 boxes wide / tall proportional layout
+                levelData.goal = { x: gridX, y: gridY, w: GRID_SIZE, h: GRID_SIZE * 2 };
             }
+        }
+
+        // Mouse Events for Drag-to-Draw
+        canvas.addEventListener('mousedown', e => {
+            if (currentMode !== 'editor') return;
+            isMouseDown = true;
+            if (e.button === 0) { // Left click
+                applyToolAt(e.clientX, e.clientY);
+            }
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            if (currentMode !== 'editor' || !isMouseDown) return;
+            applyToolAt(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('mouseup', () => {
+            isMouseDown = false;
         });
 
         // Right Click to Delete Elements
@@ -223,19 +221,14 @@
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
 
-            // Check platforms
             levelData.platforms = levelData.platforms.filter(p => !(mx >= p.x && mx <= p.x + p.w && my >= p.y && my <= p.y + p.h));
-            // Check spikes
             levelData.spikes = levelData.spikes.filter(s => !(mx >= s.x && mx <= s.x + s.w && my >= s.y && my <= s.y + s.h));
-            // Check coins
-            levelData.coins = levelData.coins.filter(c => Math.hypot(mx - c.x, my - c.y) > c.radius + 5);
         });
 
-        // Game Update Loop (Physics & Collision)
+        // Game Physics Update
         function updateGame() {
             if (currentMode !== 'play' || isGameOver || isGameWon) return;
 
-            // Horizontal Movement
             if (keys['ArrowLeft'] || keys['KeyA']) {
                 player.vx = -player.speed;
             } else if (keys['ArrowRight'] || keys['KeyD']) {
@@ -244,22 +237,19 @@
                 player.vx = 0;
             }
 
-            // Jumping
             if ((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && player.grounded) {
                 player.vy = player.jumpPower;
                 player.grounded = false;
             }
 
-            // Gravity
             player.vy += gravity;
             player.x += player.vx;
             player.y += player.vy;
 
-            // Boundaries
             if (player.x < 0) player.x = 0;
             if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 
-            // Platform Collisions
+            // Platform Collision
             player.grounded = false;
             levelData.platforms.forEach(p => {
                 if (
@@ -274,7 +264,7 @@
                 }
             });
 
-            // Spike / Hazard Collisions (Game Over)
+            // Spike Collision
             levelData.spikes.forEach(s => {
                 if (
                     player.x < s.x + s.w &&
@@ -290,23 +280,10 @@
             // Abyss Fall
             if (player.y > canvas.height) {
                 isGameOver = true;
-                showOverlay("Game Over!", "You fell into the abyss!", "text-rose-400");
+                showOverlay("Game Over!", "You fell down!", "text-rose-400");
             }
 
-            // Coin Collection
-            levelData.coins.forEach(c => {
-                if (!c.collected) {
-                    let distX = (player.x + player.width / 2) - c.x;
-                    let distY = (player.y + player.height / 2) - c.y;
-                    if (Math.hypot(distX, distY) < player.width / 2 + c.radius) {
-                        c.collected = true;
-                        score += 100;
-                        document.getElementById('scoreVal').textContent = score;
-                    }
-                }
-            });
-
-            // Goal Collision (Victory)
+            // Goal Collision
             let g = levelData.goal;
             if (
                 player.x < g.x + g.w &&
@@ -315,7 +292,7 @@
                 player.y + player.height > g.y
             ) {
                 isGameWon = true;
-                showOverlay("Victory! 🎉", `Level cleared with score: ${score}`, "text-emerald-400");
+                showOverlay("Victory! 🎉", "You cleared the level!", "text-emerald-400");
             }
         }
 
@@ -328,11 +305,11 @@
             overlay.classList.add('flex');
         }
 
-        // Render Graphics
+        // Render Canvas Graphics
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Editor Grid Lines
+            // Grid Lines in Editor Mode
             if (currentMode === 'editor') {
                 ctx.strokeStyle = '#1e293b';
                 ctx.lineWidth = 1;
@@ -344,7 +321,7 @@
                 }
             }
 
-            // Draw Platforms
+            // Draw Platforms (1 Box each)
             levelData.platforms.forEach(p => {
                 ctx.fillStyle = '#334155';
                 ctx.fillRect(p.x, p.y, p.w, p.h);
@@ -363,37 +340,23 @@
                 ctx.fill();
             });
 
-            // Draw Coins
-            levelData.coins.forEach(c => {
-                if (!c.collected || currentMode === 'editor') {
-                    ctx.beginPath();
-                    ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = '#fbbf24';
-                    ctx.fill();
-                    ctx.strokeStyle = '#d97706';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
-
-            // Draw Goal Flag
+            // Draw Goal (2 Boxes proportional)
             let g = levelData.goal;
             ctx.fillStyle = '#10b981';
             ctx.fillRect(g.x, g.y, g.w, g.h);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '10px Inter';
+            ctx.font = '9px Inter';
             if (currentMode === 'editor') {
-                ctx.fillText('GOAL', g.x + 2, g.y + 35);
+                ctx.fillText('GOAL', g.x + 1, g.y + 22);
             }
 
-            // Draw Player (Only in Play Mode)
+            // Draw Player in Play Mode
             if (currentMode === 'play') {
                 ctx.fillStyle = '#6366f1';
                 ctx.fillRect(player.x, player.y, player.width, player.height);
             }
         }
 
-        // Main Loop
         function loop() {
             updateGame();
             draw();
