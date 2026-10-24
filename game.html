@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bermuda Open-World Map - Connected Hills to Surface</title>
+    <title>Free Fire Bermuda - Complete 360 Ring Hills & Adam Character</title>
     <style>
         body {
             margin: 0;
@@ -81,7 +81,7 @@
     <div id="info">
         <strong>Free Fire Bermuda + Adam:</strong><br>
         Controls: <span>W, A, S, D to Walk</span><br>
-        Status: <span>Fully Connected Hills to Base Surface Loaded</span>
+        Status: <span>Complete 360-Degree Boundary Hills Loaded</span>
     </div>
 
     <!-- UI Buttons -->
@@ -153,7 +153,7 @@
             baseSurface.receiveShadow = true;
             scene.add(baseSurface);
 
-            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Fully Connected Boundary Hills
+            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Complete 360 Ring Hills
             const segments = 350;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
@@ -172,14 +172,13 @@
                     height -= 70;
                 }
 
-                // Fully connected boundary hills (smoothly blending from ground 0 up to high peaks and back down to ground)
-                let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
-                let innerStart = halfSize - 4000; // Start rising gradually earlier
-                if (maxDist > innerStart) {
-                    let factor = (maxDist - innerStart) / (4000);
-                    // Using smooth cosine curve so it starts at 0, rises up, and connects cleanly to the surface edge
-                    let hillCurve = (1 - Math.cos(factor * Math.PI)) * 0.5;
-                    height += hillCurve * 1100; 
+                // Complete 360-degree radial ring hills at the boundaries (fully connected from all sides)
+                let distFromCenter = Math.sqrt(vx * vx + vy * vy);
+                let innerRadius = halfSize - 4500; // Start raising mountains uniformly in a ring
+                if (distFromCenter > innerRadius) {
+                    let factor = (distFromCenter - innerRadius) / (4500);
+                    let ringHill = Math.sin(factor * Math.PI * 0.5);
+                    height += ringHill * 1300; // Full continuous mountain ring around the map
                 }
 
                 posAttr.setZ(i, Math.max(0, height));
@@ -361,20 +360,20 @@
                 if (moveLeft) adam.position.x -= adamSpeed;
                 if (moveRight) adam.position.x += adamSpeed;
 
-                // Terrain height calculation matching the connected boundary hills
+                // Terrain height matching the complete 360-degree ring hills
                 let vx = adam.position.x;
                 let vy = adam.position.z;
                 let h = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220 
                       + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 90;
                 if (Math.abs(vx) < 350) h -= 70;
 
-                let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
+                let distFromCenter = Math.sqrt(vx * vx + vy * vy);
                 let halfSize = mapSize / 2;
-                let innerStart = halfSize - 4000;
-                if (maxDist > innerStart) {
-                    let factor = (maxDist - innerStart) / (4000);
-                    let hillCurve = (1 - Math.cos(factor * Math.PI)) * 0.5;
-                    h += hillCurve * 1100;
+                let innerRadius = halfSize - 4500;
+                if (distFromCenter > innerRadius) {
+                    let factor = (distFromCenter - innerRadius) / (4500);
+                    let ringHill = Math.sin(factor * Math.PI * 0.5);
+                    h += ringHill * 1300;
                 }
 
                 adam.position.y = Math.max(10, h + 20);
