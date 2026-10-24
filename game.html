@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tactical Dummy Mission - Update 1</title>
+    <title>3D Tactical Dummy Mission - Update 2</title>
     <style>
         body {
             margin: 0;
@@ -48,7 +48,7 @@
 </head>
 <body>
     <div id="ui">
-        <strong>Mission Status:</strong> <span id="status">Go inside houses, pick up Gun & eliminate targets!</span><br>
+        <strong>Mission Status:</strong> <span id="status">Go inside houses (Doors open automatically), pick up Gun & eliminate targets!</span><br>
         Targets Left: <span id="targetCount">6</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
     <div id="crosshair"></div>
@@ -61,6 +61,7 @@
         let character;
         let head, torso, leftArm, rightArm, leftLeg, rightLeg;
         let obstacles = [];
+        let doors = []; // Automatic Sliding Doors array
         let enemies = [];
         let gunObject = null;
         let hasGun = false;
@@ -75,7 +76,7 @@
         let keys = { w: false, a: false, s: false, d: false, space: false };
         let isMouseDown = false;
         let mouseX = 0, mouseY = 0;
-        let cameraAngleX = 0, cameraAngleY = 0.85; // Updated: Camera angle higher to see more area
+        let cameraAngleX = 0, cameraAngleY = 0.85;
 
         init();
         animate();
@@ -125,7 +126,7 @@
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Spread Multiple Houses Across the Full Area
+            // 7. Spread Multiple Houses Across the Full Area with Auto-Doors
             createHouse(-60, 0, -60);
             createHouse(60, 0, -60);
             createHouse(-60, 0, 60);
@@ -277,6 +278,21 @@
             doorTop.position.set(x, y + 4, z + houseDepth/2);
             scene.add(doorTop);
             addObstacleBox(doorTop.position.x, doorTop.position.y, doorTop.position.z, 3, 1, wallThickness);
+
+            // Added: Automatic Sliding Door at Gate
+            const doorMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.5 });
+            let doorMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 3.5, 0.2), doorMat);
+            doorMesh.position.set(x, y + 1.75, z + houseDepth/2);
+            doorMesh.castShadow = true;
+            scene.add(doorMesh);
+
+            doors.push({
+                mesh: doorMesh,
+                closedX: x,
+                closedY: y + 1.75,
+                closedZ: z + houseDepth/2,
+                openZ: z + houseDepth/2 + 2.5
+            });
 
             const roofMat = new THREE.MeshStandardMaterial({ color: 0xa93226, roughness: 0.6 });
             let roof = new THREE.Mesh(new THREE.BoxGeometry(houseWidth + 1, 0.5, houseDepth + 1), roofMat);
@@ -439,6 +455,21 @@
                 character.rotation.y = Math.atan2(moveX, moveZ);
             }
 
+            // Added: Automatic Door Open/Close based on player/enemy proximity
+            doors.forEach(d => {
+                let isOpen = character.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ)) < 2.5;
+                if (!isOpen) {
+                    for(let en of enemies) {
+                        if(en.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ)) < 2.5) {
+                            isOpen = true;
+                            break;
+                        }
+                    }
+                }
+                let targetZ = isOpen ? d.openZ : d.closedZ;
+                d.mesh.position.z += (targetZ - d.mesh.position.z) * 0.1;
+            });
+
             if (gunObject && !hasGun) {
                 let dist = character.position.distanceTo(gunObject.position);
                 if (dist < 1.8) {
@@ -478,9 +509,6 @@
 
             if (!isGrounded) {
                 leftArm.rotation.x = -Math.PI * 0.6;
-                rightArm.rotation.x = -Math.PI * 0.6;
-                leftLeg.rotation.x = Math.PI * 0.3;
-                rightLeg.rotation.x = -Math.PI * 0.3;
             } else if (isMoving) {
                 leftArm.rotation.x = Math.sin(time) * 0.8;
                 rightArm.rotation.x = -Math.sin(time) * 0.8;
