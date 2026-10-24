@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Free Fire Bermuda - 100% Exact Pure Surface</title>
+    <title>Free Fire Bermuda - Smooth Surface & View Controls</title>
     <style>
         body {
             margin: 0;
@@ -33,6 +33,27 @@
             color: #38bdf8;
             font-weight: bold;
         }
+        /* Full Map View Button */
+        #map-btn {
+            position: absolute;
+            top: 95px;
+            left: 15px;
+            background: rgba(255, 85, 0, 0.9);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 100;
+            touch-action: manipulation;
+        }
+        #map-btn:active {
+            transform: scale(0.95);
+            background: rgba(200, 65, 0, 0.9);
+        }
         #minimap-container {
             position: absolute;
             top: 15px;
@@ -55,10 +76,13 @@
 </head>
 <body>
     <div id="info">
-        <strong>Free Fire Bermuda Pure Surface:</strong><br>
+        <strong>Free Fire Bermuda Map:</strong><br>
         Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Exact Bermuda Layout & Terrain Loaded</span>
+        Status: <span>Smooth Surface & Drag View Enabled</span>
     </div>
+
+    <!-- Full Map View Button -->
+    <button id="map-btn" onclick="toggleFullMap()">🗺️ Full Map View</button>
 
     <!-- Live Minimap -->
     <div id="minimap-container">
@@ -72,6 +96,12 @@
         let scene, camera, renderer;
         let mapSize = 20000;
         let minimapCtx, minimapCanvas;
+        let isFullMap = false;
+
+        // Interaction variables for dragging/panning
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraTarget = new THREE.Vector3(0, 0, 0);
 
         init();
         animate();
@@ -81,10 +111,10 @@
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x5294e2);
 
-            // 2. Camera Setup (Positioned correctly to view the massive map instantly)
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
+            // 2. Camera Setup
+            camera = new THREE.PerspectiveSystem ? null : new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
             camera.position.set(0, 3000, 5000);
-            camera.lookAt(0, 0, 0);
+            camera.lookAt(cameraTarget);
 
             // 3. Renderer Setup
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
@@ -96,7 +126,7 @@
             document.body.appendChild(renderer.domElement);
 
             // 4. Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
             scene.add(ambientLight);
 
             const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
@@ -121,8 +151,8 @@
             ocean.position.y = -200;
             scene.add(ocean);
 
-            // 6. Bermuda Surface Generation
-            const segments = 350;
+            // 6. Smooth Bermuda Surface Generation (High segment count for zero visible grid lines/grooves)
+            const segments = 400;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
             let halfSize = mapSize / 2;
@@ -150,16 +180,56 @@
             }
             groundGeo.computeVertexNormals();
 
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.88 });
+            // Smooth shading to remove all harsh polygon grooves/lines
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.85, flatShading: false });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
+            // Mouse / Touch Event Listeners for dragging and zooming across the map
+            window.addEventListener('mousedown', (e) => {
+                if(e.target.closest('#map-btn') || e.target.closest('#minimap-container')) return;
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                let deltaX = e.clientX - previousMousePosition.x;
+                let deltaY = e.clientY - previousMousePosition.y;
+
+                cameraTarget.x -= deltaX * 3.5;
+                cameraTarget.z -= deltaY * 3.5;
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            window.addEventListener('wheel', (e) => {
+                camera.position.y += e.deltaY * 3.0;
+                camera.position.y = Math.max(400, Math.min(25000, camera.position.y));
+            });
+
             minimapCanvas = document.getElementById('minimap-canvas');
             minimapCtx = minimapCanvas.getContext('2d');
 
             window.addEventListener('resize', onWindowResize);
+        }
+
+        function toggleFullMap() {
+            isFullMap = !isFullMap;
+            const btn = document.getElementById('map-btn');
+            if (isFullMap) {
+                camera.position.set(0, 16000, 0); 
+                cameraTarget.set(0, 0, 0);
+                btn.innerHTML = "🗺️ Normal View";
+            } else {
+                camera.position.set(0, 3000, 5000); 
+                cameraTarget.set(0, 0, 0);
+                btn.innerHTML = "🗺️ Full Map View";
+            }
         }
 
         function drawMinimap() {
@@ -195,6 +265,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            camera.lookAt(cameraTarget);
             drawMinimap();
             renderer.render(scene, camera);
         }
