@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Tactical Dummy Mission - Fixed</title>
+    <title>3D Tactical Dummy Mission - Final Fixed</title>
     <style>
         body {
             margin: 0;
@@ -78,7 +78,6 @@
         let mouseX = 0, mouseY = 0;
         let cameraAngleX = 0, cameraAngleY = 0.75;
 
-        // Ensure Three.js is loaded before running init
         window.onload = function() {
             if (typeof THREE === 'undefined') {
                 alert('Three.js failed to load. Check your internet connection.');
@@ -128,10 +127,10 @@
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Houses
+            // 7. Houses (Fixed syntax)
             const houseCoords = [
-                {-70, -70}, {70, -70}, {-70, 70}, {70, 70},
-                {0, -100}, {0, 100}, {-100, 0}, {100, 0}
+                {x: -70, z: -70}, {x: 70, z: -70}, {x: -70, z: 70}, {x: 70, z: 70},
+                {x: 0, z: -100}, {x: 0, z: 100}, {x: -100, z: 0}, {x: 100, z: 0}
             ];
             houseCoords.forEach(pos => createHouse(pos.x, 0, pos.z));
 
