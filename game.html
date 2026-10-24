@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Massive Open-World Map - 5x Size, Outer Ocean & Real Mountains</title>
+    <title>Massive Open-World Map - Bumpy Terrain & Connected Plateau Mountains</title>
     <style>
         body {
             margin: 0;
@@ -55,9 +55,9 @@
 </head>
 <body>
     <div id="info">
-        <strong>Massive Open-World Map (5x Size):</strong><br>
+        <strong>Massive Open-World Battleground:</strong><br>
         Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Outer Ocean, Real Mountains & Clean Land Loaded</span>
+        Status: <span>Rough Bumpy Terrain & Connected Boundary Plateaus Loaded</span>
     </div>
 
     <div id="minimap-container">
@@ -69,7 +69,7 @@
 
     <script>
         let scene, camera, renderer;
-        let mapSize = 20000; // 5x Expanded Size
+        let mapSize = 20000;
         let minimapCtx, minimapCanvas;
 
         init();
@@ -79,11 +79,11 @@
             // 1. Scene & Sky Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x5294e2);
-            scene.fog = new THREE.FogExp2(0x75aff7, 0.00015); // Adjusted fog for massive 20k scale
+            scene.fog = new THREE.FogExp2(0x75aff7, 0.00015);
 
             // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 30000);
-            camera.position.set(0, 1200, 2500);
+            camera.position.set(0, 1500, 3000);
             camera.lookAt(0, 0, 0);
 
             // 3. Renderer Setup
@@ -106,29 +106,34 @@
             sunLight.shadow.mapSize.height = 2048;
             sunLight.shadow.camera.near = 0.5;
             sunLight.shadow.camera.far = 15000;
-            const d = 4000;
+            const d = 5000;
             sunLight.shadow.camera.left = -d;
             sunLight.shadow.camera.right = d;
             sunLight.shadow.camera.top = d;
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside Mountains (10,000+ units away from center)
-            const oceanGeo = new THREE.PlaneGeometry(50000, 50000);
+            // 5. Endless Ocean Surrounding Outside (10,000+ units away)
+            const oceanGeo = new THREE.PlaneGeometry(60000, 60000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
             ocean.rotation.x = -Math.PI / 2;
-            ocean.position.y = -5;
+            ocean.position.y = -10;
             scene.add(ocean);
 
-            // 6. Massive Map Terrain Ground (Clean land, no internal water/rivers)
-            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, 250, 250);
+            // 6. Highly Bumpy & Rugged Terrain Ground (Har jagah ubad-khabad, gaddhe aur unchai)
+            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, 300, 300);
             const posAttr = groundGeo.attributes.position;
             for (let i = 0; i < posAttr.count; i++) {
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
-                // Gentle rolling hills across the massive land
-                let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 60;
+                
+                // Multi-layered sine wave noise for realistic uneven ground (gaddhe aur unchai)
+                let height = Math.sin(vx * 0.002) * Math.cos(vy * 0.002) * 120 
+                           + Math.sin(vx * 0.008) * Math.sin(vy * 0.008) * 35 
+                           + Math.cos(vx * 0.02) * 10;
+                
+                // Flatten slightly near exact center spawn area if needed, or keep fully organic
                 posAttr.setZ(i, height);
             }
             groundGeo.computeVertexNormals();
@@ -139,8 +144,8 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 7. Build World Features (Real Organic Mountain Ranges & Center Peak)
-            buildWorldFeatures();
+            // 7. Build Connected Boundary Plateaus (Passable walk-over mountains)
+            buildBoundaryPlateaus();
 
             // Setup Minimap
             minimapCanvas = document.getElementById('minimap-canvas');
@@ -149,73 +154,49 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        // Real Natural Mountain Generator (Cluster of organic rock formations instead of single cones)
-        function createRealMountainRange(x, z, width, length, maxHeight, colorHex) {
-            const group = new THREE.Group();
-            group.position.set(x, 0, z);
+        // Connected Plateau Mountains along the outer boundary (Walkable over-pass style)
+        function buildBoundaryPlateaus() {
+            let halfMap = mapSize / 2 - 500;
+            let width = mapSize;
 
-            const mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.95, flatShading: true });
-            
-            // Create multiple overlapping organic rock mounds
-            for (let i = 0; i < 6; i++) {
-                let rW = width * (0.4 + Math.random() * 0.4);
-                let rH = maxHeight * (0.6 + Math.random() * 0.4);
-                let rD = length * (0.4 + Math.random() * 0.4);
+            const plateauMat = new THREE.MeshStandardMaterial({ color: 0x434c40, roughness: 0.9, flatShading: true });
 
-                let geo = new THREE.ConeGeometry(rW, rH, 14, 10, true);
-                let pos = geo.attributes.position;
-                for (let j = 0; j < pos.count; j++) {
-                    let vx = pos.getX(j);
-                    let vy = pos.getY(j);
-                    let vz = pos.getZ(j);
-                    if (vy > 0) {
-                        let noise = Math.sin(vx * 0.05) * Math.cos(vz * 0.05) * 20 + (Math.random() - 0.5) * 15;
-                        pos.setX(j, vx + noise);
-                        pos.setZ(j, vz + noise);
-                    }
-                }
-                geo.computeVertexNormals();
+            // North Wall Plateau
+            const northGeo = new THREE.BoxGeometry(width, 400, 1000);
+            const northMesh = new THREE.Mesh(northGeo, plateauMat);
+            northMesh.position.set(0, 200, -halfMap - 500);
+            northMesh.castShadow = true;
+            northMesh.receiveShadow = true;
+            scene.add(northMesh);
 
-                let mesh = new THREE.Mesh(geo, mat);
-                let offsetX = (Math.random() - 0.5) * (width * 0.6);
-                let offsetZ = (Math.random() - 0.5) * (length * 0.6);
-                mesh.position.set(offsetX, rH / 2, offsetZ);
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-                group.add(mesh);
-            }
+            // South Wall Plateau
+            const southGeo = new THREE.BoxGeometry(width, 400, 1000);
+            const southMesh = new THREE.Mesh(southGeo, plateauMat);
+            southMesh.position.set(0, 200, halfMap + 500);
+            southMesh.castShadow = true;
+            southMesh.receiveShadow = true;
+            scene.add(southMesh);
 
-            scene.add(group);
-        }
+            // West Wall Plateau
+            const westGeo = new THREE.BoxGeometry(1000, 400, width);
+            const westMesh = new THREE.Mesh(westGeo, plateauMat);
+            westMesh.position.set(-halfMap - 500, 200, 0);
+            westMesh.castShadow = true;
+            westMesh.receiveShadow = true;
+            scene.add(westMesh);
 
-        function buildWorldFeatures() {
-            let halfMap = mapSize / 2 - 800;
-            let step = 1800;
+            // East Wall Plateau
+            const eastGeo = new THREE.BoxGeometry(1000, 400, width);
+            const eastMesh = new THREE.Mesh(eastGeo, plateauMat);
+            eastMesh.position.set(halfMap + 500, 200, 0);
+            eastMesh.castShadow = true;
+            eastMesh.receiveShadow = true;
+            scene.add(eastMesh);
 
-            // A. MAP KE CHARO AUR BOUNDARY PAR ASLI VISHAL PAHAAD (Seamless Mountain Wall)
-            for (let x = -halfMap; x <= halfMap; x += step) {
-                createRealMountainRange(x, -halfMap - 600, 1200, 1200, 1100, 0x434c40); // North Range
-                createRealMountainRange(x, halfMap + 600, 1200, 1200, 1100, 0x3f483c);  // South Range
-            }
-            for (let z = -halfMap; z <= halfMap; z += step) {
-                createRealMountainRange(-halfMap - 600, z, 1200, 1200, 1100, 0x475444); // West Range
-                createRealMountainRange(halfMap + 600, z, 1200, 1200, 1100, 0x3b4338);  // East Range
-            }
-
-            // B. MAP KE BILKUL BEECH MEIN 1 VISHAL MUKHYA PAHAAD (Center Peak like Bermuda)
-            createRealMountainRange(0, 0, 1800, 1800, 1400, 0x525c4e);
-
-            // C. SURFACE PAR CHOTE-CHOTE PAHAADI AREA (Rolling Hills across 20k map)
-            createRealMountainRange(-4000, -3500, 800, 800, 500, 0x4a5446);
-            createRealMountainRange(4000, 3500, 900, 900, 550, 0x485244);
-            createRealMountainRange(-4500, 4000, 850, 850, 520, 0x4f5a4b);
-            createRealMountainRange(3500, -4000, 800, 800, 480, 0x465042);
-
-            // D. Scattered Realistic Trees across the massive land
-            for (let i = 0; i < 300; i++) {
+            // Scattered Trees across the bumpy land
+            for (let i = 0; i < 250; i++) {
                 let tx = (Math.random() - 0.5) * (mapSize - 3000);
                 let tz = (Math.random() - 0.5) * (mapSize - 3000);
-                if (Math.abs(tx) < 1200 && Math.abs(tz) < 1200) continue; // Keep center peak clear
                 createRealisticTree(tx, tz);
             }
         }
@@ -240,19 +221,13 @@
             let h = minimapCanvas.height;
 
             minimapCtx.clearRect(0, 0, w, h);
-            minimapCtx.fillStyle = '#1b4f72'; // Ocean blue background
+            minimapCtx.fillStyle = '#1b4f72'; // Ocean background
             minimapCtx.fillRect(0, 0, w, h);
 
-            // Land mass representation (Massive 20k area)
+            // Land mass
             minimapCtx.fillStyle = '#315c1b';
             minimapCtx.beginPath();
             minimapCtx.arc(w/2, h/2, w*0.42, 0, Math.PI*2);
-            minimapCtx.fill();
-
-            // Center Peak Dot
-            minimapCtx.fillStyle = '#525c4e';
-            minimapCtx.beginPath();
-            minimapCtx.arc(w/2, h/2, 10, 0, Math.PI*2);
             minimapCtx.fill();
 
             // Center indicator
@@ -272,9 +247,9 @@
             requestAnimationFrame(animate);
 
             let time = Date.now() * 0.0001;
-            camera.position.x = Math.sin(time) * 4500;
-            camera.position.z = Math.cos(time) * 4500;
-            camera.lookAt(0, 300, 0);
+            camera.position.x = Math.sin(time) * 5000;
+            camera.position.z = Math.cos(time) * 5000;
+            camera.lookAt(0, 200, 0);
 
             drawMinimap();
             renderer.render(scene, camera);
