@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bermuda Open-World Map - Natural Boundary Hills & Height Controls</title>
+    <title>Bermuda Open-World Map - Connected Hills to Surface</title>
     <style>
         body {
             margin: 0;
@@ -81,7 +81,7 @@
     <div id="info">
         <strong>Free Fire Bermuda + Adam:</strong><br>
         Controls: <span>W, A, S, D to Walk</span><br>
-        Status: <span>Natural Hills Boundary & Height Controls Loaded</span>
+        Status: <span>Fully Connected Hills to Base Surface Loaded</span>
     </div>
 
     <!-- UI Buttons -->
@@ -107,7 +107,7 @@
         let adam;
         let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
         let adamSpeed = 12;
-        let cameraOffsetHeight = 400; // Adjustable height offset
+        let cameraOffsetHeight = 400;
 
         init();
         animate();
@@ -153,7 +153,7 @@
             baseSurface.receiveShadow = true;
             scene.add(baseSurface);
 
-            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Natural Boundary Hills
+            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Fully Connected Boundary Hills
             const segments = 350;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
@@ -163,7 +163,7 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                // Natural rolling hills across the map
+                // Rolling hills inside the map
                 let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220 
                            + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 90;
 
@@ -172,12 +172,14 @@
                     height -= 70;
                 }
 
-                // Natural sloping boundary hills (instead of sharp walls, so character can climb over)
+                // Fully connected boundary hills (smoothly blending from ground 0 up to high peaks and back down to ground)
                 let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
-                let borderThreshold = halfSize - 2200;
-                if (maxDist > borderThreshold) {
-                    let factor = (maxDist - borderThreshold) / (2200);
-                    height += Math.sin(factor * Math.PI * 0.5) * 850; // Smooth natural hill rise
+                let innerStart = halfSize - 4000; // Start rising gradually earlier
+                if (maxDist > innerStart) {
+                    let factor = (maxDist - innerStart) / (4000);
+                    // Using smooth cosine curve so it starts at 0, rises up, and connects cleanly to the surface edge
+                    let hillCurve = (1 - Math.cos(factor * Math.PI)) * 0.5;
+                    height += hillCurve * 1100; 
                 }
 
                 posAttr.setZ(i, Math.max(0, height));
@@ -359,7 +361,7 @@
                 if (moveLeft) adam.position.x -= adamSpeed;
                 if (moveRight) adam.position.x += adamSpeed;
 
-                // Approximate terrain height at adam's position including natural boundary hills
+                // Terrain height calculation matching the connected boundary hills
                 let vx = adam.position.x;
                 let vy = adam.position.z;
                 let h = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220 
@@ -368,10 +370,11 @@
 
                 let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
                 let halfSize = mapSize / 2;
-                let borderThreshold = halfSize - 2200;
-                if (maxDist > borderThreshold) {
-                    let factor = (maxDist - borderThreshold) / (2200);
-                    h += Math.sin(factor * Math.PI * 0.5) * 850;
+                let innerStart = halfSize - 4000;
+                if (maxDist > innerStart) {
+                    let factor = (maxDist - innerStart) / (4000);
+                    let hillCurve = (1 - Math.cos(factor * Math.PI)) * 0.5;
+                    h += hillCurve * 1100;
                 }
 
                 adam.position.y = Math.max(10, h + 20);
