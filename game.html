@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tactical Dummy Mission - Ultimate Forest & Physics Edition</title>
+    <title>3D Tactical Dummy Mission - Dense Forest & Indoor Camera Fixed</title>
     <style>
         body {
             margin: 0;
@@ -66,7 +66,7 @@
     <div id="ui">
         <strong>Health:</strong> 
         <div id="health-bar-container"><div id="health-bar"></div></div><br>
-        <strong>Mission Status:</strong> <span id="status">Explore 500x500 Forest Map, climb multi-story houses, get Gun & eliminate targets!</span><br>
+        <strong>Mission Status:</strong> <span id="status">Explore Dense Grass Forest, enter houses, get Gun & eliminate targets!</span><br>
         Targets Left: <span id="targetCount">12</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
     <div id="crosshair"></div>
@@ -88,10 +88,10 @@
         let isGameOver = false;
         
         let velocityY = 0;
-        let gravity = 0.012; // Adjusted gravity for smooth jumping
+        let gravity = 0.012;
         let isGrounded = false;
         const moveSpeed = 0.13;
-        const jumpForce = 0.42; // Increased jump force so character can easily climb & jump high
+        const jumpForce = 0.42;
         
         let keys = { w: false, a: false, s: false, d: false, space: false };
         let isMouseDown = false;
@@ -105,7 +105,7 @@
             // 1. Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87ceeb);
-            scene.fog = new THREE.FogExp2(0x87ceeb, 0.0025);
+            scene.fog = new THREE.FogExp2(0x87ceeb, 0.003);
 
             // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -132,13 +132,13 @@
             // 5. Expanded Ground (500x500 Full Area)
             const mapSize = 500;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize);
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x2e5e3e, roughness: 0.9 });
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e3f20, roughness: 0.9 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 6. Boundary Walls Around 500x500 Surface
+            // 6. Boundary Walls
             const wallH = 8;
             const wMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.8 });
             createBoundaryWall(0, wallH/2, -mapSize/2, mapSize, wallH, 2, wMat);
@@ -146,8 +146,8 @@
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Populate 500x500 Area with Trees, Fruit Trees, Flowers, & Bushes
-            generateForestAndFlora(mapSize);
+            // 7. Generate Dense Grass, Flowers, Trees, and Plants across 500x500
+            generateDenseForestAndFlora(mapSize);
 
             // 8. Spread Multi-Story Houses Across 500x500 Area
             createHouse(-120, 0, -120, 1);
@@ -228,25 +228,40 @@
             window.addEventListener('mousemove', onMouseMove);
         }
 
-        // Procedural Forest & Flora Generator for 500x500 Area
-        function generateForestAndFlora(size) {
-            const half = size / 2 - 20;
-            for (let i = 0; i < 150; i++) {
+        // Procedural Dense Grass, Flowers & Trees Generator (Surface covered with 🌾)
+        function generateDenseForestAndFlora(size) {
+            const half = size / 2 - 15;
+            
+            // Generate massive dense grass patches (🌾) so surface is fully hidden
+            for (let i = 0; i < 2500; i++) {
                 let x = (Math.random() - 0.5) * half * 2;
                 let z = (Math.random() - 0.5) * half * 2;
-                if (Math.abs(x) < 40 && Math.abs(z) < 40) continue; // Keep center clear
-
-                let type = Math.random();
-                if (type < 0.4) {
-                    createPineTree(x, z);
-                } else if (type < 0.7) {
-                    createFruitTree(x, z);
-                } else if (type < 0.85) {
-                    createFlowerPatch(x, z);
-                } else {
-                    createBush(x, z);
-                }
+                if (Math.abs(x) < 30 && Math.abs(z) < 30) continue; // Keep center clear
+                createGrassBlade(x, z);
             }
+
+            // Generate trees, flowers, bushes (🎄🌹🌺🌵🪴🌿🌳🌲🌾🍄🌻💮🌸🪷🌷🌺)
+            for (let i = 0; i < 200; i++) {
+                let x = (Math.random() - 0.5) * half * 2;
+                let z = (Math.random() - 0.5) * half * 2;
+                if (Math.abs(x) < 35 && Math.abs(z) < 35) continue;
+
+                let rand = Math.random();
+                if (rand < 0.3) createPineTree(x, z);
+                else if (rand < 0.55) createFruitTree(x, z);
+                else if (rand < 0.75) createFlowerCluster(x, z);
+                else if (rand < 0.9) createCactusOrPlant(x, z);
+                else createMushroomCluster(x, z);
+            }
+        }
+
+        function createGrassBlade(x, z) {
+            const grassMat = new THREE.MeshBasicMaterial({ color: 0x3da35d, side: THREE.DoubleSide });
+            const grassGeo = new THREE.PlaneGeometry(0.3, 0.8);
+            const grass = new THREE.Mesh(grassGeo, grassMat);
+            grass.position.set(x + (Math.random()-0.5)*2, 0.4, z + (Math.random()-0.5)*2);
+            grass.rotation.y = Math.random() * Math.PI;
+            scene.add(grass);
         }
 
         function createPineTree(x, z) {
@@ -266,27 +281,31 @@
             const leaves = new THREE.Mesh(new THREE.SphereGeometry(2.2, 6, 6), new THREE.MeshStandardMaterial({ color: 0x2e8b57 }));
             leaves.position.set(x, 5.2, z); leaves.castShadow = true; scene.add(leaves);
 
-            // Fruits (Red apples on tree)
-            for(let f = 0; f < 4; f++) {
-                const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6, 6), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+            for(let f = 0; f < 5; f++) {
+                const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6, 6), new THREE.MeshStandardMaterial({ color: 0xff3300 }));
                 fruit.position.set(x + (Math.random()-0.5)*2, 5 + (Math.random()-0.5)*1.5, z + (Math.random()-0.5)*2);
                 scene.add(fruit);
             }
         }
 
-        function createFlowerPatch(x, z) {
-            const colors = [0xff69b4, 0xffff00, 0xff4500, 0xda70d6];
-            for(let c = 0; c < 5; c++) {
-                let flower = new THREE.Mesh(new THREE.SphereGeometry(0.2, 5, 5), new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*colors.length)] }));
-                flower.position.set(x + (Math.random()*2 - 1), 0.1, z + (Math.random()*2 - 1));
+        function createFlowerCluster(x, z) {
+            const colors = [0xff69b4, 0xffff00, 0xff4500, 0xda70d6, 0xff1493, 0x9400d3];
+            for(let c = 0; c < 6; c++) {
+                let flower = new THREE.Mesh(new THREE.SphereGeometry(0.25, 5, 5), new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*colors.length)] }));
+                flower.position.set(x + (Math.random()*1.5 - 0.75), 0.15, z + (Math.random()*1.5 - 0.75));
                 scene.add(flower);
             }
         }
 
-        function createBush(x, z) {
-            const bush = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2), new THREE.MeshStandardMaterial({ color: 0x3a5f0b }));
-            bush.position.set(x, 0.6, z); bush.castShadow = true; scene.add(bush);
-            addObstacleBox(x, 0.6, z, 2.0, 1.2, 2.0);
+        function createCactusOrPlant(x, z) {
+            const bush = new THREE.Mesh(new THREE.DodecahedronGeometry(1.0), new THREE.MeshStandardMaterial({ color: 0x2e8b57 }));
+            bush.position.set(x, 0.5, z); bush.castShadow = true; scene.add(bush);
+            addObstacleBox(x, 0.5, z, 1.5, 1.0, 1.5);
+        }
+
+        function createMushroomCluster(x, z) {
+            const cap = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.3, 6), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+            cap.position.set(x, 0.3, z); scene.add(cap);
         }
 
         function createBoundaryWall(x, y, z, w, h, d, mat) {
@@ -482,7 +501,6 @@
                 moveX = (inputX * Math.cos(angle) + inputZ * Math.sin(angle)) * moveSpeed;
                 moveZ = (inputZ * Math.cos(angle) - inputX * Math.sin(angle)) * moveSpeed;
 
-                // Player Collision X
                 let nextX = character.position.x + moveX;
                 let canMoveX = true;
                 for (let obs of obstacles) {
@@ -494,7 +512,6 @@
                 }
                 if (canMoveX) character.position.x = nextX;
 
-                // Player Collision Z
                 let nextZ = character.position.z + moveZ;
                 let canMoveZ = true;
                 for (let obs of obstacles) {
@@ -509,7 +526,7 @@
                 character.rotation.y = Math.atan2(moveX, moveZ);
             }
 
-            // Enemy AI & Strict Wall Collision Fix (Dummies can't pass through walls)
+            // Enemy AI & Collision
             enemies.forEach(en => {
                 let distToPlayer = en.position.distanceTo(character.position);
                 if (distToPlayer < 30 && distToPlayer > 2) {
@@ -595,9 +612,21 @@
                 isGrounded = true;
             }
 
-            const camDistance = 6;
+            // Smart Camera Distance Adjustment (Inside house vs outside)
+            let isInsideHouse = false;
+            for (let obs of obstacles) {
+                // If character is inside a house bounding box footprint
+                if (character.position.x >= obs.minX - 1 && character.position.x <= obs.maxX + 1 &&
+                    character.position.z >= obs.minZ - 1 && character.position.z <= obs.maxZ + 1 &&
+                    character.position.y >= obs.minY && character.position.y < obs.maxY) {
+                    isInsideHouse = true;
+                    break;
+                }
+            }
+
+            const camDistance = isInsideHouse ? 3.2 : 6; // Pull camera closer when inside house so view doesn't clip outside walls
             let targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
-            let targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 1.0;
+            let targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + (isInsideHouse ? 0.4 : 1.0);
             let targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
 
             camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.1);
