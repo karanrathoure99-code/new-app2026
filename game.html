@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeFire Style Battleground Map (No Guns)</title>
+    <title>FreeFire Battle Royale Map - Exact Visual Style</title>
     <style>
         body {
             margin: 0;
@@ -36,11 +36,11 @@
 </head>
 <body>
     <div id="instructions">
-        <strong>FreeFire Map (No Guns):</strong><br>
+        <strong>FreeFire Map (Reference Style Match):</strong><br>
         Move: <span>W, A, S, D</span> or <span>Arrow Keys</span><br>
         Jump: <span>SPACEBAR</span><br>
         Look Around: <span>Mouse Click & Drag</span><br>
-        <em>Explore Roads, River, Ocean, Mountains & Houses!</em>
+        <em>Explore Pine Trees, Large Houses, Roads, River & Ocean!</em>
     </div>
 
     <!-- Include Three.js Library -->
@@ -52,7 +52,6 @@
         let leftArm, rightArm, leftLeg, rightLeg;
         let obstacles = [];
         
-        // Physics & Movement variables
         let velocityY = 0;
         let gravity = 0.018;
         let isGrounded = false;
@@ -68,50 +67,46 @@
         animate();
 
         function init() {
-            // 1. Scene & Sky Setup
+            // Scene & Sky Setup
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x5294e2);
-            scene.fog = new THREE.FogExp2(0x75aff7, 0.0012);
+            scene.background = new THREE.Color(0x6aa6f8);
+            scene.fog = new THREE.FogExp2(0x82b5f9, 0.001);
 
-            // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 3500);
 
-            // 3. Renderer Setup (Shadows disabled completely as requested)
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = false; 
             document.body.appendChild(renderer.domElement);
 
-            // 4. Bright Ambient Lighting (No harsh shadows)
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+            // Bright Ambient Lighting (No Shadows)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xfffaed, 0.8);
+            const sunLight = new THREE.DirectionalLight(0xfffaed, 0.7);
             sunLight.position.set(300, 600, 300);
             scene.add(sunLight);
 
-            // 5. Massive FreeFire Map Ground (1800x1800) with Hills, Roads, River & Ocean
+            // Ground Setup
             const groundGeo = new THREE.PlaneGeometry(1800, 1800, 120, 120);
             const posAttr = groundGeo.attributes.position;
             for (let i = 0; i < posAttr.count; i++) {
                 const vx = posAttr.getX(i);
                 const vy = posAttr.getY(i);
-                // Keep center flat for spawn & houses, add rolling hills further out
                 if (Math.abs(vx) > 80 || Math.abs(vy) > 80) {
                     posAttr.setZ(i, Math.sin(vx * 0.008) * Math.cos(vy * 0.008) * 8.5);
                 }
             }
             groundGeo.computeVertexNormals();
 
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.95 });
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x3b5323, roughness: 0.92 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            // Build Map Features (Roads, River, Ocean, Mountains, 50+ Trees, Houses)
             buildFreeFireMap();
 
-            // 6. Build Character (School Uniform Dummy, perfectly grounded, no air bug)
+            // Character Setup (Grounded precisely, no air bug)
             character = new THREE.Group();
             
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5c6a5, roughness: 0.6 });
@@ -120,12 +115,10 @@
             const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.3 }); 
             const hairMat = new THREE.MeshStandardMaterial({ color: 0x221308, roughness: 0.8 });     
 
-            // Torso
             const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.65, 0.3), whiteShirtMat);
             torso.position.y = 0.95;
             character.add(torso);
 
-            // Head & Hair
             const head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), skinMat);
             head.position.y = 1.45;
             character.add(head);
@@ -134,7 +127,6 @@
             hair.position.set(0, 1.66, 0);
             character.add(hair);
 
-            // Left Arm with Fingers
             const armGeo = new THREE.BoxGeometry(0.14, 0.52, 0.14);
             leftArm = new THREE.Mesh(armGeo, whiteShirtMat);
             leftArm.position.set(-0.35, 0.95, 0);
@@ -145,7 +137,6 @@
             leftHand.position.set(0, -0.3, 0);
             leftArm.add(leftHand);
 
-            // Right Arm with Fingers
             rightArm = new THREE.Mesh(armGeo, whiteShirtMat);
             rightArm.position.set(0.35, 0.95, 0);
             character.add(rightArm);
@@ -154,7 +145,6 @@
             rightHand.position.set(0, -0.3, 0);
             rightArm.add(rightHand);
 
-            // Left Leg & Shoe (Base offset set precisely to 0 so feet touch ground directly)
             const legGeo = new THREE.BoxGeometry(0.18, 0.5, 0.18);
             leftLeg = new THREE.Mesh(legGeo, blackPantsMat);
             leftLeg.position.set(-0.14, 0.45, 0);
@@ -165,7 +155,6 @@
             leftShoe.position.set(0, -0.3, 0.03);
             leftLeg.add(leftShoe);
 
-            // Right Leg & Shoe
             rightLeg = new THREE.Mesh(legGeo, blackPantsMat);
             rightLeg.position.set(0.14, 0.45, 0);
             character.add(rightLeg);
@@ -174,11 +163,9 @@
             rightShoe.position.set(0, -0.3, 0.03);
             rightLeg.add(rightShoe);
 
-            // Start Spawn Position (Exactly on ground level Y=0)
             character.position.set(0, 0, 20);
             scene.add(character);
 
-            // Event Listeners
             window.addEventListener('resize', onWindowResize);
             window.addEventListener('keydown', (e) => handleKey(e, true));
             window.addEventListener('keyup', (e) => handleKey(e, false));
@@ -192,63 +179,52 @@
             window.addEventListener('mousemove', onMouseMove);
         }
 
-        // ================= FREEFIRE MAP BUILDING =================
         function buildFreeFireMap() {
-            // 1. Roads (Pakki Roads crossing the map like FreeFire Pochinok / Clock Tower)
-            const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-            
-            // Main North-South Road
-            const roadNS = new THREE.Mesh(new THREE.PlaneGeometry(16, 1600), roadMat);
+            // Roads
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x242424, roughness: 0.9 });
+            const roadNS = new THREE.Mesh(new THREE.PlaneGeometry(16, 1800), roadMat);
             roadNS.rotation.x = -Math.PI / 2;
             roadNS.position.set(0, 0.05, 0);
             scene.add(roadNS);
 
-            // Main East-West Road
-            const roadEW = new THREE.Mesh(new THREE.PlaneGeometry(1600, 16), roadMat);
+            const roadEW = new THREE.Mesh(new THREE.PlaneGeometry(1800, 16), roadMat);
             roadEW.rotation.x = -Math.PI / 2;
             roadEW.position.set(0, 0.06, 0);
             scene.add(roadEW);
 
-            // 2. Samudra (Ocean Coast on one side)
-            const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.3 });
-            const ocean = new THREE.Mesh(new THREE.PlaneGeometry(800, 1800), oceanMat);
+            // Ocean & River
+            const ocean = new THREE.Mesh(new THREE.PlaneGeometry(800, 1800), new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.3 }));
             ocean.rotation.x = -Math.PI / 2;
             ocean.position.set(-650, 0.02, 0);
             scene.add(ocean);
 
-            // 3. Nadi (River Stream crossing diagonally)
-            const riverMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.4 });
-            const river = new THREE.Mesh(new THREE.PlaneGeometry(25, 1500), riverMat);
+            const river = new THREE.Mesh(new THREE.PlaneGeometry(25, 1500), new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.4 }));
             river.rotation.x = -Math.PI / 2;
             river.rotation.z = Math.PI / 6;
             river.position.set(200, 0.04, 0);
             scene.add(river);
 
-            // 4. Pahad (Mountains surrounding the map)
+            // Mountains
             createMountain(-550, 0, -550, 260, 130, 260, 0x3b4639);
             createMountain(550, 0, -600, 290, 145, 290, 0x323c30);
             createMountain(0, 0, -750, 360, 160, 320, 0x2a3328);
             createMountain(-650, 0, 250, 270, 130, 270, 0x374235);
             createMountain(680, 0, 300, 310, 145, 310, 0x303a2e);
 
-            // 5. 50+ Tree Variations (Bargad, Peepal, Neem, Apple, Jungle Trees touching ground)
-            const treeTypes = ['bargad', 'peepal', 'neem', 'apple', 'tropical'];
-            for (let i = 0; i < 60; i++) {
-                const tx = (Math.random() - 0.5) * 1200;
-                const tz = (Math.random() - 0.5) * 1200;
-                // Avoid placing on center spawn or roads
-                if (Math.abs(tx) < 20 && Math.abs(tz) < 20) continue;
-                if (Math.abs(tx) < 12 || Math.abs(tz) < 12) continue;
+            // Reference-style Pine & Leafy Trees (Matching Image 1 & 2)
+            for (let i = 0; i < 70; i++) {
+                const tx = (Math.random() - 0.5) * 1400;
+                const tz = (Math.random() - 0.5) * 1400;
+                if (Math.abs(tx) < 25 && Math.abs(tz) < 25) continue;
 
-                const selectedType = treeTypes[Math.floor(Math.random() * treeTypes.length)];
-                if (selectedType === 'bargad') createBargadTree(tx, tz);
-                else if (selectedType === 'peepal') createPeepalTree(tx, tz);
-                else if (selectedType === 'neem') createNeemTree(tx, tz);
-                else if (selectedType === 'apple') createAppleTree(tx, tz);
-                else createTropicalTree(tx, tz);
+                if (i % 2 === 0) {
+                    createPineTree(tx, tz); // Pine trees from Image 1
+                } else {
+                    createLeafyTree(tx, tz); // Round canopy trees from Image 2
+                }
             }
 
-            // 6. FreeFire Style Big Houses & Warehouses (Strict door entry & climbable stairs)
+            // FreeFire Houses with Doors & Stairs
             createFreeFireHouse(-45, -35, 0);
             createFreeFireHouse(55, -65, Math.PI / 2);
             createFreeFireHouse(-75, 55, Math.PI);
@@ -256,98 +232,52 @@
             createFreeFireHouse(-100, -100, Math.PI / 3);
             createFreeFireHouse(100, 100, -Math.PI / 6);
 
-            // 7. Ground 3D Grass Patches (Lush green 8D style tuplets)
-            const grassMat = new THREE.MeshStandardMaterial({ color: 0x3b6e1a, roughness: 0.9 });
-            for (let i = 0; i < 200; i++) {
-                const gx = (Math.random() - 0.5) * 1400;
-                const gz = (Math.random() - 0.5) * 1400;
+            // Detailed Ground Grass Patches
+            const grassMat = new THREE.MeshStandardMaterial({ color: 0x477822, roughness: 0.9 });
+            for (let i = 0; i < 250; i++) {
+                const gx = (Math.random() - 0.5) * 1500;
+                const gz = (Math.random() - 0.5) * 1500;
                 if (Math.abs(gx) < 25 && Math.abs(gz) < 25) continue;
                 
-                const patch = new THREE.Mesh(new THREE.ConeGeometry(0.5, 0.9, 4), grassMat);
-                patch.position.set(gx, 0.45, gz);
+                const patch = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.0, 4), grassMat);
+                patch.position.set(gx, 0.5, gz);
                 scene.add(patch);
             }
+        }
+
+        // Pine Tree (Matching Image 1 reference)
+        function createPineTree(x, z) {
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 5, 6), new THREE.MeshStandardMaterial({ color: 0x543d2b, roughness: 0.9 }));
+            trunk.position.set(x, 2.5, z);
+            scene.add(trunk);
+
+            const pineMat = new THREE.MeshStandardMaterial({ color: 0x1e4620, roughness: 0.85 });
+            for (let j = 0; j < 3; j++) {
+                const tier = new THREE.Mesh(new THREE.ConeGeometry(2.2 - (j * 0.4), 2.5, 6), pineMat);
+                tier.position.set(x, 4 + (j * 1.5), z);
+                scene.add(tier);
+            }
+
+            obstacles.push({ minX: x - 0.8, maxX: x + 0.8, minZ: z - 0.8, maxZ: z + 0.8, topY: 0 });
+        }
+
+        // Leafy Tree (Matching Image 2 reference)
+        function createLeafyTree(x, z) {
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.1, 5.5, 8), new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.85 }));
+            trunk.position.set(x, 2.75, z);
+            scene.add(trunk);
+
+            const leaves = new THREE.Mesh(new THREE.SphereGeometry(3.2, 8, 8), new THREE.MeshStandardMaterial({ color: 0x2d6829, roughness: 0.8 }));
+            leaves.position.set(x, 6, z);
+            scene.add(leaves);
+
+            obstacles.push({ minX: x - 1.0, maxX: x + 1.0, minZ: z - 1.0, maxZ: z + 1.0, topY: 0 });
         }
 
         function createMountain(x, y, z, w, h, d, color) {
             const mountain = new THREE.Mesh(new THREE.ConeGeometry(w / 2, h, 8), new THREE.MeshStandardMaterial({ color: color, roughness: 0.95 }));
             mountain.position.set(x, h / 2, z);
             scene.add(mountain);
-        }
-
-        function createBargadTree(x, z) {
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4d3826, roughness: 0.9 });
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.9, 5.2, 8), trunkMat);
-            trunk.position.set(x, 2.6, z);
-            scene.add(trunk);
-
-            for (let i = 0; i < 4; i++) {
-                const angle = i * (Math.PI / 2);
-                const root = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.28, 4.2, 5), trunkMat);
-                root.position.set(x + Math.cos(angle) * 1.6, 2, z + Math.sin(angle) * 1.6);
-                scene.add(root);
-            }
-
-            const top = new THREE.Mesh(new THREE.SphereGeometry(3.6, 8, 8), new THREE.MeshStandardMaterial({ color: 0x193d1e, roughness: 0.85 }));
-            top.position.set(x, 6.2, z);
-            scene.add(top);
-
-            obstacles.push({ minX: x - 1.3, maxX: x + 1.3, minZ: z - 1.3, maxZ: z + 1.3, topY: 0 });
-        }
-
-        function createPeepalTree(x, z) {
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.35, 6.2, 8), new THREE.MeshStandardMaterial({ color: 0x5c4331, roughness: 0.85 }));
-            trunk.position.set(x, 3.1, z);
-            scene.add(trunk);
-
-            const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(3.2, 1), new THREE.MeshStandardMaterial({ color: 0x205425, roughness: 0.8 }));
-            leaves.position.set(x, 6.8, z);
-            scene.add(leaves);
-
-            obstacles.push({ minX: x - 1.1, maxX: x + 1.1, minZ: z - 1.1, maxZ: z + 1.1, topY: 0 });
-        }
-
-        function createNeemTree(x, z) {
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 1.05, 5.2, 7), new THREE.MeshStandardMaterial({ color: 0x463223, roughness: 0.9 }));
-            trunk.position.set(x, 2.6, z);
-            scene.add(trunk);
-
-            const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.6, 4.8, 6), new THREE.MeshStandardMaterial({ color: 0x2a632d, roughness: 0.8 }));
-            leaves.position.set(x, 5.8, z);
-            scene.add(leaves);
-
-            obstacles.push({ minX: x - 0.9, maxX: x + 0.9, minZ: z - 0.9, maxZ: z + 0.9, topY: 0 });
-        }
-
-        function createAppleTree(x, z) {
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.95, 4.2, 6), new THREE.MeshStandardMaterial({ color: 0x543b30, roughness: 0.85 }));
-            trunk.position.set(x, 2.1, z);
-            scene.add(trunk);
-
-            const leaves = new THREE.Mesh(new THREE.SphereGeometry(2.4, 6, 6), new THREE.MeshStandardMaterial({ color: 0x25622e, roughness: 0.8 }));
-            leaves.position.set(x, 4.8, z);
-            scene.add(leaves);
-
-            const appleMat = new THREE.MeshStandardMaterial({ color: 0xd92b2b, roughness: 0.35 });
-            for (let i = 0; i < 4; i++) {
-                const apple = new THREE.Mesh(new THREE.SphereGeometry(0.16, 5, 5), appleMat);
-                apple.position.set(x + (i % 2 === 0 ? 0.85 : -0.85), 4.2 + (i * 0.2), z + (i > 1 ? 0.85 : -0.85));
-                scene.add(apple);
-            }
-
-            obstacles.push({ minX: x - 0.8, maxX: x + 0.8, minZ: z - 0.8, maxZ: z + 0.8, topY: 0 });
-        }
-
-        function createTropicalTree(x, z) {
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 7, 7), new THREE.MeshStandardMaterial({ color: 0x6e503b, roughness: 0.8 }));
-            trunk.position.set(x, 3.5, z);
-            scene.add(trunk);
-
-            const leaves = new THREE.Mesh(new THREE.SphereGeometry(2.8, 7, 7), new THREE.MeshStandardMaterial({ color: 0x184a22, roughness: 0.85 }));
-            leaves.position.set(x, 7.2, z);
-            scene.add(leaves);
-
-            obstacles.push({ minX: x - 0.7, maxX: x + 0.7, minZ: z - 0.7, maxZ: z + 0.7, topY: 0 });
         }
 
         function createFreeFireHouse(x, z, rotationY) {
@@ -446,7 +376,7 @@
             velocityY -= gravity;
             character.position.y += velocityY;
 
-            let targetGroundY = 0; // Standard ground level Y=0
+            let targetGroundY = 0;
 
             for (let obs of obstacles) {
                 if (character.position.x >= obs.minX && character.position.x <= obs.maxX &&
@@ -465,7 +395,7 @@
                 isGrounded = true;
             }
 
-            // Walking & Jumping Animations (Strictly grounded feet)
+            // Walking & Jumping Animations
             const time = Date.now() * 0.01;
             const isMoving = (inputX !== 0 || inputZ !== 0) && isGrounded;
 
@@ -486,7 +416,7 @@
                 rightLeg.rotation.x = 0;
             }
 
-            // Third-Person Camera Tracking
+            // Camera Tracking
             const camDistance = 7.0;
             const targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
             const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 1.2;
