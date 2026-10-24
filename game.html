@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeFire Map x India 25 Famous Places</title>
+    <title>100% Exact FreeFire Map Layout x India 25 Famous Places</title>
     <style>
         body {
             margin: 0;
@@ -36,11 +36,11 @@
 </head>
 <body>
     <div id="instructions">
-        <strong>FreeFire Battleground (India 25 Famous Places Edition):</strong><br>
+        <strong>FreeFire Exact Map Layout (India 25 Landmarks Edition):</strong><br>
         Move: <span>W, A, S, D</span> or <span>Arrow Keys</span><br>
         Jump: <span>SPACEBAR</span><br>
         Look Around: <span>Mouse Click & Drag</span><br>
-        <em>Explore FF-Style Map featuring Taj Mahal, India Gate, Hawa Mahal & 22 More Landmarks!</em>
+        <em>Peak=Taj Mahal, Clock Tower=India Gate, Factory=Statue of Unity & More!</em>
     </div>
 
     <!-- Include Three.js Library -->
@@ -70,9 +70,9 @@
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x5294e2);
-            scene.fog = new THREE.FogExp2(0x75aff7, 0.0009);
+            scene.fog = new THREE.FogExp2(0x75aff7, 0.0008);
 
-            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 4500);
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 5000);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -86,14 +86,18 @@
             sunLight.position.set(300, 600, 300);
             scene.add(sunLight);
 
-            // Ground Setup
-            const groundGeo = new THREE.PlaneGeometry(2400, 2400, 150, 150);
+            // Ground Setup (FF Exact Sized Terrain)
+            const groundGeo = new THREE.PlaneGeometry(2600, 2600, 160, 160);
             const posAttr = groundGeo.attributes.position;
             for (let i = 0; i < posAttr.count; i++) {
                 const vx = posAttr.getX(i);
                 const vy = posAttr.getY(i);
-                if (Math.abs(vx) > 100 || Math.abs(vy) > 100) {
-                    posAttr.setZ(i, Math.sin(vx * 0.007) * Math.cos(vy * 0.007) * 10);
+                // Exact Peak Hill Center and Outer Mountains
+                const distFromCenter = Math.sqrt(vx*vx + vy*vy);
+                if (distFromCenter < 120) {
+                    posAttr.setZ(i, Math.max(0, 35 - distFromCenter * 0.25)); // Peak Hill
+                } else {
+                    posAttr.setZ(i, Math.sin(vx * 0.007) * Math.cos(vy * 0.007) * 12);
                 }
             }
             groundGeo.computeVertexNormals();
@@ -103,7 +107,7 @@
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            buildFFMapWith25IndianLandmarks();
+            buildExactFFMapWithIndianLandmarks();
 
             // Character Setup with Face & School Uniform
             character = new THREE.Group();
@@ -173,7 +177,8 @@
             rightShoe.position.set(0, -0.3, 0.03);
             rightLeg.add(rightShoe);
 
-            character.position.set(0, 0, 20);
+            // Spawn safely away from center peak
+            character.position.set(0, 35, 120);
             scene.add(character);
 
             window.addEventListener('resize', onWindowResize);
@@ -189,96 +194,96 @@
             window.addEventListener('mousemove', onMouseMove);
         }
 
-        function buildFFMapWith25IndianLandmarks() {
+        function buildExactFFMapWithIndianLandmarks() {
             // Clouds
             const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, transparent: true, opacity: 0.85 });
-            for (let i = 0; i < 45; i++) {
+            for (let i = 0; i < 50; i++) {
                 const cg = new THREE.Group();
                 for (let j = 0; j < 4; j++) {
                     const p = new THREE.Mesh(new THREE.SphereGeometry(15 + Math.random() * 10, 7, 7), cloudMat);
                     p.position.set((j - 1.5) * 15, Math.random() * 5, (Math.random() - 0.5) * 15);
                     cg.add(p);
                 }
-                cg.position.set((Math.random() - 0.5) * 2000, 300 + Math.random() * 80, (Math.random() - 0.5) * 2000);
+                cg.position.set((Math.random() - 0.5) * 2200, 320 + Math.random() * 80, (Math.random() - 0.5) * 2200);
                 scene.add(cg);
                 clouds.push(cg);
             }
 
-            // FF Style Roads
+            // FF Style Intersecting Roads
             const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-            const r1 = new THREE.Mesh(new THREE.PlaneGeometry(16, 2200), roadMat);
+            const r1 = new THREE.Mesh(new THREE.PlaneGeometry(16, 2400), roadMat);
             r1.rotation.x = -Math.PI / 2;
             r1.position.set(0, 0.05, 0);
             scene.add(r1);
 
-            const r2 = new THREE.Mesh(new THREE.PlaneGeometry(2200, 16), roadMat);
+            const r2 = new THREE.Mesh(new THREE.PlaneGeometry(2400, 16), roadMat);
             r2.rotation.x = -Math.PI / 2;
             r2.position.set(0, 0.06, 0);
             scene.add(r2);
 
-            // Ocean & River
-            const ocean = new THREE.Mesh(new THREE.PlaneGeometry(800, 2200), new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.3 }));
+            // Ocean (West Coast) & River (Diagonal)
+            const ocean = new THREE.Mesh(new THREE.PlaneGeometry(900, 2400), new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.3 }));
             ocean.rotation.x = -Math.PI / 2;
-            ocean.position.set(-900, 0.02, 0);
+            ocean.position.set(-1000, 0.02, 0);
             scene.add(ocean);
 
-            const river = new THREE.Mesh(new THREE.PlaneGeometry(30, 2000), new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.4 }));
+            const river = new THREE.Mesh(new THREE.PlaneGeometry(35, 2200), new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.4 }));
             river.rotation.x = -Math.PI / 2;
             river.rotation.z = Math.PI / 5;
-            river.position.set(300, 0.04, 0);
+            river.position.set(350, 0.04, 0);
             scene.add(river);
 
-            // Mountains
-            createMountain(-700, 0, -700, 300, 150, 300, 0x3b4639);
-            createMountain(700, 0, -750, 330, 165, 330, 0x323c30);
-            createMountain(0, 0, -950, 400, 180, 360, 0x2a3328);
-            createMountain(-800, 0, 350, 310, 145, 310, 0x374235);
-            createMountain(820, 0, 400, 350, 160, 350, 0x303a2e);
+            // Outer Mountains (FF Border Mountains)
+            createMountain(-800, 0, -800, 320, 160, 320, 0x3b4639);
+            createMountain(800, 0, -850, 350, 175, 350, 0x323c30);
+            createMountain(0, 0, -1050, 420, 190, 380, 0x2a3328);
+            createMountain(-900, 0, 400, 330, 155, 330, 0x374235);
+            createMountain(920, 0, 450, 370, 170, 370, 0x303a2e);
 
             // Free Fire Residential Houses
-            createFreeFireHouse(-50, -40, 0);
-            createFreeFireHouse(60, -70, Math.PI / 2);
-            createFreeFireHouse(-80, 60, Math.PI);
-            createFreeFireHouse(70, 80, -Math.PI / 4);
+            createFreeFireHouse(-120, -120, 0);
+            createFreeFireHouse(150, -150, Math.PI / 2);
+            createFreeFireHouse(-180, 150, Math.PI);
+            createFreeFireHouse(160, 180, -Math.PI / 4);
 
-            // ================= EXACT 25 FAMOUS INDIAN LANDMARKS (AS FF ZONES) =================
-            const landmarks = [
-                { name: "Taj Mahal", x: -140, z: -140, color: 0xffffff, size: 7 },
-                { name: "India Gate", x: 140, z: -140, color: 0xdcdcdc, size: 6 },
-                { name: "Qutub Minar", x: -180, z: 120, color: 0xa0522d, size: 8 },
-                { name: "Lotus Temple", x: 180, z: 120, color: 0xfffaf0, size: 6 },
-                { name: "Gateway of India", x: -220, z: 0, color: 0xbc8f8f, size: 7 },
-                { name: "Hawa Mahal", x: 220, z: 0, color: 0xff4500, size: 7 },
-                { name: "Victoria Memorial", x: 0, z: -220, color: 0xf5deb3, size: 8 },
-                { name: "Red Fort", x: 0, z: 220, color: 0xb22222, size: 8 },
-                { name: "Charminar", x: -120, z: -280, color: 0xd2b48c, size: 6 },
-                { name: "Mysore Palace", x: 120, z: -280, color: 0xffd700, size: 7 },
-                { name: "Sun Temple Konark", x: -280, z: -120, color: 0xcd853f, size: 6 },
-                { name: "Khajuraho", x: 280, z: -120, color: 0xdeb887, size: 6 },
-                { name: "Statue of Unity", x: -280, z: 180, color: 0xff8c00, size: 9 },
-                { name: "Ajanta Caves", x: 280, z: 180, color: 0x696969, size: 7 },
-                { name: "Ellora Caves", x: -340, z: 0, color: 0x708090, size: 7 },
-                { name: "Golden Temple", x: 340, z: 0, color: 0xffd700, size: 7 },
-                { name: "Meenakshi Temple", x: -200, z: -340, color: 0xff6347, size: 7 },
-                { name: "Mandu Fort", x: 200, z: -340, color: 0x8b4513, size: 6 },
-                { name: "Leh Palace", x: -340, z: -220, color: 0xd3d3d3, size: 7 },
-                { name: "Brihadeeswarar Temple", x: 340, z: -220, color: 0xdaada3, size: 7 },
-                { name: "Tawang Monastery", x: -220, z: 280, color: 0x800000, size: 6 },
-                { name: "Jaisalmer Fort", x: 220, z: 280, color: 0xdaa520, size: 8 },
-                { name: "Vivekananda Rock", x: -380, z: 120, color: 0x556b2f, size: 6 },
-                { name: "Hampi Chariot", x: 380, z: 120, color: 0xb8860b, size: 6 },
-                { name: "Sanchi Stupa", x: 0, z: -380, color: 0xf4a460, size: 7 }
+            // ================= 25 EXACT FREE FIRE ZONES REPLACED WITH INDIAN LANDMARKS =================
+            const ffMapZones = [
+                { zone: "Peak", x: 0, z: 0, name: "Taj Mahal", color: 0xffffff, size: 10, groundY: 35 },
+                { zone: "Clock Tower", x: -200, z: -200, name: "India Gate", color: 0xdcdcdc, size: 7, groundY: 0 },
+                { zone: "Factory", x: 250, z: -200, name: "Statue of Unity", color: 0xff8c00, size: 12, groundY: 0 },
+                { zone: "Pochinok", x: -250, z: 200, name: "Hawa Mahal", color: 0xff4500, size: 8, groundY: 0 },
+                { zone: "Bimasakti Strip", x: 0, z: -250, name: "Qutub Minar", color: 0xa0522d, size: 9, groundY: 0 },
+                { zone: "Cape Town", x: -400, z: 0, name: "Gateway of India", color: 0xbc8f8f, size: 8, groundY: 0 },
+                { zone: "Mill", x: 300, z: 250, name: "Red Fort", color: 0xb22222, size: 9, groundY: 0 },
+                { zone: "Observatory", x: -300, z: -350, name: "Lotus Temple", color: 0xfffaf0, size: 7, groundY: 0 },
+                { zone: "Hangar", x: 350, z: -350, name: "Mysore Palace", color: 0xffd700, size: 8, groundY: 0 },
+                { zone: "Mars Electric", x: -350, z: 350, name: "Sun Temple Konark", color: 0xcd853f, size: 7, groundY: 0 },
+                { zone: "Rim Nam Village", x: 150, z: 350, name: "Charminar", color: 0xd2b48c, size: 7, groundY: 0 },
+                { zone: "Katulistiwa", x: 0, z: 400, name: "Khajuraho", color: 0xdeb887, size: 7, groundY: 0 },
+                { zone: "Sentosa", x: -500, z: -500, name: "Vivekananda Rock", color: 0x556b2f, size: 7, groundY: 0 },
+                { zone: "Graveyard", x: -200, z: 400, name: "Ajanta & Ellora Caves", color: 0x696969, size: 8, groundY: 0 },
+                { zone: "Bulls Eye", x: 200, z: -100, name: "Golden Temple", color: 0xffd700, size: 7, groundY: 0 },
+                { zone: "Kalahari Outpost", x: 450, z: 0, name: "Jaisalmer Fort", color: 0xdaa520, size: 9, groundY: 0 },
+                { zone: "Shipyard", x: -450, z: 200, name: "Victoria Memorial", color: 0xf5deb3, size: 8, groundY: 0 },
+                { zone: "Keraton", x: 100, z: -400, name: "Meenakshi Temple", color: 0xff6347, size: 7, groundY: 0 },
+                { zone: "Forge", x: -100, z: -400, name: "Brihadeeswarar Temple", color: 0xdaada3, size: 7, groundY: 0 },
+                { zone: "Outpost", x: 400, z: 300, name: "Leh Palace", color: 0xd3d3d3, size: 7, groundY: 0 },
+                { zone: "Crossroads", x: -100, z: 250, name: "Tawang Monastery", color: 0x800000, size: 7, groundY: 0 },
+                { zone: "Riverside", x: 250, z: 150, name: "Sanchi Stupa", color: 0xf4a460, size: 7, groundY: 0 },
+                { zone: "Bimasakti Bridge", x: 0, z: -120, name: "Hampi Stone Chariot", color: 0xb8860b, size: 6, groundY: 15 },
+                { zone: "Mandu Zone", x: -350, z: -150, name: "Mandu Fort", color: 0x8b4513, size: 7, groundY: 0 },
+                { zone: "Terminal Zone", x: 350, z: -250, name: "Victoria Terminus", color: 0x708090, size: 8, groundY: 0 }
             ];
 
-            landmarks.forEach(lm => {
-                createLandmark(lm.x, lm.z, lm.color, lm.size);
+            ffMapZones.forEach(lm => {
+                createLandmark(lm.x, lm.z, lm.color, lm.size, lm.groundY);
             });
 
             // Varieties of Grass
             const grassColors = [0x3a7018, 0x477822, 0x2e5c14, 0x558b2f];
-            for (let i = 0; i < 600; i++) {
-                const gx = (Math.random() - 0.5) * 2000;
-                const gz = (Math.random() - 0.5) * 2000;
+            for (let i = 0; i < 700; i++) {
+                const gx = (Math.random() - 0.5) * 2200;
+                const gz = (Math.random() - 0.5) * 2200;
                 if (Math.abs(gx) < 30 && Math.abs(gz) < 30) continue;
                 
                 const col = grassColors[Math.floor(Math.random() * grassColors.length)];
@@ -288,18 +293,18 @@
             }
 
             // Trees
-            for (let i = 0; i < 90; i++) {
-                const tx = (Math.random() - 0.5) * 1800;
-                const tz = (Math.random() - 0.5) * 1800;
-                if (Math.abs(tx) < 30 && Math.abs(tz) < 30) continue;
+            for (let i = 0; i < 100; i++) {
+                const tx = (Math.random() - 0.5) * 2000;
+                const tz = (Math.random() - 0.5) * 2000;
+                if (Math.abs(tx) < 40 && Math.abs(tz) < 40) continue;
                 if (i % 2 === 0) createPineTree(tx, tz);
                 else createLeafyTree(tx, tz);
             }
         }
 
-        function createLandmark(x, z, colorHex, size) {
+        function createLandmark(x, z, colorHex, size, groundY) {
             const group = new THREE.Group();
-            group.position.set(x, 0, z);
+            group.position.set(x, groundY, z);
 
             const mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.7 });
             const base = new THREE.Mesh(new THREE.BoxGeometry(size, size * 0.6, size), mat);
@@ -311,7 +316,7 @@
             group.add(top);
 
             scene.add(group);
-            obstacles.push({ minX: x - size/2, maxX: x + size/2, minZ: z - size/2, maxZ: z + size/2, topY: size * 0.6 });
+            obstacles.push({ minX: x - size/2, maxX: x + size/2, minZ: z - size/2, maxZ: z + size/2, topY: groundY + (size * 0.6) });
         }
 
         function createPineTree(x, z) {
@@ -420,7 +425,7 @@
 
             clouds.forEach(c => {
                 c.position.x += 0.05;
-                if (c.position.x > 1000) c.position.x = -1000;
+                if (c.position.x > 1100) c.position.x = -1100;
             });
 
             let inputX = 0;
@@ -447,6 +452,11 @@
             character.position.y += velocityY;
 
             let targetGroundY = 0;
+            // Check central peak height dynamically based on distance from center (0,0)
+            const distFromCenter = Math.sqrt(character.position.x * character.position.x + character.position.z * character.position.z);
+            if (distFromCenter < 120) {
+                targetGroundY = Math.max(0, 35 - distFromCenter * 0.25);
+            }
 
             for (let obs of obstacles) {
                 if (character.position.x >= obs.minX && character.position.x <= obs.maxX &&
