@@ -3,47 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realistic Open-World 3D Level & School Character</title>
+    <title>3D Ultra-Realistic Open-World Game Level</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #0d1117;
-            font-family: sans-serif;
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             user-select: none;
         }
         #instructions {
             position: absolute;
-            top: 15px;
-            left: 15px;
+            top: 20px;
+            left: 20px;
             color: #ffffff;
-            background: rgba(13, 17, 23, 0.85);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 16px 22px;
-            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 18px 24px;
+            border-radius: 12px;
             pointer-events: none;
             font-size: 14px;
             line-height: 1.6;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
         }
         #instructions span {
-            color: #58a6ff;
+            color: #38bdf8;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div id="instructions">
-        <strong>HD Open-World Controls:</strong><br>
+        <strong>3D HD Open-World Controls:</strong><br>
         Move: <span>W, A, S, D</span> or <span>Arrow Keys</span><br>
         Jump: <span>SPACEBAR</span><br>
-        Look Around: <span>Mouse Drag</span><br>
-        <em>Note: Enter houses strictly via the front door or climb stairs!</em>
+        Look Around: <span>Mouse Drag (Click & Drag)</span><br>
+        <em>Tip: Climb 3D stairs and enter houses through front doors!</em>
     </div>
 
-    <!-- Include Three.js & PBR Texture Libraries from CDN -->
+    <!-- Include Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
@@ -51,7 +51,6 @@
         let character;
         let leftArm, rightArm, leftLeg, rightLeg;
         let obstacles = [];
-        let doors = [];
         
         // Physics & Movement variables
         let velocityY = 0;
@@ -69,99 +68,97 @@
         animate();
 
         function init() {
-            // 1. Scene & Atmosphere Setup (Photorealistic Sky & Fog)
+            // 1. Scene & Photorealistic Atmosphere Setup
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x73a8f5); // HD Daytime Sky
-            scene.fog = new THREE.FogExp2(0x8cb6f7, 0.003); // Deep atmospheric fog for massive scale
+            scene.background = new THREE.Color(0x609ef7); // Vibrant HD Sky Blue
+            scene.fog = new THREE.FogExp2(0x7baef8, 0.0028); // Realistic Horizon Depth Fog
 
             // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
 
-            // 3. Renderer Setup with HD Shadows & Tone Mapping
+            // 3. Ultra HD Renderer Setup with Soft Shadows & Tone Mapping
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.2;
+            renderer.toneMappingExposure = 1.15;
             document.body.appendChild(renderer.domElement);
 
-            // 4. Advanced Lighting (Sun & HD Environment Lighting)
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            // 4. Advanced 3D Lighting Setup (Sun & Ambient Glow)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xfffaed, 1.2);
-            sunLight.position.set(150, 300, 150);
+            const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
+            sunLight.position.set(180, 320, 180);
             sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 4048;  // High-Res 4K Shadows
+            sunLight.shadow.mapSize.width = 4048;
             sunLight.shadow.mapSize.height = 4048;
             sunLight.shadow.camera.near = 0.5;
             sunLight.shadow.camera.far = 1000;
-            const d = 250;
-            sunLight.shadow.camera.left = -d;
-            sunLight.shadow.camera.right = d;
-            sunLight.shadow.camera.top = d;
-            sunLight.shadow.camera.bottom = -d;
-            sunLight.shadow.bias = -0.0005;
+            const shadowRange = 250;
+            sunLight.shadow.camera.left = -shadowRange;
+            sunLight.shadow.camera.right = shadowRange;
+            sunLight.shadow.camera.top = shadowRange;
+            sunLight.shadow.camera.bottom = -shadowRange;
+            sunLight.shadow.bias = -0.0004;
             scene.add(sunLight);
 
-            // 5. Huge Open-World Ground (~FreeFire Map Scale - Half Size: 800x800 units)
-            const groundGeo = new THREE.PlaneGeometry(800, 800, 64, 64);
-            // Add subtle procedural vertex displacement for natural bumpy terrain
+            // 5. Massive 3D Terrain Ground (FreeFire Scale - Half Size)
+            const groundGeo = new THREE.PlaneGeometry(800, 800, 75, 75);
             const posAttr = groundGeo.attributes.position;
             for (let i = 0; i < posAttr.count; i++) {
                 const vx = posAttr.getX(i);
                 const vy = posAttr.getY(i);
-                if (Math.abs(vx) > 50 || Math.abs(vy) > 50) {
-                    posAttr.setZ(i, Math.sin(vx * 0.02) * Math.cos(vy * 0.02) * 4);
+                if (Math.abs(vx) > 40 || Math.abs(vy) > 40) {
+                    posAttr.setZ(i, Math.sin(vx * 0.015) * Math.cos(vy * 0.015) * 4.5);
                 }
             }
             groundGeo.computeVertexNormals();
 
             const groundMat = new THREE.MeshStandardMaterial({ 
-                color: 0x3b5e2b, 
-                roughness: 0.9, 
-                metalness: 0.05 
+                color: 0x3a5a25, 
+                roughness: 0.88, 
+                metalness: 0.04 
             });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 6. Build Massive World (Realistic Mountains, Specific Trees, Large Houses, Huts, Stairs)
+            // 6. Build Complete 3D World (Mountains, Trees, Houses, Stairs)
             buildWorld();
 
-            // 7. Build Ultra-Realistic School Uniform Dummy Character
+            // 7. Build Ultra-Realistic 3D School Uniform Dummy Character
             character = new THREE.Group();
             
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5c6a5, roughness: 0.6 });
-            const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.5 }); 
+            const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.45 }); 
             const blackPantsMat = new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.4 }); 
-            const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.3, metalness: 0.2 }); 
-            const hairMat = new THREE.MeshStandardMaterial({ color: 0x241409, roughness: 0.8 });     
+            const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.25, metalness: 0.2 }); 
+            const hairMat = new THREE.MeshStandardMaterial({ color: 0x221308, roughness: 0.8 });     
 
-            // Torso
+            // Torso (White Shirt)
             const torsoGeo = new THREE.BoxGeometry(0.5, 0.65, 0.3);
             const torso = new THREE.Mesh(torsoGeo, whiteShirtMat);
             torso.position.y = 0.95;
             torso.castShadow = true;
             character.add(torso);
 
-            // Head
+            // Head & 3D Hair
             const headGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
             const head = new THREE.Mesh(headGeo, skinMat);
             head.position.y = 1.45;
             head.castShadow = true;
             character.add(head);
 
-            // Hair
-            const hairGeo = new THREE.BoxGeometry(0.37, 0.12, 0.37);
+            const hairGeo = new THREE.BoxGeometry(0.37, 0.14, 0.37);
             const hair = new THREE.Mesh(hairGeo, hairMat);
-            hair.position.set(0, 1.65, 0);
+            hair.position.set(0, 1.66, 0);
             hair.castShadow = true;
             character.add(hair);
 
-            // Left Arm & Fingers
+            // Left Arm with 3D Fingers
             const armGeo = new THREE.BoxGeometry(0.14, 0.52, 0.14);
             leftArm = new THREE.Mesh(armGeo, whiteShirtMat);
             leftArm.position.set(-0.35, 0.95, 0);
@@ -173,7 +170,7 @@
             leftHand.position.set(0, -0.3, 0);
             leftArm.add(leftHand);
 
-            // Right Arm & Fingers
+            // Right Arm with 3D Fingers
             rightArm = new THREE.Mesh(armGeo, whiteShirtMat);
             rightArm.position.set(0.35, 0.95, 0);
             rightArm.castShadow = true;
@@ -183,19 +180,19 @@
             rightHand.position.set(0, -0.3, 0);
             rightArm.add(rightHand);
 
-            // Left Leg & Shoe
+            // Left Leg & Black School Shoe
             const legGeo = new THREE.BoxGeometry(0.18, 0.5, 0.18);
             leftLeg = new THREE.Mesh(legGeo, blackPantsMat);
             leftLeg.position.set(-0.14, 0.45, 0);
             leftLeg.castShadow = true;
             character.add(leftLeg);
 
-            const shoeGeo = new THREE.BoxGeometry(0.2, 0.12, 0.26);
+            const shoeGeo = new THREE.BoxGeometry(0.2, 0.12, 0.27);
             const leftShoe = new THREE.Mesh(shoeGeo, blackShoeMat);
             leftShoe.position.set(0, -0.3, 0.03);
             leftLeg.add(leftShoe);
 
-            // Right Leg & Shoe
+            // Right Leg & Black School Shoe
             rightLeg = new THREE.Mesh(legGeo, blackPantsMat);
             rightLeg.position.set(0.14, 0.45, 0);
             rightLeg.castShadow = true;
@@ -205,7 +202,7 @@
             rightShoe.position.set(0, -0.3, 0.03);
             rightLeg.add(rightShoe);
 
-            // Start Position (Spawn in open village courtyard)
+            // Start Spawn Position
             character.position.set(0, 0, 15);
             scene.add(character);
 
@@ -223,40 +220,39 @@
             window.addEventListener('mousemove', onMouseMove);
         }
 
-        // ================= WORLD BUILDING (HD Mountains, Trees, Houses & Stairs) =================
+        // ================= 3D WORLD BUILDING =================
         function buildWorld() {
-            // 1. HD Mountain Ranges surrounding the map
-            createMountain(-250, 20, -250, 140, 70, 140, 0x525c51);
-            createMountain(250, 25, -280, 160, 85, 160, 0x475245);
-            createMountain(0, 30, -350, 200, 95, 180, 0x3d473c);
-            createMountain(-300, 22, 100, 150, 75, 150, 0x4a5448);
-            createMountain(320, 28, 120, 180, 90, 180, 0x404b3e);
+            // 1. 3D Mountain Ranges
+            createMountain(-250, 20, -250, 150, 75, 150, 0x4e584c);
+            createMountain(260, 25, -280, 170, 90, 170, 0x444f42);
+            createMountain(0, 30, -360, 210, 100, 190, 0x394437);
+            createMountain(-310, 22, 110, 160, 80, 160, 0x465144);
+            createMountain(330, 28, 130, 190, 95, 190, 0x3d473b);
 
-            // 2. Specific HD Trees: Bargad (Banyan), Peepal, Neem, Apple
+            // 2. 3D Specific Trees: Bargad (Banyan), Peepal, Neem, Apple
             createBargadTree(-45, -30);
             createBargadTree(55, -45);
             
-            createPeepalTree(-70, 20);
-            createPeepalTree(65, 35);
+            createPeepalTree(-75, 25);
+            createPeepalTree(70, 40);
 
-            createNeemTree(-25, 50);
-            createNeemTree(30, -70);
+            createNeemTree(-25, 55);
+            createNeemTree(35, -75);
 
-            createAppleTree(-90, -70);
-            createAppleTree(95, -85);
-            createAppleTree(-60, 80);
+            createAppleTree(-95, -75);
+            createAppleTree(100, -90);
+            createAppleTree(-65, 85);
 
-            // 3. Detailed Large Houses with Functional Doors & Stairs
-            createLargeHouse(-30, -20, 0);   // House 1 (Facing Front)
-            createLargeHouse(40, -40, Math.PI / 2); // House 2 (Facing Left)
+            // 3. 3D Large Houses with 3D Stairs and Front Doors
+            createLargeHouse(-32, -20, 0);
+            createLargeHouse(42, -42, Math.PI / 2);
 
             // 4. Village Huts
-            createHut(-60, -10);
-            createHut(70, 10);
-            createHut(-20, 100);
+            createHut(-65, -12);
+            createHut(75, 12);
+            createHut(-22, 105);
         }
 
-        // Detailed Mountain Generator
         function createMountain(x, y, z, w, h, d, color) {
             const geo = new THREE.ConeGeometry(w / 2, h, 8);
             const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.95 });
@@ -267,111 +263,107 @@
             scene.add(mountain);
         }
 
-        // Specific Tree 1: Bargad (Banyan Tree with hanging roots and massive canopy)
+        // 3D Bargad (Banyan) Tree
         function createBargadTree(x, z) {
-            const trunkGeo = new THREE.CylinderGeometry(1.2, 1.8, 5, 8);
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x523d28, roughness: 0.9 });
+            const trunkGeo = new THREE.CylinderGeometry(1.3, 1.9, 5.2, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4d3826, roughness: 0.9 });
             const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.set(x, 2.5, z);
+            trunk.position.set(x, 2.6, z);
             trunk.castShadow = true;
             scene.add(trunk);
 
-            // Hanging aerial roots
             for (let i = 0; i < 4; i++) {
                 const angle = i * (Math.PI / 2);
-                const rootGeo = new THREE.CylinderGeometry(0.15, 0.25, 4, 5);
+                const rootGeo = new THREE.CylinderGeometry(0.15, 0.28, 4.2, 5);
                 const root = new THREE.Mesh(rootGeo, trunkMat);
-                root.position.set(x + Math.cos(angle) * 1.5, 2, z + Math.sin(angle) * 1.5);
+                root.position.set(x + Math.cos(angle) * 1.6, 2, z + Math.sin(angle) * 1.6);
                 scene.add(root);
             }
 
-            // Massive Banyan Canopy clusters
-            const canopyMat = new THREE.MeshStandardMaterial({ color: 0x1c4220, roughness: 0.85 });
-            const topGeo = new THREE.SphereGeometry(3.5, 7, 7);
+            const canopyMat = new THREE.MeshStandardMaterial({ color: 0x193d1e, roughness: 0.85 });
+            const topGeo = new THREE.SphereGeometry(3.6, 8, 8);
             const top = new THREE.Mesh(topGeo, canopyMat);
-            top.position.set(x, 6, z);
+            top.position.set(x, 6.2, z);
             top.castShadow = true;
             scene.add(top);
 
-            obstacles.push({ minX: x - 1.2, maxX: x + 1.2, minZ: z - 1.2, maxZ: z + 1.2, topY: 0 });
+            obstacles.push({ minX: x - 1.3, maxX: x + 1.3, minZ: z - 1.3, maxZ: z + 1.3, topY: 0 });
         }
 
-        // Specific Tree 2: Peepal Tree (Heart-shaped leaves look, tall spread)
+        // 3D Peepal Tree
         function createPeepalTree(x, z) {
-            const trunkGeo = new THREE.CylinderGeometry(0.9, 1.3, 6, 8);
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x614735, roughness: 0.85 });
+            const trunkGeo = new THREE.CylinderGeometry(0.95, 1.35, 6.2, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4331, roughness: 0.85 });
             const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.set(x, 3, z);
+            trunk.position.set(x, 3.1, z);
             trunk.castShadow = true;
             scene.add(trunk);
 
-            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x225c27, roughness: 0.8 });
-            const leavesGeo = new THREE.DodecahedronGeometry(3, 1);
+            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x205425, roughness: 0.8 });
+            const leavesGeo = new THREE.DodecahedronGeometry(3.2, 1);
             const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-            leaves.position.set(x, 6.5, z);
+            leaves.position.set(x, 6.8, z);
             leaves.castShadow = true;
             scene.add(leaves);
 
-            obstacles.push({ minX: x - 1, maxX: x + 1, minZ: z - 1, maxZ: z + 1, topY: 0 });
+            obstacles.push({ minX: x - 1.1, maxX: x + 1.1, minZ: z - 1.1, maxZ: z + 1.1, topY: 0 });
         }
 
-        // Specific Tree 3: Neem Tree (Upright dense foliage)
+        // 3D Neem Tree
         function createNeemTree(x, z) {
-            const trunkGeo = new THREE.CylinderGeometry(0.7, 1.0, 5, 7);
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
+            const trunkGeo = new THREE.CylinderGeometry(0.75, 1.05, 5.2, 7);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x463223, roughness: 0.9 });
             const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.set(x, 2.5, z);
+            trunk.position.set(x, 2.6, z);
             trunk.castShadow = true;
             scene.add(trunk);
 
-            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x2d6a30, roughness: 0.8 });
-            const leavesGeo = new THREE.ConeGeometry(2.5, 4.5, 6);
+            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x2a632d, roughness: 0.8 });
+            const leavesGeo = new THREE.ConeGeometry(2.6, 4.8, 6);
             const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-            leaves.position.set(x, 5.5, z);
+            leaves.position.set(x, 5.8, z);
             leaves.castShadow = true;
             scene.add(leaves);
+
+            obstacles.push({ minX: x - 0.9, maxX: x + 0.9, minZ: z - 0.9, maxZ: z + 0.9, topY: 0 });
+        }
+
+        // 3D Apple Tree with 3D Fruits
+        function createAppleTree(x, z) {
+            const trunkGeo = new THREE.CylinderGeometry(0.65, 0.95, 4.2, 6);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x543b30, roughness: 0.85 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.set(x, 2.1, z);
+            trunk.castShadow = true;
+            scene.add(trunk);
+
+            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x25622e, roughness: 0.8 });
+            const leavesGeo = new THREE.SphereGeometry(2.4, 6, 6);
+            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+            leaves.position.set(x, 4.8, z);
+            leaves.castShadow = true;
+            scene.add(leaves);
+
+            const appleMat = new THREE.MeshStandardMaterial({ color: 0xd92b2b, roughness: 0.35 });
+            for (let i = 0; i < 4; i++) {
+                const apple = new THREE.Mesh(new THREE.SphereGeometry(0.16, 5, 5), appleMat);
+                apple.position.set(x + (i % 2 === 0 ? 0.85 : -0.85), 4.2 + (i * 0.2), z + (i > 1 ? 0.85 : -0.85));
+                scene.add(apple);
+            }
 
             obstacles.push({ minX: x - 0.8, maxX: x + 0.8, minZ: z - 0.8, maxZ: z + 0.8, topY: 0 });
         }
 
-        // Specific Tree 4: Apple Tree (With red fruit accents)
-        function createAppleTree(x, z) {
-            const trunkGeo = new THREE.CylinderGeometry(0.6, 0.9, 4, 6);
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.85 });
-            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.set(x, 2, z);
-            trunk.castShadow = true;
-            scene.add(trunk);
-
-            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x286b32, roughness: 0.8 });
-            const leavesGeo = new THREE.SphereGeometry(2.2, 6, 6);
-            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-            leaves.position.set(x, 4.5, z);
-            leaves.castShadow = true;
-            scene.add(leaves);
-
-            // Red apples
-            const appleMat = new THREE.MeshStandardMaterial({ color: 0xcc2929, roughness: 0.4 });
-            for (let i = 0; i < 4; i++) {
-                const apple = new THREE.Mesh(new THREE.SphereGeometry(0.15, 4, 4), appleMat);
-                apple.position.set(x + (i % 2 === 0 ? 0.8 : -0.8), 4 + (i * 0.2), z + (i > 1 ? 0.8 : -0.8));
-                scene.add(apple);
-            }
-
-            obstacles.push({ minX: x - 0.7, maxX: x + 0.7, minZ: z - 0.7, maxZ: z + 0.7, topY: 0 });
-        }
-
-        // Large Multi-Room House with Functional Doorway & Climbable Stairs
+        // 3D Large House with Staircase & Front Door Entry
         function createLargeHouse(x, z, rotationY) {
             const houseGroup = new THREE.Group();
             houseGroup.position.set(x, 0, z);
             houseGroup.rotation.y = rotationY;
 
-            // Main Walls (Brick/Concrete HD texture feel)
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0xd9d9d9, roughness: 0.7 });
-            const brickMat = new THREE.MeshStandardMaterial({ color: 0xa84332, roughness: 0.8 });
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.65 });
+            const brickMat = new THREE.MeshStandardMaterial({ color: 0x993d2f, roughness: 0.75 });
 
-            // House Base Structure
+            // 3D House Base
             const baseGeo = new THREE.BoxGeometry(8, 5, 8);
             const base = new THREE.Mesh(baseGeo, wallMat);
             base.position.y = 2.5;
@@ -379,77 +371,66 @@
             base.receiveShadow = true;
             houseGroup.add(base);
 
-            // Roof (Slanted gable roof)
-            const roofGeo = new THREE.ConeGeometry(6.2, 3, 4);
+            // 3D Roof
+            const roofGeo = new THREE.ConeGeometry(6.3, 3.2, 4);
             const roof = new THREE.Mesh(roofGeo, brickMat);
-            roof.position.y = 6.5;
+            roof.position.y = 6.6;
             roof.rotation.y = Math.PI / 4;
             roof.castShadow = true;
             houseGroup.add(roof);
 
-            // Front Door Opening (Gap/Archway so dummy enters strictly through door)
-            // We set up collision boundaries around the house walls, leaving the front door open.
-            
-            // Staircase leading to entrance
+            // 3D Staircase leading to front door
             for (let i = 0; i < 3; i++) {
-                const stairGeo = new THREE.BoxGeometry(2.5, 0.3, 0.6);
-                const stairMat = new THREE.MeshStandardMaterial({ color: 0x7a7a7a, roughness: 0.6 });
+                const stairGeo = new THREE.BoxGeometry(2.6, 0.3, 0.65);
+                const stairMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 });
                 const stair = new THREE.Mesh(stairGeo, stairMat);
-                stair.position.set(0, i * 0.3 + 0.15, 4.3 + (2 - i) * 0.5);
+                stair.position.set(0, i * 0.3 + 0.15, 4.35 + (2 - i) * 0.55);
                 stair.castShadow = true;
                 stair.receiveShadow = true;
                 houseGroup.add(stair);
 
-                // Register stairs as climbable collision platforms
-                // Transform local stair position to world space for collision check
                 const worldStairX = x + stair.position.x * Math.cos(rotationY) - stair.position.z * Math.sin(rotationY);
                 const worldStairZ = z + stair.position.x * Math.sin(rotationY) + stair.position.z * Math.cos(rotationY);
                 obstacles.push({
-                    minX: worldStairX - 1.3, maxX: worldStairX + 1.3,
-                    minZ: worldStairZ - 0.4, maxZ: worldStairZ + 0.4,
+                    minX: worldStairX - 1.35, maxX: worldStairX + 1.35,
+                    minZ: worldStairZ - 0.45, maxZ: worldStairZ + 0.45,
                     topY: stair.position.y + 0.15
                 });
             }
 
             scene.add(houseGroup);
 
-            // House Wall Collisions (Excluding Front Doorway so dummy enters inside)
-            // Left Wall
+            // Wall Collisions with front door gap
             obstacles.push({ minX: x - 4.2, maxX: x - 3.8, minZ: z - 4, maxZ: z + 4, topY: 5 });
-            // Right Wall
             obstacles.push({ minX: x + 3.8, maxX: x + 4.2, minZ: z - 4, maxZ: z + 4, topY: 5 });
-            // Back Wall
             obstacles.push({ minX: x - 4, maxX: x + 4, minZ: z - 4.2, maxZ: z - 3.8, topY: 5 });
-            // Front Left Wall segment
             obstacles.push({ minX: x - 4, maxX: x - 1.2, minZ: z + 3.8, maxZ: z + 4.2, topY: 5 });
-            // Front Right Wall segment
             obstacles.push({ minX: x + 1.2, maxX: x + 4, minZ: z + 3.8, maxZ: z + 4.2, topY: 5 });
         }
 
-        // Village Hut Generator
+        // 3D Village Hut
         function createHut(x, z) {
-            const wallGeo = new THREE.BoxGeometry(3.5, 2.2, 3.5);
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0xc49a6c, roughness: 0.8 });
+            const wallGeo = new THREE.BoxGeometry(3.6, 2.3, 3.6);
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.8 });
             const walls = new THREE.Mesh(wallGeo, wallMat);
-            walls.position.set(x, 1.1, z);
+            walls.position.set(x, 1.15, z);
             walls.castShadow = true;
             walls.receiveShadow = true;
             scene.add(walls);
 
-            const roofGeo = new THREE.ConeGeometry(2.8, 1.8, 4);
-            const roofMat = new THREE.MeshStandardMaterial({ color: 0x994d1a, roughness: 0.7 });
+            const roofGeo = new THREE.ConeGeometry(2.9, 1.9, 4);
+            const roofMat = new THREE.MeshStandardMaterial({ color: 0xa8511e, roughness: 0.7 });
             const roof = new THREE.Mesh(roofGeo, roofMat);
-            roof.position.set(x, 3.1, z);
+            roof.position.set(x, 3.2, z);
             roof.rotation.y = Math.PI / 4;
             roof.castShadow = true;
             scene.add(roof);
 
-            // Hut collision with door gap on front
-            obstacles.push({ minX: x - 1.8, maxX: x - 0.6, minZ: z + 1.6, maxZ: z + 1.9, topY: 2.2 });
-            obstacles.push({ minX: x + 0.6, maxX: x + 1.8, minZ: z + 1.6, maxZ: z + 1.9, topY: 2.2 });
-            obstacles.push({ minX: x - 1.9, maxX: x - 1.6, minZ: z - 1.8, maxZ: z + 1.8, topY: 2.2 });
-            obstacles.push({ minX: x + 1.6, maxX: x + 1.9, minZ: z - 1.8, maxZ: z + 1.8, topY: 2.2 });
-            obstacles.push({ minX: x - 1.8, maxX: x + 1.8, minZ: z - 1.9, maxZ: z - 1.6, topY: 2.2 });
+            obstacles.push({ minX: x - 1.85, maxX: x - 0.6, minZ: z + 1.6, maxZ: z + 1.95, topY: 2.3 });
+            obstacles.push({ minX: x + 0.6, maxX: x + 1.85, minZ: z + 1.6, maxZ: z + 1.95, topY: 2.3 });
+            obstacles.push({ minX: x - 1.95, maxX: x - 1.6, minZ: z - 1.8, maxZ: z + 1.8, topY: 2.3 });
+            obstacles.push({ minX: x + 1.6, maxX: x + 1.95, minZ: z - 1.8, maxZ: z + 1.8, topY: 2.3 });
+            obstacles.push({ minX: x - 1.85, maxX: x + 1.85, minZ: z - 1.95, maxZ: z - 1.6, topY: 2.3 });
         }
 
         function handleKey(e, isDown) {
@@ -488,7 +469,6 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Camera-relative Movement Calculation
             let inputX = 0;
             let inputZ = 0;
 
@@ -504,7 +484,6 @@
                 character.position.x += moveX;
                 character.position.z += moveZ;
 
-                // Automatically rotate dummy towards camera movement direction
                 const targetRotation = Math.atan2(moveX, moveZ);
                 character.rotation.y = targetRotation;
             }
@@ -513,7 +492,7 @@
             velocityY -= gravity;
             character.position.y += velocityY;
 
-            // Surface Collision Check (Prevent sinking into ground or house walls)
+            // Surface Collision Check
             let targetGroundY = 0;
 
             for (let obs of obstacles) {
@@ -533,34 +512,31 @@
                 isGrounded = true;
             }
 
-            // Animations (Walking & Jumping)
+            // Walking & Jumping Animations
             const time = Date.now() * 0.01;
             const isMoving = (inputX !== 0 || inputZ !== 0) && isGrounded;
 
             if (!isGrounded) {
-                // Jump Pose: Arms raised up, legs bent
                 leftArm.rotation.x = -Math.PI * 0.6;
                 rightArm.rotation.x = -Math.PI * 0.6;
                 leftLeg.rotation.x = Math.PI * 0.3;
                 rightLeg.rotation.x = -Math.PI * 0.3;
             } else if (isMoving) {
-                // Walk Animation: Swing arms and legs
                 leftArm.rotation.x = Math.sin(time) * 0.8;
                 rightArm.rotation.x = -Math.sin(time) * 0.8;
                 leftLeg.rotation.x = -Math.sin(time) * 0.8;
                 rightLeg.rotation.x = Math.sin(time) * 0.8;
             } else {
-                // Idle Pose
                 leftArm.rotation.x = 0;
                 rightArm.rotation.x = 0;
                 leftLeg.rotation.x = 0;
                 rightLeg.rotation.x = 0;
             }
 
-            // Smooth Third-Person Camera Follow
-            const camDistance = 6.5;
+            // Third-Person Camera Tracking
+            const camDistance = 6.8;
             const targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
-            const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 1.0;
+            const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 1.1;
             const targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
 
             camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.1);
