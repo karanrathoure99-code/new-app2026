@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tactical Dummy Mission Prototype</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D Tactical Dummy Mission Prototype - Advanced</title>
     <style>
         body {
             margin: 0;
@@ -12,6 +12,7 @@
             background-color: #1a1a1a;
             font-family: sans-serif;
             user-select: none;
+            -webkit-user-select: none;
         }
         #ui {
             position: absolute;
@@ -19,11 +20,11 @@
             left: 15px;
             color: white;
             background: rgba(0, 0, 0, 0.75);
-            padding: 15px 20px;
+            padding: 12px 18px;
             border-radius: 8px;
             pointer-events: none;
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 13px;
+            line-height: 1.5;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             z-index: 10;
         }
@@ -43,19 +44,89 @@
             pointer-events: none;
             z-index: 10;
         }
+        /* Mobile Touch Controls (50% transparent) */
+        #touch-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            pointer-events: none;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 25px;
+            box-sizing: border-box;
+            z-index: 20;
+        }
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 60px);
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+            justify-content: flex-end;
+        }
+        .t-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+            transition: background 0.1s;
+        }
+        .t-btn:active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        #btn-w { grid-column: 2; grid-row: 1; }
+        #btn-a { grid-column: 1; grid-row: 2; }
+        #btn-s { grid-column: 2; grid-row: 2; }
+        #btn-d { grid-column: 3; grid-row: 2; }
+        #btn-jump, #btn-shoot {
+            width: 75px;
+            height: 55px;
+            border-radius: 12px;
+        }
+        #btn-shoot {
+            background: rgba(231, 76, 60, 0.3);
+            border-color: rgba(231, 76, 60, 0.6);
+        }
+        #btn-shoot:active {
+            background: rgba(231, 76, 60, 0.6);
+        }
     </style>
 </head>
 <body>
     <div id="ui">
-        <strong>Controls:</strong><br>
-        Move: <span>W, A, S, D</span> or <span>Arrow Keys</span><br>
-        Jump: <span>SPACEBAR</span> | Look: <span>Mouse Drag</span><br>
-        Shoot: <span>Left Click</span><br>
-        <hr style="border:0; border-top:1px solid #555; margin:8px 0;">
-        Mission Status: <span id="status">Go inside the houses, pick up the Gun & eliminate targets!</span><br>
-        Targets Left: <span id="targetCount">3</span> | Weapon: <span id="weaponStatus">Unarmed</span>
+        <strong>Mission Status:</strong> <span id="status">Go inside houses, pick up Gun & eliminate targets!</span><br>
+        Targets Left: <span id="targetCount">6</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
     <div id="crosshair"></div>
+
+    <!-- 50% Transparent Touch Controls for Mobile/Screen Play -->
+    <div id="touch-controls">
+        <div class="control-group">
+            <div class="t-btn" id="btn-w">W</div>
+            <div class="t-btn" id="btn-a">A</div>
+            <div class="t-btn" id="btn-s">S</div>
+            <div class="t-btn" id="btn-d">D</div>
+        </div>
+        <div class="action-group">
+            <div class="t-btn" id="btn-jump">JUMP</div>
+            <div class="t-btn" id="btn-shoot">FIRE</div>
+        </div>
+    </div>
 
     <!-- Include Three.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -68,19 +139,18 @@
         let enemies = [];
         let gunObject = null;
         let hasGun = false;
-        let targetsRemaining = 3;
+        let targetsRemaining = 6;
         
-        // Physics & Movement variables
         let velocityY = 0;
         let gravity = 0.015;
         let isGrounded = false;
-        const moveSpeed = 0.1;
-        const jumpForce = 0.3;
+        const moveSpeed = 0.12;
+        const jumpForce = 0.32;
         
         let keys = { w: false, a: false, s: false, d: false, space: false };
         let isMouseDown = false;
         let mouseX = 0, mouseY = 0;
-        let cameraAngleX = 0, cameraAngleY = 0.5;
+        let cameraAngleX = 0, cameraAngleY = 0.6;
 
         init();
         animate();
@@ -89,7 +159,7 @@
             // 1. Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87ceeb);
-            scene.fog = new THREE.FogExp2(0x87ceeb, 0.008);
+            scene.fog = new THREE.FogExp2(0x87ceeb, 0.005);
 
             // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -101,47 +171,67 @@
             document.body.appendChild(renderer.domElement);
 
             // 4. Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
             scene.add(ambientLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(50, 80, 50);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+            dirLight.position.set(60, 100, 60);
             dirLight.castShadow = true;
-            dirLight.shadow.camera.left = -100;
-            dirLight.shadow.camera.right = 100;
-            dirLight.shadow.camera.top = 100;
-            dirLight.shadow.camera.bottom = -100;
+            dirLight.shadow.camera.left = -150;
+            dirLight.shadow.camera.right = 150;
+            dirLight.shadow.camera.top = 150;
+            dirLight.shadow.camera.bottom = -150;
             scene.add(dirLight);
 
-            // 5. Create Expanded Ground (500% larger -> 300x300)
-            const groundGeo = new THREE.PlaneGeometry(300, 300);
+            // 5. Create Expanded Ground (300x300)
+            const mapSize = 300;
+            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize);
             const groundMat = new THREE.MeshStandardMaterial({ color: 0x3b6e4a, roughness: 0.9 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 6. Build Houses with entry gates and windows
-            createHouse(-20, 0, -20);
-            createHouse(20, 0, -25);
-            createHouse(0, 0, -45);
+            // 6. Create Boundary Walls Around Surface (So player can't escape the area)
+            const wallH = 6;
+            const wMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.8 });
+            // North Boundary
+            createBoundaryWall(0, wallH/2, -mapSize/2, mapSize, wallH, 2, wMat);
+            // South Boundary
+            createBoundaryWall(0, wallH/2, mapSize/2, mapSize, wallH, 2, wMat);
+            // West Boundary
+            createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
+            // East Boundary
+            createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Create Cover Boxes scattered around
-            createCoverBox(-8, 0.75, -10, 3, 1.5, 1.5);
-            createCoverBox(8, 0.75, -12, 1.5, 1.5, 3);
-            createCoverBox(-15, 0.75, -35, 4, 1.5, 1.5);
-            createCoverBox(15, 0.75, -35, 1.5, 1.5, 4);
-            createCoverBox(0, 0.75, -25, 2, 1.5, 2);
+            // 7. Spread Multiple Houses Across the Full Area
+            createHouse(-60, 0, -60);
+            createHouse(60, 0, -60);
+            createHouse(-60, 0, 60);
+            createHouse(60, 0, 60);
+            createHouse(0, 0, -80);
 
-            // 8. Place Gun inside one of the Houses (House 1)
-            createGun(-20, 0.3, -20);
+            // 8. Spread Cover Boxes Across the Full Area
+            createCoverBox(-30, 0.75, -30, 4, 1.5, 1.5);
+            createCoverBox(30, 0.75, -30, 1.5, 1.5, 4);
+            createCoverBox(-30, 0.75, 30, 3, 1.5, 3);
+            createCoverBox(30, 0.75, 30, 4, 1.5, 2);
+            createCoverBox(0, 0.75, -40, 5, 1.5, 1.5);
+            createCoverBox(-40, 0.75, 0, 1.5, 1.5, 5);
+            createCoverBox(40, 0.75, 0, 3, 1.5, 3);
 
-            // 9. Spawn Enemy Dummies around the map
-            createEnemy(10, 0, -15);
-            createEnemy(-10, 0, -50);
-            createEnemy(25, 0, -40);
+            // 9. Place Gun Inside House 1 (-60, 0, -60)
+            createGun(-60, 0.3, -60);
 
-            // 10. Build Dummy Character (~1.2 boxes height)
+            // 10. Spawn Enemy Dummies Across the Map
+            createEnemy(50, 0, -50);
+            createEnemy(-50, 0, 80);
+            createEnemy(70, 0, 40);
+            createEnemy(-20, 0, -90);
+            createEnemy(30, 0, 90);
+            createEnemy(-80, 0, -20);
+
+            // 11. Build Dummy Character (~1.2 boxes height)
             character = new THREE.Group();
             
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
@@ -183,7 +273,7 @@
             character.add(rightLeg);
 
             // Start position of character
-            character.position.set(0, 0, 10);
+            character.position.set(0, 0, 120);
             scene.add(character);
 
             // Event Listeners
@@ -192,7 +282,7 @@
             window.addEventListener('keyup', (e) => handleKey(e, false));
             
             window.addEventListener('mousedown', (e) => {
-                if (e.button === 0) { // Left click
+                if (e.button === 0) {
                     isMouseDown = true;
                     mouseX = e.clientX;
                     mouseY = e.clientY;
@@ -201,13 +291,70 @@
             });
             window.addEventListener('mouseup', () => { isMouseDown = false; });
             window.addEventListener('mousemove', onMouseMove);
+
+            // Touch Support for Mobile Dragging & Controls
+            window.addEventListener('touchstart', (e) => {
+                if(e.touches.length === 1 && e.target.tagName !== 'DIV') {
+                    isMouseDown = true;
+                    mouseX = e.touches[0].clientX;
+                    mouseY = e.touches[0].clientY;
+                }
+            });
+            window.addEventListener('touchend', () => { isMouseDown = false; });
+            window.addEventListener('touchmove', (e) => {
+                if(isMouseDown && e.touches.length === 1) {
+                    const deltaX = e.touches[0].clientX - mouseX;
+                    const deltaY = e.touches[0].clientY - mouseY;
+                    cameraAngleX -= deltaX * 0.005;
+                    cameraAngleY = Math.max(0.1, Math.min(1.4, cameraAngleY - deltaY * 0.005));
+                    mouseX = e.touches[0].clientX;
+                    mouseY = e.touches[0].clientY;
+                }
+            });
+
+            // UI Touch Bindings
+            bindTouchButton('btn-w', 'w');
+            bindTouchButton('btn-s', 's');
+            bindTouchButton('btn-a', 'a');
+            bindTouchButton('btn-d', 'd');
+            
+            document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (isGrounded) { velocityY = jumpForce; isGrounded = false; }
+            });
+            document.getElementById('btn-jump').addEventListener('click', () => {
+                if (isGrounded) { velocityY = jumpForce; isGrounded = false; }
+            });
+
+            document.getElementById('btn-shoot').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                shootGun();
+            });
+            document.getElementById('btn-shoot').addEventListener('click', () => {
+                shootGun();
+            });
         }
 
-        // Function to create a realistic House with walls, roof, gate opening, and window
+        function bindTouchButton(id, keyName) {
+            const el = document.getElementById(id);
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
+            el.addEventListener('mousedown', () => { keys[keyName] = true; });
+            el.addEventListener('mouseup', () => { keys[keyName] = false; });
+            el.addEventListener('mouseleave', () => { keys[keyName] = false; });
+        }
+
+        function createBoundaryWall(x, y, z, w, h, d, mat) {
+            let mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+            mesh.position.set(x, y, z);
+            scene.add(mesh);
+            addObstacleBox(x, y, z, w, h, d);
+        }
+
         function createHouse(x, y, z) {
-            const houseWidth = 8;
-            const houseHeight = 4;
-            const houseDepth = 8;
+            const houseWidth = 9;
+            const houseHeight = 4.5;
+            const houseDepth = 9;
             const wallThickness = 0.4;
             const wallMat = new THREE.MeshStandardMaterial({ color: 0xd9c3b0, roughness: 0.7 });
 
@@ -226,17 +373,17 @@
             addObstacleBox(leftWall.position.x, leftWall.position.y, leftWall.position.z, wallThickness, houseHeight, houseDepth);
 
             // Right Wall (with a small window)
-            let rightWall1 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3), wallMat);
-            rightWall1.position.set(x + houseWidth/2, y + houseHeight/2, z - 2.5);
+            let rightWall1 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3.5), wallMat);
+            rightWall1.position.set(x + houseWidth/2, y + houseHeight/2, z - 2.75);
             rightWall1.castShadow = true; rightWall1.receiveShadow = true;
             scene.add(rightWall1);
-            addObstacleBox(rightWall1.position.x, rightWall1.position.y, rightWall1.position.z, wallThickness, houseHeight, 3);
+            addObstacleBox(rightWall1.position.x, rightWall1.position.y, rightWall1.position.z, wallThickness, houseHeight, 3.5);
 
-            let rightWall2 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3), wallMat);
-            rightWall2.position.set(x + houseWidth/2, y + houseHeight/2, z + 2.5);
+            let rightWall2 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3.5), wallMat);
+            rightWall2.position.set(x + houseWidth/2, y + houseHeight/2, z + 2.75);
             rightWall2.castShadow = true; rightWall2.receiveShadow = true;
             scene.add(rightWall2);
-            addObstacleBox(rightWall2.position.x, rightWall2.position.y, rightWall2.position.z, wallThickness, houseHeight, 3);
+            addObstacleBox(rightWall2.position.x, rightWall2.position.y, rightWall2.position.z, wallThickness, houseHeight, 3.5);
 
             // Window top & bottom pieces
             let winBottom = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, 1.2, 2), wallMat);
@@ -250,21 +397,21 @@
             addObstacleBox(winTop.position.x, winTop.position.y, winTop.position.z, wallThickness, 1.2, 2);
 
             // Front Wall with a Gate Opening (Doorway)
-            let frontWall1 = new THREE.Mesh(new THREE.BoxGeometry(2.5, houseHeight, wallThickness), wallMat);
-            frontWall1.position.set(x - 2.75, y + houseHeight/2, z + houseDepth/2);
+            let frontWall1 = new THREE.Mesh(new THREE.BoxGeometry(3, houseHeight, wallThickness), wallMat);
+            frontWall1.position.set(x - 3, y + houseHeight/2, z + houseDepth/2);
             frontWall1.castShadow = true; frontWall1.receiveShadow = true;
             scene.add(frontWall1);
-            addObstacleBox(frontWall1.position.x, frontWall1.position.y, frontWall1.position.z, 2.5, houseHeight, wallThickness);
+            addObstacleBox(frontWall1.position.x, frontWall1.position.y, frontWall1.position.z, 3, houseHeight, wallThickness);
 
-            let frontWall2 = new THREE.Mesh(new THREE.BoxGeometry(2.5, houseHeight, wallThickness), wallMat);
-            frontWall2.position.set(x + 2.75, y + houseHeight/2, z + houseDepth/2);
+            let frontWall2 = new THREE.Mesh(new THREE.BoxGeometry(3, houseHeight, wallThickness), wallMat);
+            frontWall2.position.set(x + 3, y + houseHeight/2, z + houseDepth/2);
             frontWall2.castShadow = true; frontWall2.receiveShadow = true;
             scene.add(frontWall2);
-            addObstacleBox(frontWall2.position.x, frontWall2.position.y, frontWall2.position.z, 2.5, houseHeight, wallThickness);
+            addObstacleBox(frontWall2.position.x, frontWall2.position.y, frontWall2.position.z, 3, houseHeight, wallThickness);
 
             // Door Top Lintel
             let doorTop = new THREE.Mesh(new THREE.BoxGeometry(3, 1, wallThickness), wallMat);
-            doorTop.position.set(x, y + 3.5, z + houseDepth/2);
+            doorTop.position.set(x, y + 4, z + houseDepth/2);
             scene.add(doorTop);
             addObstacleBox(doorTop.position.x, doorTop.position.y, doorTop.position.z, 3, 1, wallThickness);
 
@@ -307,7 +454,7 @@
 
         function createEnemy(x, y, z) {
             const enemyGroup = new THREE.Group();
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c }); // Red uniform for enemy
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c });
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
 
             const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), bodyMat);
@@ -359,15 +506,13 @@
         function shootGun() {
             if (!hasGun || targetsRemaining <= 0) return;
 
-            // Simple raycast from camera center to check if an enemy is hit
             const raycaster = new THREE.Raycaster();
-            const centerVector = new THREE.Vector2(0, 0);
-            raycaster.setFromCamera(centerVector, camera);
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
             let enemyMeshes = [];
             enemies.forEach(en => {
-                enemyMeshes.push(en.children[0]); // Torso
-                enemyMeshes.push(en.children[1]); // Head
+                enemyMeshes.push(en.children[0]);
+                enemyMeshes.push(en.children[1]);
             });
 
             const intersects = raycaster.intersectObjects(enemyMeshes);
@@ -375,7 +520,6 @@
                 let hitMesh = intersects[0].object;
                 let hitEnemyGroup = hitMesh.parent;
 
-                // Remove enemy from scene
                 scene.remove(hitEnemyGroup);
                 enemies = enemies.filter(e => e !== hitEnemyGroup);
                 targetsRemaining--;
@@ -390,30 +534,63 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Character Movement Calculation
+            // Free Fire Style Camera-Relative Movement Calculation
+            let inputX = 0;
+            let inputZ = 0;
+
+            if (keys.w) inputZ -= 1;
+            if (keys.s) inputZ += 1;
+            if (keys.a) inputX -= 1;
+            if (keys.d) inputX += 1;
+
             let moveX = 0;
             let moveZ = 0;
 
-            if (keys.w) moveZ -= moveSpeed;
-            if (keys.s) moveZ += moveSpeed;
-            if (keys.a) moveX -= moveSpeed;
-            if (keys.d) moveX += moveSpeed;
+            if (inputX !== 0 || inputZ !== 0) {
+                // Calculate movement relative to camera angle (Free Fire style orientation)
+                const angle = cameraAngleX;
+                moveX = (inputX * Math.cos(angle) + inputZ * Math.sin(angle)) * moveSpeed;
+                moveZ = (inputZ * Math.cos(angle) - inputX * Math.sin(angle)) * moveSpeed;
 
-            if (moveX !== 0 || moveZ !== 0) {
-                character.position.x += moveX;
-                character.position.z += moveZ;
+                // Predict Next X Position & Check Collision
+                let nextX = character.position.x + moveX;
+                let canMoveX = true;
+                for (let obs of obstacles) {
+                    if (nextX >= obs.minX - 0.35 && nextX <= obs.maxX + 0.35 &&
+                        character.position.z >= obs.minZ - 0.35 && character.position.z <= obs.maxZ + 0.35 &&
+                        character.position.y + 0.1 < obs.topY && character.position.y + 1.2 > obs.minY) {
+                        canMoveX = false;
+                        break;
+                    }
+                }
+                if (canMoveX) character.position.x = nextX;
+
+                // Predict Next Z Position & Check Collision
+                let nextZ = character.position.z + moveZ;
+                let canMoveZ = true;
+                for (let obs of obstacles) {
+                    if (character.position.x >= obs.minX - 0.35 && character.position.x <= obs.maxX + 0.35 &&
+                        nextZ >= obs.minZ - 0.35 && nextZ <= obs.maxZ + 0.35 &&
+                        character.position.y + 0.1 < obs.topY && character.position.y + 1.2 > obs.minY) {
+                        canMoveZ = false;
+                        break;
+                    }
+                }
+                if (canMoveZ) character.position.z = nextZ;
+
+                // Auto-turn character towards movement direction (Free Fire character feel)
                 character.rotation.y = Math.atan2(moveX, moveZ);
             }
 
-            // Check if player picks up the gun (proximity check)
+            // Check Gun Pickup
             if (gunObject && !hasGun) {
                 let dist = character.position.distanceTo(gunObject.position);
-                if (dist < 1.5) {
+                if (dist < 1.8) {
                     scene.remove(gunObject);
                     gunObject = null;
                     hasGun = true;
                     document.getElementById('weaponStatus').innerText = 'Assault Rifle Equipped!';
-                    document.getElementById('status').innerText = 'Gun acquired! Now go outside and eliminate the targets!';
+                    document.getElementById('status').innerText = 'Gun acquired! Eliminate all 6 targets!';
                 }
             }
 
@@ -421,15 +598,13 @@
             velocityY -= gravity;
             character.position.y += velocityY;
 
-            // Surface Collision Check
+            // Surface & Obstacle Top Collision Check
             let targetGroundY = 0;
 
             for (let obs of obstacles) {
-                // Check horizontal boundaries
                 if (character.position.x >= obs.minX - 0.3 && character.position.x <= obs.maxX + 0.3 &&
                     character.position.z >= obs.minZ - 0.3 && character.position.z <= obs.maxZ + 0.3) {
                     
-                    // If standing on top of obstacle
                     if (character.position.y >= obs.topY - 0.6 && character.position.y <= obs.topY + 0.6) {
                         if (obs.topY > targetGroundY) {
                             targetGroundY = obs.topY;
@@ -438,16 +613,15 @@
                 }
             }
 
-            // Ground collision resolution
             if (character.position.y <= targetGroundY) {
                 character.position.y = targetGroundY;
                 velocityY = 0;
                 isGrounded = true;
             }
 
-            // Animations
+            // Character Animations
             const time = Date.now() * 0.01;
-            const isMoving = (moveX !== 0 || moveZ !== 0) && isGrounded;
+            const isMoving = (inputX !== 0 || inputZ !== 0) && isGrounded;
 
             if (!isGrounded) {
                 leftArm.rotation.x = -Math.PI * 0.6;
