@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Massive Open-World Map - Dry Terrain Fix</title>
+    <title>Massive Open-World Map - Smooth Natural Terrain</title>
     <style>
         body {
             margin: 0;
@@ -57,7 +57,7 @@
     <div id="info">
         <strong>Massive Open-World Battleground:</strong><br>
         Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Dry Solid Terrain & Raised Borders Loaded</span>
+        Status: <span>Smooth Rolling Terrain & Raised Borders Loaded</span>
     </div>
 
     <div id="minimap-container">
@@ -113,15 +113,15 @@
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside (Deep below ground level)
+            // 5. Endless Ocean Surrounding Outside (Far away)
             const oceanGeo = new THREE.PlaneGeometry(60000, 60000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
             ocean.rotation.x = -Math.PI / 2;
-            ocean.position.y = -200; // Safely pushed deep down
+            ocean.position.y = -200;
             scene.add(ocean);
 
-            // 6. Massive Solid Terrain Ground (Ensuring zero negative height dips)
+            // 6. Smooth Rolling Terrain Ground (No pits/holes, only gentle hills and flat areas)
             const segments = 300;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
@@ -132,12 +132,10 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                // Positive rolling hills (strictly above base level)
-                let height = Math.abs(Math.sin(vx * 0.0015) * Math.cos(vy * 0.0015) * 180) 
-                           + Math.abs(Math.sin(vx * 0.006) * Math.sin(vy * 0.006) * 45) 
-                           + 15; // Base offset to keep entire map completely dry and solid
+                // Purely positive gentle rolling hills (no negative dips or potholes)
+                let height = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 80) + 10;
 
-                // Raise the edges/boundaries high up like mountain walls
+                // Raise the edges/boundaries smoothly to form raised borders
                 let distFromCenter = Math.max(Math.abs(vx), Math.abs(vy));
                 let borderThreshold = halfSize - 2500;
                 if (distFromCenter > borderThreshold) {
@@ -149,7 +147,7 @@
             }
             groundGeo.computeVertexNormals();
 
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.88, flatShading: true });
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.88 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
@@ -172,13 +170,13 @@
         function createRealisticTree(x, z) {
             const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.2, 12, 8), trunkMat);
-            trunk.position.set(x, 25, z); // Adjusted for higher stable terrain base
+            trunk.position.set(x, 20, z); 
             trunk.castShadow = true;
             scene.add(trunk);
 
             const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
             const top = new THREE.Mesh(new THREE.SphereGeometry(6, 8, 8), foliageMat);
-            top.position.set(x, 32, z);
+            top.position.set(x, 27, z);
             top.castShadow = true;
             scene.add(top);
         }
