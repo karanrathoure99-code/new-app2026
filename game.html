@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tactical Dummy Mission - Massive Colored Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D Tactical Dummy Mission - Pro Terrain & Animations</title>
     <style>
         body {
             margin: 0;
@@ -60,16 +60,90 @@
             pointer-events: none;
             z-index: 10;
         }
+        /* Mobile Touch Controls (50% transparent, shown only on touch devices via JS) */
+        #touch-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            pointer-events: none;
+            display: none; 
+            justify-content: space-between;
+            padding: 0 25px;
+            box-sizing: border-box;
+            z-index: 20;
+        }
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 60px);
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+            justify-content: flex-end;
+        }
+        .t-btn {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+        }
+        .t-btn:active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        #btn-w { grid-column: 2; grid-row: 1; }
+        #btn-a { grid-column: 1; grid-row: 2; }
+        #btn-s { grid-column: 2; grid-row: 2; }
+        #btn-d { grid-column: 3; grid-row: 2; }
+        #btn-jump, #btn-shoot {
+            width: 75px;
+            height: 55px;
+            border-radius: 12px;
+        }
+        #btn-shoot {
+            background: rgba(231, 76, 60, 0.35);
+            border-color: rgba(231, 76, 60, 0.6);
+        }
+        #btn-shoot:active {
+            background: rgba(231, 76, 60, 0.6);
+        }
     </style>
 </head>
 <body>
     <div id="ui">
         <strong>Health:</strong> 
         <div id="health-bar-container"><div id="health-bar"></div></div><br>
-        <strong>Mission Status:</strong> <span id="status">Explore 50km Dense Grass Forest, 50 Unique Houses, 200+ Colored Covers!</span><br>
+        <strong>Mission Status:</strong> <span id="status">Explore Hilly Forest, Walk up stairs into houses, get Gun & eliminate targets!</span><br>
         Targets Left: <span id="targetCount">15</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
     <div id="crosshair"></div>
+
+    <!-- Mobile Touch Controls (50% transparent) -->
+    <div id="touch-controls">
+        <div class="control-group">
+            <div class="t-btn" id="btn-w">W</div>
+            <div class="t-btn" id="btn-a">A</div>
+            <div class="t-btn" id="btn-s">S</div>
+            <div class="t-btn" id="btn-d">D</div>
+        </div>
+        <div class="action-group">
+            <div class="t-btn" id="btn-jump">JUMP</div>
+            <div class="t-btn" id="btn-shoot">FIRE</div>
+        </div>
+    </div>
 
     <!-- Include Three.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -91,7 +165,7 @@
         let gravity = 0.012;
         let isGrounded = false;
         const moveSpeed = 0.13;
-        const jumpForce = 0.42;
+        const jumpForce = 0.40;
         
         let keys = { w: false, a: false, s: false, d: false, space: false };
         let isMouseDown = false;
@@ -102,6 +176,11 @@
         animate();
 
         function init() {
+            // Show touch controls only on mobile/touch devices
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                document.getElementById('touch-controls').style.display = 'flex';
+            }
+
             // 1. Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87ceeb);
@@ -129,41 +208,60 @@
             dirLight.shadow.camera.bottom = -250;
             scene.add(dirLight);
 
-            // 5. Expanded Ground (500x500)
+            // 5. Uneven Hilly Terrain (500x500 Surface with height variations)
             const mapSize = 500;
-            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize);
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e3f20, roughness: 0.9 });
+            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, 40, 40);
+            groundGeo.rotateX(-Math.PI / 2);
+
+            const pos = groundGeo.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                let px = pos.getX(i);
+                let pz = pos.getZ(i);
+                // Create natural hills using sin/cos waves so houses sit securely on ground heights
+                let h = Math.sin(px * 0.02) * Math.cos(pz * 0.02) * 2.0;
+                if (Math.abs(px) < 50 && Math.abs(pz) < 50) h = 0; // Flat center spawn
+                pos.setY(i, h);
+            }
+            groundGeo.computeVertexNormals();
+
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x2e6f40, roughness: 0.9 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
+            // Helper to get ground height at any (x, z)
+            window.getTerrainHeight = function(x, z) {
+                return Math.sin(x * 0.02) * Math.cos(z * 0.02) * 2.0;
+            };
+
             // 6. Boundary Walls
-            const wallH = 8;
+            const wallH = 10;
             const wMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.8 });
             createBoundaryWall(0, wallH/2, -mapSize/2, mapSize, wallH, 2, wMat);
             createBoundaryWall(0, wallH/2, mapSize/2, mapSize, wallH, 2, wMat);
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Generate Dense Grass, Flowers & Trees
+            // 7. Dense Grass, Flowers & Flora
             generateDenseForestAndFlora(mapSize);
 
-            // 8. Generate 50 Unique Multi-Story Houses with Different Designs & Colors
+            // 8. Generate 50 Unique Multi-Story Houses with Real Walkable Stairs & Floors
             generateDiverseHouses();
 
-            // 9. Generate 200+ Smaller Colored Cover Boxes across the Map
+            // 9. Generate 200+ Colored Cover Boxes
             generateColoredCoverBoxes();
 
-            // 10. Place Gun Inside House (-100, 0, -100)
-            createGun(-100, 0.3, -100);
+            // 10. Place Gun Inside House (-100, groundHeight, -100)
+            let gunY = getTerrainHeight(-100, -100) + 0.3;
+            createGun(-100, gunY, -100);
 
-            // 11. Spawn 15 Enemy Dummies Across the Map
+            // 11. Spawn 15 Enemy Dummies
             for(let i = 0; i < 15; i++) {
-                let ex = (Math.random() - 0.5) * 350;
-                let ez = (Math.random() - 0.5) * 350;
-                if(Math.abs(ex) < 40 && Math.abs(ez) < 40) ex = 100;
-                createEnemy(ex, 0, ez);
+                let ex = (Math.random() - 0.5) * 380;
+                let ez = (Math.random() - 0.5) * 380;
+                if(Math.abs(ex) < 50 && Math.abs(ez) < 50) ex = 120;
+                let ey = getTerrainHeight(ex, ez);
+                createEnemy(ex, ey, ez);
             }
 
             // 12. Build Dummy Character
@@ -194,7 +292,8 @@
             rightLeg = new THREE.Mesh(legGeo, pantsMat);
             rightLeg.position.set(0.15, 0.3, 0); character.add(rightLeg);
 
-            character.position.set(0, 0, 220);
+            let startTerrainY = getTerrainHeight(0, 200);
+            character.position.set(0, startTerrainY, 200);
             scene.add(character);
 
             // Event Listeners
@@ -212,6 +311,38 @@
             });
             window.addEventListener('mouseup', () => { isMouseDown = false; });
             window.addEventListener('mousemove', onMouseMove);
+
+            // Touch UI Bindings for Mobile
+            bindTouchButton('btn-w', 'w');
+            bindTouchButton('btn-s', 's');
+            bindTouchButton('btn-a', 'a');
+            bindTouchButton('btn-d', 'd');
+            
+            document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (isGrounded && !isGameOver) { velocityY = jumpForce; isGrounded = false; }
+            });
+            document.getElementById('btn-jump').addEventListener('click', () => {
+                if (isGrounded && !isGameOver) { velocityY = jumpForce; isGrounded = false; }
+            });
+
+            document.getElementById('btn-shoot').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                shootGun();
+            });
+            document.getElementById('btn-shoot').addEventListener('click', () => {
+                shootGun();
+            });
+        }
+
+        function bindTouchButton(id, keyName) {
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
+            el.addEventListener('mousedown', () => { keys[keyName] = true; });
+            el.addEventListener('mouseup', () => { keys[keyName] = false; });
+            el.addEventListener('mouseleave', () => { keys[keyName] = false; });
         }
 
         function generateDenseForestAndFlora(size) {
@@ -219,51 +350,53 @@
             for (let i = 0; i < 2500; i++) {
                 let x = (Math.random() - 0.5) * half * 2;
                 let z = (Math.random() - 0.5) * half * 2;
-                if (Math.abs(x) < 30 && Math.abs(z) < 30) continue;
+                if (Math.abs(x) < 40 && Math.abs(z) < 40) continue;
                 createGrassBlade(x, z);
             }
 
             for (let i = 0; i < 200; i++) {
                 let x = (Math.random() - 0.5) * half * 2;
                 let z = (Math.random() - 0.5) * half * 2;
-                if (Math.abs(x) < 35 && Math.abs(z) < 35) continue;
+                if (Math.abs(x) < 45 && Math.abs(z) < 45) continue;
+                let y = getTerrainHeight(x, z);
                 let rand = Math.random();
-                if (rand < 0.3) createPineTree(x, z);
-                else if (rand < 0.6) createFruitTree(x, z);
-                else createFlowerCluster(x, z);
+                if (rand < 0.3) createPineTree(x, y, z);
+                else if (rand < 0.6) createFruitTree(x, y, z);
+                else createFlowerCluster(x, y, z);
             }
         }
 
         function createGrassBlade(x, z) {
+            let y = getTerrainHeight(x, z);
             const grassMat = new THREE.MeshBasicMaterial({ color: 0x3da35d, side: THREE.DoubleSide });
             const grassGeo = new THREE.PlaneGeometry(0.3, 0.8);
             const grass = new THREE.Mesh(grassGeo, grassMat);
-            grass.position.set(x + (Math.random()-0.5)*2, 0.4, z + (Math.random()-0.5)*2);
+            grass.position.set(x + (Math.random()-0.5)*2, y + 0.4, z + (Math.random()-0.5)*2);
             grass.rotation.y = Math.random() * Math.PI;
             scene.add(grass);
         }
 
-        function createPineTree(x, z) {
+        function createPineTree(x, y, z) {
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 4), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
-            trunk.position.set(x, 2, z); trunk.castShadow = true; scene.add(trunk);
-            addObstacleBox(x, 2, z, 0.8, 4, 0.8);
+            trunk.position.set(x, y + 2, z); trunk.castShadow = true; scene.add(trunk);
+            addObstacleBox(x, y + 2, z, 0.8, 4, 0.8);
             const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 6, 6), new THREE.MeshStandardMaterial({ color: 0x1e4620 }));
-            leaves.position.set(x, 5.5, z); leaves.castShadow = true; scene.add(leaves);
+            leaves.position.set(x, y + 5.5, z); leaves.castShadow = true; scene.add(leaves);
         }
 
-        function createFruitTree(x, z) {
+        function createFruitTree(x, y, z) {
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 4.5), new THREE.MeshStandardMaterial({ color: 0x5c4033 }));
-            trunk.position.set(x, 2.25, z); trunk.castShadow = true; scene.add(trunk);
-            addObstacleBox(x, 2.25, z, 1.0, 4.5, 1.0);
+            trunk.position.set(x, y + 2.25, z); trunk.castShadow = true; scene.add(trunk);
+            addObstacleBox(x, y + 2.25, z, 1.0, 4.5, 1.0);
             const leaves = new THREE.Mesh(new THREE.SphereGeometry(2.2, 6, 6), new THREE.MeshStandardMaterial({ color: 0x2e8b57 }));
-            leaves.position.set(x, 5.2, z); leaves.castShadow = true; scene.add(leaves);
+            leaves.position.set(x, y + 5.2, z); leaves.castShadow = true; scene.add(leaves);
         }
 
-        function createFlowerCluster(x, z) {
+        function createFlowerCluster(x, y, z) {
             const colors = [0xff69b4, 0xffff00, 0xff4500, 0xda70d6, 0xff1493];
             for(let c = 0; c < 5; c++) {
                 let flower = new THREE.Mesh(new THREE.SphereGeometry(0.25, 5, 5), new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*colors.length)] }));
-                flower.position.set(x + (Math.random()*1.5 - 0.75), 0.15, z + (Math.random()*1.5 - 0.75));
+                flower.position.set(x + (Math.random()*1.5 - 0.75), y + 0.15, z + (Math.random()*1.5 - 0.75));
                 scene.add(flower);
             }
         }
@@ -272,35 +405,34 @@
             const houseColors = [0xd9c3b0, 0xc0392b, 0x2980b9, 0x27ae60, 0xf39c12, 0x8e44ad, 0x16a085, 0xd35400];
             const roofColors = [0xa93226, 0x2c3e50, 0x7f8c8d, 0x1abc9c, 0xe67e22, 0x9b59b6];
 
-            // Generate 50 unique houses spread across 500x500
             for(let i = 0; i < 50; i++) {
-                let hx = (Math.random() - 0.5) * 380;
-                let hz = (Math.random() - 0.5) * 380;
-                if(Math.abs(hx) < 50 && Math.abs(hz) < 50) hx += 120; // Avoid center spawn
+                let hx = (Math.random() - 0.5) * 400;
+                let hz = (Math.random() - 0.5) * 400;
+                if(Math.abs(hx) < 60 && Math.abs(hz) < 60) hx += 140;
 
-                let floors = Math.floor(Math.random() * 3) + 1; // 1, 2 or 3 floors
+                let hy = getTerrainHeight(hx, hz);
+                let floors = Math.floor(Math.random() * 3) + 1;
                 let wallColor = houseColors[Math.floor(Math.random() * houseColors.length)];
                 let roofColor = roofColors[Math.floor(Math.random() * roofColors.length)];
 
-                createHouse(hx, 0, hz, floors, wallColor, roofColor);
+                createHouse(hx, hy, hz, floors, wallColor, roofColor);
             }
         }
 
         function generateColoredCoverBoxes() {
             const boxColors = [0xe74c3c, 0x3498db, 0x2ecc71, 0xf1c40f, 0x9b59b6, 0x1abc9c, 0xe67e22, 0x34495e, 0x7f8c8d, 0xdc7633];
-            
-            // Generate 200 smaller colored cover boxes
             for(let i = 0; i < 200; i++) {
-                let bx = (Math.random() - 0.5) * 420;
-                let bz = (Math.random() - 0.5) * 420;
-                if(Math.abs(bx) < 30 && Math.abs(bz) < 30) continue;
+                let bx = (Math.random() - 0.5) * 440;
+                let bz = (Math.random() - 0.5) * 440;
+                if(Math.abs(bx) < 40 && Math.abs(bz) < 40) continue;
 
-                let w = Math.random() * 2 + 1.5; // Smaller size
+                let by = getTerrainHeight(bx, bz);
+                let w = Math.random() * 2 + 1.5;
                 let h = Math.random() * 1.5 + 1.0;
                 let d = Math.random() * 2 + 1.5;
                 let color = boxColors[Math.floor(Math.random() * boxColors.length)];
 
-                createCoverBox(bx, bz, w, h, d, color);
+                createCoverBox(bx, by, bz, w, h, d, color);
             }
         }
 
@@ -381,12 +513,13 @@
                     addObstacleBox(floorSlab.position.x, floorSlab.position.y, floorSlab.position.z, houseWidth - 0.4, 0.3, houseDepth - 0.4);
                 }
 
+                // Proper Walkable Stairs for each upper floor
                 if (f < floors - 1) {
-                    for (let s = 0; s < 7; s++) {
-                        let stairStep = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.2, 0.6), new THREE.MeshStandardMaterial({ color: 0x444 }));
-                        stairStep.position.set(x - 3.5, currentY + 0.3 + s * 0.5, z - 3 + s * 0.6);
+                    for (let s = 0; s < 8; s++) {
+                        let stairStep = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 0.5), new THREE.MeshStandardMaterial({ color: 0x555 }));
+                        stairStep.position.set(x - 3.5, currentY + 0.3 + s * 0.5, z - 3 + s * 0.5);
                         scene.add(stairStep);
-                        addObstacleBox(stairStep.position.x, stairStep.position.y, stairStep.position.z, 1.8, 0.2, 0.6);
+                        addObstacleBox(stairStep.position.x, stairStep.position.y, stairStep.position.z, 2, 0.2, 0.5);
                     }
                 }
             }
@@ -399,13 +532,13 @@
             addObstacleBox(roof.position.x, roof.position.y, roof.position.z, houseWidth + 1.2, 0.5, houseDepth + 1.2);
         }
 
-        function createCoverBox(x, z, w, h, d, col) {
+        function createCoverBox(x, y, z, w, h, d, col) {
             let mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: col, roughness: 0.5 }));
-            mesh.position.set(x, h / 2, z);
+            mesh.position.set(x, y + h / 2, z);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
             scene.add(mesh);
-            addObstacleBox(x, h / 2, z, w, h, d);
+            addObstacleBox(x, y + h / 2, z, w, h, d);
         }
 
         function addObstacleBox(x, y, z, w, h, d) {
@@ -491,8 +624,9 @@
             let inputX = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
             let inputZ = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
             let moveX = 0, moveZ = 0;
+            let isMoving = (inputX !== 0 || inputZ !== 0);
 
-            if (inputX !== 0 || inputZ !== 0) {
+            if (isMoving) {
                 let angle = cameraAngleX;
                 moveX = (inputX * Math.cos(angle) + inputZ * Math.sin(angle)) * moveSpeed;
                 moveZ = (inputZ * Math.cos(angle) - inputX * Math.sin(angle)) * moveSpeed;
@@ -583,14 +717,14 @@
                     gunObject = null;
                     hasGun = true;
                     document.getElementById('weaponStatus').innerText = 'Assault Rifle';
-                    document.getElementById('status').innerText = 'Gun acquired! Explore forest & eliminate targets!';
+                    document.getElementById('status').innerText = 'Gun acquired! Climb stairs & eliminate targets!';
                 }
             }
 
             velocityY -= gravity;
             character.position.y += velocityY;
 
-            let targetGroundY = 0;
+            let targetGroundY = getTerrainHeight(character.position.x, character.position.z);
             for (let obs of obstacles) {
                 if (character.position.x >= obs.minX - 0.3 && character.position.x <= obs.maxX + 0.3 &&
                     character.position.z >= obs.minZ - 0.3 && character.position.z <= obs.maxZ + 0.3) {
@@ -606,18 +740,33 @@
                 isGrounded = true;
             }
 
-            // Close Camera Distance (Closer to dummy)
+            // Character Animations (Front, Back, Left, Right, Jump, Walk)
+            const time = Date.now() * 0.015;
+            if (!isGrounded) {
+                leftArm.rotation.x = -Math.PI * 0.6;
+                rightArm.rotation.x = -Math.PI * 0.6;
+                leftLeg.rotation.x = Math.PI * 0.3;
+                rightLeg.rotation.x = -Math.PI * 0.3;
+            } else if (isMoving) {
+                leftArm.rotation.x = Math.sin(time) * 0.9;
+                rightArm.rotation.x = -Math.sin(time) * 0.9;
+                leftLeg.rotation.x = -Math.sin(time) * 0.9;
+                rightLeg.rotation.x = Math.sin(time) * 0.9;
+            } else {
+                leftArm.rotation.x = 0; rightArm.rotation.x = 0;
+                leftLeg.rotation.x = 0; rightLeg.rotation.x = 0;
+            }
+
             let isInsideHouse = false;
             for (let obs of obstacles) {
                 if (character.position.x >= obs.minX - 1 && character.position.x <= obs.maxX + 1 &&
                     character.position.z >= obs.minZ - 1 && character.position.z <= obs.maxZ + 1 &&
                     character.position.y >= obs.minY && character.position.y < obs.maxY) {
-                    isInsideHouse = true;
-                    break;
+                    isInsideHouse = true; break;
                 }
             }
 
-            const camDistance = isInsideHouse ? 2.8 : 4.5; // Closer camera distance
+            const camDistance = isInsideHouse ? 2.8 : 4.5;
             let targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
             let targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + (isInsideHouse ? 0.3 : 0.8);
             let targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
