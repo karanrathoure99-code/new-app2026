@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Dummy Character & Level Design Prototype</title>
+    <title>3D School Uniform Dummy & Village Level Design</title>
     <style>
         body {
             margin: 0;
@@ -18,12 +18,12 @@
             top: 15px;
             left: 15px;
             color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 14px 20px;
             border-radius: 8px;
             pointer-events: none;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         #instructions span {
@@ -46,17 +46,17 @@
     <script>
         let scene, camera, renderer;
         let character;
-        let head, torso, leftArm, rightArm, leftLeg, rightLeg;
+        let leftArm, rightArm, leftLeg, rightLeg;
         let obstacles = [];
         
         // Physics & Movement variables
         let velocityY = 0;
         let gravity = 0.015;
         let isGrounded = false;
-        const moveSpeed = 0.1;
-        const jumpForce = 0.3;
+        const moveSpeed = 0.12;
+        const jumpForce = 0.35;
         
-        let keys = { w: false, a: false, s: false, d: false, space: false };
+        let keys = { w: false, a: false, s: false, d: false };
         let isMouseDown = false;
         let mouseX = 0, mouseY = 0;
         let cameraAngleX = 0, cameraAngleY = 0.5;
@@ -68,7 +68,7 @@
             // 1. Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87ceeb); // Sky blue
-            scene.fog = new THREE.FogExp2(0x87ceeb, 0.015);
+            scene.fog = new THREE.FogExp2(0x87ceeb, 0.012);
 
             // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -80,76 +80,102 @@
             document.body.appendChild(renderer.domElement);
 
             // 4. Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
             scene.add(ambientLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(20, 40, 20);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+            dirLight.position.set(40, 60, 40);
             dirLight.castShadow = true;
             scene.add(dirLight);
 
-            // 5. Create Ground
-            const groundGeo = new THREE.PlaneGeometry(100, 100);
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x4a7c59, roughness: 0.8 });
+            // 5. Create Large Ground
+            const groundGeo = new THREE.PlaneGeometry(250, 250);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x55a630, roughness: 0.85 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 6. Create Level Obstacles (Boxes to jump on / test collisions)
-            createObstacle(0, 1, -10, 4, 2, 2, 0xd9534f);
-            createObstacle(-6, 0.75, -5, 3, 1.5, 3, 0xf0ad4e);
-            createObstacle(6, 1.5, -8, 2, 3, 4, 0x5bc0de);
+            // 6. Build Level Environment (Mountains, Trees, Huts, Platforms)
+            buildEnvironment();
 
-            // 7. Build Dummy Character (~1.2 boxes height)
+            // 7. Build Detailed School-Uniform Dummy Character
             character = new THREE.Group();
             
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
-            const shirtMat = new THREE.MeshStandardMaterial({ color: 0x337ab7 });
-            const pantsMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White Dress Shirt
+            const blackPantsMat = new THREE.MeshStandardMaterial({ color: 0x111111 }); // Black Pants
+            const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x050505 }); // Black School Shoes
+            const hairMat = new THREE.MeshStandardMaterial({ color: 0x4a2e1b });     // Brown Hair
 
-            // Torso (Middle Area)
-            const torsoGeo = new THREE.BoxGeometry(0.5, 0.6, 0.3);
-            torso = new THREE.Mesh(torsoGeo, shirtMat);
-            torso.position.y = 0.9;
+            // Torso (White Shirt)
+            const torsoGeo = new THREE.BoxGeometry(0.5, 0.65, 0.3);
+            const torso = new THREE.Mesh(torsoGeo, whiteShirtMat);
+            torso.position.y = 0.95;
             torso.castShadow = true;
             character.add(torso);
 
             // Head
             const headGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
-            head = new THREE.Mesh(headGeo, skinMat);
-            head.position.y = 1.35;
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 1.45;
             head.castShadow = true;
             character.add(head);
 
-            // Left Arm
-            const armGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
-            leftArm = new THREE.Mesh(armGeo, skinMat);
-            leftArm.position.set(-0.35, 0.9, 0);
+            // Hair
+            const hairGeo = new THREE.BoxGeometry(0.37, 0.12, 0.37);
+            const hair = new THREE.Mesh(hairGeo, hairMat);
+            hair.position.set(0, 1.65, 0);
+            hair.castShadow = true;
+            character.add(hair);
+
+            // Left Arm (with fingers hint)
+            const armGeo = new THREE.BoxGeometry(0.14, 0.52, 0.14);
+            leftArm = new THREE.Mesh(armGeo, whiteShirtMat);
+            leftArm.position.set(-0.35, 0.95, 0);
             leftArm.castShadow = true;
             character.add(leftArm);
 
+            // Left Hand Fingers (Small boxes)
+            const fingerGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+            const leftHand = new THREE.Mesh(fingerGeo, skinMat);
+            leftHand.position.set(0, -0.3, 0);
+            leftArm.add(leftHand);
+
             // Right Arm
-            rightArm = new THREE.Mesh(armGeo, skinMat);
-            rightArm.position.set(0.35, 0.9, 0);
+            rightArm = new THREE.Mesh(armGeo, whiteShirtMat);
+            rightArm.position.set(0.35, 0.95, 0);
             rightArm.castShadow = true;
             character.add(rightArm);
 
-            // Left Leg
-            const legGeo = new THREE.BoxGeometry(0.18, 0.6, 0.18);
-            leftLeg = new THREE.Mesh(legGeo, pantsMat);
-            leftLeg.position.set(-0.15, 0.3, 0);
+            const rightHand = new THREE.Mesh(fingerGeo, skinMat);
+            rightHand.position.set(0, -0.3, 0);
+            rightArm.add(rightHand);
+
+            // Left Leg & Black Shoe
+            const legGeo = new THREE.BoxGeometry(0.18, 0.5, 0.18);
+            leftLeg = new THREE.Mesh(legGeo, blackPantsMat);
+            leftLeg.position.set(-0.14, 0.45, 0);
             leftLeg.castShadow = true;
             character.add(leftLeg);
 
-            // Right Leg
-            rightLeg = new THREE.Mesh(legGeo, pantsMat);
-            rightLeg.position.set(0.15, 0.3, 0);
+            const shoeGeo = new THREE.BoxGeometry(0.2, 0.12, 0.25);
+            const leftShoe = new THREE.Mesh(shoeGeo, blackShoeMat);
+            leftShoe.position.set(0, -0.3, 0.03);
+            leftLeg.add(leftShoe);
+
+            // Right Leg & Black Shoe
+            rightLeg = new THREE.Mesh(legGeo, blackPantsMat);
+            rightLeg.position.set(0.14, 0.45, 0);
             rightLeg.castShadow = true;
             character.add(rightLeg);
 
-            // Start position of character
-            character.position.set(0, 0, 5);
+            const rightShoe = new THREE.Mesh(shoeGeo, blackShoeMat);
+            rightShoe.position.set(0, -0.3, 0.03);
+            rightLeg.add(rightShoe);
+
+            // Start Position
+            character.position.set(0, 0, 8);
             scene.add(character);
 
             // Event Listeners
@@ -166,20 +192,99 @@
             window.addEventListener('mousemove', onMouseMove);
         }
 
+        // Environment Builder: Mountains, Trees, Huts & Playable Obstacles
+        function buildEnvironment() {
+            // 1. Chote Pahad (Small Mountains / Hills)
+            createMountain(-35, 4, -30, 25, 10, 25, 0x6b705c);
+            createMountain(40, 5, -40, 30, 12, 30, 0x588157);
+            createMountain(0, 3, -50, 35, 9, 20, 0x4f772d);
+
+            // 2. Ped (Trees)
+            const treePositions = [
+                [-12, -8], [12, -10], [-15, 5], [18, 8], 
+                [-25, -20], [25, -18], [-8, 20], [10, 22]
+            ];
+            treePositions.forEach(pos => createTree(pos[0], pos[1]));
+
+            // 3. Jhopdiyan (Huts)
+            createHut(-15, -12);
+            createHut(16, -15);
+            createHut(0, -25);
+
+            // 4. Jumpable Platforms / Obstacles
+            createObstacle(0, 1, -10, 5, 2, 2, 0xd9534f);
+            createObstacle(-7, 0.75, -5, 3, 1.5, 3, 0xf0ad4e);
+            createObstacle(7, 1.5, -8, 3, 3, 3, 0x5bc0de);
+        }
+
         function createObstacle(x, y, z, w, h, d, color) {
             const geo = new THREE.BoxGeometry(w, h, d);
-            const mat = new THREE.MeshStandardMaterial({ color: color });
+            const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.5 });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.set(x, y, z);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
             scene.add(mesh);
             
-            // Store bounding box data for collision detection
             obstacles.push({
                 minX: x - w / 2, maxX: x + w / 2,
                 minZ: z - d / 2, maxZ: z + d / 2,
                 topY: y + h / 2
+            });
+        }
+
+        function createMountain(x, y, z, w, h, d, color) {
+            const geo = new THREE.ConeGeometry(w / 2, h, 6);
+            const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.9 });
+            const mountain = new THREE.Mesh(geo, mat);
+            mountain.position.set(x, y + h / 2 - 1, z);
+            mountain.castShadow = true;
+            mountain.receiveShadow = true;
+            scene.add(mountain);
+        }
+
+        function createTree(x, z) {
+            // Trunk
+            const trunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 2, 6);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.set(x, 1, z);
+            trunk.castShadow = true;
+            scene.add(trunk);
+
+            // Leaves
+            const leavesGeo = new THREE.ConeGeometry(1.5, 3, 6);
+            const leavesMat = new THREE.MeshStandardMaterial({ color: 0x2d6a4f });
+            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+            leaves.position.set(x, 3, z);
+            leaves.castShadow = true;
+            scene.add(leaves);
+        }
+
+        function createHut(x, z) {
+            // Hut Walls
+            const wallGeo = new THREE.BoxGeometry(3, 2, 3);
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xd4a373 });
+            const walls = new THREE.Mesh(wallGeo, wallMat);
+            walls.position.set(x, 1, z);
+            walls.castShadow = true;
+            walls.receiveShadow = true;
+            scene.add(walls);
+
+            // Hut Roof
+            const roofGeo = new THREE.ConeGeometry(2.4, 1.8, 4);
+            const roofMat = new THREE.MeshStandardMaterial({ color: 0xbc6c25 });
+            const roof = new THREE.Mesh(roofGeo, roofMat);
+            roof.position.set(x, 2.9, z);
+            roof.rotation.y = Math.PI / 4;
+            roof.castShadow = true;
+            scene.add(roof);
+
+            // Add hut base as collision obstacle
+            obstacles.push({
+                minX: x - 1.5, maxX: x + 1.5,
+                minZ: z - 1.5, maxZ: z + 1.5,
+                topY: 2
             });
         }
 
@@ -219,20 +324,26 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Character Movement Calculation
-            let moveX = 0;
-            let moveZ = 0;
+            // Camera-relative Movement Calculation
+            let inputX = 0;
+            let inputZ = 0;
 
-            if (keys.w) moveZ -= moveSpeed;
-            if (keys.s) moveZ += moveSpeed;
-            if (keys.a) moveX -= moveSpeed;
-            if (keys.d) moveX += moveSpeed;
+            if (keys.w) inputZ -= 1;
+            if (keys.s) inputZ += 1;
+            if (keys.a) inputX -= 1;
+            if (keys.d) inputX += 1;
 
-            if (moveX !== 0 || moveZ !== 0) {
+            if (inputX !== 0 || inputZ !== 0) {
+                // Calculate movement vector based on camera angle (cameraAngleX)
+                const moveX = (inputX * Math.cos(cameraAngleX) + inputZ * Math.sin(cameraAngleX)) * moveSpeed;
+                const moveZ = (inputX * -Math.sin(cameraAngleX) + inputZ * Math.cos(cameraAngleX)) * moveSpeed;
+
                 character.position.x += moveX;
                 character.position.z += moveZ;
-                // Face towards movement direction
-                character.rotation.y = Math.atan2(moveX, moveZ);
+
+                // Automatically rotate dummy to face the exact movement direction
+                const targetRotation = Math.atan2(moveX, moveZ);
+                character.rotation.y = targetRotation;
             }
 
             // Gravity & Vertical Physics
@@ -240,14 +351,12 @@
             character.position.y += velocityY;
 
             // Surface Collision Check (Prevent sinking into ground or obstacles)
-            let targetGroundY = 0; // Default floor
+            let targetGroundY = 0;
 
             for (let obs of obstacles) {
-                // Check if character is horizontally within the box boundaries
                 if (character.position.x >= obs.minX && character.position.x <= obs.maxX &&
                     character.position.z >= obs.minZ && character.position.z <= obs.maxZ) {
-                    // If the character is falling onto or standing on top of this obstacle
-                    if (character.position.y >= obs.topY - 0.5 && character.position.y <= obs.topY + 0.5) {
+                    if (character.position.y >= obs.topY - 0.6 && character.position.y <= obs.topY + 0.6) {
                         if (obs.topY > targetGroundY) {
                             targetGroundY = obs.topY;
                         }
@@ -255,7 +364,6 @@
                 }
             }
 
-            // Ground collision resolution
             if (character.position.y <= targetGroundY) {
                 character.position.y = targetGroundY;
                 velocityY = 0;
@@ -264,7 +372,7 @@
 
             // Animations (Walking & Jumping)
             const time = Date.now() * 0.01;
-            const isMoving = (moveX !== 0 || moveZ !== 0) && isGrounded;
+            const isMoving = (inputX !== 0 || inputZ !== 0) && isGrounded;
 
             if (!isGrounded) {
                 // Jump Pose: Arms flying/raised up, legs bent
@@ -273,7 +381,7 @@
                 leftLeg.rotation.x = Math.PI * 0.3;
                 rightLeg.rotation.x = -Math.PI * 0.3;
             } else if (isMoving) {
-                // Walk/Run Animation: Swing arms and legs symmetrically
+                // Walk Animation: Swing arms and legs
                 leftArm.rotation.x = Math.sin(time) * 0.8;
                 rightArm.rotation.x = -Math.sin(time) * 0.8;
                 leftLeg.rotation.x = -Math.sin(time) * 0.8;
@@ -287,13 +395,13 @@
             }
 
             // Smooth Third-Person Camera Follow
-            const camDistance = 5;
+            const camDistance = 6;
             const targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
-            const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 0.5;
+            const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 0.8;
             const targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
 
             camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.1);
-            camera.lookAt(character.position.x, character.position.y + 0.8, character.position.z);
+            camera.lookAt(character.position.x, character.position.y + 0.9, character.position.z);
 
             renderer.render(scene, camera);
         }
