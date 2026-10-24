@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Massive Open-World Map - Static Camera & Full Map Button</title>
+    <title>Open-World Map - 10k x 10k Size & Central Gap</title>
     <style>
         body {
             margin: 0;
@@ -76,9 +76,9 @@
 </head>
 <body>
     <div id="info">
-        <strong>Massive Open-World Battleground:</strong><br>
-        Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Camera Static, Full Map Toggle Enabled</span>
+        <strong>Open-World Battleground:</strong><br>
+        Map Area: <span>10,000 x 10,000 Units</span><br>
+        Status: <span>Optimized Size & Central Gaps Loaded</span>
     </div>
 
     <!-- Full Map View Button -->
@@ -93,7 +93,7 @@
 
     <script>
         let scene, camera, renderer;
-        let mapSize = 20000;
+        let mapSize = 10000; // Updated to 10k x 10k
         let minimapCtx, minimapCanvas;
         let isFullMap = false;
 
@@ -106,8 +106,8 @@
             scene.background = new THREE.Color(0x5294e2);
 
             // 2. Camera Setup (Fixed Static View)
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 40000);
-            camera.position.set(0, 1200, 2500);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 30000);
+            camera.position.set(0, 800, 1800);
             camera.lookAt(0, 0, 0);
 
             // 3. Renderer Setup
@@ -124,13 +124,13 @@
             scene.add(ambientLight);
 
             const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
-            sunLight.position.set(2000, 4000, 2000);
+            sunLight.position.set(1500, 3000, 1500);
             sunLight.castShadow = true;
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
             sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 25000;
-            const d = 8000;
+            sunLight.shadow.camera.far = 18000;
+            const d = 5000;
             sunLight.shadow.camera.left = -d;
             sunLight.shadow.camera.right = d;
             sunLight.shadow.camera.top = d;
@@ -138,15 +138,15 @@
             scene.add(sunLight);
 
             // 5. Endless Ocean Surrounding Outside
-            const oceanGeo = new THREE.PlaneGeometry(80000, 80000);
+            const oceanGeo = new THREE.PlaneGeometry(50000, 50000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
             ocean.rotation.x = -Math.PI / 2;
             ocean.position.y = -200;
             scene.add(ocean);
 
-            // 6. Massive Terrain Ground
-            const segments = 350;
+            // 6. Terrain Ground (10k x 10k with proper spacing and gaps)
+            const segments = 250;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
             
@@ -156,14 +156,18 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                let height = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220) 
-                           + Math.abs(Math.sin(vx * 0.004) * Math.cos(vy * 0.004) * 150) + 15;
+                // Gentle rolling hills with a clear central valley/gap
+                let centerDist = Math.sqrt(vx*vx + vy*vy);
+                let heightFactor = centerDist < 2500 ? 0.3 : 1.0; // Flatter central area with gaps
+
+                let height = (Math.abs(Math.sin(vx * 0.002) * Math.cos(vy * 0.002) * 120) 
+                           + Math.abs(Math.sin(vx * 0.008) * Math.sin(vy * 0.008) * 60) + 10) * heightFactor;
 
                 let distFromCenter = Math.max(Math.abs(vx), Math.abs(vy));
-                let borderThreshold = halfSize - 2500;
+                let borderThreshold = halfSize - 1500;
                 if (distFromCenter > borderThreshold) {
-                    let factor = (distFromCenter - borderThreshold) / (2500);
-                    height += Math.pow(factor, 2) * 1200;
+                    let factor = (distFromCenter - borderThreshold) / (1500);
+                    height += Math.pow(factor, 2) * 800;
                 }
 
                 posAttr.setZ(i, height);
@@ -176,19 +180,16 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 7. Large Inner Hills
-            createLargeHill(1500, 1500, 1200, 450);
-            createLargeHill(-2000, 1800, 1400, 500);
-            createLargeHill(1800, -2000, 1300, 480);
-            createLargeHill(-1600, -1600, 1500, 520);
-            createLargeHill(0, 2500, 1600, 550);
-            createLargeHill(-2500, 0, 1400, 480);
-            createLargeHill(2500, 0, 1400, 480);
+            // 7. Well-spaced Hills with gaps around the edges
+            createLargeHill(1000, 1000, 800, 300);
+            createLargeHill(-1200, 1000, 900, 320);
+            createLargeHill(1000, -1200, 850, 310);
+            createLargeHill(-1000, -1000, 900, 330);
 
-            // 8. Dense Forests
-            for (let i = 0; i < 800; i++) {
-                let tx = (Math.random() - 0.5) * (mapSize - 4000);
-                let tz = (Math.random() - 0.5) * (mapSize - 4000);
+            // 8. Scattered Forests
+            for (let i = 0; i < 400; i++) {
+                let tx = (Math.random() - 0.5) * (mapSize - 2000);
+                let tz = (Math.random() - 0.5) * (mapSize - 2000);
                 createRealisticTree(tx, tz);
             }
 
@@ -198,30 +199,29 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        // Toggle Full Map View (Top-Down Bird's Eye View)
         function toggleFullMap() {
             isFullMap = !isFullMap;
             const btn = document.getElementById('map-btn');
             if (isFullMap) {
-                camera.position.set(0, 14000, 0); // High above looking straight down
+                camera.position.set(0, 8000, 0); 
                 camera.lookAt(0, 0, 0);
                 btn.innerHTML = "🗺️ Normal View";
             } else {
-                camera.position.set(0, 1200, 2500); // Back to normal static position
+                camera.position.set(0, 800, 1800); 
                 camera.lookAt(0, 0, 0);
                 btn.innerHTML = "🗺️ Full Map View";
             }
         }
 
         function createLargeHill(x, z, radius, height) {
-            const hillGeo = new THREE.ConeGeometry(radius, height, 16, 8, true);
+            const hillGeo = new THREE.ConeGeometry(radius, height, 14, 6, true);
             const pos = hillGeo.attributes.position;
             for (let i = 0; i < pos.count; i++) {
                 let vx = pos.getX(i);
                 let vy = pos.getY(i);
                 let vz = pos.getZ(i);
                 if (vy > 0) {
-                    let noise = Math.sin(vx * 0.05) * Math.cos(vz * 0.05) * 40 + (Math.random() - 0.5) * 30;
+                    let noise = Math.sin(vx * 0.05) * Math.cos(vz * 0.05) * 25 + (Math.random() - 0.5) * 20;
                     pos.setX(i, vx + noise);
                     pos.setZ(i, vz + noise);
                 }
@@ -238,14 +238,14 @@
 
         function createRealisticTree(x, z) {
             const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.2, 14, 8), trunkMat);
-            trunk.position.set(x, 25, z); 
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.8, 10, 8), trunkMat);
+            trunk.position.set(x, 15, z); 
             trunk.castShadow = true;
             scene.add(trunk);
 
             const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
-            const top = new THREE.Mesh(new THREE.SphereGeometry(7, 8, 8), foliageMat);
-            top.position.set(x, 33, z);
+            const top = new THREE.Mesh(new THREE.SphereGeometry(5, 8, 8), foliageMat);
+            top.position.set(x, 21, z);
             top.castShadow = true;
             scene.add(top);
         }
@@ -278,8 +278,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-
-            // Camera is now completely static (stopped rotating) unless Full Map View is toggled
             drawMinimap();
             renderer.render(scene, camera);
         }
