@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Massive Open-World Map - Fixed Terrain & Raised Boundaries</title>
+    <title>Massive Open-World Map - Dry Terrain Fix</title>
     <style>
         body {
             margin: 0;
@@ -57,7 +57,7 @@
     <div id="info">
         <strong>Massive Open-World Battleground:</strong><br>
         Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Terrain Stabilized, Raised Borders & Bumpy Land Loaded</span>
+        Status: <span>Dry Solid Terrain & Raised Borders Loaded</span>
     </div>
 
     <div id="minimap-container">
@@ -86,7 +86,7 @@
             camera.position.set(0, 1500, 3000);
             camera.lookAt(0, 0, 0);
 
-            // 3. Renderer Setup (Precision fix to prevent surface flickering / z-fighting)
+            // 3. Renderer Setup
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
@@ -113,15 +113,15 @@
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside (Far away)
+            // 5. Endless Ocean Surrounding Outside (Deep below ground level)
             const oceanGeo = new THREE.PlaneGeometry(60000, 60000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
             ocean.rotation.x = -Math.PI / 2;
-            ocean.position.y = -50;
+            ocean.position.y = -200; // Safely pushed deep down
             scene.add(ocean);
 
-            // 6. Massive Bumpy & Sloped Terrain Ground with Raised Boundary Edges
+            // 6. Massive Solid Terrain Ground (Ensuring zero negative height dips)
             const segments = 300;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
@@ -130,19 +130,19 @@
 
             for (let i = 0; i < posAttr.count; i++) {
                 let vx = posAttr.getX(i);
-                let vy = posAttr.getY(i); // In plane geometry local space, Y is Z in world space before rotation
+                let vy = posAttr.getY(i);
                 
-                // Natural bumpy and varied terrain across the map
-                let height = Math.sin(vx * 0.0015) * Math.cos(vy * 0.0015) * 250 
-                           + Math.sin(vx * 0.006) * Math.sin(vy * 0.006) * 60 
-                           + Math.cos(vx * 0.015) * 20;
+                // Positive rolling hills (strictly above base level)
+                let height = Math.abs(Math.sin(vx * 0.0015) * Math.cos(vy * 0.0015) * 180) 
+                           + Math.abs(Math.sin(vx * 0.006) * Math.sin(vy * 0.006) * 45) 
+                           + 15; // Base offset to keep entire map completely dry and solid
 
-                // Raise the edges/boundaries high up like mountain walls seamlessly
+                // Raise the edges/boundaries high up like mountain walls
                 let distFromCenter = Math.max(Math.abs(vx), Math.abs(vy));
                 let borderThreshold = halfSize - 2500;
                 if (distFromCenter > borderThreshold) {
                     let factor = (distFromCenter - borderThreshold) / (2500);
-                    height += Math.pow(factor, 2) * 900; // Smooth elevation to form raised border
+                    height += Math.pow(factor, 2) * 1000;
                 }
 
                 posAttr.setZ(i, height);
@@ -155,7 +155,7 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 7. Scattered Trees across the stable terrain
+            // 7. Scattered Trees
             for (let i = 0; i < 300; i++) {
                 let tx = (Math.random() - 0.5) * (mapSize - 4000);
                 let tz = (Math.random() - 0.5) * (mapSize - 4000);
@@ -172,13 +172,13 @@
         function createRealisticTree(x, z) {
             const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.2, 12, 8), trunkMat);
-            trunk.position.set(x, 15, z); // Adjusted baseline
+            trunk.position.set(x, 25, z); // Adjusted for higher stable terrain base
             trunk.castShadow = true;
             scene.add(trunk);
 
             const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
             const top = new THREE.Mesh(new THREE.SphereGeometry(6, 8, 8), foliageMat);
-            top.position.set(x, 22, z);
+            top.position.set(x, 32, z);
             top.castShadow = true;
             scene.add(top);
         }
