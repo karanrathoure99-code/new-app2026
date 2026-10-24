@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Massive Open-World Map - Smooth Natural Terrain</title>
+    <title>Massive Open-World Map - Blocked Line of Sight & Dense Hills</title>
     <style>
         body {
             margin: 0;
@@ -57,7 +57,7 @@
     <div id="info">
         <strong>Massive Open-World Battleground:</strong><br>
         Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Smooth Rolling Terrain & Raised Borders Loaded</span>
+        Status: <span>Line-of-Sight Blocked by Hills & Dense Forests</span>
     </div>
 
     <div id="minimap-container">
@@ -79,11 +79,12 @@
             // 1. Scene & Sky Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x5294e2);
-            scene.fog = new THREE.FogExp2(0x75aff7, 0.00015);
+            // Thick atmospheric fog to block visibility across the massive map
+            scene.fog = new THREE.FogExp2(0x75aff7, 0.00035);
 
-            // 2. Camera Setup
-            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 30000);
-            camera.position.set(0, 1500, 3000);
+            // 2. Camera Setup (Lower immersive angle to feel the scale)
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 15000);
+            camera.position.set(0, 400, 1000);
             camera.lookAt(0, 0, 0);
 
             // 3. Renderer Setup
@@ -105,7 +106,7 @@
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
             sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 15000;
+            sunLight.shadow.camera.far = 12000;
             const d = 6000;
             sunLight.shadow.camera.left = -d;
             sunLight.shadow.camera.right = d;
@@ -113,7 +114,7 @@
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside (Far away)
+            // 5. Endless Ocean Surrounding Outside
             const oceanGeo = new THREE.PlaneGeometry(60000, 60000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
@@ -121,8 +122,8 @@
             ocean.position.y = -200;
             scene.add(ocean);
 
-            // 6. Smooth Rolling Terrain Ground (No pits/holes, only gentle hills and flat areas)
-            const segments = 300;
+            // 6. Massive Terrain Ground with Inner Hills & Plateaus (Blocking Sightlines)
+            const segments = 350;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
             
@@ -132,15 +133,16 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                // Purely positive gentle rolling hills (no negative dips or potholes)
-                let height = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 80) + 10;
+                // Varied rolling hills + prominent inner hills/ridges to block vision
+                let height = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220) 
+                           + Math.abs(Math.sin(vx * 0.004) * Math.cos(vy * 0.004) * 150) + 15;
 
-                // Raise the edges/boundaries smoothly to form raised borders
+                // Raise the edges/boundaries high up
                 let distFromCenter = Math.max(Math.abs(vx), Math.abs(vy));
                 let borderThreshold = halfSize - 2500;
                 if (distFromCenter > borderThreshold) {
                     let factor = (distFromCenter - borderThreshold) / (2500);
-                    height += Math.pow(factor, 2) * 1000;
+                    height += Math.pow(factor, 2) * 1200;
                 }
 
                 posAttr.setZ(i, height);
@@ -153,8 +155,15 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 7. Scattered Trees
-            for (let i = 0; i < 300; i++) {
+            // 7. Add Large Inner Hills / Rock Formations to block visibility across the map
+            createLargeHill(1500, 1500, 1200, 450);
+            createLargeHill(-2000, 1800, 1400, 500);
+            createLargeHill(1800, -2000, 1300, 480);
+            createLargeHill(-1600, -1600, 1500, 520);
+            createLargeHill(0, 2500, 1600, 550);
+
+            // 8. Dense Forests (Lots of trees to block lines of sight)
+            for (let i = 0; i < 800; i++) {
                 let tx = (Math.random() - 0.5) * (mapSize - 4000);
                 let tz = (Math.random() - 0.5) * (mapSize - 4000);
                 createRealisticTree(tx, tz);
@@ -167,16 +176,40 @@
             window.addEventListener('resize', onWindowResize);
         }
 
+        // Create massive inner hills to obstruct view from one end to another
+        function createLargeHill(x, z, radius, height) {
+            const hillGeo = new THREE.ConeGeometry(radius, height, 16, 8, true);
+            const pos = hillGeo.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                let vx = pos.getX(i);
+                let vy = pos.getY(i);
+                let vz = pos.getZ(i);
+                if (vy > 0) {
+                    let noise = Math.sin(vx * 0.05) * Math.cos(vz * 0.05) * 40 + (Math.random() - 0.5) * 30;
+                    pos.setX(i, vx + noise);
+                    pos.setZ(i, vz + noise);
+                }
+            }
+            hillGeo.computeVertexNormals();
+
+            const hillMat = new THREE.MeshStandardMaterial({ color: 0x434c40, roughness: 0.95, flatShading: true });
+            const hillMesh = new THREE.Mesh(hillGeo, hillMat);
+            hillMesh.position.set(x, height / 2, z);
+            hillMesh.castShadow = true;
+            hillMesh.receiveShadow = true;
+            scene.add(hillMesh);
+        }
+
         function createRealisticTree(x, z) {
             const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.2, 12, 8), trunkMat);
-            trunk.position.set(x, 20, z); 
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.2, 14, 8), trunkMat);
+            trunk.position.set(x, 25, z); 
             trunk.castShadow = true;
             scene.add(trunk);
 
             const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
-            const top = new THREE.Mesh(new THREE.SphereGeometry(6, 8, 8), foliageMat);
-            top.position.set(x, 27, z);
+            const top = new THREE.Mesh(new THREE.SphereGeometry(7, 8, 8), foliageMat);
+            top.position.set(x, 33, z);
             top.castShadow = true;
             scene.add(top);
         }
@@ -210,10 +243,11 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            let time = Date.now() * 0.0001;
-            camera.position.x = Math.sin(time) * 5500;
-            camera.position.z = Math.cos(time) * 5500;
-            camera.lookAt(0, 200, 0);
+            // Cinematic panoramic movement behind the hills
+            let time = Date.now() * 0.00008;
+            camera.position.x = Math.sin(time) * 4500;
+            camera.position.z = Math.cos(time) * 4500;
+            camera.lookAt(0, 100, 0);
 
             drawMinimap();
             renderer.render(scene, camera);
