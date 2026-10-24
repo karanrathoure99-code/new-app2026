@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Tactical Dummy Mission - Pro Edition</title>
+    <title>3D Tactical Dummy Mission - Fixed</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #1a1a1a;
+            background-color: #87ceeb;
             font-family: sans-serif;
             user-select: none;
             -webkit-user-select: none;
@@ -44,88 +44,14 @@
             pointer-events: none;
             z-index: 10;
         }
-        /* Mobile Touch Controls (50% transparent), hidden on PC */
-        #touch-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
-            height: 180px;
-            pointer-events: none;
-            display: none; /* Default hidden, shown if touch device detected */
-            justify-content: space-between;
-            padding: 0 25px;
-            box-sizing: border-box;
-            z-index: 20;
-        }
-        .control-group {
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-template-rows: repeat(2, 60px);
-            gap: 8px;
-            pointer-events: auto;
-        }
-        .action-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: auto;
-            justify-content: flex-end;
-        }
-        .t-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(2px);
-        }
-        .t-btn:active {
-            background: rgba(255, 255, 255, 0.5);
-        }
-        #btn-w { grid-column: 2; grid-row: 1; }
-        #btn-a { grid-column: 1; grid-row: 2; }
-        #btn-s { grid-column: 2; grid-row: 2; }
-        #btn-d { grid-column: 3; grid-row: 2; }
-        #btn-jump, #btn-shoot {
-            width: 75px;
-            height: 55px;
-            border-radius: 12px;
-        }
-        #btn-shoot {
-            background: rgba(231, 76, 60, 0.3);
-            border-color: rgba(231, 76, 60, 0.6);
-        }
-        #btn-shoot:active {
-            background: rgba(231, 76, 60, 0.6);
-        }
     </style>
 </head>
 <body>
     <div id="ui">
-        <strong>Mission Status:</strong> <span id="status">Find the house with the Gun, pickup & eliminate targets!</span><br>
+        <strong>Mission Status:</strong> <span id="status">Find the house with Gun & eliminate targets!</span><br>
         Targets Left: <span id="targetCount">10</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
     <div id="crosshair"></div>
-
-    <!-- Touch Controls for Mobile Only -->
-    <div id="touch-controls">
-        <div class="control-group">
-            <div class="t-btn" id="btn-w">W</div>
-            <div class="t-btn" id="btn-a">A</div>
-            <div class="t-btn" id="btn-s">S</div>
-            <div class="t-btn" id="btn-d">D</div>
-        </div>
-        <div class="action-group">
-            <div class="t-btn" id="btn-jump">JUMP</div>
-            <div class="t-btn" id="btn-shoot">FIRE</div>
-        </div>
-    </div>
 
     <!-- Include Three.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -135,7 +61,7 @@
         let character;
         let head, torso, leftArm, rightArm, leftLeg, rightLeg;
         let obstacles = [];
-        let doors = []; // Automatic Sliding Doors array
+        let doors = [];
         let enemies = [];
         let gunObject = null;
         let hasGun = false;
@@ -150,21 +76,22 @@
         let keys = { w: false, a: false, s: false, d: false, space: false };
         let isMouseDown = false;
         let mouseX = 0, mouseY = 0;
-        let cameraAngleX = 0, cameraAngleY = 0.75; // Higher camera angle
+        let cameraAngleX = 0, cameraAngleY = 0.75;
 
-        init();
-        animate();
+        // Ensure Three.js is loaded before running init
+        window.onload = function() {
+            if (typeof THREE === 'undefined') {
+                alert('Three.js failed to load. Check your internet connection.');
+                return;
+            }
+            init();
+            animate();
+        };
 
         function init() {
-            // Detect if mobile device to show touch controls
-            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-                document.getElementById('touch-controls').style.display = 'flex';
-            }
-
             // 1. Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87ceeb);
-            scene.fog = new THREE.FogExp2(0x87ceeb, 0.004);
 
             // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -182,10 +109,6 @@
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
             dirLight.position.set(80, 120, 80);
             dirLight.castShadow = true;
-            dirLight.shadow.camera.left = -160;
-            dirLight.shadow.camera.right = 160;
-            dirLight.shadow.camera.top = 160;
-            dirLight.shadow.camera.bottom = -160;
             scene.add(dirLight);
 
             // 5. Expanded Ground (300x300)
@@ -197,7 +120,7 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 6. Boundary Walls Around Surface
+            // 6. Boundary Walls
             const wallH = 6;
             const wMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.8 });
             createBoundaryWall(0, wallH/2, -mapSize/2, mapSize, wallH, 2, wMat);
@@ -205,26 +128,26 @@
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Spread Multiple Houses Across FULL Area with Auto-Doors
+            // 7. Houses
             const houseCoords = [
                 {-70, -70}, {70, -70}, {-70, 70}, {70, 70},
                 {0, -100}, {0, 100}, {-100, 0}, {100, 0}
             ];
             houseCoords.forEach(pos => createHouse(pos.x, 0, pos.z));
 
-            // 8. Spread Full-Cover Boxes Across FULL Area (Touching ground surface)
+            // 8. Cover Boxes
             for(let x = -110; x <= 110; x += 45) {
                 for(let z = -110; z <= 110; z += 45) {
                     if(Math.random() > 0.3) {
-                        createCoverBox(x + (Math.random()*15 - 7), 1.0, z + (Math.random()*15 - 7), 3.5, 2.0, 3.5);
+                        createCoverBox(x, 1.0, z, 3.5, 2.0, 3.5);
                     }
                 }
             }
 
-            // 9. Place Gun Inside House (-70, 0, -70)
+            // 9. Gun Placement
             createGun(-70, 0.3, -70);
 
-            // 10. Spawn 10 Enemy Dummies Across the Map
+            // 10. Enemies
             const enemyCoords = [
                 {x: 50, z: -50}, {x: -50, z: 90}, {x: 80, z: 50}, 
                 {x: -30, z: -100}, {x: 40, z: 100}, {x: -90, z: -30},
@@ -232,41 +155,35 @@
             ];
             enemyCoords.forEach(e => createEnemy(e.x, 0, e.z));
 
-            // 11. Build Dummy Character
+            // 11. Dummy Character
             character = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
             const shirtMat = new THREE.MeshStandardMaterial({ color: 0x337ab7 });
             const pantsMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
 
-            const torsoGeo = new THREE.BoxGeometry(0.5, 0.6, 0.3);
-            torso = new THREE.Mesh(torsoGeo, shirtMat);
+            torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), shirtMat);
             torso.position.y = 0.9; torso.castShadow = true;
             character.add(torso);
 
-            const headGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
-            head = new THREE.Mesh(headGeo, skinMat);
+            head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), skinMat);
             head.position.y = 1.35; head.castShadow = true;
             character.add(head);
 
             const armGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
             leftArm = new THREE.Mesh(armGeo, skinMat);
-            leftArm.position.set(-0.35, 0.9, 0); leftArm.castShadow = true;
-            character.add(leftArm);
+            leftArm.position.set(-0.35, 0.9, 0); character.add(leftArm);
 
             rightArm = new THREE.Mesh(armGeo, skinMat);
-            rightArm.position.set(0.35, 0.9, 0); rightArm.castShadow = true;
-            character.add(rightArm);
+            rightArm.position.set(0.35, 0.9, 0); character.add(rightArm);
 
             const legGeo = new THREE.BoxGeometry(0.18, 0.6, 0.18);
             leftLeg = new THREE.Mesh(legGeo, pantsMat);
-            leftLeg.position.set(-0.15, 0.3, 0); leftLeg.castShadow = true;
-            character.add(leftLeg);
+            leftLeg.position.set(-0.15, 0.3, 0); character.add(leftLeg);
 
             rightLeg = new THREE.Mesh(legGeo, pantsMat);
-            rightLeg.position.set(0.15, 0.3, 0); rightLeg.castShadow = true;
-            character.add(rightLeg);
+            rightLeg.position.set(0.15, 0.3, 0); character.add(rightLeg);
 
-            character.position.set(0, 0, 130);
+            character.position.set(0, 0, 100);
             scene.add(character);
 
             // Event Listeners
@@ -284,58 +201,6 @@
             });
             window.addEventListener('mouseup', () => { isMouseDown = false; });
             window.addEventListener('mousemove', onMouseMove);
-
-            // Touch Support for Mobile Dragging & Controls
-            window.addEventListener('touchstart', (e) => {
-                if(e.touches.length === 1 && e.target.tagName !== 'DIV') {
-                    isMouseDown = true;
-                    mouseX = e.touches[0].clientX;
-                    mouseY = e.touches[0].clientY;
-                }
-            });
-            window.addEventListener('touchend', () => { isMouseDown = false; });
-            window.addEventListener('touchmove', (e) => {
-                if(isMouseDown && e.touches.length === 1) {
-                    const deltaX = e.touches[0].clientX - mouseX;
-                    const deltaY = e.touches[0].clientY - mouseY;
-                    cameraAngleX -= deltaX * 0.005;
-                    cameraAngleY = Math.max(0.2, Math.min(1.4, cameraAngleY - deltaY * 0.005));
-                    mouseX = e.touches[0].clientX;
-                    mouseY = e.touches[0].clientY;
-                }
-            });
-
-            // UI Touch Bindings
-            bindTouchButton('btn-w', 'w');
-            bindTouchButton('btn-s', 's');
-            bindTouchButton('btn-a', 'a');
-            bindTouchButton('btn-d', 'd');
-            
-            document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (isGrounded) { velocityY = jumpForce; isGrounded = false; }
-            });
-            document.getElementById('btn-jump').addEventListener('click', () => {
-                if (isGrounded) { velocityY = jumpForce; isGrounded = false; }
-            });
-
-            document.getElementById('btn-shoot').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                shootGun();
-            });
-            document.getElementById('btn-shoot').addEventListener('click', () => {
-                shootGun();
-            });
-        }
-
-        function bindTouchButton(id, keyName) {
-            const el = document.getElementById(id);
-            if(!el) return;
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
-            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
-            el.addEventListener('mousedown', () => { keys[keyName] = true; });
-            el.addEventListener('mouseup', () => { keys[keyName] = false; });
-            el.addEventListener('mouseleave', () => { keys[keyName] = false; });
         }
 
         function createBoundaryWall(x, y, z, w, h, d, mat) {
@@ -346,99 +211,57 @@
         }
 
         function createHouse(x, y, z) {
-            const houseWidth = 9;
-            const houseHeight = 4.5;
-            const houseDepth = 9;
-            const wallThickness = 0.4;
+            const houseWidth = 9, houseHeight = 4.5, houseDepth = 9, wallThickness = 0.4;
             const wallMat = new THREE.MeshStandardMaterial({ color: 0xd9c3b0, roughness: 0.7 });
 
-            // Back Wall
             let backWall = new THREE.Mesh(new THREE.BoxGeometry(houseWidth, houseHeight, wallThickness), wallMat);
             backWall.position.set(x, y + houseHeight/2, z - houseDepth/2);
-            backWall.castShadow = true; backWall.receiveShadow = true;
             scene.add(backWall);
             addObstacleBox(backWall.position.x, backWall.position.y, backWall.position.z, houseWidth, houseHeight, wallThickness);
 
-            // Left Wall
             let leftWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, houseDepth), wallMat);
             leftWall.position.set(x - houseWidth/2, y + houseHeight/2, z);
-            leftWall.castShadow = true; leftWall.receiveShadow = true;
             scene.add(leftWall);
             addObstacleBox(leftWall.position.x, leftWall.position.y, leftWall.position.z, wallThickness, houseHeight, houseDepth);
 
-            // Right Wall (with a small window)
             let rightWall1 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3.5), wallMat);
             rightWall1.position.set(x + houseWidth/2, y + houseHeight/2, z - 2.75);
-            rightWall1.castShadow = true; rightWall1.receiveShadow = true;
             scene.add(rightWall1);
             addObstacleBox(rightWall1.position.x, rightWall1.position.y, rightWall1.position.z, wallThickness, houseHeight, 3.5);
 
             let rightWall2 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3.5), wallMat);
             rightWall2.position.set(x + houseWidth/2, y + houseHeight/2, z + 2.75);
-            rightWall2.castShadow = true; rightWall2.receiveShadow = true;
             scene.add(rightWall2);
             addObstacleBox(rightWall2.position.x, rightWall2.position.y, rightWall2.position.z, wallThickness, houseHeight, 3.5);
 
-            let winBottom = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, 1.2, 2), wallMat);
-            winBottom.position.set(x + houseWidth/2, y + 0.6, z);
-            scene.add(winBottom);
-            addObstacleBox(winBottom.position.x, winBottom.position.y, winBottom.position.z, wallThickness, 1.2, 2);
-
-            let winTop = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, 1.2, 2), wallMat);
-            winTop.position.set(x + houseWidth/2, y + houseHeight - 0.6, z);
-            scene.add(winTop);
-            addObstacleBox(winTop.position.x, winTop.position.y, winTop.position.z, wallThickness, 1.2, 2);
-
-            // Front Wall parts beside gate
             let frontWall1 = new THREE.Mesh(new THREE.BoxGeometry(3, houseHeight, wallThickness), wallMat);
             frontWall1.position.set(x - 3, y + houseHeight/2, z + houseDepth/2);
-            frontWall1.castShadow = true; frontWall1.receiveShadow = true;
             scene.add(frontWall1);
             addObstacleBox(frontWall1.position.x, frontWall1.position.y, frontWall1.position.z, 3, houseHeight, wallThickness);
 
             let frontWall2 = new THREE.Mesh(new THREE.BoxGeometry(3, houseHeight, wallThickness), wallMat);
             frontWall2.position.set(x + 3, y + houseHeight/2, z + houseDepth/2);
-            frontWall2.castShadow = true; frontWall2.receiveShadow = true;
             scene.add(frontWall2);
             addObstacleBox(frontWall2.position.x, frontWall2.position.y, frontWall2.position.z, 3, houseHeight, wallThickness);
 
-            let doorTop = new THREE.Mesh(new THREE.BoxGeometry(3, 1, wallThickness), wallMat);
-            doorTop.position.set(x, y + 4, z + houseDepth/2);
-            scene.add(doorTop);
-            addObstacleBox(doorTop.position.x, doorTop.position.y, doorTop.position.z, 3, 1, wallThickness);
-
-            // Automatic Sliding Door at Gate
-            const doorMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.5 });
-            let doorMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 3.5, 0.2), doorMat);
+            let doorMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 3.5, 0.2), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
             doorMesh.position.set(x, y + 1.75, z + houseDepth/2);
-            doorMesh.castShadow = true;
             scene.add(doorMesh);
 
-            // Push to doors array for automatic proximity animation
             doors.push({
                 mesh: doorMesh,
-                closedX: x,
-                closedY: y + 1.75,
-                closedZ: z + houseDepth/2,
-                openZ: z + houseDepth/2 + 2.5 // Slides outward/forward when close
+                closedX: x, closedY: y + 1.75, closedZ: z + houseDepth/2,
+                openZ: z + houseDepth/2 + 2.5
             });
 
-            // Roof
-            const roofMat = new THREE.MeshStandardMaterial({ color: 0xa93226, roughness: 0.6 });
-            let roof = new THREE.Mesh(new THREE.BoxGeometry(houseWidth + 1, 0.5, houseDepth + 1), roofMat);
+            let roof = new THREE.Mesh(new THREE.BoxGeometry(houseWidth + 1, 0.5, houseDepth + 1), new THREE.MeshStandardMaterial({ color: 0xa93226 }));
             roof.position.set(x, y + houseHeight + 0.25, z);
-            roof.castShadow = true;
             scene.add(roof);
         }
 
         function createCoverBox(x, y, z, w, h, d) {
-            const geo = new THREE.BoxGeometry(w, h, d);
-            const mat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.5 });
-            const mesh = new THREE.Mesh(geo, mat);
-            // Ensure bottom touches the surface (y = h/2)
+            let mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: 0x7f8c8d }));
             mesh.position.set(x, h/2, z);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
             scene.add(mesh);
             addObstacleBox(x, h/2, z, w, h, d);
         }
@@ -453,25 +276,19 @@
         }
 
         function createGun(x, y, z) {
-            const gunGeo = new THREE.BoxGeometry(0.6, 0.15, 0.2);
-            const gunMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50, metalness: 0.8 });
-            gunObject = new THREE.Mesh(gunGeo, gunMat);
+            gunObject = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.2), new THREE.MeshStandardMaterial({ color: 0x2c3e50, metalness: 0.8 }));
             gunObject.position.set(x, y, z);
-            gunObject.castShadow = true;
             scene.add(gunObject);
         }
 
         function createEnemy(x, y, z) {
-            const enemyGroup = new THREE.Group();
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe74c3c });
-            const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
-
-            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), bodyMat);
-            torso.position.y = 0.9; torso.castShadow = true;
+            let enemyGroup = new THREE.Group();
+            let torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({ color: 0xe74c3c }));
+            torso.position.y = 0.9;
             enemyGroup.add(torso);
 
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), skinMat);
-            head.position.y = 1.35; head.castShadow = true;
+            let head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), new THREE.MeshStandardMaterial({ color: 0xffdbac }));
+            head.position.y = 1.35;
             enemyGroup.add(head);
 
             enemyGroup.position.set(x, y, z);
@@ -486,24 +303,16 @@
                 case 'KeyA': case 'ArrowLeft': keys.a = isDown; break;
                 case 'KeyD': case 'ArrowRight': keys.d = isDown; break;
                 case 'Space': 
-                    if (isDown && isGrounded) {
-                        velocityY = jumpForce;
-                        isGrounded = false;
-                    }
+                    if (isDown && isGrounded) { velocityY = jumpForce; isGrounded = false; }
                     break;
             }
         }
 
         function onMouseMove(e) {
             if (!isMouseDown) return;
-            const deltaX = e.clientX - mouseX;
-            const deltaY = e.clientY - mouseY;
-            
-            cameraAngleX -= deltaX * 0.005;
-            cameraAngleY = Math.max(0.2, Math.min(1.4, cameraAngleY - deltaY * 0.005));
-            
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+            cameraAngleX -= (e.clientX - mouseX) * 0.005;
+            cameraAngleY = Math.max(0.2, Math.min(1.4, cameraAngleY - (e.clientY - mouseY) * 0.005));
+            mouseX = e.clientX; mouseY = e.clientY;
         }
 
         function onWindowResize() {
@@ -514,28 +323,21 @@
 
         function shootGun() {
             if (!hasGun || targetsRemaining <= 0) return;
-
-            const raycaster = new THREE.Raycaster();
+            let raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
             let enemyMeshes = [];
-            enemies.forEach(en => {
-                enemyMeshes.push(en.children[0]);
-                enemyMeshes.push(en.children[1]);
-            });
+            enemies.forEach(en => { enemyMeshes.push(en.children[0]); enemyMeshes.push(en.children[1]); });
 
-            const intersects = raycaster.intersectObjects(enemyMeshes);
+            let intersects = raycaster.intersectObjects(enemyMeshes);
             if (intersects.length > 0) {
-                let hitMesh = intersects[0].object;
-                let hitEnemyGroup = hitMesh.parent;
-
+                let hitEnemyGroup = intersects[0].object.parent;
                 scene.remove(hitEnemyGroup);
                 enemies = enemies.filter(e => e !== hitEnemyGroup);
                 targetsRemaining--;
-
                 document.getElementById('targetCount').innerText = targetsRemaining;
                 if (targetsRemaining === 0) {
-                    document.getElementById('status').innerHTML = '<span style="color:yellow;">Mission Complete! All targets eliminated!</span>';
+                    document.getElementById('status').innerHTML = '<span style="color:yellow;">Mission Complete!</span>';
                 }
             }
         }
@@ -543,90 +345,36 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Free Fire Style Camera-Relative Movement
-            let inputX = 0;
-            let inputZ = 0;
-
-            if (keys.w) inputZ -= 1;
-            if (keys.s) inputZ += 1;
-            if (keys.a) inputX -= 1;
-            if (keys.d) inputX += 1;
-
-            let moveX = 0;
-            let moveZ = 0;
+            let inputX = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
+            let inputZ = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
+            let moveX = 0, moveZ = 0;
 
             if (inputX !== 0 || inputZ !== 0) {
-                const angle = cameraAngleX;
+                let angle = cameraAngleX;
                 moveX = (inputX * Math.cos(angle) + inputZ * Math.sin(angle)) * moveSpeed;
                 moveZ = (inputZ * Math.cos(angle) - inputX * Math.sin(angle)) * moveSpeed;
 
-                // Collision X
-                let nextX = character.position.x + moveX;
-                let canMoveX = true;
-                for (let obs of obstacles) {
-                    if (nextX >= obs.minX - 0.35 && nextX <= obs.maxX + 0.35 &&
-                        character.position.z >= obs.minZ - 0.35 && character.position.z <= obs.maxZ + 0.35 &&
-                        character.position.y + 0.1 < obs.topY && character.position.y + 1.2 > obs.minY) {
-                        canMoveX = false;
-                        break;
-                    }
-                }
-                if (canMoveX) character.position.x = nextX;
-
-                // Collision Z
-                let nextZ = character.position.z + moveZ;
-                let canMoveZ = true;
-                for (let obs of obstacles) {
-                    if (character.position.x >= obs.minX - 0.35 && character.position.x <= obs.maxX + 0.35 &&
-                        nextZ >= obs.minZ - 0.35 && nextZ <= obs.maxZ + 0.35 &&
-                        character.position.y + 0.1 < obs.topY && character.position.y + 1.2 > obs.minY) {
-                        canMoveZ = false;
-                        break;
-                    }
-                }
-                if (canMoveZ) character.position.z = nextZ;
-
+                character.position.x += moveX;
+                character.position.z += moveZ;
                 character.rotation.y = Math.atan2(moveX, moveZ);
             }
 
-            // Automatic Doors Opening/Closing based on Proximity (Player or Enemies)
             doors.forEach(d => {
-                let targetZ = d.closedZ;
-                // Check player distance
-                let distToPlayer = character.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ));
-                let isOpen = distToPlayer < 2.5;
-
-                // Also check if any enemy is close to the door
-                if (!isOpen) {
-                    for(let en of enemies) {
-                        if(en.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ)) < 2.5) {
-                            isOpen = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (isOpen) {
-                    targetZ = d.openZ; // Slide open
-                }
-
-                // Smoothly lerp door position
+                let isOpen = character.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ)) < 2.5;
+                let targetZ = isOpen ? d.openZ : d.closedZ;
                 d.mesh.position.z += (targetZ - d.mesh.position.z) * 0.1;
             });
 
-            // Check Gun Pickup
             if (gunObject && !hasGun) {
-                let dist = character.position.distanceTo(gunObject.position);
-                if (dist < 1.8) {
+                if (character.position.distanceTo(gunObject.position) < 1.8) {
                     scene.remove(gunObject);
                     gunObject = null;
                     hasGun = true;
-                    document.getElementById('weaponStatus').innerText = 'Assault Rifle Equipped!';
-                    document.getElementById('status').innerText = 'Gun acquired! Eliminate all 10 targets!';
+                    document.getElementById('weaponStatus').innerText = 'Assault Rifle';
+                    document.getElementById('status').innerText = 'Gun acquired! Eliminate targets!';
                 }
             }
 
-            // Gravity & Vertical Physics
             velocityY -= gravity;
             character.position.y += velocityY;
 
@@ -635,9 +383,7 @@
                 if (character.position.x >= obs.minX - 0.3 && character.position.x <= obs.maxX + 0.3 &&
                     character.position.z >= obs.minZ - 0.3 && character.position.z <= obs.maxZ + 0.3) {
                     if (character.position.y >= obs.topY - 0.6 && character.position.y <= obs.topY + 0.6) {
-                        if (obs.topY > targetGroundY) {
-                            targetGroundY = obs.topY;
-                        }
+                        if (obs.topY > targetGroundY) targetGroundY = obs.topY;
                     }
                 }
             }
@@ -648,32 +394,10 @@
                 isGrounded = true;
             }
 
-            // Animations
-            const time = Date.now() * 0.01;
-            const isMoving = (inputX !== 0 || inputZ !== 0) && isGrounded;
-
-            if (!isGrounded) {
-                leftArm.rotation.x = -Math.PI * 0.6;
-                rightArm.rotation.x = -Math.PI * 0.6;
-                leftLeg.rotation.x = Math.PI * 0.3;
-                rightLeg.rotation.x = -Math.PI * 0.3;
-            } else if (isMoving) {
-                leftArm.rotation.x = Math.sin(time) * 0.8;
-                rightArm.rotation.x = -Math.sin(time) * 0.8;
-                leftLeg.rotation.x = -Math.sin(time) * 0.8;
-                rightLeg.rotation.x = Math.sin(time) * 0.8;
-            } else {
-                leftArm.rotation.x = 0;
-                rightArm.rotation.x = 0;
-                leftLeg.rotation.x = 0;
-                rightLeg.rotation.x = 0;
-            }
-
-            // Higher Third-Person Camera Follow
             const camDistance = 6;
-            const targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
-            const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 1.0;
-            const targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
+            let targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
+            let targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 1.0;
+            let targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
 
             camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.1);
             camera.lookAt(character.position.x, character.position.y + 0.8, character.position.z);
