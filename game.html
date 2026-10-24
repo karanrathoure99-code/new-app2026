@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Free Fire Bermuda - Complete 360 Ring Hills & Adam Character</title>
+    <title>Free Fire Bermuda - Solid Base, Connected Mountains & Adam</title>
     <style>
         body {
             margin: 0;
@@ -81,7 +81,7 @@
     <div id="info">
         <strong>Free Fire Bermuda + Adam:</strong><br>
         Controls: <span>W, A, S, D to Walk</span><br>
-        Status: <span>Complete 360-Degree Boundary Hills Loaded</span>
+        Status: <span>Solid White Base & Connected Perimeter Mountains</span>
     </div>
 
     <!-- UI Buttons -->
@@ -149,11 +149,11 @@
             const baseMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
             const baseSurface = new THREE.Mesh(baseGeo, baseMat);
             baseSurface.rotation.x = -Math.PI / 2;
-            baseSurface.position.y = -10;
+            baseSurface.position.y = -20;
             baseSurface.receiveShadow = true;
             scene.add(baseSurface);
 
-            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Complete 360 Ring Hills
+            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Lowered Edges and Connected High Perimeter Mountains
             const segments = 350;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
@@ -164,21 +164,21 @@
                 let vy = posAttr.getY(i);
                 
                 // Rolling hills inside the map
-                let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220 
-                           + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 90;
+                let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 180 
+                           + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 70;
 
                 // River valley depression in center
                 if (Math.abs(vx) < 350) {
-                    height -= 70;
+                    height -= 60;
                 }
 
-                // Complete 360-degree radial ring hills at the boundaries (fully connected from all sides)
+                // Lowered edges smoothly blending into high solid perimeter mountains rising from the white base
                 let distFromCenter = Math.sqrt(vx * vx + vy * vy);
-                let innerRadius = halfSize - 4500; // Start raising mountains uniformly in a ring
+                let innerRadius = halfSize - 3500; 
                 if (distFromCenter > innerRadius) {
-                    let factor = (distFromCenter - innerRadius) / (4500);
-                    let ringHill = Math.sin(factor * Math.PI * 0.5);
-                    height += ringHill * 1300; // Full continuous mountain ring around the map
+                    let factor = (distFromCenter - innerRadius) / (3500);
+                    let mountainRise = Math.pow(factor, 1.8) * 1800; // High solid perimeter mountains
+                    height += mountainRise;
                 }
 
                 posAttr.setZ(i, Math.max(0, height));
@@ -360,20 +360,20 @@
                 if (moveLeft) adam.position.x -= adamSpeed;
                 if (moveRight) adam.position.x += adamSpeed;
 
-                // Terrain height matching the complete 360-degree ring hills
+                // Terrain height matching the solid perimeter mountains and lowered edges
                 let vx = adam.position.x;
                 let vy = adam.position.z;
-                let h = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220 
-                      + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 90;
-                if (Math.abs(vx) < 350) h -= 70;
+                let h = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 180 
+                      + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 70;
+                if (Math.abs(vx) < 350) h -= 60;
 
                 let distFromCenter = Math.sqrt(vx * vx + vy * vy);
                 let halfSize = mapSize / 2;
-                let innerRadius = halfSize - 4500;
+                let innerRadius = halfSize - 3500;
                 if (distFromCenter > innerRadius) {
-                    let factor = (distFromCenter - innerRadius) / (4500);
-                    let ringHill = Math.sin(factor * Math.PI * 0.5);
-                    h += ringHill * 1300;
+                    let factor = (distFromCenter - innerRadius) / (3500);
+                    let mountainRise = Math.pow(factor, 1.8) * 1800;
+                    h += mountainRise;
                 }
 
                 adam.position.y = Math.max(10, h + 20);
