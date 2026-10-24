@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Base White Surface - 20000 x 20000 Open World</title>
+    <title>Stacked Open-World Map - White Base + Bermuda Surface</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #1e293b;
+            background-color: #0f172a;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             user-select: none;
             -webkit-user-select: none;
@@ -75,9 +75,9 @@
 </head>
 <body>
     <div id="info">
-        <strong>Base White Surface Loaded:</strong><br>
-        Surface Size: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Ready for Map Integration</span>
+        <strong>Stacked World Setup:</strong><br>
+        Base Surface: <span>20k x 20k White Base</span><br>
+        Map Surface: <span>15k x 15k Bermuda Terrain Loaded</span>
     </div>
 
     <!-- Full Map View Button -->
@@ -93,11 +93,11 @@
 
     <script>
         let scene, camera, renderer;
-        let mapSize = 20000; // Exact 20000 x 20000 Surface
+        let baseSize = 20000; // 20,000 x 20,000 Base Surface
+        let mapSize = 15000;  // 15,000 x 15,000 Bermuda Map Surface
         let minimapCtx, minimapCanvas;
         let isFullMap = false;
 
-        // Drag & Pan controls
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let cameraTarget = new THREE.Vector3(0, 0, 0);
@@ -106,16 +106,13 @@
         animate();
 
         function init() {
-            // 1. Scene Setup
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0f172a);
+            scene.background = new THREE.Color(0x1e293b);
 
-            // 2. Camera Setup
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
-            camera.position.set(0, 4000, 6000);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 60000);
+            camera.position.set(0, 4500, 7000);
             camera.lookAt(cameraTarget);
 
-            // 3. Renderer Setup
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
@@ -124,29 +121,94 @@
             renderer.toneMappingExposure = 1.2;
             document.body.appendChild(renderer.domElement);
 
-            // 4. Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
             sunLight.position.set(4000, 8000, 4000);
             sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 0.5;
+            sunLight.shadow.camera.far = 35000;
+            const d = 15000;
+            sunLight.shadow.camera.left = -d;
+            sunLight.shadow.camera.right = d;
+            sunLight.shadow.camera.top = d;
+            sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. BASE WHITE SURFACE (20,000 x 20,000 Pure Flat White Plane)
-            const surfaceGeo = new THREE.PlaneGeometry(mapSize, mapSize);
-            const surfaceMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff, // Pure White Surface as requested
-                roughness: 0.5,
-                metalness: 0.1
-            });
-            const baseSurface = new THREE.Mesh(surfaceGeo, surfaceMat);
+            // 1. BOTTOM LAYER: 20,000 x 20,000 Solid White Base Surface
+            const baseGeo = new THREE.PlaneGeometry(baseSize, baseSize);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
+            const baseSurface = new THREE.Mesh(baseGeo, baseMat);
             baseSurface.rotation.x = -Math.PI / 2;
-            baseSurface.position.y = 0;
+            baseSurface.position.y = -10; // Exactly at bottom
             baseSurface.receiveShadow = true;
             scene.add(baseSurface);
 
-            // Mouse / Touch Dragging and Zooming Controls
+            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain placed on top of White Base
+            const segments = 350;
+            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
+            const posAttr = groundGeo.attributes.position;
+            let halfSize = mapSize / 2;
+
+            for (let i = 0; i < posAttr.count; i++) {
+                let vx = posAttr.getX(i);
+                let vy = posAttr.getY(i);
+                
+                // Bermuda terrain variations: flat, slopes, rolling hills & pits
+                let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 200 
+                           + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 80;
+
+                // River valley depression in center
+                if (Math.abs(vx) < 350) {
+                    height -= 70;
+                }
+
+                // Raise outer 15k boundaries into high mountain walls
+                let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
+                let borderThreshold = halfSize - 1800;
+                if (maxDist > borderThreshold) {
+                    let factor = (maxDist - borderThreshold) / (1800);
+                    height += Math.pow(factor, 2) * 1500;
+                }
+
+                posAttr.setZ(i, Math.max(0, height)); // Solid base
+            }
+            groundGeo.computeVertexNormals();
+
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.85, flatShading: false });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = 0; // Placed right on top of the base
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 3. River Flow across the Bermuda surface
+            const riverGeo = new THREE.PlaneGeometry(350, mapSize);
+            const riverMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.3 });
+            const river = new THREE.Mesh(riverGeo, riverMat);
+            river.rotation.x = -Math.PI / 2;
+            river.position.set(0, 5, 0);
+            scene.add(river);
+
+            // 4. Solid Dam across the River
+            const damGeo = new THREE.BoxGeometry(450, 240, 120);
+            const damMat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.6 });
+            const dam = new THREE.Mesh(damGeo, damMat);
+            dam.position.set(0, 120, 0);
+            dam.castShadow = true;
+            dam.receiveShadow = true;
+            scene.add(dam);
+
+            // 5. Giant Solid Rocks / Mountains on the Bermuda Surface
+            createGiantRock(-3000, 2500, 700, 600, 0x475444);
+            createGiantRock(3500, -3000, 800, 700, 0x434c40);
+            createGiantRock(-2500, -3500, 900, 800, 0x3b4338);
+            createGiantRock(3000, 3000, 750, 650, 0x525c4e);
+
+            // Mouse / Touch Controls for Dragging and Zooming
             window.addEventListener('mousedown', (e) => {
                 if(e.target.closest('#map-btn') || e.target.closest('#minimap-container')) return;
                 isDragging = true;
@@ -158,8 +220,8 @@
                 let deltaX = e.clientX - previousMousePosition.x;
                 let deltaY = e.clientY - previousMousePosition.y;
 
-                cameraTarget.x -= deltaX * 4.0;
-                cameraTarget.z -= deltaY * 4.0;
+                cameraTarget.x -= deltaX * 4.5;
+                cameraTarget.z -= deltaY * 4.5;
 
                 previousMousePosition = { x: e.clientX, y: e.clientY };
             });
@@ -168,7 +230,7 @@
 
             window.addEventListener('wheel', (e) => {
                 camera.position.y += e.deltaY * 3.5;
-                camera.position.y = Math.max(500, Math.min(30000, camera.position.y));
+                camera.position.y = Math.max(500, Math.min(35000, camera.position.y));
             });
 
             minimapCanvas = document.getElementById('minimap-canvas');
@@ -177,15 +239,38 @@
             window.addEventListener('resize', onWindowResize);
         }
 
+        function createGiantRock(x, z, radius, height, colorHex) {
+            const rockGeo = new THREE.ConeGeometry(radius, height, 12, 6, true);
+            const pos = rockGeo.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                let vx = pos.getX(i);
+                let vy = pos.getY(i);
+                let vz = pos.getZ(i);
+                if (vy > 0) {
+                    let noise = Math.sin(vx * 0.05) * Math.cos(vz * 0.05) * 50 + (Math.random() - 0.5) * 40;
+                    pos.setX(i, vx + noise);
+                    pos.setZ(i, vz + noise);
+                }
+            }
+            rockGeo.computeVertexNormals();
+
+            const rockMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.9, flatShading: true });
+            const rockMesh = new THREE.Mesh(rockGeo, rockMat);
+            rockMesh.position.set(x, height / 2, z);
+            rockMesh.castShadow = true;
+            rockMesh.receiveShadow = true;
+            scene.add(rockMesh);
+        }
+
         function toggleFullMap() {
             isFullMap = !isFullMap;
             const btn = document.getElementById('map-btn');
             if (isFullMap) {
-                camera.position.set(0, 18000, 0); 
+                camera.position.set(0, 24000, 0); 
                 cameraTarget.set(0, 0, 0);
                 btn.innerHTML = "🗺️ Normal View";
             } else {
-                camera.position.set(0, 4000, 6000); 
+                camera.position.set(0, 4500, 7000); 
                 cameraTarget.set(0, 0, 0);
                 btn.innerHTML = "🗺️ Full Map View";
             }
@@ -200,9 +285,17 @@
             minimapCtx.fillStyle = '#1e293b';
             minimapCtx.fillRect(0, 0, w, h);
 
-            // Base Surface representation on minimap
+            // White Base on minimap
             minimapCtx.fillStyle = '#ffffff';
-            minimapCtx.fillRect(w * 0.1, h * 0.1, w * 0.8, h * 0.8);
+            minimapCtx.fillRect(w * 0.05, h * 0.05, w * 0.9, h * 0.9);
+
+            // Bermuda Map Surface on top
+            minimapCtx.fillStyle = '#315c1b';
+            minimapCtx.fillRect(w * 0.15, h * 0.15, w * 0.7, h * 0.7);
+
+            // River line
+            minimapCtx.fillStyle = '#2980b9';
+            minimapCtx.fillRect(w * 0.48, h * 0.15, w * 0.04, h * 0.7);
 
             minimapCtx.fillStyle = '#ff3300';
             minimapCtx.beginPath();
