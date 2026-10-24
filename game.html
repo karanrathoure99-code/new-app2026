@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Free Fire Bermuda - Smooth Surface & View Controls</title>
+    <title>Base White Surface - 20000 x 20000 Open World</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #5294e2;
+            background-color: #1e293b;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             user-select: none;
             -webkit-user-select: none;
@@ -33,7 +33,6 @@
             color: #38bdf8;
             font-weight: bold;
         }
-        /* Full Map View Button */
         #map-btn {
             position: absolute;
             top: 95px;
@@ -76,9 +75,9 @@
 </head>
 <body>
     <div id="info">
-        <strong>Free Fire Bermuda Map:</strong><br>
-        Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Smooth Surface & Drag View Enabled</span>
+        <strong>Base White Surface Loaded:</strong><br>
+        Surface Size: <span>20,000 x 20,000 Units</span><br>
+        Status: <span>Ready for Map Integration</span>
     </div>
 
     <!-- Full Map View Button -->
@@ -94,11 +93,11 @@
 
     <script>
         let scene, camera, renderer;
-        let mapSize = 20000;
+        let mapSize = 20000; // Exact 20000 x 20000 Surface
         let minimapCtx, minimapCanvas;
         let isFullMap = false;
 
-        // Interaction variables for dragging/panning
+        // Drag & Pan controls
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let cameraTarget = new THREE.Vector3(0, 0, 0);
@@ -109,11 +108,11 @@
         function init() {
             // 1. Scene Setup
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x5294e2);
+            scene.background = new THREE.Color(0x0f172a);
 
             // 2. Camera Setup
-            camera = new THREE.PerspectiveSystem ? null : new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
-            camera.position.set(0, 3000, 5000);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
+            camera.position.set(0, 4000, 6000);
             camera.lookAt(cameraTarget);
 
             // 3. Renderer Setup
@@ -126,68 +125,28 @@
             document.body.appendChild(renderer.domElement);
 
             // 4. Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
-            sunLight.position.set(3000, 6000, 3000);
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            sunLight.position.set(4000, 8000, 4000);
             sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 2048;
-            sunLight.shadow.mapSize.height = 2048;
-            sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 30000;
-            const d = 12000;
-            sunLight.shadow.camera.left = -d;
-            sunLight.shadow.camera.right = d;
-            sunLight.shadow.camera.top = d;
-            sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside
-            const oceanGeo = new THREE.PlaneGeometry(90000, 90000);
-            const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
-            const ocean = new THREE.Mesh(oceanGeo, oceanMat);
-            ocean.rotation.x = -Math.PI / 2;
-            ocean.position.y = -200;
-            scene.add(ocean);
+            // 5. BASE WHITE SURFACE (20,000 x 20,000 Pure Flat White Plane)
+            const surfaceGeo = new THREE.PlaneGeometry(mapSize, mapSize);
+            const surfaceMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff, // Pure White Surface as requested
+                roughness: 0.5,
+                metalness: 0.1
+            });
+            const baseSurface = new THREE.Mesh(surfaceGeo, surfaceMat);
+            baseSurface.rotation.x = -Math.PI / 2;
+            baseSurface.position.y = 0;
+            baseSurface.receiveShadow = true;
+            scene.add(baseSurface);
 
-            // 6. Smooth Bermuda Surface Generation (High segment count for zero visible grid lines/grooves)
-            const segments = 400;
-            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
-            const posAttr = groundGeo.attributes.position;
-            let halfSize = mapSize / 2;
-
-            for (let i = 0; i < posAttr.count; i++) {
-                let vx = posAttr.getX(i);
-                let vy = posAttr.getY(i);
-                
-                let distFromCenter = Math.sqrt(vx*vx + vy*vy);
-                let centerPeak = Math.max(0, (1 - distFromCenter / (mapSize * 0.3))) * 1100;
-
-                let rollingHills = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 180) 
-                                 + Math.abs(Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 80);
-
-                let height = centerPeak + rollingHills + 20;
-
-                let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
-                let borderThreshold = halfSize - 2000;
-                if (maxDist > borderThreshold) {
-                    let factor = (maxDist - borderThreshold) / (2000);
-                    height += Math.pow(factor, 2) * 1400;
-                }
-
-                posAttr.setZ(i, height);
-            }
-            groundGeo.computeVertexNormals();
-
-            // Smooth shading to remove all harsh polygon grooves/lines
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.85, flatShading: false });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.receiveShadow = true;
-            scene.add(ground);
-
-            // Mouse / Touch Event Listeners for dragging and zooming across the map
+            // Mouse / Touch Dragging and Zooming Controls
             window.addEventListener('mousedown', (e) => {
                 if(e.target.closest('#map-btn') || e.target.closest('#minimap-container')) return;
                 isDragging = true;
@@ -199,8 +158,8 @@
                 let deltaX = e.clientX - previousMousePosition.x;
                 let deltaY = e.clientY - previousMousePosition.y;
 
-                cameraTarget.x -= deltaX * 3.5;
-                cameraTarget.z -= deltaY * 3.5;
+                cameraTarget.x -= deltaX * 4.0;
+                cameraTarget.z -= deltaY * 4.0;
 
                 previousMousePosition = { x: e.clientX, y: e.clientY };
             });
@@ -208,8 +167,8 @@
             window.addEventListener('mouseup', () => { isDragging = false; });
 
             window.addEventListener('wheel', (e) => {
-                camera.position.y += e.deltaY * 3.0;
-                camera.position.y = Math.max(400, Math.min(25000, camera.position.y));
+                camera.position.y += e.deltaY * 3.5;
+                camera.position.y = Math.max(500, Math.min(30000, camera.position.y));
             });
 
             minimapCanvas = document.getElementById('minimap-canvas');
@@ -222,11 +181,11 @@
             isFullMap = !isFullMap;
             const btn = document.getElementById('map-btn');
             if (isFullMap) {
-                camera.position.set(0, 16000, 0); 
+                camera.position.set(0, 18000, 0); 
                 cameraTarget.set(0, 0, 0);
                 btn.innerHTML = "🗺️ Normal View";
             } else {
-                camera.position.set(0, 3000, 5000); 
+                camera.position.set(0, 4000, 6000); 
                 cameraTarget.set(0, 0, 0);
                 btn.innerHTML = "🗺️ Full Map View";
             }
@@ -238,18 +197,12 @@
             let h = minimapCanvas.height;
 
             minimapCtx.clearRect(0, 0, w, h);
-            minimapCtx.fillStyle = '#1b4f72';
+            minimapCtx.fillStyle = '#1e293b';
             minimapCtx.fillRect(0, 0, w, h);
 
-            minimapCtx.fillStyle = '#315c1b';
-            minimapCtx.beginPath();
-            minimapCtx.arc(w/2, h/2, w*0.42, 0, Math.PI*2);
-            minimapCtx.fill();
-
-            minimapCtx.fillStyle = '#475444';
-            minimapCtx.beginPath();
-            minimapCtx.arc(w/2, h/2, 10, 0, Math.PI*2);
-            minimapCtx.fill();
+            // Base Surface representation on minimap
+            minimapCtx.fillStyle = '#ffffff';
+            minimapCtx.fillRect(w * 0.1, h * 0.1, w * 0.8, h * 0.8);
 
             minimapCtx.fillStyle = '#ff3300';
             minimapCtx.beginPath();
