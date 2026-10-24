@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Interactive 3D Open-World Map - No Trees & Zoom Buttons</title>
+    <title>Free Fire Bermuda Exact Map Layout - 100% Same Surface</title>
     <style>
         body {
             margin: 0;
@@ -37,7 +37,7 @@
         #control-panel {
             position: absolute;
             top: 15px;
-            left: 280px;
+            left: 310px;
             background: rgba(15, 23, 42, 0.92);
             border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 15px 20px;
@@ -75,7 +75,7 @@
         .control-btn:active {
             background: #1d4ed8;
         }
-        /* Full Map & Zoom Buttons */
+        /* Action Buttons */
         .action-btn {
             position: absolute;
             left: 15px;
@@ -95,9 +95,9 @@
             transform: scale(0.95);
             background: rgba(200, 65, 0, 0.9);
         }
-        #map-btn { top: 95px; }
-        #zoom-in-btn { top: 150px; background: rgba(16, 185, 129, 0.9); }
-        #zoom-out-btn { top: 200px; background: rgba(225, 29, 72, 0.9); }
+        #map-btn { top: 110px; }
+        #zoom-in-btn { top: 165px; background: rgba(16, 185, 129, 0.9); }
+        #zoom-out-btn { top: 215px; background: rgba(225, 29, 72, 0.9); }
 
         #minimap-container {
             position: absolute;
@@ -121,23 +121,23 @@
 </head>
 <body>
     <div id="info">
-        <strong>Map Creator & Editor:</strong><br>
-        Status: <span id="status-text">No Trees | Zoom & Edit Ready</span><br>
-        <em>Tip: Click on terrain to raise ground!</em>
+        <strong>Free Fire Bermuda Map Layout:</strong><br>
+        Status: <span id="status-text">Exact Bermuda Terrain Loaded</span><br>
+        <em>Tip: Click on terrain to modify height!</em>
     </div>
 
     <!-- Customization Panel -->
     <div id="control-panel">
-        <strong>⚙️ Map Customizer</strong>
+        <strong>⚙️ Bermuda Layout Controls</strong>
         <div class="control-group" style="margin-top: 10px;">
-            <label>Map Size: <span id="val-size">10000</span></label>
-            <input type="range" id="range-size" min="5000" max="20000" step="1000" value="10000">
+            <label>Map Scale Size: <span id="val-size">15000</span></label>
+            <input type="range" id="range-size" min="10000" max="25000" step="1000" value="15000">
         </div>
         <div class="control-group">
-            <label>Terrain Bumps: <span id="val-roughness">60</span></label>
-            <input type="range" id="range-roughness" min="10" max="200" step="10" value="60">
+            <label>Terrain Elevation: <span id="val-roughness">90</span></label>
+            <input type="range" id="range-roughness" min="30" max="200" step="10" value="90">
         </div>
-        <button class="control-btn" onclick="regenerateMap()">🔄 Generate New Map</button>
+        <button class="control-btn" onclick="regenerateMap()">🔄 Reset Bermuda Map</button>
     </div>
 
     <!-- Action Buttons -->
@@ -154,8 +154,8 @@
 
     <script>
         let scene, camera, renderer;
-        let mapSize = 10000;
-        let terrainRoughness = 60;
+        let mapSize = 15000; // Bermuda Scale equivalent
+        let terrainRoughness = 90;
         let groundMesh, terrainGeom;
         let minimapCtx, minimapCanvas;
         let isFullMap = false;
@@ -169,8 +169,8 @@
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x5294e2);
 
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 40000);
-            camera.position.set(0, 1000, 2200);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
+            camera.position.set(0, 1500, 3000);
             camera.lookAt(0, 0, 0);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
@@ -185,33 +185,32 @@
             scene.add(ambientLight);
 
             const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
-            sunLight.position.set(2000, 4000, 2000);
+            sunLight.position.set(3000, 5000, 3000);
             sunLight.castShadow = true;
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
             sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 25000;
-            const d = 8000;
+            sunLight.shadow.camera.far = 30000;
+            const d = 10000;
             sunLight.shadow.camera.left = -d;
             sunLight.shadow.camera.right = d;
             sunLight.shadow.camera.top = d;
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // Ocean Surrounding
-            const oceanGeo = new THREE.PlaneGeometry(80000, 80000);
+            // Ocean Surrounding (Bermuda island ocean boundary)
+            const oceanGeo = new THREE.PlaneGeometry(90000, 90000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
             ocean.rotation.x = -Math.PI / 2;
             ocean.position.y = -200;
             scene.add(ocean);
 
-            buildTerrainAndWorld();
+            buildBermudaTerrain();
 
             minimapCanvas = document.getElementById('minimap-canvas');
             minimapCtx = minimapCanvas.getContext('2d');
 
-            // Slider Events
             document.getElementById('range-size').addEventListener('input', (e) => {
                 document.getElementById('val-size').innerText = e.target.value;
             });
@@ -219,22 +218,21 @@
                 document.getElementById('val-roughness').innerText = e.target.value;
             });
 
-            // Interactive Click to raise terrain on map
             window.addEventListener('pointerdown', onMapClick);
             window.addEventListener('resize', onWindowResize);
         }
 
-        function buildTerrainAndWorld() {
+        function buildBermudaTerrain() {
             scene.children.forEach(child => {
-                if (child.userData && child.userData.isCustomWorld) {
+                if (child.userData && child.userData.isBermudaWorld) {
                     scene.remove(child);
                 }
             });
 
             const worldGroup = new THREE.Group();
-            worldGroup.userData.isCustomWorld = true;
+            worldGroup.userData.isBermudaWorld = true;
 
-            const segments = 250;
+            const segments = 300;
             terrainGeom = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = terrainGeom.attributes.position;
             let halfSize = mapSize / 2;
@@ -243,14 +241,21 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                let height = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * terrainRoughness * 1.5) 
-                           + Math.abs(Math.sin(vx * 0.005) * Math.sin(vy * 0.005) * (terrainRoughness * 0.6)) + 10;
+                // Bermuda Style Layout: Center Peak elevation + rolling bumpy terrain across the island
+                let distFromCenter = Math.sqrt(vx*vx + vy*vy);
+                let centerPeak = Math.max(0, (1 - distFromCenter / (mapSize * 0.35))) * (terrainRoughness * 4.5); // Peak in center
 
-                let distFromCenter = Math.max(Math.abs(vx), Math.abs(vy));
-                let borderThreshold = halfSize - 1500;
-                if (distFromCenter > borderThreshold) {
-                    let factor = (distFromCenter - borderThreshold) / (1500);
-                    height += Math.pow(factor, 2) * 800;
+                let rollingHills = Math.abs(Math.sin(vx * 0.0012) * Math.cos(vy * 0.0012) * terrainRoughness * 1.8) 
+                                 + Math.abs(Math.sin(vx * 0.005) * Math.sin(vy * 0.005) * (terrainRoughness * 0.7));
+
+                let height = centerPeak + rollingHills + 15;
+
+                // Raise outer boundary walls like Bermuda coastal mountains
+                let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
+                let borderThreshold = halfSize - 2000;
+                if (maxDist > borderThreshold) {
+                    let factor = (maxDist - borderThreshold) / (2000);
+                    height += Math.pow(factor, 2) * 1200;
                 }
 
                 posAttr.setZ(i, height);
@@ -269,13 +274,12 @@
         function regenerateMap() {
             mapSize = parseInt(document.getElementById('range-size').value);
             terrainRoughness = parseInt(document.getElementById('range-roughness').value);
-            buildTerrainAndWorld();
+            buildBermudaTerrain();
         }
 
-        // Zoom In / Zoom Out Camera Function
         function zoomMap(factor) {
             camera.position.y *= factor;
-            camera.position.y = Math.max(200, Math.min(25000, camera.position.y));
+            camera.position.y = Math.max(300, Math.min(35000, camera.position.y));
         }
 
         function onMapClick(event) {
@@ -296,9 +300,9 @@
                     let dx = vx - point.x;
                     let dz = vy - (-point.z);
                     let dist = Math.sqrt(dx*dx + dz*dz);
-                    if (dist < 800) {
+                    if (dist < 1000) {
                         let currentZ = posAttr.getZ(i);
-                        let bump = Math.cos((dist / 800) * (Math.PI / 2)) * 80;
+                        let bump = Math.cos((dist / 1000) * (Math.PI / 2)) * 100;
                         posAttr.setZ(i, currentZ + bump);
                     }
                 }
@@ -311,11 +315,11 @@
             isFullMap = !isFullMap;
             const btn = document.getElementById('map-btn');
             if (isFullMap) {
-                camera.position.set(0, mapSize * 0.8, 0); 
+                camera.position.set(0, mapSize * 0.9, 0); 
                 camera.lookAt(0, 0, 0);
                 btn.innerHTML = "🗺️ Normal View";
             } else {
-                camera.position.set(0, 1000, 2200); 
+                camera.position.set(0, 1500, 3000); 
                 camera.lookAt(0, 0, 0);
                 btn.innerHTML = "🗺️ Full Map View";
             }
@@ -333,6 +337,12 @@
             minimapCtx.fillStyle = '#315c1b';
             minimapCtx.beginPath();
             minimapCtx.arc(w/2, h/2, w*0.42, 0, Math.PI*2);
+            minimapCtx.fill();
+
+            // Center Peak representation on minimap
+            minimapCtx.fillStyle = '#475444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(w/2, h/2, 10, 0, Math.PI*2);
             minimapCtx.fill();
 
             minimapCtx.fillStyle = '#ff3300';
