@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Open-World Map - 10k x 10k Size & Central Gap</title>
+    <title>Interactive 3D Open-World Map Generator & Editor</title>
     <style>
         body {
             margin: 0;
@@ -19,9 +19,9 @@
             top: 15px;
             left: 15px;
             color: white;
-            background: rgba(10, 15, 25, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 12px 18px;
+            background: rgba(10, 15, 25, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 14px 20px;
             border-radius: 10px;
             font-size: 13px;
             pointer-events: none;
@@ -33,10 +33,52 @@
             color: #38bdf8;
             font-weight: bold;
         }
-        /* Full Map Toggle Button */
+        /* Customization Control Panel UI */
+        #control-panel {
+            position: absolute;
+            top: 15px;
+            left: 280px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 15px 20px;
+            border-radius: 12px;
+            color: white;
+            font-size: 13px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            max-width: 260px;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #cbd5e1;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        .control-btn {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .control-btn:active {
+            background: #1d4ed8;
+        }
+        /* Full Map View Button */
         #map-btn {
             position: absolute;
-            top: 85px;
+            top: 220px;
             left: 15px;
             background: rgba(255, 85, 0, 0.9);
             color: white;
@@ -76,9 +118,27 @@
 </head>
 <body>
     <div id="info">
-        <strong>Open-World Battleground:</strong><br>
-        Map Area: <span>10,000 x 10,000 Units</span><br>
-        Status: <span>Optimized Size & Central Gaps Loaded</span>
+        <strong>Map Creator & Editor:</strong><br>
+        Status: <span id="status-text">Interactive Mode Active</span><br>
+        <em>Tip: Adjust sliders or click on terrain to raise ground!</em>
+    </div>
+
+    <!-- Customization Panel -->
+    <div id="control-panel">
+        <strong>⚙️ Map Customizer</strong>
+        <div class="control-group" style="margin-top: 10px;">
+            <label>Map Size: <span id="val-size">10000</span></label>
+            <input type="range" id="range-size" min="5000" max="20000" step="1000" value="10000">
+        </div>
+        <div class="control-group">
+            <label>Terrain Bumps: <span id="val-roughness">60</span></label>
+            <input type="range" id="range-roughness" min="10" max="200" step="10" value="60">
+        </div>
+        <div class="control-group">
+            <label>Tree Density: <span id="val-trees">300</span></label>
+            <input type="range" id="range-trees" min="50" max="800" step="50" value="300">
+        </div>
+        <button class="control-btn" onclick="regenerateMap()">🔄 Generate New Map</button>
     </div>
 
     <!-- Full Map View Button -->
@@ -93,24 +153,26 @@
 
     <script>
         let scene, camera, renderer;
-        let mapSize = 10000; // Updated to 10k x 10k
+        let mapSize = 10000;
+        let terrainRoughness = 60;
+        let treeCount = 300;
+        let groundMesh, terrainGeom;
         let minimapCtx, minimapCanvas;
         let isFullMap = false;
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
 
         init();
         animate();
 
         function init() {
-            // 1. Scene Setup (0% Fog)
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x5294e2);
 
-            // 2. Camera Setup (Fixed Static View)
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 30000);
-            camera.position.set(0, 800, 1800);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 40000);
+            camera.position.set(0, 1000, 2200);
             camera.lookAt(0, 0, 0);
 
-            // 3. Renderer Setup
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
@@ -119,49 +181,76 @@
             renderer.toneMappingExposure = 1.2;
             document.body.appendChild(renderer.domElement);
 
-            // 4. Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
 
             const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
-            sunLight.position.set(1500, 3000, 1500);
+            sunLight.position.set(2000, 4000, 2000);
             sunLight.castShadow = true;
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
             sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 18000;
-            const d = 5000;
+            sunLight.shadow.camera.far = 25000;
+            const d = 8000;
             sunLight.shadow.camera.left = -d;
             sunLight.shadow.camera.right = d;
             sunLight.shadow.camera.top = d;
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside
-            const oceanGeo = new THREE.PlaneGeometry(50000, 50000);
+            // Ocean Surrounding
+            const oceanGeo = new THREE.PlaneGeometry(80000, 80000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
             ocean.rotation.x = -Math.PI / 2;
             ocean.position.y = -200;
             scene.add(ocean);
 
-            // 6. Terrain Ground (10k x 10k with proper spacing and gaps)
+            buildTerrainAndWorld();
+
+            minimapCanvas = document.getElementById('minimap-canvas');
+            minimapCtx = minimapCanvas.getContext('2d');
+
+            // Slider Events
+            document.getElementById('range-size').addEventListener('input', (e) => {
+                document.getElementById('val-size').innerText = e.target.value;
+            });
+            document.getElementById('range-roughness').addEventListener('input', (e) => {
+                document.getElementById('val-roughness').innerText = e.target.value;
+            });
+            document.getElementById('range-trees').addEventListener('input', (e) => {
+                document.getElementById('val-trees').innerText = e.target.value;
+            });
+
+            // Interactive Click to raise terrain on map
+            window.addEventListener('pointerdown', onMapClick);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function buildTerrainAndWorld() {
+            // Remove previous ground/trees if any
+            scene.children.forEach(child => {
+                if (child.userData && child.userData.isCustomWorld) {
+                    scene.remove(child);
+                }
+            });
+
+            const worldGroup = new THREE.Group();
+            worldGroup.userData.isCustomWorld = true;
+
+            // Terrain Ground with custom roughness & size
             const segments = 250;
-            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
-            const posAttr = groundGeo.attributes.position;
-            
+            terrainGeom = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
+            const posAttr = terrainGeom.attributes.position;
             let halfSize = mapSize / 2;
 
             for (let i = 0; i < posAttr.count; i++) {
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                // Gentle rolling hills with a clear central valley/gap
-                let centerDist = Math.sqrt(vx*vx + vy*vy);
-                let heightFactor = centerDist < 2500 ? 0.3 : 1.0; // Flatter central area with gaps
-
-                let height = (Math.abs(Math.sin(vx * 0.002) * Math.cos(vy * 0.002) * 120) 
-                           + Math.abs(Math.sin(vx * 0.008) * Math.sin(vy * 0.008) * 60) + 10) * heightFactor;
+                // User-defined bumpy height variations (No sharp cone mountains, only rolling slopes)
+                let height = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * terrainRoughness * 1.5) 
+                           + Math.abs(Math.sin(vx * 0.005) * Math.sin(vy * 0.005) * (terrainRoughness * 0.6)) + 10;
 
                 let distFromCenter = Math.max(Math.abs(vx), Math.abs(vy));
                 let borderThreshold = halfSize - 1500;
@@ -172,82 +261,92 @@
 
                 posAttr.setZ(i, height);
             }
-            groundGeo.computeVertexNormals();
+            terrainGeom.computeVertexNormals();
 
             const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.88 });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.receiveShadow = true;
-            scene.add(ground);
+            groundMesh = new THREE.Mesh(terrainGeom, groundMat);
+            groundMesh.rotation.x = -Math.PI / 2;
+            groundMesh.receiveShadow = true;
+            worldGroup.add(groundMesh);
 
-            // 7. Well-spaced Hills with gaps around the edges
-            createLargeHill(1000, 1000, 800, 300);
-            createLargeHill(-1200, 1000, 900, 320);
-            createLargeHill(1000, -1200, 850, 310);
-            createLargeHill(-1000, -1000, 900, 330);
-
-            // 8. Scattered Forests
-            for (let i = 0; i < 400; i++) {
+            // Scattered Trees based on user slider
+            for (let i = 0; i < treeCount; i++) {
                 let tx = (Math.random() - 0.5) * (mapSize - 2000);
                 let tz = (Math.random() - 0.5) * (mapSize - 2000);
-                createRealisticTree(tx, tz);
+                let treeGroup = createRealisticTree(tx, tz);
+                worldGroup.add(treeGroup);
             }
 
-            minimapCanvas = document.getElementById('minimap-canvas');
-            minimapCtx = minimapCanvas.getContext('2d');
+            scene.add(worldGroup);
+        }
 
-            window.addEventListener('resize', onWindowResize);
+        function regenerateMap() {
+            mapSize = parseInt(document.getElementById('range-size').value);
+            terrainRoughness = parseInt(document.getElementById('range-roughness').value);
+            treeCount = parseInt(document.getElementById('range-trees').value);
+            buildTerrainAndWorld();
+        }
+
+        function onMapClick(event) {
+            // Ignore if clicking UI control panel
+            if (event.target.closest('#control-panel') || event.target.closest('#map-btn')) return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            let intersects = raycaster.intersectObject(groundMesh);
+
+            if (intersects.length > 0) {
+                let point = intersects[0].point;
+                // Raise terrain vertex heights around click point dynamically
+                let posAttr = terrainGeom.attributes.position;
+                for (let i = 0; i < posAttr.count; i++) {
+                    let vx = posAttr.getX(i);
+                    let vy = posAttr.getY(i);
+                    // Local plane coordinate mapping
+                    let dx = vx - point.x;
+                    let dz = vy - (-point.z); // Z in local plane is -Y in world or vice versa depending on rotation
+                    let dist = Math.sqrt(dx*dx + dz*dz);
+                    if (dist < 800) {
+                        let currentZ = posAttr.getZ(i);
+                        let bump = Math.cos((dist / 800) * (Math.PI / 2)) * 80;
+                        posAttr.setZ(i, currentZ + bump);
+                    }
+                }
+                terrainGeom.computeVertexNormals();
+                posAttr.needsUpdate = true;
+            }
+        }
+
+        function createRealisticTree(x, z) {
+            const treeGroup = new THREE.Group();
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.8, 10, 8), trunkMat);
+            trunk.position.set(x, 15, z); 
+            trunk.castShadow = true;
+            treeGroup.add(trunk);
+
+            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
+            const top = new THREE.Mesh(new THREE.SphereGeometry(5, 8, 8), foliageMat);
+            top.position.set(x, 21, z);
+            top.castShadow = true;
+            treeGroup.add(top);
+            return treeGroup;
         }
 
         function toggleFullMap() {
             isFullMap = !isFullMap;
             const btn = document.getElementById('map-btn');
             if (isFullMap) {
-                camera.position.set(0, 8000, 0); 
+                camera.position.set(0, mapSize * 0.8, 0); 
                 camera.lookAt(0, 0, 0);
                 btn.innerHTML = "🗺️ Normal View";
             } else {
-                camera.position.set(0, 800, 1800); 
+                camera.position.set(0, 1000, 2200); 
                 camera.lookAt(0, 0, 0);
                 btn.innerHTML = "🗺️ Full Map View";
             }
-        }
-
-        function createLargeHill(x, z, radius, height) {
-            const hillGeo = new THREE.ConeGeometry(radius, height, 14, 6, true);
-            const pos = hillGeo.attributes.position;
-            for (let i = 0; i < pos.count; i++) {
-                let vx = pos.getX(i);
-                let vy = pos.getY(i);
-                let vz = pos.getZ(i);
-                if (vy > 0) {
-                    let noise = Math.sin(vx * 0.05) * Math.cos(vz * 0.05) * 25 + (Math.random() - 0.5) * 20;
-                    pos.setX(i, vx + noise);
-                    pos.setZ(i, vz + noise);
-                }
-            }
-            hillGeo.computeVertexNormals();
-
-            const hillMat = new THREE.MeshStandardMaterial({ color: 0x434c40, roughness: 0.95, flatShading: true });
-            const hillMesh = new THREE.Mesh(hillGeo, hillMat);
-            hillMesh.position.set(x, height / 2, z);
-            hillMesh.castShadow = true;
-            hillMesh.receiveShadow = true;
-            scene.add(hillMesh);
-        }
-
-        function createRealisticTree(x, z) {
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.8, 10, 8), trunkMat);
-            trunk.position.set(x, 15, z); 
-            trunk.castShadow = true;
-            scene.add(trunk);
-
-            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
-            const top = new THREE.Mesh(new THREE.SphereGeometry(5, 8, 8), foliageMat);
-            top.position.set(x, 21, z);
-            top.castShadow = true;
-            scene.add(top);
         }
 
         function drawMinimap() {
