@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>100% Exact FreeFire Map Layout x India 25 Famous Places</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FreeFire x India Landmarks - Mobile Landscape & PC Game</title>
     <style>
         body {
             margin: 0;
@@ -12,35 +12,112 @@
             background-color: #050b14;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             user-select: none;
+            -webkit-user-select: none;
         }
         #instructions {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 15px;
+            left: 15px;
             color: #ffffff;
-            background: rgba(10, 15, 25, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 18px 24px;
-            border-radius: 12px;
+            background: rgba(10, 15, 25, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 18px;
+            border-radius: 10px;
             pointer-events: none;
-            font-size: 14px;
-            line-height: 1.6;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 10;
         }
         #instructions span {
             color: #ff5500;
             font-weight: bold;
         }
+
+        /* Mobile Touch Controls UI */
+        #touch-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .control-group {
+            display: flex;
+            gap: 12px;
+            pointer-events: auto;
+        }
+        .touch-btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            touch-action: manipulation;
+        }
+        .touch-btn:active {
+            background: rgba(255, 85, 0, 0.6);
+            transform: scale(0.95);
+        }
+        #dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 5px;
+            pointer-events: auto;
+        }
+        .d-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            touch-action: manipulation;
+        }
+        .d-btn:active {
+            background: rgba(255, 85, 0, 0.7);
+        }
+        #btn-up { grid-column: 2; grid-row: 1; }
+        #btn-left { grid-column: 1; grid-row: 2; }
+        #btn-right { grid-column: 3; grid-row: 2; }
+        #btn-down { grid-column: 2; grid-row: 3; }
     </style>
 </head>
 <body>
     <div id="instructions">
-        <strong>FreeFire Exact Map Layout (India 25 Landmarks Edition):</strong><br>
-        Move: <span>W, A, S, D</span> or <span>Arrow Keys</span><br>
-        Jump: <span>SPACEBAR</span><br>
-        Look Around: <span>Mouse Click & Drag</span><br>
-        <em>Peak=Taj Mahal, Clock Tower=India Gate, Factory=Statue of Unity & More!</em>
+        <strong>Controls (PC & Mobile):</strong><br>
+        PC: <span>WASD / Arrows + SPACE</span><br>
+        Mobile: <span>Use On-Screen D-Pad & Jump</span>
+    </div>
+
+    <!-- Mobile Touch UI Overlay -->
+    <div id="touch-controls">
+        <div id="dpad">
+            <div class="d-btn" id="btn-up">▲</div>
+            <div class="d-btn" id="btn-left">◀</div>
+            <div class="d-btn" id="btn-right">▶</div>
+            <div class="d-btn" id="btn-down">▼</div>
+        </div>
+        <div class="control-group">
+            <div class="touch-btn" id="btn-jump">JUMP</div>
+        </div>
     </div>
 
     <!-- Include Three.js Library -->
@@ -86,16 +163,15 @@
             sunLight.position.set(300, 600, 300);
             scene.add(sunLight);
 
-            // Ground Setup (FF Exact Sized Terrain)
+            // Ground Setup
             const groundGeo = new THREE.PlaneGeometry(2600, 2600, 160, 160);
             const posAttr = groundGeo.attributes.position;
             for (let i = 0; i < posAttr.count; i++) {
                 const vx = posAttr.getX(i);
                 const vy = posAttr.getY(i);
-                // Exact Peak Hill Center and Outer Mountains
                 const distFromCenter = Math.sqrt(vx*vx + vy*vy);
                 if (distFromCenter < 120) {
-                    posAttr.setZ(i, Math.max(0, 35 - distFromCenter * 0.25)); // Peak Hill
+                    posAttr.setZ(i, Math.max(0, 35 - distFromCenter * 0.25));
                 } else {
                     posAttr.setZ(i, Math.sin(vx * 0.007) * Math.cos(vy * 0.007) * 12);
                 }
@@ -109,7 +185,7 @@
 
             buildExactFFMapWithIndianLandmarks();
 
-            // Character Setup with Face & School Uniform
+            // Character Setup
             character = new THREE.Group();
             
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5c6a5, roughness: 0.6 });
@@ -177,25 +253,61 @@
             rightShoe.position.set(0, -0.3, 0.03);
             rightLeg.add(rightShoe);
 
-            // Spawn safely away from center peak
             character.position.set(0, 35, 120);
             scene.add(character);
 
+            // Event Listeners (PC & Mobile Touch)
             window.addEventListener('resize', onWindowResize);
             window.addEventListener('keydown', (e) => handleKey(e, true));
             window.addEventListener('keyup', (e) => handleKey(e, false));
             
-            window.addEventListener('mousedown', (e) => {
-                isMouseDown = true;
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
+            // Mouse & Touch Look Around
+            window.addEventListener('mousedown', (e) => { isMouseDown = true; mouseX = e.clientX; mouseY = e.clientY; });
             window.addEventListener('mouseup', () => { isMouseDown = false; });
             window.addEventListener('mousemove', onMouseMove);
+
+            // Mobile Touch Controls Binding
+            bindTouchButton('btn-up', 'w');
+            bindTouchButton('btn-down', 's');
+            bindTouchButton('btn-left', 'a');
+            bindTouchButton('btn-right', 'd');
+
+            const jumpBtn = document.getElementById('btn-jump');
+            jumpBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (isGrounded) { velocityY = jumpForce; isGrounded = false; }
+            });
+            jumpBtn.addEventListener('mousedown', (e) => {
+                if (isGrounded) { velocityY = jumpForce; isGrounded = false; }
+            });
+
+            // Touch Drag for Camera on Mobile
+            let touchX = 0, touchY = 0;
+            window.addEventListener('touchstart', (e) => {
+                if(e.target.closest('#touch-controls') || e.target.closest('#instructions')) return;
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            });
+            window.addEventListener('touchmove', (e) => {
+                if(e.target.closest('#touch-controls') || e.target.closest('#instructions')) return;
+                const deltaX = e.touches[0].clientX - touchX;
+                const deltaY = e.touches[0].clientY - touchY;
+                cameraAngleX -= deltaX * 0.005;
+                cameraAngleY = Math.max(0.1, Math.min(1.4, cameraAngleY - deltaY * 0.005));
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            });
+        }
+
+        function bindTouchButton(id, keyName) {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
+            btn.addEventListener('mousedown', () => { keys[keyName] = true; });
+            btn.addEventListener('mouseup', () => { keys[keyName] = false; });
         }
 
         function buildExactFFMapWithIndianLandmarks() {
-            // Clouds
             const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, transparent: true, opacity: 0.85 });
             for (let i = 0; i < 50; i++) {
                 const cg = new THREE.Group();
@@ -209,7 +321,6 @@
                 clouds.push(cg);
             }
 
-            // FF Style Intersecting Roads
             const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
             const r1 = new THREE.Mesh(new THREE.PlaneGeometry(16, 2400), roadMat);
             r1.rotation.x = -Math.PI / 2;
@@ -221,7 +332,6 @@
             r2.position.set(0, 0.06, 0);
             scene.add(r2);
 
-            // Ocean (West Coast) & River (Diagonal)
             const ocean = new THREE.Mesh(new THREE.PlaneGeometry(900, 2400), new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.3 }));
             ocean.rotation.x = -Math.PI / 2;
             ocean.position.set(-1000, 0.02, 0);
@@ -233,20 +343,17 @@
             river.position.set(350, 0.04, 0);
             scene.add(river);
 
-            // Outer Mountains (FF Border Mountains)
             createMountain(-800, 0, -800, 320, 160, 320, 0x3b4639);
             createMountain(800, 0, -850, 350, 175, 350, 0x323c30);
             createMountain(0, 0, -1050, 420, 190, 380, 0x2a3328);
             createMountain(-900, 0, 400, 330, 155, 330, 0x374235);
             createMountain(920, 0, 450, 370, 170, 370, 0x303a2e);
 
-            // Free Fire Residential Houses
             createFreeFireHouse(-120, -120, 0);
             createFreeFireHouse(150, -150, Math.PI / 2);
             createFreeFireHouse(-180, 150, Math.PI);
             createFreeFireHouse(160, 180, -Math.PI / 4);
 
-            // ================= 25 EXACT FREE FIRE ZONES REPLACED WITH INDIAN LANDMARKS =================
             const ffMapZones = [
                 { zone: "Peak", x: 0, z: 0, name: "Taj Mahal", color: 0xffffff, size: 10, groundY: 35 },
                 { zone: "Clock Tower", x: -200, z: -200, name: "India Gate", color: 0xdcdcdc, size: 7, groundY: 0 },
@@ -279,20 +386,17 @@
                 createLandmark(lm.x, lm.z, lm.color, lm.size, lm.groundY);
             });
 
-            // Varieties of Grass
             const grassColors = [0x3a7018, 0x477822, 0x2e5c14, 0x558b2f];
             for (let i = 0; i < 700; i++) {
                 const gx = (Math.random() - 0.5) * 2200;
                 const gz = (Math.random() - 0.5) * 2200;
                 if (Math.abs(gx) < 30 && Math.abs(gz) < 30) continue;
-                
                 const col = grassColors[Math.floor(Math.random() * grassColors.length)];
                 const grass = new THREE.Mesh(new THREE.ConeGeometry(0.3 + Math.random() * 0.4, 0.8 + Math.random() * 0.8, 4), new THREE.MeshStandardMaterial({ color: col, roughness: 0.9 }));
                 grass.position.set(gx, 0.5, gz);
                 scene.add(grass);
             }
 
-            // Trees
             for (let i = 0; i < 100; i++) {
                 const tx = (Math.random() - 0.5) * 2000;
                 const tz = (Math.random() - 0.5) * 2000;
@@ -305,16 +409,13 @@
         function createLandmark(x, z, colorHex, size, groundY) {
             const group = new THREE.Group();
             group.position.set(x, groundY, z);
-
             const mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.7 });
             const base = new THREE.Mesh(new THREE.BoxGeometry(size, size * 0.6, size), mat);
             base.position.y = (size * 0.6) / 2;
             group.add(base);
-
             const top = new THREE.Mesh(new THREE.ConeGeometry(size * 0.8, size * 0.5, 6), mat);
             top.position.y = (size * 0.6) + (size * 0.5) / 2;
             group.add(top);
-
             scene.add(group);
             obstacles.push({ minX: x - size/2, maxX: x + size/2, minZ: z - size/2, maxZ: z + size/2, topY: groundY + (size * 0.6) });
         }
@@ -323,7 +424,6 @@
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 5, 6), new THREE.MeshStandardMaterial({ color: 0x543d2b, roughness: 0.9 }));
             trunk.position.set(x, 2.5, z);
             scene.add(trunk);
-
             const pineMat = new THREE.MeshStandardMaterial({ color: 0x1e4620, roughness: 0.85 });
             for (let j = 0; j < 3; j++) {
                 const tier = new THREE.Mesh(new THREE.ConeGeometry(2.2 - (j * 0.4), 2.5, 6), pineMat);
@@ -337,7 +437,6 @@
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.1, 5.5, 8), new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.85 }));
             trunk.position.set(x, 2.75, z);
             scene.add(trunk);
-
             const leaves = new THREE.Mesh(new THREE.SphereGeometry(3.2, 8, 8), new THREE.MeshStandardMaterial({ color: 0x2d6829, roughness: 0.8 }));
             leaves.position.set(x, 6, z);
             scene.add(leaves);
@@ -354,11 +453,9 @@
             const houseGroup = new THREE.Group();
             houseGroup.position.set(x, 0, z);
             houseGroup.rotation.y = rotationY;
-
             const base = new THREE.Mesh(new THREE.BoxGeometry(9, 5.5, 9), new THREE.MeshStandardMaterial({ color: 0xd6d3c4, roughness: 0.7 }));
             base.position.y = 2.75;
             houseGroup.add(base);
-
             const roof = new THREE.Mesh(new THREE.ConeGeometry(7.0, 3.5, 4), new THREE.MeshStandardMaterial({ color: 0x8a2f24, roughness: 0.6 }));
             roof.position.y = 7.25;
             roof.rotation.y = Math.PI / 4;
@@ -368,18 +465,11 @@
                 const stair = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.3, 0.7), new THREE.MeshStandardMaterial({ color: 0x595959, roughness: 0.5 }));
                 stair.position.set(0, i * 0.3 + 0.15, 4.8 + (2 - i) * 0.6);
                 houseGroup.add(stair);
-
                 const worldStairX = x + stair.position.x * Math.cos(rotationY) - stair.position.z * Math.sin(rotationY);
                 const worldStairZ = z + stair.position.x * Math.sin(rotationY) + stair.position.z * Math.cos(rotationY);
-                obstacles.push({
-                    minX: worldStairX - 1.4, maxX: worldStairX + 1.4,
-                    minZ: worldStairZ - 0.5, maxZ: worldStairZ + 0.5,
-                    topY: stair.position.y + 0.15
-                });
+                obstacles.push({ minX: worldStairX - 1.4, maxX: worldStairX + 1.4, minZ: worldStairZ - 0.5, maxZ: worldStairZ + 0.5, topY: stair.position.y + 0.15 });
             }
-
             scene.add(houseGroup);
-
             obstacles.push({ minX: x - 4.7, maxX: x - 4.3, minZ: z - 4.5, maxZ: z + 4.5, topY: 5.5 });
             obstacles.push({ minX: x + 4.3, maxX: x + 4.7, minZ: z - 4.5, maxZ: z + 4.5, topY: 5.5 });
             obstacles.push({ minX: x - 4.5, maxX: x + 4.5, minZ: z - 4.7, maxZ: z - 4.3, topY: 5.5 });
@@ -394,10 +484,7 @@
                 case 'KeyA': case 'ArrowLeft': keys.a = isDown; break;
                 case 'KeyD': case 'ArrowRight': keys.d = isDown; break;
                 case 'Space': 
-                    if (isDown && isGrounded) {
-                        velocityY = jumpForce;
-                        isGrounded = false;
-                    }
+                    if (isDown && isGrounded) { velocityY = jumpForce; isGrounded = false; }
                     break;
             }
         }
@@ -406,10 +493,8 @@
             if (!isMouseDown) return;
             const deltaX = e.clientX - mouseX;
             const deltaY = e.clientY - mouseY;
-            
             cameraAngleX -= deltaX * 0.005;
             cameraAngleY = Math.max(0.1, Math.min(1.4, cameraAngleY - deltaY * 0.005));
-            
             mouseX = e.clientX;
             mouseY = e.clientY;
         }
@@ -439,20 +524,15 @@
             if (inputX !== 0 || inputZ !== 0) {
                 const moveX = (inputX * Math.cos(cameraAngleX) + inputZ * Math.sin(cameraAngleX)) * moveSpeed;
                 const moveZ = (inputX * -Math.sin(cameraAngleX) + inputZ * Math.cos(cameraAngleX)) * moveSpeed;
-
                 character.position.x += moveX;
                 character.position.z += moveZ;
-
-                const targetRotation = Math.atan2(moveX, moveZ);
-                character.rotation.y = targetRotation;
+                character.rotation.y = Math.atan2(moveX, moveZ);
             }
 
-            // Gravity & Ground Collision
             velocityY -= gravity;
             character.position.y += velocityY;
 
             let targetGroundY = 0;
-            // Check central peak height dynamically based on distance from center (0,0)
             const distFromCenter = Math.sqrt(character.position.x * character.position.x + character.position.z * character.position.z);
             if (distFromCenter < 120) {
                 targetGroundY = Math.max(0, 35 - distFromCenter * 0.25);
@@ -462,9 +542,7 @@
                 if (character.position.x >= obs.minX && character.position.x <= obs.maxX &&
                     character.position.z >= obs.minZ && character.position.z <= obs.maxZ) {
                     if (character.position.y >= obs.topY - 0.5 && character.position.y <= obs.topY + 0.5) {
-                        if (obs.topY > targetGroundY) {
-                            targetGroundY = obs.topY;
-                        }
+                        if (obs.topY > targetGroundY) targetGroundY = obs.topY;
                     }
                 }
             }
@@ -475,7 +553,6 @@
                 isGrounded = true;
             }
 
-            // Walking & Jumping Animations
             const time = Date.now() * 0.01;
             const isMoving = (inputX !== 0 || inputZ !== 0) && isGrounded;
 
@@ -496,7 +573,6 @@
                 rightLeg.rotation.x = 0;
             }
 
-            // Camera Tracking
             const camDistance = 7.0;
             const targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
             const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 1.2;
