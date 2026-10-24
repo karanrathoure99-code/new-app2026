@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Interactive 3D Open-World Map Generator & Editor</title>
+    <title>Interactive 3D Open-World Map - No Trees & Zoom Buttons</title>
     <style>
         body {
             margin: 0;
@@ -50,7 +50,7 @@
             max-width: 260px;
         }
         .control-group {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .control-group label {
             display: block;
@@ -75,27 +75,30 @@
         .control-btn:active {
             background: #1d4ed8;
         }
-        /* Full Map View Button */
-        #map-btn {
+        /* Full Map & Zoom Buttons */
+        .action-btn {
             position: absolute;
-            top: 220px;
             left: 15px;
             background: rgba(255, 85, 0, 0.9);
             color: white;
             border: 2px solid rgba(255, 255, 255, 0.5);
-            padding: 12px 20px;
+            padding: 10px 16px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             z-index: 100;
             touch-action: manipulation;
         }
-        #map-btn:active {
+        .action-btn:active {
             transform: scale(0.95);
             background: rgba(200, 65, 0, 0.9);
         }
+        #map-btn { top: 95px; }
+        #zoom-in-btn { top: 150px; background: rgba(16, 185, 129, 0.9); }
+        #zoom-out-btn { top: 200px; background: rgba(225, 29, 72, 0.9); }
+
         #minimap-container {
             position: absolute;
             top: 15px;
@@ -119,8 +122,8 @@
 <body>
     <div id="info">
         <strong>Map Creator & Editor:</strong><br>
-        Status: <span id="status-text">Interactive Mode Active</span><br>
-        <em>Tip: Adjust sliders or click on terrain to raise ground!</em>
+        Status: <span id="status-text">No Trees | Zoom & Edit Ready</span><br>
+        <em>Tip: Click on terrain to raise ground!</em>
     </div>
 
     <!-- Customization Panel -->
@@ -134,15 +137,13 @@
             <label>Terrain Bumps: <span id="val-roughness">60</span></label>
             <input type="range" id="range-roughness" min="10" max="200" step="10" value="60">
         </div>
-        <div class="control-group">
-            <label>Tree Density: <span id="val-trees">300</span></label>
-            <input type="range" id="range-trees" min="50" max="800" step="50" value="300">
-        </div>
         <button class="control-btn" onclick="regenerateMap()">🔄 Generate New Map</button>
     </div>
 
-    <!-- Full Map View Button -->
-    <button id="map-btn" onclick="toggleFullMap()">🗺️ Full Map View</button>
+    <!-- Action Buttons -->
+    <button id="map-btn" class="action-btn" onclick="toggleFullMap()">🗺️ Full Map View</button>
+    <button id="zoom-in-btn" class="action-btn" onclick="zoomMap(0.8)">➕ Zoom In</button>
+    <button id="zoom-out-btn" class="action-btn" onclick="zoomMap(1.25)">➖ Zoom Out</button>
 
     <div id="minimap-container">
         <canvas id="minimap-canvas" width="160" height="160"></canvas>
@@ -155,7 +156,6 @@
         let scene, camera, renderer;
         let mapSize = 10000;
         let terrainRoughness = 60;
-        let treeCount = 300;
         let groundMesh, terrainGeom;
         let minimapCtx, minimapCanvas;
         let isFullMap = false;
@@ -218,9 +218,6 @@
             document.getElementById('range-roughness').addEventListener('input', (e) => {
                 document.getElementById('val-roughness').innerText = e.target.value;
             });
-            document.getElementById('range-trees').addEventListener('input', (e) => {
-                document.getElementById('val-trees').innerText = e.target.value;
-            });
 
             // Interactive Click to raise terrain on map
             window.addEventListener('pointerdown', onMapClick);
@@ -228,7 +225,6 @@
         }
 
         function buildTerrainAndWorld() {
-            // Remove previous ground/trees if any
             scene.children.forEach(child => {
                 if (child.userData && child.userData.isCustomWorld) {
                     scene.remove(child);
@@ -238,7 +234,6 @@
             const worldGroup = new THREE.Group();
             worldGroup.userData.isCustomWorld = true;
 
-            // Terrain Ground with custom roughness & size
             const segments = 250;
             terrainGeom = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = terrainGeom.attributes.position;
@@ -248,7 +243,6 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                // User-defined bumpy height variations (No sharp cone mountains, only rolling slopes)
                 let height = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * terrainRoughness * 1.5) 
                            + Math.abs(Math.sin(vx * 0.005) * Math.sin(vy * 0.005) * (terrainRoughness * 0.6)) + 10;
 
@@ -269,27 +263,23 @@
             groundMesh.receiveShadow = true;
             worldGroup.add(groundMesh);
 
-            // Scattered Trees based on user slider
-            for (let i = 0; i < treeCount; i++) {
-                let tx = (Math.random() - 0.5) * (mapSize - 2000);
-                let tz = (Math.random() - 0.5) * (mapSize - 2000);
-                let treeGroup = createRealisticTree(tx, tz);
-                worldGroup.add(treeGroup);
-            }
-
             scene.add(worldGroup);
         }
 
         function regenerateMap() {
             mapSize = parseInt(document.getElementById('range-size').value);
             terrainRoughness = parseInt(document.getElementById('range-roughness').value);
-            treeCount = parseInt(document.getElementById('range-trees').value);
             buildTerrainAndWorld();
         }
 
+        // Zoom In / Zoom Out Camera Function
+        function zoomMap(factor) {
+            camera.position.y *= factor;
+            camera.position.y = Math.max(200, Math.min(25000, camera.position.y));
+        }
+
         function onMapClick(event) {
-            // Ignore if clicking UI control panel
-            if (event.target.closest('#control-panel') || event.target.closest('#map-btn')) return;
+            if (event.target.closest('#control-panel') || event.target.closest('.action-btn')) return;
 
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -299,14 +289,12 @@
 
             if (intersects.length > 0) {
                 let point = intersects[0].point;
-                // Raise terrain vertex heights around click point dynamically
                 let posAttr = terrainGeom.attributes.position;
                 for (let i = 0; i < posAttr.count; i++) {
                     let vx = posAttr.getX(i);
                     let vy = posAttr.getY(i);
-                    // Local plane coordinate mapping
                     let dx = vx - point.x;
-                    let dz = vy - (-point.z); // Z in local plane is -Y in world or vice versa depending on rotation
+                    let dz = vy - (-point.z);
                     let dist = Math.sqrt(dx*dx + dz*dz);
                     if (dist < 800) {
                         let currentZ = posAttr.getZ(i);
@@ -317,22 +305,6 @@
                 terrainGeom.computeVertexNormals();
                 posAttr.needsUpdate = true;
             }
-        }
-
-        function createRealisticTree(x, z) {
-            const treeGroup = new THREE.Group();
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.8, 10, 8), trunkMat);
-            trunk.position.set(x, 15, z); 
-            trunk.castShadow = true;
-            treeGroup.add(trunk);
-
-            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
-            const top = new THREE.Mesh(new THREE.SphereGeometry(5, 8, 8), foliageMat);
-            top.position.set(x, 21, z);
-            top.castShadow = true;
-            treeGroup.add(top);
-            return treeGroup;
         }
 
         function toggleFullMap() {
