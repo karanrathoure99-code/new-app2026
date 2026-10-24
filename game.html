@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tactical Dummy Mission - Update 4 (Combat Edition)</title>
+    <title>3D Tactical Dummy Mission - Ultimate Edition</title>
     <style>
         body {
             margin: 0;
@@ -66,8 +66,8 @@
     <div id="ui">
         <strong>Health:</strong> 
         <div id="health-bar-container"><div id="health-bar"></div></div><br>
-        <strong>Mission Status:</strong> <span id="status">Find the house with Gun, eliminate targets! Avoid enemy fire!</span><br>
-        Targets Left: <span id="targetCount">10</span> | Weapon: <span id="weaponStatus">Unarmed</span>
+        <strong>Mission Status:</strong> <span id="status">Explore 400x400 map, climb multi-story houses, get Gun & eliminate targets!</span><br>
+        Targets Left: <span id="targetCount">12</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
     <div id="crosshair"></div>
 
@@ -79,11 +79,11 @@
         let character;
         let head, torso, leftArm, rightArm, leftLeg, rightLeg;
         let obstacles = [];
-        let doors = [];
+        let doors = []; // Realistic swing doors array
         let enemies = [];
         let gunObject = null;
         let hasGun = false;
-        let targetsRemaining = 10;
+        let targetsRemaining = 12;
         let playerHealth = 100;
         let isGameOver = false;
         
@@ -105,7 +105,7 @@
             // 1. Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87ceeb);
-            scene.fog = new THREE.FogExp2(0x87ceeb, 0.004);
+            scene.fog = new THREE.FogExp2(0x87ceeb, 0.003);
 
             // 2. Camera Setup
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -121,16 +121,16 @@
             scene.add(ambientLight);
 
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-            dirLight.position.set(80, 120, 80);
+            dirLight.position.set(100, 150, 100);
             dirLight.castShadow = true;
-            dirLight.shadow.camera.left = -160;
-            dirLight.shadow.camera.right = 160;
-            dirLight.shadow.camera.top = 160;
-            dirLight.shadow.camera.bottom = -160;
+            dirLight.shadow.camera.left = -200;
+            dirLight.shadow.camera.right = 200;
+            dirLight.shadow.camera.top = 200;
+            dirLight.shadow.camera.bottom = -200;
             scene.add(dirLight);
 
-            // 5. Expanded Ground (300x300)
-            const mapSize = 300;
+            // 5. Expanded Ground (400x400)
+            const mapSize = 400;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize);
             const groundMat = new THREE.MeshStandardMaterial({ color: 0x3b6e4a, roughness: 0.9 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
@@ -138,42 +138,46 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 6. Boundary Walls
-            const wallH = 6;
+            // 6. Boundary Walls Around 400x400 Surface
+            const wallH = 8;
             const wMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.8 });
             createBoundaryWall(0, wallH/2, -mapSize/2, mapSize, wallH, 2, wMat);
             createBoundaryWall(0, wallH/2, mapSize/2, mapSize, wallH, 2, wMat);
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Houses with Auto-Doors
-            const houseCoords = [
-                {x: -70, z: -70}, {x: 70, z: -70}, {x: -70, z: 70}, {x: 70, z: 70},
-                {x: 0, z: -100}, {x: 0, z: 100}, {x: -100, z: 0}, {x: 100, z: 0}
-            ];
-            houseCoords.forEach(pos => createHouse(pos.x, 0, pos.z));
+            // 7. Spread Multi-Story Houses Across 400x400 Area (1-floor, 2-floor, 3-floor with stairs)
+            createHouse(-100, 0, -100, 1);
+            createHouse(100, 0, -100, 2);
+            createHouse(-100, 0, 100, 3);
+            createHouse(100, 0, 100, 2);
+            createHouse(0, 0, -150, 3);
+            createHouse(0, 0, 150, 1);
+            createHouse(-150, 0, 0, 2);
+            createHouse(150, 0, 0, 3);
 
-            // 8. Cover Boxes
-            for(let x = -110; x <= 110; x += 40) {
-                for(let z = -110; z <= 110; z += 40) {
-                    if(Math.abs(x) > 20 || Math.abs(z) > 20) {
-                        createCoverBox(x + (Math.random()*10 - 5), z + (Math.random()*10 - 5), 4.0, 2.2, 4.0);
+            // 8. Spread Cover Boxes Across 400x400 Area
+            for(let x = -170; x <= 170; x += 50) {
+                for(let z = -170; z <= 170; z += 50) {
+                    if(Math.abs(x) > 30 || Math.abs(z) > 30) {
+                        createCoverBox(x + (Math.random()*15 - 7.5), z + (Math.random()*15 - 7.5), 5.0, 2.5, 5.0);
                     }
                 }
             }
 
-            // 9. Gun Placement
-            createGun(-70, 0.3, -70);
+            // 9. Place Gun Inside House (-100, 0, -100)
+            createGun(-100, 0.3, -100);
 
-            // 10. Enemies
+            // 10. Spawn 12 Enemy Dummies Across the Map
             const enemyCoords = [
-                {x: 50, z: -50}, {x: -50, z: 90}, {x: 80, z: 50}, 
-                {x: -30, z: -100}, {x: 40, z: 100}, {x: -90, z: -30},
-                {x: 20, z: 20}, {x: -60, z: 40}, {x: 90, z: -80}, {x: 0, z: -40}
+                {x: 80, z: -80}, {x: -80, z: 120}, {x: 120, z: 80}, 
+                {x: -50, z: -140}, {x: 60, z: 140}, {x: -140, z: -50},
+                {x: 30, z: 30}, {x: -90, z: 60}, {x: 140, z: -120}, {x: 0, z: -60},
+                {x: -120, z: -120}, {x: 120, z: 120}
             ];
             enemyCoords.forEach(e => createEnemy(e.x, 0, e.z));
 
-            // 11. Dummy Character
+            // 11. Build Dummy Character
             character = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
             const shirtMat = new THREE.MeshStandardMaterial({ color: 0x337ab7 });
@@ -201,7 +205,7 @@
             rightLeg = new THREE.Mesh(legGeo, pantsMat);
             rightLeg.position.set(0.15, 0.3, 0); character.add(rightLeg);
 
-            character.position.set(0, 0, 120);
+            character.position.set(0, 0, 180);
             scene.add(character);
 
             // Event Listeners
@@ -228,68 +232,101 @@
             addObstacleBox(x, y, z, w, h, d);
         }
 
-        function createHouse(x, y, z) {
-            const houseWidth = 9, houseHeight = 4.5, houseDepth = 9, wallThickness = 0.4;
+        // Create Multi-Story House with Floors, Stairs, and Real Hinge Door
+        function createHouse(x, y, z, floors) {
+            const houseWidth = 14; // 50% larger
+            const floorHeight = 4.5;
+            const houseDepth = 14;
+            const wallThickness = 0.5;
             const wallMat = new THREE.MeshStandardMaterial({ color: 0xd9c3b0, roughness: 0.7 });
 
-            let backWall = new THREE.Mesh(new THREE.BoxGeometry(houseWidth, houseHeight, wallThickness), wallMat);
-            backWall.position.set(x, y + houseHeight/2, z - houseDepth/2);
-            scene.add(backWall);
-            addObstacleBox(backWall.position.x, backWall.position.y, backWall.position.z, houseWidth, houseHeight, wallThickness);
+            for(let f = 0; f < floors; f++) {
+                let currentY = y + f * floorHeight;
 
-            let leftWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, houseDepth), wallMat);
-            leftWall.position.set(x - houseWidth/2, y + houseHeight/2, z);
-            scene.add(leftWall);
-            addObstacleBox(leftWall.position.x, leftWall.position.y, leftWall.position.z, wallThickness, houseHeight, houseDepth);
+                // Back Wall
+                let backWall = new THREE.Mesh(new THREE.BoxGeometry(houseWidth, floorHeight, wallThickness), wallMat);
+                backWall.position.set(x, currentY + floorHeight/2, z - houseDepth/2);
+                scene.add(backWall);
+                addObstacleBox(backWall.position.x, backWall.position.y, backWall.position.z, houseWidth, floorHeight, wallThickness);
 
-            let rightWall1 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3.5), wallMat);
-            rightWall1.position.set(x + houseWidth/2, y + houseHeight/2, z - 2.75);
-            scene.add(rightWall1);
-            addObstacleBox(rightWall1.position.x, rightWall1.position.y, rightWall1.position.z, wallThickness, houseHeight, 3.5);
+                // Left Wall
+                let leftWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, floorHeight, houseDepth), wallMat);
+                leftWall.position.set(x - houseWidth/2, currentY + floorHeight/2, z);
+                scene.add(leftWall);
+                addObstacleBox(leftWall.position.x, leftWall.position.y, leftWall.position.z, wallThickness, floorHeight, houseDepth);
 
-            let rightWall2 = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, houseHeight, 3.5), wallMat);
-            rightWall2.position.set(x + houseWidth/2, y + houseHeight/2, z + 2.75);
-            scene.add(rightWall2);
-            addObstacleBox(rightWall2.position.x, rightWall2.position.y, rightWall2.position.z, wallThickness, houseHeight, 3.5);
+                // Right Wall
+                let rightWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, floorHeight, houseDepth), wallMat);
+                rightWall.position.set(x + houseWidth/2, currentY + floorHeight/2, z);
+                scene.add(rightWall);
+                addObstacleBox(rightWall.position.x, rightWall.position.y, rightWall.position.z, wallThickness, floorHeight, houseDepth);
 
-            let winBottom = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, 1.2, 2), wallMat);
-            winBottom.position.set(x + houseWidth/2, y + 0.6, z);
-            scene.add(winBottom);
-            addObstacleBox(winBottom.position.x, winBottom.position.y, winBottom.position.z, wallThickness, 1.2, 2);
+                if (f === 0) {
+                    // Ground floor front wall with door opening
+                    let frontWall1 = new THREE.Mesh(new THREE.BoxGeometry(5, floorHeight, wallThickness), wallMat);
+                    frontWall1.position.set(x - 4.5, currentY + floorHeight/2, z + houseDepth/2);
+                    scene.add(frontWall1);
+                    addObstacleBox(frontWall1.position.x, frontWall1.position.y, frontWall1.position.z, 5, floorHeight, wallThickness);
 
-            let winTop = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, 1.2, 2), wallMat);
-            winTop.position.set(x + houseWidth/2, y + houseHeight - 0.6, z);
-            scene.add(winTop);
-            addObstacleBox(winTop.position.x, winTop.position.y, winTop.position.z, wallThickness, 1.2, 2);
+                    let frontWall2 = new THREE.Mesh(new THREE.BoxGeometry(5, floorHeight, wallThickness), wallMat);
+                    frontWall2.position.set(x + 4.5, currentY + floorHeight/2, z + houseDepth/2);
+                    scene.add(frontWall2);
+                    addObstacleBox(frontWall2.position.x, frontWall2.position.y, frontWall2.position.z, 5, floorHeight, wallThickness);
 
-            let frontWall1 = new THREE.Mesh(new THREE.BoxGeometry(3, houseHeight, wallThickness), wallMat);
-            frontWall1.position.set(x - 3, y + houseHeight/2, z + houseDepth/2);
-            scene.add(frontWall1);
-            addObstacleBox(frontWall1.position.x, frontWall1.position.y, frontWall1.position.z, 3, houseHeight, wallThickness);
+                    let doorTop = new THREE.Mesh(new THREE.BoxGeometry(4, 1, wallThickness), wallMat);
+                    doorTop.position.set(x, currentY + 4, z + houseDepth/2);
+                    scene.add(doorTop);
+                    addObstacleBox(doorTop.position.x, doorTop.position.y, doorTop.position.z, 4, 1, wallThickness);
 
-            let frontWall2 = new THREE.Mesh(new THREE.BoxGeometry(3, houseHeight, wallThickness), wallMat);
-            frontWall2.position.set(x + 3, y + houseHeight/2, z + houseDepth/2);
-            scene.add(frontWall2);
-            addObstacleBox(frontWall2.position.x, frontWall2.position.y, frontWall2.position.z, 3, houseHeight, wallThickness);
+                    // Real Hinge Door (Swings open like a real door)
+                    const doorGroup = new THREE.Group();
+                    const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(4, 3.5, 0.2), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
+                    doorMesh.position.set(2, 0, 0); // Offset pivot to left edge
+                    doorMesh.castShadow = true;
+                    doorGroup.add(doorMesh);
+                    doorGroup.position.set(x - 2, currentY + 1.75, z + houseDepth/2);
+                    scene.add(doorGroup);
 
-            let doorTop = new THREE.Mesh(new THREE.BoxGeometry(3, 1, wallThickness), wallMat);
-            doorTop.position.set(x, y + 4, z + houseDepth/2);
-            scene.add(doorTop);
-            addObstacleBox(doorTop.position.x, doorTop.position.y, doorTop.position.z, 3, 1, wallThickness);
+                    doors.push({
+                        group: doorGroup,
+                        closedRotY: 0,
+                        openRotY: -Math.PI / 2, // Swings 90 degrees open
+                        closedX: x, closedZ: z + houseDepth/2
+                    });
+                } else {
+                    // Upper floor front wall
+                    let frontWall = new THREE.Mesh(new THREE.BoxGeometry(houseWidth, floorHeight, wallThickness), wallMat);
+                    frontWall.position.set(x, currentY + floorHeight/2, z + houseDepth/2);
+                    scene.add(frontWall);
+                    addObstacleBox(frontWall.position.x, frontWall.position.y, frontWall.position.z, houseWidth, floorHeight, wallThickness);
+                }
 
-            let doorMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 3.5, 0.2), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
-            doorMesh.position.set(x, y + 1.75, z + houseDepth/2);
-            scene.add(doorMesh);
+                // Floor ceiling slab / platform to stand on
+                if (f < floors - 1 || floors > 1) {
+                    let floorSlab = new THREE.Mesh(new THREE.BoxGeometry(houseWidth - 0.5, 0.3, houseDepth - 0.5), wallMat);
+                    floorSlab.position.set(x, currentY + floorHeight, z);
+                    scene.add(floorSlab);
+                    addObstacleBox(floorSlab.position.x, floorSlab.position.y, floorSlab.position.z, houseWidth - 0.5, 0.3, houseDepth - 0.5);
+                }
 
-            doors.push({
-                mesh: doorMesh,
-                closedX: x, closedY: y + 1.75, closedZ: z + houseDepth/2,
-                openZ: z + houseDepth/2 + 2.5
-            });
+                // Add stairs for multi-story houses to reach upper floors
+                if (f < floors - 1) {
+                    for (let s = 0; s < 8; s++) {
+                        let stairStep = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 0.6), new THREE.MeshStandardMaterial({ color: 0x555 }));
+                        stairStep.position.set(x - 4, currentY + 0.3 + s * 0.5, z - 4 + s * 0.6);
+                        scene.add(stairStep);
+                        addObstacleBox(stairStep.position.x, stairStep.position.y, stairStep.position.z, 2, 0.2, 0.6);
+                    }
+                }
+            }
 
-            let roof = new THREE.Mesh(new THREE.BoxGeometry(houseWidth + 1, 0.5, houseDepth + 1), new THREE.MeshStandardMaterial({ color: 0xa93226 }));
-            roof.position.set(x, y + houseHeight + 0.25, z);
+            // Roof
+            const roofMat = new THREE.MeshStandardMaterial({ color: 0xa93226, roughness: 0.6 });
+            let roof = new THREE.Mesh(new THREE.BoxGeometry(houseWidth + 1.5, 0.6, houseDepth + 1.5), roofMat);
+            roof.position.set(x, y + floors * floorHeight + 0.3, z);
+            roof.castShadow = true;
             scene.add(roof);
+            addObstacleBox(roof.position.x, roof.position.y, roof.position.z, houseWidth + 1.5, 0.6, houseDepth + 1.5);
         }
 
         function createCoverBox(x, z, w, h, d) {
@@ -319,11 +356,11 @@
         function createEnemy(x, y, z) {
             let enemyGroup = new THREE.Group();
             let torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({ color: 0xe74c3c }));
-            torso.position.y = 0.9;
+            torso.position.y = 0.9; torso.castShadow = true;
             enemyGroup.add(torso);
 
             let head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), new THREE.MeshStandardMaterial({ color: 0xffdbac }));
-            head.position.y = 1.35;
+            head.position.y = 1.35; head.castShadow = true;
             enemyGroup.add(head);
 
             enemyGroup.position.set(x, y, z);
@@ -390,48 +427,99 @@
                 moveX = (inputX * Math.cos(angle) + inputZ * Math.sin(angle)) * moveSpeed;
                 moveZ = (inputZ * Math.cos(angle) - inputX * Math.sin(angle)) * moveSpeed;
 
-                character.position.x += moveX;
-                character.position.z += moveZ;
+                // Predict X and check obstacle + house wall collision for player
+                let nextX = character.position.x + moveX;
+                let canMoveX = true;
+                for (let obs of obstacles) {
+                    if (nextX >= obs.minX - 0.35 && nextX <= obs.maxX + 0.35 &&
+                        character.position.z >= obs.minZ - 0.35 && character.position.z <= obs.maxZ + 0.35 &&
+                        character.position.y + 0.1 < obs.topY && character.position.y + 1.2 > obs.minY) {
+                        canMoveX = false; break;
+                    }
+                }
+                if (canMoveX) character.position.x = nextX;
+
+                // Predict Z and check collision
+                let nextZ = character.position.z + moveZ;
+                let canMoveZ = true;
+                for (let obs of obstacles) {
+                    if (character.position.x >= obs.minX - 0.35 && character.position.x <= obs.maxX + 0.35 &&
+                        nextZ >= obs.minZ - 0.35 && nextZ <= obs.maxZ + 0.35 &&
+                        character.position.y + 0.1 < obs.topY && character.position.y + 1.2 > obs.minY) {
+                        canMoveZ = false; break;
+                    }
+                }
+                if (canMoveZ) character.position.z = nextZ;
+
                 character.rotation.y = Math.atan2(moveX, moveZ);
             }
 
-            // Enemy Attack / Damage Mechanics (If enemy is close to player)
+            // Enemy Movement & Wall Collision Prevention
             enemies.forEach(en => {
                 let distToPlayer = en.position.distanceTo(character.position);
+                if (distToPlayer < 25 && distToPlayer > 2) {
+                    // Simple AI movement towards player
+                    let dirX = (character.position.x - en.position.x) * 0.003;
+                    let dirZ = (character.position.z - en.position.z) * 0.003;
+
+                    let newEnemyX = en.position.x + dirX;
+                    let canEnMoveX = true;
+                    for (let obs of obstacles) {
+                        if (newEnemyX >= obs.minX - 0.4 && newEnemyX <= obs.maxX + 0.4 &&
+                            en.position.z >= obs.minZ - 0.4 && en.position.z <= obs.maxZ + 0.4 &&
+                            en.position.y + 0.1 < obs.topY && en.position.y + 1.2 > obs.minY) {
+                            canEnMoveX = false; break;
+                        }
+                    }
+                    if (canEnMoveX) en.position.x = newEnemyX;
+
+                    let newEnemyZ = en.position.z + dirZ;
+                    let canEnMoveZ = true;
+                    for (let obs of obstacles) {
+                        if (en.position.x >= obs.minX - 0.4 && en.position.x <= obs.maxX + 0.4 &&
+                            newEnemyZ >= obs.minZ - 0.4 && newEnemyZ <= obs.maxZ + 0.4 &&
+                            en.position.y + 0.1 < obs.topY && en.position.y + 1.2 > obs.minY) {
+                            canEnMoveZ = false; break;
+                        }
+                    }
+                    if (canEnMoveZ) en.position.z = newEnemyZ;
+                    en.rotation.y = Math.atan2(dirX, dirZ);
+                }
+
+                // Enemy Attack / Damage
                 if (distToPlayer < 12) {
-                    // Enemy shoots player if close
                     if (Math.random() < 0.03) {
-                        playerHealth -= 5;
+                        playerHealth -= 4;
                         document.getElementById('health-bar').style.width = Math.max(0, playerHealth) + '%';
                         if (playerHealth <= 0) {
                             isGameOver = true;
-                            document.getElementById('status').innerHTML = '<span style="color:red; font-size:16px;">GAME OVER! Refresh page to restart.</span>';
+                            document.getElementById('status').innerHTML = '<span style="color:red; font-size:15px;">GAME OVER! Refresh to restart.</span>';
                         }
                     }
                 }
             });
 
+            // Realistic Door Swing Animation on Proximity
             doors.forEach(d => {
-                let isOpen = character.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ)) < 2.5;
+                let isOpen = character.position.distanceTo(new THREE.Vector3(d.closedX, 0, d.closedZ)) < 3.0;
                 if(!isOpen) {
                     for(let en of enemies) {
-                        if(en.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ)) < 2.5) {
-                            isOpen = true;
-                            break;
+                        if(en.position.distanceTo(new THREE.Vector3(d.closedX, 0, d.closedZ)) < 3.0) {
+                            isOpen = true; break;
                         }
                     }
                 }
-                let targetZ = isOpen ? d.openZ : d.closedZ;
-                d.mesh.position.z += (targetZ - d.mesh.position.z) * 0.1;
+                let targetRotY = isOpen ? d.openRotY : d.closedRotY;
+                d.group.rotation.y += (targetRotY - d.group.rotation.y) * 0.1;
             });
 
             if (gunObject && !hasGun) {
-                if (character.position.distanceTo(gunObject.position) < 1.8) {
+                if (character.position.distanceTo(gunObject.position) < 2.0) {
                     scene.remove(gunObject);
                     gunObject = null;
                     hasGun = true;
                     document.getElementById('weaponStatus').innerText = 'Assault Rifle';
-                    document.getElementById('status').innerText = 'Gun acquired! Eliminate targets & avoid enemy fire!';
+                    document.getElementById('status').innerText = 'Gun acquired! Climb multi-story houses & eliminate targets!';
                 }
             }
 
