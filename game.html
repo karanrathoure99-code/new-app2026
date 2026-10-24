@@ -1,392 +1,444 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Free Fire Bermuda - Solid Base, Connected Mountains & Adam</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Massive 10000x10000 White Surface Explorer</title>
+    <!-- Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            margin: 0;
-            padding: 0;
+            font-family: 'Inter', sans-serif;
+            touch-action: none; /* Prevent default pinch-zoom/scroll on mobile to handle custom gestures */
             overflow: hidden;
-            background-color: #1e293b;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
         }
-        #info {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            color: white;
-            background: rgba(10, 15, 25, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 12px 18px;
-            border-radius: 10px;
-            font-size: 13px;
-            pointer-events: none;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            backdrop-filter: blur(6px);
-            z-index: 10;
+        /* Custom scrollbar for control panels */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        #info span {
-            color: #38bdf8;
-            font-weight: bold;
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
         }
-        /* Action UI Buttons */
-        .ui-btn {
-            position: absolute;
-            left: 15px;
-            background: rgba(255, 85, 0, 0.9);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            z-index: 100;
-            touch-action: manipulation;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
         }
-        .ui-btn:active {
-            transform: scale(0.95);
-            background: rgba(200, 65, 0, 0.9);
-        }
-        #map-btn { top: 95px; }
-        #height-up-btn { top: 155px; background: rgba(16, 185, 129, 0.9); }
-        #height-down-btn { top: 210px; background: rgba(59, 130, 246, 0.9); }
-
-        #minimap-container {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 160px;
-            height: 160px;
-            background: rgba(10, 15, 25, 0.85);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-            pointer-events: none;
-            z-index: 10;
-        }
-        #minimap-canvas {
-            width: 100%;
-            height: 100%;
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
-<body>
-    <div id="info">
-        <strong>Free Fire Bermuda + Adam:</strong><br>
-        Controls: <span>W, A, S, D to Walk</span><br>
-        Status: <span>Solid White Base & Connected Perimeter Mountains</span>
+<body class="h-full bg-slate-900 text-slate-100 flex flex-col relative select-none">
+
+    <!-- Top Navigation Header -->
+    <header class="absolute top-0 left-0 right-0 z-20 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md flex items-center justify-center w-10 h-10">
+                <i class="fa-solid fa-compass text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base md:text-lg tracking-tight text-white flex items-center gap-2">
+                    Infinite Canvas <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">10,000 × 10,000 px</span>
+                </h1>
+                <p class="text-xs text-slate-400 hidden sm:block">Explore the massive pure white surface with smooth zoom and pan.</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Stats -->
+        <div class="flex items-center space-x-2 md:space-x-4">
+            <div class="hidden md:flex items-center space-x-3 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
+                <span>Zoom: <strong id="zoomIndicator" class="text-indigo-400">100%</strong></span>
+                <span class="text-slate-600">|</span>
+                <span>Pos: <strong id="posIndicator" class="text-indigo-400">X: 5000, Y: 5000</strong></span>
+            </div>
+            
+            <button onclick="toggleInfoModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg transition border border-slate-700 shadow-sm flex items-center gap-2 text-xs font-medium px-3">
+                <i class="fa-solid fa-circle-question text-indigo-400"></i>
+                <span class="hidden sm:inline">Help</span>
+            </button>
+            <button onclick="resetView()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg transition shadow-md flex items-center gap-1.5 text-xs font-medium">
+                <i class="fa-solid fa-house"></i>
+                <span>Center View</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Viewport Container -->
+    <main id="viewport" class="flex-1 w-full h-full relative overflow-hidden cursor-grab active:cursor-grabbing bg-slate-950">
+        <!-- The Massive 10000x10000 White Surface -->
+        <div id="canvasSurface" class="absolute bg-white shadow-2xl rounded-sm transition-transform duration-75 ease-out" style="width: 10000px; height: 10000px; transform-origin: 0 0;">
+            <!-- Subtle grid pattern or corner markers to give a sense of scale across the 10000px surface -->
+            <div class="absolute top-6 left-6 text-slate-400 font-mono text-sm pointer-events-none select-none flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded border border-slate-200">
+                <i class="fa-solid fa-arrow-up-left text-indigo-600"></i> Top-Left Corner (0, 0)
+            </div>
+            <div class="absolute top-6 right-6 text-slate-400 font-mono text-sm pointer-events-none select-none flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded border border-slate-200">
+                Top-Right Corner (10000, 0) <i class="fa-solid fa-arrow-up-right text-indigo-600"></i>
+            </div>
+            <div class="absolute bottom-6 left-6 text-slate-400 font-mono text-sm pointer-events-none select-none flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded border border-slate-200">
+                <i class="fa-solid fa-arrow-down-left text-indigo-600"></i> Bottom-Left Corner (0, 10000)
+            </div>
+            <div class="absolute bottom-6 right-6 text-slate-400 font-mono text-sm pointer-events-none select-none flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded border border-slate-200">
+                Bottom-Right Corner (10000, 10000) <i class="fa-solid fa-arrow-down-right text-indigo-600"></i>
+            </div>
+            
+            <!-- Center Crosshair Marker on the white surface -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full border-2 border-dashed border-indigo-500 flex items-center justify-center animate-spin" style="animation-duration: 20s;">
+                </div>
+                <span class="mt-2 text-xs font-mono text-slate-500 bg-white/90 px-2 py-1 rounded shadow border border-slate-200">Center (5000, 5000)</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Zoom Controls Panel -->
+    <div class="absolute bottom-6 left-6 z-20 flex flex-col bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl shadow-xl overflow-hidden p-1.5 space-y-1">
+        <button onclick="zoomIn()" title="Zoom In" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-200 transition">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <div class="h-[1px] bg-slate-800 w-full my-0.5"></div>
+        <button onclick="zoomOut()" title="Zoom Out" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-200 transition">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+        <div class="h-[1px] bg-slate-800 w-full my-0.5"></div>
+        <button onclick="fitToScreen()" title="Fit to Screen" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-200 transition text-xs font-bold">
+            FIT
+        </button>
     </div>
 
-    <!-- UI Buttons -->
-    <button id="map-btn" class="ui-btn" onclick="toggleFullMap()">🗺️ Full Map View</button>
-    <button id="height-up-btn" class="ui-btn" onclick="adjustHeight(150)">🔼 Height Up (+)</button>
-    <button id="height-down-btn" class="ui-btn" onclick="adjustHeight(-150)">🔽 Height Down (-)</button>
-
-    <!-- Live Minimap -->
-    <div id="minimap-container">
-        <canvas id="minimap-canvas" width="160" height="160"></canvas>
+    <!-- Floating Minimap Navigation Widget -->
+    <div class="absolute bottom-6 right-6 z-20 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl shadow-xl p-2 hidden sm:block">
+        <div class="text-[10px] uppercase font-semibold text-slate-400 mb-1 px-1 flex justify-between items-center">
+            <span>Minimap</span>
+            <span id="minimapCoords" class="font-mono text-indigo-400">5000, 5000</span>
+        </div>
+        <div id="minimapContainer" onclick="jumpToMinimap(event)" class="relative w-36 h-36 bg-slate-950 rounded-lg overflow-hidden border border-slate-800 cursor-pointer">
+            <!-- Miniature white surface representation -->
+            <div class="absolute inset-2 bg-white rounded-sm opacity-90"></div>
+            <!-- Viewport indicator box inside minimap -->
+            <div id="minimapViewport" class="absolute border-2 border-indigo-500 bg-indigo-500/20 rounded-[2px] transition-all duration-75 pointer-events-none"></div>
+        </div>
     </div>
 
-    <!-- Three.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-slate-200">
+            <button onclick="toggleInfoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-compass text-indigo-500"></i> Exploration Controls
+            </h3>
+            <p class="text-sm text-slate-400 mb-4">
+                You are exploring a massive <strong class="text-indigo-400">10,000 × 10,000 pixel</strong> pure white canvas. Use the following gestures to navigate:
+            </p>
+            <ul class="space-y-3 text-sm text-slate-300 mb-6">
+                <li class="flex items-start gap-3">
+                    <div class="bg-slate-800 p-2 rounded-lg text-indigo-400 mt-0.5"><i class="fa-solid fa-hand"></i></div>
+                    <div><strong>Pan / Drag:</strong> Click and drag anywhere on the canvas or use touch drag on mobile devices to move around.</div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="bg-slate-800 p-2 rounded-lg text-indigo-400 mt-0.5"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <div><strong>Zoom:</strong> Use your mouse scroll wheel, pinch gestures on trackpad/touchscreen, or the floating +/- buttons.</div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="bg-slate-800 p-2 rounded-lg text-indigo-400 mt-0.5"><i class="fa-solid fa-map"></i></div>
+                    <div><strong>Minimap:</strong> Click anywhere on the bottom-right minimap to instantly jump to that area.</div>
+                </li>
+            </ul>
+            <button onclick="toggleInfoModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl transition shadow-lg">
+                Start Exploring
+            </button>
+        </div>
+    </div>
 
+    <!-- Notification toast for custom messages -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 shadow-xl text-xs font-medium transition-all duration-300 opacity-0 pointer-events-none">
+        Centered view on canvas
+    </div>
+
+    <!-- JavaScript Application Logic -->
     <script>
-        let scene, camera, renderer;
-        let baseSize = 20000;
-        let mapSize = 15000;
-        let minimapCtx, minimapCanvas;
-        let isFullMap = false;
+        // Canvas and Viewport state
+        const surface = document.getElementById('canvasSurface');
+        const viewport = document.getElementById('viewport');
+        const zoomIndicator = document.getElementById('zoomIndicator');
+        const posIndicator = document.getElementById('posIndicator');
+        const minimapViewport = document.getElementById('minimapViewport');
+        const minimapCoords = document.getElementById('minimapCoords');
+        const toast = document.getElementById('toast');
 
-        let adam;
-        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-        let adamSpeed = 12;
-        let cameraOffsetHeight = 400;
+        const SURFACE_SIZE = 10000;
+        
+        let scale = 1;
+        let panX = 0;
+        let panY = 0;
 
-        init();
-        animate();
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
 
-        function init() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x1e293b);
+        // Touch interaction variables for pinch-to-zoom
+        let initialPinchDistance = null;
+        let initialScale = 1;
 
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 60000);
-            camera.position.set(0, 1000, 1800);
+        // Initialize view: Center the canvas in the viewport
+        function initView() {
+            const vWidth = viewport.clientWidth;
+            const vHeight = viewport.clientHeight;
+            
+            // Fit initially so a good portion or the whole thing is visible, or center precisely
+            // Let's calculate a nice initial scale that fits comfortably or starts at a reasonable zoom
+            scale = Math.min(vWidth, vHeight) / 2500;
+            if (scale < 0.1) scale = 0.1;
+            if (scale > 2) scale = 0.5;
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.2;
-            document.body.appendChild(renderer.domElement);
+            // Center point (5000, 5000) in the middle of viewport
+            panX = (vWidth / 2) - (5000 * scale);
+            panY = (vHeight / 2) - (5000 * scale);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-            scene.add(ambientLight);
+            updateTransform();
+        }
 
-            const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
-            sunLight.position.set(4000, 8000, 4000);
-            sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 2048;
-            sunLight.shadow.mapSize.height = 2048;
-            sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 35000;
-            const d = 15000;
-            sunLight.shadow.camera.left = -d;
-            sunLight.shadow.camera.right = d;
-            sunLight.shadow.camera.top = d;
-            sunLight.shadow.camera.bottom = -d;
-            scene.add(sunLight);
+        function updateTransform() {
+            surface.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            
+            // Update UI indicators
+            zoomIndicator.textContent = `${Math.round(scale * 100)}%`;
+            
+            // Calculate center coordinate on the 10000x10000 surface relative to viewport center
+            const vWidth = viewport.clientWidth;
+            const vHeight = viewport.clientHeight;
+            const centerX = (vWidth / 2 - panX) / scale;
+            const centerY = (vHeight / 2 - panY) / scale;
+            
+            const clampedX = Math.max(0, Math.min(SURFACE_SIZE, Math.round(centerX)));
+            const clampedY = Math.max(0, Math.min(SURFACE_SIZE, Math.round(centerY)));
+            
+            posIndicator.textContent = `X: ${clampedX}, Y: ${clampedY}`;
+            minimapCoords.textContent = `${clampedX}, ${clampedY}`;
 
-            // 1. BOTTOM LAYER: 20,000 x 20,000 Solid White Base Surface
-            const baseGeo = new THREE.PlaneGeometry(baseSize, baseSize);
-            const baseMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
-            const baseSurface = new THREE.Mesh(baseGeo, baseMat);
-            baseSurface.rotation.x = -Math.PI / 2;
-            baseSurface.position.y = -20;
-            baseSurface.receiveShadow = true;
-            scene.add(baseSurface);
+            updateMinimapBox();
+        }
 
-            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Lowered Edges and Connected High Perimeter Mountains
-            const segments = 350;
-            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
-            const posAttr = groundGeo.attributes.position;
-            let halfSize = mapSize / 2;
+        function updateMinimapBox() {
+            const minimapContainer = document.getElementById('minimapContainer');
+            const mWidth = minimapContainer.clientWidth;
+            const mHeight = minimapContainer.clientHeight;
+            
+            // Scale factor between surface and minimap (inset is 2px padding each side or relative)
+            // Minimap inner box represents SURFACE_SIZE (10000px) mapped to mWidth - 16px approx
+            const innerSize = mWidth - 16; // accounting for inset
+            const ratio = innerSize / SURFACE_SIZE;
+            
+            const vWidth = viewport.clientWidth;
+            const vHeight = viewport.clientHeight;
 
-            for (let i = 0; i < posAttr.count; i++) {
-                let vx = posAttr.getX(i);
-                let vy = posAttr.getY(i);
+            const boxWidth = (vWidth / scale) * ratio;
+            const boxHeight = (vHeight / scale) * ratio;
+            const boxLeft = 8 + (-panX / scale) * ratio;
+            const boxTop = 8 + (-panY / scale) * ratio;
+
+            minimapViewport.style.width = `${Math.max(4, boxWidth)}px`;
+            minimapViewport.style.height = `${Math.max(4, boxHeight)}px`;
+            minimapViewport.style.left = `${Math.max(8, Math.min(mWidth - 8 - 4, boxLeft))}px`;
+            minimapViewport.style.top = `${Math.max(8, Math.min(mHeight - 8 - 4, boxTop))}px`;
+        }
+
+        // Panning & Dragging Event Listeners
+        viewport.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return; // Only left click
+            isDragging = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+            viewport.classList.add('cursor-grabbing');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            viewport.classList.remove('cursor-grabbing');
+        });
+
+        // Touch support for mobile panning
+        viewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX - panX;
+                startY = e.touches[0].clientY - panY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = scale;
+            }
+        }, { passive: false });
+
+        viewport.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDragging) {
+                panX = e.touches[0].clientX - startX;
+                panY = e.touches[0].clientY - startY;
+                updateTransform();
+            } else if (e.touches.length === 2 && initialPinchDistance) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const factor = currentDistance / initialPinchDistance;
+                let newScale = initialScale * factor;
                 
-                // Rolling hills inside the map
-                let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 180 
-                           + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 70;
-
-                // River valley depression in center
-                if (Math.abs(vx) < 350) {
-                    height -= 60;
-                }
-
-                // Lowered edges smoothly blending into high solid perimeter mountains rising from the white base
-                let distFromCenter = Math.sqrt(vx * vx + vy * vy);
-                let innerRadius = halfSize - 3500; 
-                if (distFromCenter > innerRadius) {
-                    let factor = (distFromCenter - innerRadius) / (3500);
-                    let mountainRise = Math.pow(factor, 1.8) * 1800; // High solid perimeter mountains
-                    height += mountainRise;
-                }
-
-                posAttr.setZ(i, Math.max(0, height));
+                // Clamp scale between 0.05x and 10x
+                newScale = Math.max(0.05, Math.min(10, newScale));
+                
+                // Zoom towards midpoint of touches
+                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                
+                const surfX = (midX - panX) / scale;
+                const surfY = (midY - panY) / scale;
+                
+                scale = newScale;
+                panX = midX - surfX * scale;
+                panY = midY - surfY * scale;
+                
+                updateTransform();
             }
-            groundGeo.computeVertexNormals();
+        }, { passive: false });
 
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.85, flatShading: false });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
-            ground.rotation.x = -Math.PI / 2;
-            ground.position.y = 0;
-            ground.receiveShadow = true;
-            scene.add(ground);
-
-            // 3. River Flow
-            const riverGeo = new THREE.PlaneGeometry(350, mapSize);
-            const riverMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, roughness: 0.3 });
-            const river = new THREE.Mesh(riverGeo, riverMat);
-            river.rotation.x = -Math.PI / 2;
-            river.position.set(0, 5, 0);
-            scene.add(river);
-
-            // 4. Dam
-            const damGeo = new THREE.BoxGeometry(450, 240, 120);
-            const damMat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.6 });
-            const dam = new THREE.Mesh(damGeo, damMat);
-            dam.position.set(0, 120, 0);
-            dam.castShadow = true;
-            dam.receiveShadow = true;
-            scene.add(dam);
-
-            // 5. Giant Rocks / Mountains
-            createGiantRock(-3000, 2500, 700, 600, 0x475444);
-            createGiantRock(3500, -3000, 800, 700, 0x434c40);
-            createGiantRock(-2500, -3500, 900, 800, 0x3b4338);
-            createGiantRock(3000, 3000, 750, 650, 0x525c4e);
-
-            // 6. ADAM CHARACTER
-            adam = createAdamCharacter();
-            adam.position.set(0, 50, 500);
-            scene.add(adam);
-
-            // Keyboard Controls
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') moveForward = true;
-                if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') moveBackward = true;
-                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLeft = true;
-                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveRight = true;
-            });
-
-            window.addEventListener('keyup', (e) => {
-                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') moveForward = false;
-                if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') moveBackward = false;
-                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLeft = false;
-                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveRight = false;
-            });
-
-            minimapCanvas = document.getElementById('minimap-canvas');
-            minimapCtx = minimapCanvas.getContext('2d');
-
-            window.addEventListener('resize', onWindowResize);
-        }
-
-        function createAdamCharacter() {
-            const charGroup = new THREE.Group();
-            const matSkin = new THREE.MeshStandardMaterial({ color: 0xf5d0b1, roughness: 0.6 });
-            const matShirt = new THREE.MeshStandardMaterial({ color: 0xe74c3c, roughness: 0.7 });
-            const matPants = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.8 });
-
-            const head = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), matSkin);
-            head.position.y = 45;
-            head.castShadow = true;
-            charGroup.add(head);
-
-            const torso = new THREE.Mesh(new THREE.BoxGeometry(14, 18, 8), matShirt);
-            torso.position.y = 30;
-            torso.castShadow = true;
-            charGroup.add(torso);
-
-            const lArm = new THREE.Mesh(new THREE.BoxGeometry(4, 16, 4), matSkin);
-            lArm.position.set(-10, 30, 0);
-            lArm.castShadow = true;
-            charGroup.add(lArm);
-
-            const rArm = new THREE.Mesh(new THREE.BoxGeometry(4, 16, 4), matSkin);
-            rArm.position.set(10, 30, 0);
-            rArm.castShadow = true;
-            charGroup.add(rArm);
-
-            const lLeg = new THREE.Mesh(new THREE.BoxGeometry(5, 18, 5), matPants);
-            lLeg.position.set(-4, 10, 0);
-            lLeg.castShadow = true;
-            charGroup.add(lLeg);
-
-            const rLeg = new THREE.Mesh(new THREE.BoxGeometry(5, 18, 5), matPants);
-            rLeg.position.set(4, 10, 0);
-            rLeg.castShadow = true;
-            charGroup.add(rLeg);
-
-            return charGroup;
-        }
-
-        function createGiantRock(x, z, radius, height, colorHex) {
-            const rockGeo = new THREE.ConeGeometry(radius, height, 12, 6, true);
-            const pos = rockGeo.attributes.position;
-            for (let i = 0; i < pos.count; i++) {
-                let vx = pos.getX(i);
-                let vy = pos.getY(i);
-                let vz = pos.getZ(i);
-                if (vy > 0) {
-                    let noise = Math.sin(vx * 0.05) * Math.cos(vz * 0.05) * 50 + (Math.random() - 0.5) * 40;
-                    pos.setX(i, vx + noise);
-                    pos.setZ(i, vz + noise);
-                }
+        viewport.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                initialPinchDistance = null;
             }
-            rockGeo.computeVertexNormals();
-
-            const rockMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.9, flatShading: true });
-            const rockMesh = new THREE.Mesh(rockGeo, rockMat);
-            rockMesh.position.set(x, height / 2, z);
-            rockMesh.castShadow = true;
-            rockMesh.receiveShadow = true;
-            scene.add(rockMesh);
-        }
-
-        function adjustHeight(amount) {
-            cameraOffsetHeight += amount;
-            cameraOffsetHeight = Math.max(200, Math.min(3000, cameraOffsetHeight));
-        }
-
-        function toggleFullMap() {
-            isFullMap = !isFullMap;
-            const btn = document.getElementById('map-btn');
-            if (isFullMap) {
-                camera.position.set(0, 24000, 0); 
-                camera.lookAt(0, 0, 0);
-                btn.innerHTML = "🗺️ Adam View";
-            } else {
-                btn.innerHTML = "🗺️ Full Map View";
+            if (e.touches.length === 0) {
+                isDragging = false;
             }
+        });
+
+        // Mouse Wheel Zooming centered on cursor
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const zoomIntensity = 0.12;
+            const direction = e.deltaY < 0 ? 1 : -1;
+            let newScale = scale * (1 + direction * zoomIntensity);
+            
+            // Clamp scale
+            newScale = Math.max(0.05, Math.min(10, newScale));
+            
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            // Adjust pan so point under mouse stays fixed
+            panX = mouseX - (mouseX - panX) * (newScale / scale);
+            panY = mouseY - (mouseY - panY) * (newScale / scale);
+            scale = newScale;
+            
+            updateTransform();
+        }, { passive: false });
+
+        // Button Zoom Controls
+        function zoomIn() {
+            zoomToCenter(scale * 1.3);
         }
 
-        function drawMinimap() {
-            if (!minimapCtx) return;
-            let w = minimapCanvas.width;
-            let h = minimapCanvas.height;
-
-            minimapCtx.clearRect(0, 0, w, h);
-            minimapCtx.fillStyle = '#1e293b';
-            minimapCtx.fillRect(0, 0, w, h);
-
-            minimapCtx.fillStyle = '#ffffff';
-            minimapCtx.fillRect(w * 0.05, h * 0.05, w * 0.9, h * 0.9);
-
-            minimapCtx.fillStyle = '#315c1b';
-            minimapCtx.fillRect(w * 0.15, h * 0.15, w * 0.7, h * 0.7);
-
-            if (adam) {
-                let normX = (adam.position.x / mapSize + 0.5) * w;
-                let normZ = (adam.position.z / mapSize + 0.5) * h;
-                minimapCtx.fillStyle = '#ff3300';
-                minimapCtx.beginPath();
-                minimapCtx.arc(normX, normZ, 5, 0, Math.PI * 2);
-                minimapCtx.fill();
-            }
+        function zoomOut() {
+            zoomToCenter(scale / 1.3);
         }
 
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        function zoomToCenter(newScale) {
+            newScale = Math.max(0.05, Math.min(10, newScale));
+            const vWidth = viewport.clientWidth;
+            const vHeight = viewport.clientHeight;
+            
+            const centerX = vWidth / 2;
+            const centerY = vHeight / 2;
+            
+            const surfX = (centerX - panX) / scale;
+            const surfY = (centerY - panY) / scale;
+            
+            scale = newScale;
+            panX = centerX - surfX * scale;
+            panY = centerY - surfY * scale;
+            
+            updateTransform();
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (adam) {
-                if (moveForward) adam.position.z -= adamSpeed;
-                if (moveBackward) adam.position.z += adamSpeed;
-                if (moveLeft) adam.position.x -= adamSpeed;
-                if (moveRight) adam.position.x += adamSpeed;
-
-                // Terrain height matching the solid perimeter mountains and lowered edges
-                let vx = adam.position.x;
-                let vy = adam.position.z;
-                let h = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 180 
-                      + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 70;
-                if (Math.abs(vx) < 350) h -= 60;
-
-                let distFromCenter = Math.sqrt(vx * vx + vy * vy);
-                let halfSize = mapSize / 2;
-                let innerRadius = halfSize - 3500;
-                if (distFromCenter > innerRadius) {
-                    let factor = (distFromCenter - innerRadius) / (3500);
-                    let mountainRise = Math.pow(factor, 1.8) * 1800;
-                    h += mountainRise;
-                }
-
-                adam.position.y = Math.max(10, h + 20);
-
-                if (!isFullMap) {
-                    camera.position.set(adam.position.x, adam.position.y + cameraOffsetHeight, adam.position.z + cameraOffsetHeight * 1.8);
-                    camera.lookAt(adam.position.x, adam.position.y, adam.position.z);
-                }
-            }
-
-            drawMinimap();
-            renderer.render(scene, camera);
+        function resetView() {
+            initView();
+            showToast("Centered 10000x10000 surface view");
         }
+
+        function fitToScreen() {
+            const vWidth = viewport.clientWidth;
+            const vHeight = viewport.clientHeight;
+            
+            const scaleX = (vWidth - 80) / SURFACE_SIZE;
+            const scaleY = (vHeight - 80) / SURFACE_SIZE;
+            scale = Math.min(scaleX, scaleY);
+            
+            panX = (vWidth - SURFACE_SIZE * scale) / 2;
+            panY = (vHeight - SURFACE_SIZE * scale) / 2;
+            
+            updateTransform();
+            showToast("Fitted surface to screen");
+        }
+
+        function jumpToMinimap(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            
+            const mWidth = rect.width;
+            const innerSize = mWidth - 16;
+            const ratio = innerSize / SURFACE_SIZE;
+            
+            // Target surface coordinates
+            const targetSurfX = (clickX - 8) / ratio;
+            const targetSurfY = (clickY - 8) / ratio;
+            
+            const vWidth = viewport.clientWidth;
+            const vHeight = viewport.clientHeight;
+            
+            panX = (vWidth / 2) - (targetSurfX * scale);
+            panY = (vHeight / 2) - (targetSurfY * scale);
+            
+            updateTransform();
+        }
+
+        function toggleInfoModal() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        }
+
+        // Window resize listener
+        window.addEventListener('resize', () => {
+            updateTransform();
+        });
+
+        // Initialize on load
+        window.onload = () => {
+            initView();
+        };
     </script>
 </body>
 </html>
