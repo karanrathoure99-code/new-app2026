@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bermuda Open-World Map with Playable Adam Character</title>
+    <title>Bermuda Open-World Map - Natural Boundary Hills & Height Controls</title>
     <style>
         body {
             margin: 0;
@@ -33,26 +33,30 @@
             color: #38bdf8;
             font-weight: bold;
         }
-        #map-btn {
+        /* Action UI Buttons */
+        .ui-btn {
             position: absolute;
-            top: 95px;
             left: 15px;
             background: rgba(255, 85, 0, 0.9);
             color: white;
             border: 2px solid rgba(255, 255, 255, 0.5);
-            padding: 12px 20px;
+            padding: 10px 16px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             z-index: 100;
             touch-action: manipulation;
         }
-        #map-btn:active {
+        .ui-btn:active {
             transform: scale(0.95);
             background: rgba(200, 65, 0, 0.9);
         }
+        #map-btn { top: 95px; }
+        #height-up-btn { top: 155px; background: rgba(16, 185, 129, 0.9); }
+        #height-down-btn { top: 210px; background: rgba(59, 130, 246, 0.9); }
+
         #minimap-container {
             position: absolute;
             top: 15px;
@@ -75,13 +79,15 @@
 </head>
 <body>
     <div id="info">
-        <strong>Free Fire World + Adam:</strong><br>
-        Controls: <span>W, A, S, D or Arrow Keys to Walk</span><br>
-        Status: <span>Adam Character Loaded on Solid Terrain</span>
+        <strong>Free Fire Bermuda + Adam:</strong><br>
+        Controls: <span>W, A, S, D to Walk</span><br>
+        Status: <span>Natural Hills Boundary & Height Controls Loaded</span>
     </div>
 
-    <!-- Full Map View Button -->
-    <button id="map-btn" onclick="toggleFullMap()">🗺️ Full Map View</button>
+    <!-- UI Buttons -->
+    <button id="map-btn" class="ui-btn" onclick="toggleFullMap()">🗺️ Full Map View</button>
+    <button id="height-up-btn" class="ui-btn" onclick="adjustHeight(150)">🔼 Height Up (+)</button>
+    <button id="height-down-btn" class="ui-btn" onclick="adjustHeight(-150)">🔽 Height Down (-)</button>
 
     <!-- Live Minimap -->
     <div id="minimap-container">
@@ -101,6 +107,7 @@
         let adam;
         let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
         let adamSpeed = 12;
+        let cameraOffsetHeight = 400; // Adjustable height offset
 
         init();
         animate();
@@ -110,7 +117,7 @@
             scene.background = new THREE.Color(0x1e293b);
 
             camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 60000);
-            camera.position.set(0, 800, 1500);
+            camera.position.set(0, 1000, 1800);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -146,7 +153,7 @@
             baseSurface.receiveShadow = true;
             scene.add(baseSurface);
 
-            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain
+            // 2. TOP LAYER: 15,000 x 15,000 Bermuda Solid Terrain with Natural Boundary Hills
             const segments = 350;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
@@ -156,18 +163,21 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 200 
-                           + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 80;
+                // Natural rolling hills across the map
+                let height = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220 
+                           + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 90;
 
+                // River valley depression in center
                 if (Math.abs(vx) < 350) {
                     height -= 70;
                 }
 
+                // Natural sloping boundary hills (instead of sharp walls, so character can climb over)
                 let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
-                let borderThreshold = halfSize - 1800;
+                let borderThreshold = halfSize - 2200;
                 if (maxDist > borderThreshold) {
-                    let factor = (maxDist - borderThreshold) / (1800);
-                    height += Math.pow(factor, 2) * 1500;
+                    let factor = (maxDist - borderThreshold) / (2200);
+                    height += Math.sin(factor * Math.PI * 0.5) * 850; // Smooth natural hill rise
                 }
 
                 posAttr.setZ(i, Math.max(0, height));
@@ -204,12 +214,12 @@
             createGiantRock(-2500, -3500, 900, 800, 0x3b4338);
             createGiantRock(3000, 3000, 750, 650, 0x525c4e);
 
-            // 6. CREATE FREE FIRE ADAM CHARACTER
+            // 6. ADAM CHARACTER
             adam = createAdamCharacter();
-            adam.position.set(0, 50, 500); // Spawn near center
+            adam.position.set(0, 50, 500);
             scene.add(adam);
 
-            // Keyboard Controls for Adam
+            // Keyboard Controls
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') moveForward = true;
                 if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') moveBackward = true;
@@ -230,45 +240,37 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        // Free Fire Adam Character Model Builder
         function createAdamCharacter() {
             const charGroup = new THREE.Group();
-
             const matSkin = new THREE.MeshStandardMaterial({ color: 0xf5d0b1, roughness: 0.6 });
-            const matShirt = new THREE.MeshStandardMaterial({ color: 0xe74c3c, roughness: 0.7 }); // Classic Red Adam Shirt
-            const matPants = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.8 }); // Dark Pants
+            const matShirt = new THREE.MeshStandardMaterial({ color: 0xe74c3c, roughness: 0.7 });
+            const matPants = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.8 });
 
-            // Head
             const head = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), matSkin);
             head.position.y = 45;
             head.castShadow = true;
             charGroup.add(head);
 
-            // Torso (Shirt)
             const torso = new THREE.Mesh(new THREE.BoxGeometry(14, 18, 8), matShirt);
             torso.position.y = 30;
             torso.castShadow = true;
             charGroup.add(torso);
 
-            // Left Arm
             const lArm = new THREE.Mesh(new THREE.BoxGeometry(4, 16, 4), matSkin);
             lArm.position.set(-10, 30, 0);
             lArm.castShadow = true;
             charGroup.add(lArm);
 
-            // Right Arm
             const rArm = new THREE.Mesh(new THREE.BoxGeometry(4, 16, 4), matSkin);
             rArm.position.set(10, 30, 0);
             rArm.castShadow = true;
             charGroup.add(rArm);
 
-            // Left Leg
             const lLeg = new THREE.Mesh(new THREE.BoxGeometry(5, 18, 5), matPants);
             lLeg.position.set(-4, 10, 0);
             lLeg.castShadow = true;
             charGroup.add(lLeg);
 
-            // Right Leg
             const rLeg = new THREE.Mesh(new THREE.BoxGeometry(5, 18, 5), matPants);
             rLeg.position.set(4, 10, 0);
             rLeg.castShadow = true;
@@ -300,6 +302,11 @@
             scene.add(rockMesh);
         }
 
+        function adjustHeight(amount) {
+            cameraOffsetHeight += amount;
+            cameraOffsetHeight = Math.max(200, Math.min(3000, cameraOffsetHeight));
+        }
+
         function toggleFullMap() {
             isFullMap = !isFullMap;
             const btn = document.getElementById('map-btn');
@@ -327,7 +334,6 @@
             minimapCtx.fillStyle = '#315c1b';
             minimapCtx.fillRect(w * 0.15, h * 0.15, w * 0.7, h * 0.7);
 
-            // Adam position dot on minimap
             if (adam) {
                 let normX = (adam.position.x / mapSize + 0.5) * w;
                 let normZ = (adam.position.z / mapSize + 0.5) * h;
@@ -347,22 +353,31 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Handle Adam movement
             if (adam) {
                 if (moveForward) adam.position.z -= adamSpeed;
                 if (moveBackward) adam.position.z += adamSpeed;
                 if (moveLeft) adam.position.x -= adamSpeed;
                 if (moveRight) adam.position.x += adamSpeed;
 
-                // Approximate terrain height at adam's position
-                let h = Math.sin(adam.position.x * 0.001) * Math.cos(adam.position.z * 0.001) * 200 
-                      + Math.sin(adam.position.x * 0.004) * Math.sin(adam.position.z * 0.004) * 80;
-                if (Math.abs(adam.position.x) < 350) h -= 70;
+                // Approximate terrain height at adam's position including natural boundary hills
+                let vx = adam.position.x;
+                let vy = adam.position.z;
+                let h = Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 220 
+                      + Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 90;
+                if (Math.abs(vx) < 350) h -= 70;
+
+                let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
+                let halfSize = mapSize / 2;
+                let borderThreshold = halfSize - 2200;
+                if (maxDist > borderThreshold) {
+                    let factor = (maxDist - borderThreshold) / (2200);
+                    h += Math.sin(factor * Math.PI * 0.5) * 850;
+                }
+
                 adam.position.y = Math.max(10, h + 20);
 
-                // Camera follows Adam smoothly unless Full Map is active
                 if (!isFullMap) {
-                    camera.position.set(adam.position.x, adam.position.y + 400, adam.position.z + 800);
+                    camera.position.set(adam.position.x, adam.position.y + cameraOffsetHeight, adam.position.z + cameraOffsetHeight * 1.8);
                     camera.lookAt(adam.position.x, adam.position.y, adam.position.z);
                 }
             }
