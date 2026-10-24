@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Tactical Dummy Mission - Crouch & Balanced Jump</title>
+    <title>3D Tactical Dummy Mission - Free Fire Loot & Scope Edition</title>
     <style>
         body {
             margin: 0;
@@ -48,19 +48,40 @@
             background: #e74c3c;
             transition: width 0.2s;
         }
-        #crosshair {
+        /* Free Fire Style Center Dot Crosshair (.) */
+        #crosshair-dot {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 10px;
-            height: 10px;
-            margin: -5px 0 0 -5px;
-            border: 2px solid rgba(255, 255, 255, 0.7);
+            width: 6px;
+            height: 6px;
+            margin: -3px 0 0 -3px;
+            background-color: #ffffff;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 15;
+            box-shadow: 0 0 4px rgba(0,0,0,0.8);
         }
-        /* Mobile Touch Controls (50% transparent) */
+        /* Sniper / Scope Overlay */
+        #scope-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: 40vw solid rgba(0,0,0,0.85);
+            box-sizing: border-box;
+            pointer-events: none;
+            display: none;
+            z-index: 12;
+        }
+        #scope-overlay::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100px; height: 100px;
+            margin: -50px 0 0 -50px;
+            border: 2px solid red;
+            border-radius: 50%;
+        }
+        /* Mobile Touch Controls */
         #touch-controls {
             position: absolute;
             bottom: 20px;
@@ -92,7 +113,7 @@
             background: rgba(255, 255, 255, 0.25);
             border: 2px solid rgba(255, 255, 255, 0.5);
             color: white;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             border-radius: 12px;
             display: flex;
@@ -108,17 +129,18 @@
         #btn-a { grid-column: 1; grid-row: 2; }
         #btn-s { grid-column: 2; grid-row: 2; }
         #btn-d { grid-column: 3; grid-row: 2; }
-        #btn-jump, #btn-down, #btn-shoot {
+        #btn-jump, #btn-down, #btn-scope, #btn-shoot {
             width: 75px;
-            height: 48px;
-            border-radius: 12px;
+            height: 42px;
+            border-radius: 10px;
         }
         #btn-shoot {
-            background: rgba(231, 76, 60, 0.35);
+            background: rgba(231, 76, 60, 0.4);
             border-color: rgba(231, 76, 60, 0.6);
         }
-        #btn-shoot:active {
-            background: rgba(231, 76, 60, 0.6);
+        #btn-scope {
+            background: rgba(52, 152, 219, 0.4);
+            border-color: rgba(52, 152, 219, 0.6);
         }
     </style>
 </head>
@@ -126,10 +148,11 @@
     <div id="ui">
         <strong>Health:</strong> 
         <div id="health-bar-container"><div id="health-bar"></div></div><br>
-        <strong>Mission Status:</strong> <span id="status">Use DOWN (Ctrl) to Crouch & Move like Free Fire! Climb stairs into houses.</span><br>
+        <strong>Mission Status:</strong> <span id="status">Loot random Guns/Medkits in houses, use Scope & eliminate targets!</span><br>
         Targets Left: <span id="targetCount">15</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
-    <div id="crosshair"></div>
+    <div id="crosshair-dot"></div>
+    <div id="scope-overlay"></div>
 
     <!-- Mobile Touch Controls -->
     <div id="touch-controls">
@@ -142,6 +165,7 @@
         <div class="action-group">
             <div class="t-btn" id="btn-jump">JUMP</div>
             <div class="t-btn" id="btn-down">DOWN</div>
+            <div class="t-btn" id="btn-scope">SCOPE</div>
             <div class="t-btn" id="btn-shoot">FIRE</div>
         </div>
     </div>
@@ -156,19 +180,20 @@
         let obstacles = [];
         let doors = [];
         let enemies = [];
-        let gunObject = null;
+        let lootItems = []; // Random Loot (Guns, Medkits, Booms)
         let hasGun = false;
+        let isScoped = false;
         let targetsRemaining = 15;
         let playerHealth = 100;
         let isGameOver = false;
-        let isCrouching = false; // Free Fire style crouch state
+        let isCrouching = false;
         
         let velocityY = 0;
         let gravity = 0.012;
         let isGrounded = false;
         const normalMoveSpeed = 0.13;
-        const crouchMoveSpeed = 0.07; // Slower speed when crouching
-        const jumpForce = 0.25; // Balanced jump so character cannot jump over cover boxes
+        const crouchMoveSpeed = 0.07;
+        const jumpForce = 0.25;
         
         let keys = { w: false, a: false, s: false, d: false, space: false, ctrl: false };
         let isMouseDown = false;
@@ -204,29 +229,21 @@
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.95);
             dirLight.position.set(120, 180, 120);
             dirLight.castShadow = true;
-            dirLight.shadow.camera.left = -250;
-            dirLight.shadow.camera.right = 250;
-            dirLight.shadow.camera.top = 250;
-            dirLight.shadow.camera.bottom = -250;
             scene.add(dirLight);
 
-            // 5. Uneven Terrain (500x500)
+            // 5. Terrain
             const mapSize = 500;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, 40, 40);
             groundGeo.rotateX(-Math.PI / 2);
-
             const pos = groundGeo.attributes.position;
             for (let i = 0; i < pos.count; i++) {
-                let px = pos.getX(i);
-                let pz = pos.getZ(i);
+                let px = pos.getX(i), pz = pos.getZ(i);
                 let h = Math.sin(px * 0.02) * Math.cos(pz * 0.02) * 2.0;
                 if (Math.abs(px) < 50 && Math.abs(pz) < 50) h = 0;
                 pos.setY(i, h);
             }
             groundGeo.computeVertexNormals();
-
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x2e6f40, roughness: 0.9 });
-            const ground = new THREE.Mesh(groundGeo, groundMat);
+            const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ color: 0x2e6f40, roughness: 0.9 }));
             ground.receiveShadow = true;
             scene.add(ground);
 
@@ -242,58 +259,46 @@
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Dense Grass & Flora
+            // 7. Dense Grass
             generateDenseForestAndFlora(mapSize);
 
-            // 8. Generate 50 Unique Multi-Story Houses with Solid Floors & Stairs
+            // 8. Generate 50 Houses with Walkable Stairs
             generateDiverseHouses();
 
             // 9. Generate 200 Cover Boxes
             generateColoredCoverBoxes();
 
-            // 10. Place Gun Inside House
-            let gunY = getTerrainHeight(-100, -100) + 0.3;
-            createGun(-100, gunY, -100);
+            // 10. Random Loot Spawn (Guns, Medkits, Booms with changing locations every match)
+            spawnRandomLoot();
 
-            // 11. Spawn 15 Enemies
+            // 11. Spawn Enemies
             for(let i = 0; i < 15; i++) {
                 let ex = (Math.random() - 0.5) * 380;
                 let ez = (Math.random() - 0.5) * 380;
                 if(Math.abs(ex) < 50 && Math.abs(ez) < 50) ex = 120;
-                let ey = getTerrainHeight(ex, ez);
-                createEnemy(ex, ey, ez);
+                createEnemy(ex, getTerrainHeight(ex, ez), ez);
             }
 
-            // 12. Build Dummy Character
+            // 12. Build Character
             character = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
             const shirtMat = new THREE.MeshStandardMaterial({ color: 0x337ab7 });
             const pantsMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
 
             torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), shirtMat);
-            torso.position.y = 0.9; torso.castShadow = true;
-            character.add(torso);
-
+            torso.position.y = 0.9; torso.castShadow = true; character.add(torso);
             head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), skinMat);
-            head.position.y = 1.35; head.castShadow = true;
-            character.add(head);
+            head.position.y = 1.35; head.castShadow = true; character.add(head);
 
             const armGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
-            leftArm = new THREE.Mesh(armGeo, skinMat);
-            leftArm.position.set(-0.35, 0.9, 0); character.add(leftArm);
-
-            rightArm = new THREE.Mesh(armGeo, skinMat);
-            rightArm.position.set(0.35, 0.9, 0); character.add(rightArm);
+            leftArm = new THREE.Mesh(armGeo, skinMat); leftArm.position.set(-0.35, 0.9, 0); character.add(leftArm);
+            rightArm = new THREE.Mesh(armGeo, skinMat); rightArm.position.set(0.35, 0.9, 0); character.add(rightArm);
 
             const legGeo = new THREE.BoxGeometry(0.18, 0.6, 0.18);
-            leftLeg = new THREE.Mesh(legGeo, pantsMat);
-            leftLeg.position.set(-0.15, 0.3, 0); character.add(leftLeg);
+            leftLeg = new THREE.Mesh(legGeo, pantsMat); leftLeg.position.set(-0.15, 0.3, 0); character.add(leftLeg);
+            rightLeg = new THREE.Mesh(legGeo, pantsMat); rightLeg.position.set(0.15, 0.3, 0); character.add(rightLeg);
 
-            rightLeg = new THREE.Mesh(legGeo, pantsMat);
-            rightLeg.position.set(0.15, 0.3, 0); character.add(rightLeg);
-
-            let startTerrainY = getTerrainHeight(0, 200);
-            character.position.set(0, startTerrainY, 200);
+            character.position.set(0, getTerrainHeight(0, 200), 200);
             scene.add(character);
 
             // Event Listeners
@@ -304,8 +309,7 @@
             window.addEventListener('mousedown', (e) => {
                 if (e.button === 0 && !isGameOver) {
                     isMouseDown = true;
-                    mouseX = e.clientX;
-                    mouseY = e.clientY;
+                    mouseX = e.clientX; mouseY = e.clientY;
                     shootGun();
                 }
             });
@@ -320,40 +324,34 @@
             
             document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (isGrounded && !isGameOver) { velocityY = jumpForce; isGrounded = false; }
+                if (isGrounded && !isGameOver && !isCrouching) { velocityY = jumpForce; isGrounded = false; }
             });
             document.getElementById('btn-jump').addEventListener('click', () => {
-                if (isGrounded && !isGameOver) { velocityY = jumpForce; isGrounded = false; }
+                if (isGrounded && !isGameOver && !isCrouching) { velocityY = jumpForce; isGrounded = false; }
             });
 
-            // DOWN / Crouch Touch Button
-            const downBtn = document.getElementById('btn-down');
-            downBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                toggleCrouch();
-            });
-            downBtn.addEventListener('click', () => {
-                toggleCrouch();
-            });
+            document.getElementById('btn-down').addEventListener('touchstart', (e) => { e.preventDefault(); toggleCrouch(); });
+            document.getElementById('btn-down').addEventListener('click', () => { toggleCrouch(); });
 
-            document.getElementById('btn-shoot').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                shootGun();
-            });
-            document.getElementById('btn-shoot').addEventListener('click', () => {
-                shootGun();
-            });
+            document.getElementById('btn-scope').addEventListener('touchstart', (e) => { e.preventDefault(); toggleScope(); });
+            document.getElementById('btn-scope').addEventListener('click', () => { toggleScope(); });
+
+            document.getElementById('btn-shoot').addEventListener('touchstart', (e) => { e.preventDefault(); shootGun(); });
+            document.getElementById('btn-shoot').addEventListener('click', () => { shootGun(); });
+        }
+
+        function toggleScope() {
+            if (!hasGun) return;
+            isScoped = !isScoped;
+            document.getElementById('scope-overlay').style.display = isScoped ? 'block' : 'none';
+            camera.fov = isScoped ? 30 : 60; // Zoom in for scope
+            camera.updateProjectionMatrix();
         }
 
         function toggleCrouch() {
             isCrouching = !isCrouching;
-            if (isCrouching) {
-                character.scale.y = 0.6; // Crouch height (Free Fire style)
-                document.getElementById('btn-down').style.background = 'rgba(255, 255, 255, 0.6)';
-            } else {
-                character.scale.y = 1.0;
-                document.getElementById('btn-down').style.background = 'rgba(255, 255, 255, 0.25)';
-            }
+            character.scale.y = isCrouching ? 0.6 : 1.0;
+            document.getElementById('btn-down').style.background = isCrouching ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.25)';
         }
 
         function bindTouchButton(id, keyName) {
@@ -372,52 +370,59 @@
                 let x = (Math.random() - 0.5) * half * 2;
                 let z = (Math.random() - 0.5) * half * 2;
                 if (Math.abs(x) < 40 && Math.abs(z) < 40) continue;
-                createGrassBlade(x, z);
+                let y = getTerrainHeight(x, z);
+                const grass = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.8), new THREE.MeshBasicMaterial({ color: 0x3da35d, side: THREE.DoubleSide }));
+                grass.position.set(x, y + 0.4, z); grass.rotation.y = Math.random() * Math.PI;
+                scene.add(grass);
             }
         }
 
-        function createGrassBlade(x, z) {
-            let y = getTerrainHeight(x, z);
-            const grassMat = new THREE.MeshBasicMaterial({ color: 0x3da35d, side: THREE.DoubleSide });
-            const grassGeo = new THREE.PlaneGeometry(0.3, 0.8);
-            const grass = new THREE.Mesh(grassGeo, grassMat);
-            grass.position.set(x + (Math.random()-0.5)*2, y + 0.4, z + (Math.random()-0.5)*2);
-            grass.rotation.y = Math.random() * Math.PI;
-            scene.add(grass);
-        }
-
         function generateDiverseHouses() {
-            const houseColors = [0xd9c3b0, 0xc0392b, 0x2980b9, 0x27ae60, 0xf39c12, 0x8e44ad, 0x16a085, 0xd35400];
-            const roofColors = [0xa93226, 0x2c3e50, 0x7f8c8d, 0x1abc9c, 0xe67e22, 0x9b59b6];
+            const houseColors = [0xd9c3b0, 0xc0392b, 0x2980b9, 0x27ae60, 0xf39c12, 0x8e44ad];
+            const roofColors = [0xa93226, 0x2c3e50, 0x7f8c8d, 0x1abc9c];
 
             for(let i = 0; i < 50; i++) {
                 let hx = (Math.random() - 0.5) * 400;
                 let hz = (Math.random() - 0.5) * 400;
                 if(Math.abs(hx) < 60 && Math.abs(hz) < 60) hx += 140;
-
-                let hy = getTerrainHeight(hx, hz);
-                let floors = Math.floor(Math.random() * 3) + 1;
-                let wallColor = houseColors[Math.floor(Math.random() * houseColors.length)];
-                let roofColor = roofColors[Math.floor(Math.random() * roofColors.length)];
-
-                createHouse(hx, hy, hz, floors, wallColor, roofColor);
+                createHouse(hx, getTerrainHeight(hx, hz), hz, Math.floor(Math.random() * 3) + 1, houseColors[Math.floor(Math.random() * houseColors.length)], roofColors[Math.floor(Math.random() * roofColors.length)]);
             }
         }
 
         function generateColoredCoverBoxes() {
-            const boxColors = [0xe74c3c, 0x3498db, 0x2ecc71, 0xf1c40f, 0x9b59b6, 0x1abc9c, 0xe67e22, 0x34495e, 0x7f8c8d, 0xdc7633];
+            const boxColors = [0xe74c3c, 0x3498db, 0x2ecc71, 0xf1c40f, 0x9b59b6];
             for(let i = 0; i < 200; i++) {
                 let bx = (Math.random() - 0.5) * 440;
                 let bz = (Math.random() - 0.5) * 440;
                 if(Math.abs(bx) < 40 && Math.abs(bz) < 40) continue;
+                let w = Math.random() * 2 + 1.5, h = Math.random() * 1.5 + 1.0, d = Math.random() * 2 + 1.5;
+                let mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: boxColors[Math.floor(Math.random() * boxColors.length)] }));
+                mesh.position.set(bx, getTerrainHeight(bx, bz) + h/2, bz);
+                scene.add(mesh);
+                addObstacleBox(bx, getTerrainHeight(bx, bz) + h/2, bz, w, h, d);
+            }
+        }
 
-                let by = getTerrainHeight(bx, bz);
-                let w = Math.random() * 2 + 1.5;
-                let h = Math.random() * 1.5 + 1.0;
-                let d = Math.random() * 2 + 1.5;
-                let color = boxColors[Math.floor(Math.random() * boxColors.length)];
-
-                createCoverBox(bx, by, bz, w, h, d, color);
+        // Random Loot Spawn (Guns, Medkits, Booms changing place every match)
+        function spawnRandomLoot() {
+            const lootTypes = ['gun', 'medkit', 'boom'];
+            for (let i = 0; i < 40; i++) {
+                let lx = (Math.random() - 0.5) * 380;
+                let lz = (Math.random() - 0.5) * 380;
+                let ly = getTerrainHeight(lx, lz) + 0.3;
+                let type = lootTypes[Math.floor(Math.random() * lootTypes.length)];
+                
+                let mesh;
+                if (type === 'gun') {
+                    mesh = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.2), new THREE.MeshStandardMaterial({ color: 0x2c3e50, metalness: 0.8 }));
+                } else if (type === 'medkit') {
+                    mesh = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({ color: 0xffffff })); // White medkit with red cross
+                } else {
+                    mesh = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), new THREE.MeshStandardMaterial({ color: 0x000000 })); // Boom / Grenade
+                }
+                mesh.position.set(lx, ly, lz);
+                scene.add(mesh);
+                lootItems.push({ mesh: mesh, type: type });
             }
         }
 
@@ -429,10 +434,7 @@
         }
 
         function createHouse(x, y, z, floors, wallCol, roofCol) {
-            const houseWidth = 12;
-            const floorHeight = 4.2;
-            const houseDepth = 12;
-            const wallThickness = 0.4;
+            const houseWidth = 12, floorHeight = 4.2, houseDepth = 12, wallThickness = 0.4;
             const wallMat = new THREE.MeshStandardMaterial({ color: wallCol, roughness: 0.7 });
 
             for(let f = 0; f < floors; f++) {
@@ -440,118 +442,73 @@
 
                 let backWall = new THREE.Mesh(new THREE.BoxGeometry(houseWidth, floorHeight, wallThickness), wallMat);
                 backWall.position.set(x, currentY + floorHeight/2, z - houseDepth/2);
-                scene.add(backWall);
-                addObstacleBox(backWall.position.x, backWall.position.y, backWall.position.z, houseWidth, floorHeight, wallThickness);
+                scene.add(backWall); addObstacleBox(backWall.position.x, backWall.position.y, backWall.position.z, houseWidth, floorHeight, wallThickness);
 
                 let leftWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, floorHeight, houseDepth), wallMat);
                 leftWall.position.set(x - houseWidth/2, currentY + floorHeight/2, z);
-                scene.add(leftWall);
-                addObstacleBox(leftWall.position.x, leftWall.position.y, leftWall.position.z, wallThickness, floorHeight, houseDepth);
+                scene.add(leftWall); addObstacleBox(leftWall.position.x, leftWall.position.y, leftWall.position.z, wallThickness, floorHeight, houseDepth);
 
                 let rightWall = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, floorHeight, houseDepth), wallMat);
                 rightWall.position.set(x + houseWidth/2, currentY + floorHeight/2, z);
-                scene.add(rightWall);
-                addObstacleBox(rightWall.position.x, rightWall.position.y, rightWall.position.z, wallThickness, floorHeight, houseDepth);
+                scene.add(rightWall); addObstacleBox(rightWall.position.x, rightWall.position.y, rightWall.position.z, wallThickness, floorHeight, houseDepth);
 
                 if (f === 0) {
                     let frontWall1 = new THREE.Mesh(new THREE.BoxGeometry(4, floorHeight, wallThickness), wallMat);
                     frontWall1.position.set(x - 4, currentY + floorHeight/2, z + houseDepth/2);
-                    scene.add(frontWall1);
-                    addObstacleBox(frontWall1.position.x, frontWall1.position.y, frontWall1.position.z, 4, floorHeight, wallThickness);
+                    scene.add(frontWall1); addObstacleBox(frontWall1.position.x, frontWall1.position.y, frontWall1.position.z, 4, floorHeight, wallThickness);
 
                     let frontWall2 = new THREE.Mesh(new THREE.BoxGeometry(4, floorHeight, wallThickness), wallMat);
                     frontWall2.position.set(x + 4, currentY + floorHeight/2, z + houseDepth/2);
-                    scene.add(frontWall2);
-                    addObstacleBox(frontWall2.position.x, frontWall2.position.y, frontWall2.position.z, 4, floorHeight, wallThickness);
+                    scene.add(frontWall2); addObstacleBox(frontWall2.position.x, frontWall2.position.y, frontWall2.position.z, 4, floorHeight, wallThickness);
 
                     let doorTop = new THREE.Mesh(new THREE.BoxGeometry(4, 1, wallThickness), wallMat);
                     doorTop.position.set(x, currentY + 3.7, z + houseDepth/2);
-                    scene.add(doorTop);
-                    addObstacleBox(doorTop.position.x, doorTop.position.y, doorTop.position.z, 4, 1, wallThickness);
+                    scene.add(doorTop); addObstacleBox(doorTop.position.x, doorTop.position.y, doorTop.position.z, 4, 1, wallThickness);
 
                     const doorGroup = new THREE.Group();
                     const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(4, 3.2, 0.2), new THREE.MeshStandardMaterial({ color: 0x5c3a21 }));
-                    doorMesh.position.set(2, 0, 0);
-                    doorMesh.castShadow = true;
-                    doorGroup.add(doorMesh);
+                    doorMesh.position.set(2, 0, 0); doorGroup.add(doorMesh);
                     doorGroup.position.set(x - 2, currentY + 1.6, z + houseDepth/2);
                     scene.add(doorGroup);
-
-                    doors.push({
-                        group: doorGroup,
-                        closedRotY: 0,
-                        openRotY: -Math.PI / 2,
-                        closedX: x, closedZ: z + houseDepth/2
-                    });
+                    doors.push({ group: doorGroup, closedRotY: 0, openRotY: -Math.PI / 2, closedX: x, closedZ: z + houseDepth/2 });
                 } else {
                     let frontWall = new THREE.Mesh(new THREE.BoxGeometry(houseWidth, floorHeight, wallThickness), wallMat);
                     frontWall.position.set(x, currentY + floorHeight/2, z + houseDepth/2);
-                    scene.add(frontWall);
-                    addObstacleBox(frontWall.position.x, frontWall.position.y, frontWall.position.z, houseWidth, floorHeight, wallThickness);
+                    scene.add(frontWall); addObstacleBox(frontWall.position.x, frontWall.position.y, frontWall.position.z, houseWidth, floorHeight, wallThickness);
                 }
 
-                // Solid Floor (Fursh) for each level inside the house
+                // Solid floor inside house
                 let floorSlab = new THREE.Mesh(new THREE.BoxGeometry(houseWidth - 0.4, 0.3, houseDepth - 0.4), wallMat);
                 floorSlab.position.set(x, currentY + floorHeight, z);
-                scene.add(floorSlab);
-                addObstacleBox(floorSlab.position.x, floorSlab.position.y, floorSlab.position.z, houseWidth - 0.4, 0.3, houseDepth - 0.4);
+                scene.add(floorSlab); addObstacleBox(floorSlab.position.x, floorSlab.position.y, floorSlab.position.z, houseWidth - 0.4, 0.3, houseDepth - 0.4);
 
-                // Stairs to upper floors
+                // Walkable stairs inside house
                 if (f < floors - 1) {
                     for (let s = 0; s < 8; s++) {
                         let stairStep = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 0.5), new THREE.MeshStandardMaterial({ color: 0x555 }));
                         stairStep.position.set(x - 3.5, currentY + 0.3 + s * 0.5, z - 3 + s * 0.5);
-                        scene.add(stairStep);
-                        addObstacleBox(stairStep.position.x, stairStep.position.y, stairStep.position.z, 2, 0.2, 0.5);
+                        scene.add(stairStep); addObstacleBox(stairStep.position.x, stairStep.position.y, stairStep.position.z, 2, 0.2, 0.5);
                     }
                 }
             }
 
-            const roofMat = new THREE.MeshStandardMaterial({ color: roofCol, roughness: 0.6 });
-            let roof = new THREE.Mesh(new THREE.BoxGeometry(houseWidth + 1.2, 0.5, houseDepth + 1.2), roofMat);
+            let roof = new THREE.Mesh(new THREE.BoxGeometry(houseWidth + 1.2, 0.5, houseDepth + 1.2), new THREE.MeshStandardMaterial({ color: roofCol }));
             roof.position.set(x, y + floors * floorHeight + 0.25, z);
-            roof.castShadow = true;
-            scene.add(roof);
-            addObstacleBox(roof.position.x, roof.position.y, roof.position.z, houseWidth + 1.2, 0.5, houseDepth + 1.2);
-        }
-
-        function createCoverBox(x, y, z, w, h, d, col) {
-            let mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: col, roughness: 0.5 }));
-            mesh.position.set(x, y + h / 2, z);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            scene.add(mesh);
-            addObstacleBox(x, y + h / 2, z, w, h, d);
+            scene.add(roof); addObstacleBox(roof.position.x, roof.position.y, roof.position.z, houseWidth + 1.2, 0.5, houseDepth + 1.2);
         }
 
         function addObstacleBox(x, y, z, w, h, d) {
-            obstacles.push({
-                minX: x - w / 2, maxX: x + w / 2,
-                minZ: z - d / 2, maxZ: z + d / 2,
-                minY: y - h / 2, maxY: y + h / 2,
-                topY: y + h / 2
-            });
-        }
-
-        function createGun(x, y, z) {
-            gunObject = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.2), new THREE.MeshStandardMaterial({ color: 0x2c3e50, metalness: 0.8 }));
-            gunObject.position.set(x, y, z);
-            scene.add(gunObject);
+            obstacles.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, minY: y - h / 2, maxY: y + h / 2, topY: y + h / 2 });
         }
 
         function createEnemy(x, y, z) {
             let enemyGroup = new THREE.Group();
             let torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({ color: 0xe74c3c }));
-            torso.position.y = 0.9; torso.castShadow = true;
-            enemyGroup.add(torso);
-
+            torso.position.y = 0.9; enemyGroup.add(torso);
             let head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), new THREE.MeshStandardMaterial({ color: 0xffdbac }));
-            head.position.y = 1.35; head.castShadow = true;
-            enemyGroup.add(head);
-
+            head.position.y = 1.35; enemyGroup.add(head);
             enemyGroup.position.set(x, y, z);
-            scene.add(enemyGroup);
-            enemies.push(enemyGroup);
+            scene.add(enemyGroup); enemies.push(enemyGroup);
         }
 
         function handleKey(e, isDown) {
@@ -561,11 +518,8 @@
                 case 'KeyA': case 'ArrowLeft': keys.a = isDown; break;
                 case 'KeyD': case 'ArrowRight': keys.d = isDown; break;
                 case 'ControlLeft': case 'ControlRight':
-                    if (isDown && !keys.ctrl) {
-                        toggleCrouch();
-                    }
-                    keys.ctrl = isDown;
-                    break;
+                    if (isDown && !keys.ctrl) toggleCrouch();
+                    keys.ctrl = isDown; break;
                 case 'Space': 
                     if (isDown && isGrounded && !isGameOver && !isCrouching) { velocityY = jumpForce; isGrounded = false; }
                     break;
@@ -588,7 +542,7 @@
         function shootGun() {
             if (!hasGun || targetsRemaining <= 0) return;
             let raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera); // Fires exactly at the center dot (.)
 
             let enemyMeshes = [];
             enemies.forEach(en => { enemyMeshes.push(en.children[0]); enemyMeshes.push(en.children[1]); });
@@ -646,70 +600,47 @@
                 character.rotation.y = Math.atan2(moveX, moveZ);
             }
 
+            // Loot Pickup Check (Guns, Medkits, Booms)
+            lootItems.forEach((item, index) => {
+                if (character.position.distanceTo(item.mesh.position) < 1.8) {
+                    scene.remove(item.mesh);
+                    lootItems.splice(index, 1);
+                    if (item.type === 'gun') {
+                        hasGun = true;
+                        document.getElementById('weaponStatus').innerText = 'Assault Rifle (Scoped)';
+                        document.getElementById('status').innerText = 'Gun looted! Use Scope button to aim & shoot targets.';
+                    } else if (item.type === 'medkit') {
+                        playerHealth = Math.min(100, playerHealth + 25);
+                        document.getElementById('health-bar').style.width = playerHealth + '%';
+                        document.getElementById('status').innerText = 'Medkit used! Health restored (+25).';
+                    } else if (item.type === 'boom') {
+                        document.getElementById('status').innerText = 'Boom / Grenade collected!';
+                    }
+                }
+            });
+
             enemies.forEach(en => {
                 let distToPlayer = en.position.distanceTo(character.position);
                 if (distToPlayer < 30 && distToPlayer > 2) {
                     let dirX = (character.position.x - en.position.x) * 0.003;
                     let dirZ = (character.position.z - en.position.z) * 0.003;
-
-                    let newEnemyX = en.position.x + dirX;
-                    let canEnMoveX = true;
-                    for (let obs of obstacles) {
-                        if (newEnemyX >= obs.minX - 0.4 && newEnemyX <= obs.maxX + 0.4 &&
-                            en.position.z >= obs.minZ - 0.4 && en.position.z <= obs.maxZ + 0.4 &&
-                            en.position.y + 0.1 < obs.topY && en.position.y + 1.2 > obs.minY) {
-                            canEnMoveX = false; break;
-                        }
-                    }
-                    if (canEnMoveX) en.position.x = newEnemyX;
-
-                    let newEnemyZ = en.position.z + dirZ;
-                    let canEnMoveZ = true;
-                    for (let obs of obstacles) {
-                        if (en.position.x >= obs.minX - 0.4 && en.position.x <= obs.maxX + 0.4 &&
-                            newEnemyZ >= obs.minZ - 0.4 && newEnemyZ <= obs.maxZ + 0.4 &&
-                            en.position.y + 0.1 < obs.topY && en.position.y + 1.2 > obs.minY) {
-                            canEnMoveZ = false; break;
-                        }
-                    }
-                    if (canEnMoveZ) en.position.z = newEnemyZ;
+                    en.position.x += dirX; en.position.z += dirZ;
                     en.rotation.y = Math.atan2(dirX, dirZ);
                 }
-
-                if (distToPlayer < 12) {
-                    if (Math.random() < 0.03) {
-                        playerHealth -= 4;
-                        document.getElementById('health-bar').style.width = Math.max(0, playerHealth) + '%';
-                        if (playerHealth <= 0) {
-                            isGameOver = true;
-                            document.getElementById('status').innerHTML = '<span style="color:red; font-size:15px;">GAME OVER! Refresh to restart.</span>';
-                        }
+                if (distToPlayer < 12 && Math.random() < 0.03) {
+                    playerHealth -= 4;
+                    document.getElementById('health-bar').style.width = Math.max(0, playerHealth) + '%';
+                    if (playerHealth <= 0) {
+                        isGameOver = true;
+                        document.getElementById('status').innerHTML = '<span style="color:red; font-size:15px;">GAME OVER! Refresh to restart.</span>';
                     }
                 }
             });
 
             doors.forEach(d => {
                 let isOpen = character.position.distanceTo(new THREE.Vector3(d.closedX, 0, d.closedZ)) < 3.5;
-                if(!isOpen) {
-                    for(let en of enemies) {
-                        if(en.position.distanceTo(new THREE.Vector3(d.closedX, 0, d.closedZ)) < 3.5) {
-                            isOpen = true; break;
-                        }
-                    }
-                }
-                let targetRotY = isOpen ? d.openRotY : d.closedRotY;
-                d.group.rotation.y += (targetRotY - d.group.rotation.y) * 0.1;
+                d.group.rotation.y += ((isOpen ? d.openRotY : d.closedRotY) - d.group.rotation.y) * 0.1;
             });
-
-            if (gunObject && !hasGun) {
-                if (character.position.distanceTo(gunObject.position) < 2.0) {
-                    scene.remove(gunObject);
-                    gunObject = null;
-                    hasGun = true;
-                    document.getElementById('weaponStatus').innerText = 'Assault Rifle';
-                    document.getElementById('status').innerText = 'Gun acquired! Climb stairs & eliminate targets!';
-                }
-            }
 
             velocityY -= gravity;
             character.position.y += velocityY;
@@ -730,24 +661,7 @@
                 isGrounded = true;
             }
 
-            // Character Animations
-            const time = Date.now() * 0.015;
-            if (!isGrounded) {
-                leftArm.rotation.x = -Math.PI * 0.5;
-                rightArm.rotation.x = -Math.PI * 0.5;
-                leftLeg.rotation.x = Math.PI * 0.2;
-                rightLeg.rotation.x = -Math.PI * 0.2;
-            } else if (isMoving) {
-                let speedFactor = isCrouching ? 0.5 : 0.9;
-                leftArm.rotation.x = Math.sin(time) * speedFactor;
-                rightArm.rotation.x = -Math.sin(time) * speedFactor;
-                leftLeg.rotation.x = -Math.sin(time) * speedFactor;
-                rightLeg.rotation.x = Math.sin(time) * speedFactor;
-            } else {
-                leftArm.rotation.x = 0; rightArm.rotation.x = 0;
-                leftLeg.rotation.x = 0; rightLeg.rotation.x = 0;
-            }
-
+            // Perfect Camera Setup (Slightly behind and above character, doesn't clip outside walls)
             let isInsideHouse = false;
             for (let obs of obstacles) {
                 if (character.position.x >= obs.minX - 1 && character.position.x <= obs.maxX + 1 &&
@@ -757,12 +671,12 @@
                 }
             }
 
-            const camDistance = isInsideHouse ? 2.8 : 4.5;
+            const camDistance = isScoped ? 2.2 : (isInsideHouse ? 3.0 : 4.5);
             let targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
-            let targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + (isInsideHouse ? 0.3 : 0.8);
+            let targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + (isInsideHouse ? 0.4 : 1.2);
             let targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
 
-            camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.1);
+            camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.15);
             camera.lookAt(character.position.x, character.position.y + 0.8, character.position.z);
 
             renderer.render(scene, camera);
