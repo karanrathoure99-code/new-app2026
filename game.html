@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Massive Open-World Map - Bumpy Terrain & Connected Plateau Mountains</title>
+    <title>Massive Open-World Map - Fixed Terrain & Raised Boundaries</title>
     <style>
         body {
             margin: 0;
@@ -57,7 +57,7 @@
     <div id="info">
         <strong>Massive Open-World Battleground:</strong><br>
         Map Area: <span>20,000 x 20,000 Units</span><br>
-        Status: <span>Rough Bumpy Terrain & Connected Boundary Plateaus Loaded</span>
+        Status: <span>Terrain Stabilized, Raised Borders & Bumpy Land Loaded</span>
     </div>
 
     <div id="minimap-container">
@@ -86,8 +86,8 @@
             camera.position.set(0, 1500, 3000);
             camera.lookAt(0, 0, 0);
 
-            // 3. Renderer Setup
-            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            // 3. Renderer Setup (Precision fix to prevent surface flickering / z-fighting)
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -100,52 +100,67 @@
             scene.add(ambientLight);
 
             const sunLight = new THREE.DirectionalLight(0xfffaed, 1.3);
-            sunLight.position.set(2000, 3000, 2000);
+            sunLight.position.set(2000, 4000, 2000);
             sunLight.castShadow = true;
             sunLight.shadow.mapSize.width = 2048;
             sunLight.shadow.mapSize.height = 2048;
             sunLight.shadow.camera.near = 0.5;
             sunLight.shadow.camera.far = 15000;
-            const d = 5000;
+            const d = 6000;
             sunLight.shadow.camera.left = -d;
             sunLight.shadow.camera.right = d;
             sunLight.shadow.camera.top = d;
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside (10,000+ units away)
+            // 5. Endless Ocean Surrounding Outside (Far away)
             const oceanGeo = new THREE.PlaneGeometry(60000, 60000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
             ocean.rotation.x = -Math.PI / 2;
-            ocean.position.y = -10;
+            ocean.position.y = -50;
             scene.add(ocean);
 
-            // 6. Highly Bumpy & Rugged Terrain Ground (Har jagah ubad-khabad, gaddhe aur unchai)
-            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, 300, 300);
+            // 6. Massive Bumpy & Sloped Terrain Ground with Raised Boundary Edges
+            const segments = 300;
+            const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
+            
+            let halfSize = mapSize / 2;
+
             for (let i = 0; i < posAttr.count; i++) {
                 let vx = posAttr.getX(i);
-                let vy = posAttr.getY(i);
+                let vy = posAttr.getY(i); // In plane geometry local space, Y is Z in world space before rotation
                 
-                // Multi-layered sine wave noise for realistic uneven ground (gaddhe aur unchai)
-                let height = Math.sin(vx * 0.002) * Math.cos(vy * 0.002) * 120 
-                           + Math.sin(vx * 0.008) * Math.sin(vy * 0.008) * 35 
-                           + Math.cos(vx * 0.02) * 10;
-                
-                // Flatten slightly near exact center spawn area if needed, or keep fully organic
+                // Natural bumpy and varied terrain across the map
+                let height = Math.sin(vx * 0.0015) * Math.cos(vy * 0.0015) * 250 
+                           + Math.sin(vx * 0.006) * Math.sin(vy * 0.006) * 60 
+                           + Math.cos(vx * 0.015) * 20;
+
+                // Raise the edges/boundaries high up like mountain walls seamlessly
+                let distFromCenter = Math.max(Math.abs(vx), Math.abs(vy));
+                let borderThreshold = halfSize - 2500;
+                if (distFromCenter > borderThreshold) {
+                    let factor = (distFromCenter - borderThreshold) / (2500);
+                    height += Math.pow(factor, 2) * 900; // Smooth elevation to form raised border
+                }
+
                 posAttr.setZ(i, height);
             }
             groundGeo.computeVertexNormals();
 
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.88 });
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x315c1b, roughness: 0.88, flatShading: true });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 7. Build Connected Boundary Plateaus (Passable walk-over mountains)
-            buildBoundaryPlateaus();
+            // 7. Scattered Trees across the stable terrain
+            for (let i = 0; i < 300; i++) {
+                let tx = (Math.random() - 0.5) * (mapSize - 4000);
+                let tz = (Math.random() - 0.5) * (mapSize - 4000);
+                createRealisticTree(tx, tz);
+            }
 
             // Setup Minimap
             minimapCanvas = document.getElementById('minimap-canvas');
@@ -154,63 +169,16 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        // Connected Plateau Mountains along the outer boundary (Walkable over-pass style)
-        function buildBoundaryPlateaus() {
-            let halfMap = mapSize / 2 - 500;
-            let width = mapSize;
-
-            const plateauMat = new THREE.MeshStandardMaterial({ color: 0x434c40, roughness: 0.9, flatShading: true });
-
-            // North Wall Plateau
-            const northGeo = new THREE.BoxGeometry(width, 400, 1000);
-            const northMesh = new THREE.Mesh(northGeo, plateauMat);
-            northMesh.position.set(0, 200, -halfMap - 500);
-            northMesh.castShadow = true;
-            northMesh.receiveShadow = true;
-            scene.add(northMesh);
-
-            // South Wall Plateau
-            const southGeo = new THREE.BoxGeometry(width, 400, 1000);
-            const southMesh = new THREE.Mesh(southGeo, plateauMat);
-            southMesh.position.set(0, 200, halfMap + 500);
-            southMesh.castShadow = true;
-            southMesh.receiveShadow = true;
-            scene.add(southMesh);
-
-            // West Wall Plateau
-            const westGeo = new THREE.BoxGeometry(1000, 400, width);
-            const westMesh = new THREE.Mesh(westGeo, plateauMat);
-            westMesh.position.set(-halfMap - 500, 200, 0);
-            westMesh.castShadow = true;
-            westMesh.receiveShadow = true;
-            scene.add(westMesh);
-
-            // East Wall Plateau
-            const eastGeo = new THREE.BoxGeometry(1000, 400, width);
-            const eastMesh = new THREE.Mesh(eastGeo, plateauMat);
-            eastMesh.position.set(halfMap + 500, 200, 0);
-            eastMesh.castShadow = true;
-            eastMesh.receiveShadow = true;
-            scene.add(eastMesh);
-
-            // Scattered Trees across the bumpy land
-            for (let i = 0; i < 250; i++) {
-                let tx = (Math.random() - 0.5) * (mapSize - 3000);
-                let tz = (Math.random() - 0.5) * (mapSize - 3000);
-                createRealisticTree(tx, tz);
-            }
-        }
-
         function createRealisticTree(x, z) {
             const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.2, 12, 8), trunkMat);
-            trunk.position.set(x, 6, z);
+            trunk.position.set(x, 15, z); // Adjusted baseline
             trunk.castShadow = true;
             scene.add(trunk);
 
             const foliageMat = new THREE.MeshStandardMaterial({ color: 0x1d4722, roughness: 0.7 });
             const top = new THREE.Mesh(new THREE.SphereGeometry(6, 8, 8), foliageMat);
-            top.position.set(x, 13, z);
+            top.position.set(x, 22, z);
             top.castShadow = true;
             scene.add(top);
         }
@@ -221,16 +189,14 @@
             let h = minimapCanvas.height;
 
             minimapCtx.clearRect(0, 0, w, h);
-            minimapCtx.fillStyle = '#1b4f72'; // Ocean background
+            minimapCtx.fillStyle = '#1b4f72';
             minimapCtx.fillRect(0, 0, w, h);
 
-            // Land mass
             minimapCtx.fillStyle = '#315c1b';
             minimapCtx.beginPath();
             minimapCtx.arc(w/2, h/2, w*0.42, 0, Math.PI*2);
             minimapCtx.fill();
 
-            // Center indicator
             minimapCtx.fillStyle = '#ff3300';
             minimapCtx.beginPath();
             minimapCtx.arc(w/2, h/2, 4, 0, Math.PI * 2);
@@ -247,8 +213,8 @@
             requestAnimationFrame(animate);
 
             let time = Date.now() * 0.0001;
-            camera.position.x = Math.sin(time) * 5000;
-            camera.position.z = Math.cos(time) * 5000;
+            camera.position.x = Math.sin(time) * 5500;
+            camera.position.z = Math.cos(time) * 5500;
             camera.lookAt(0, 200, 0);
 
             drawMinimap();
