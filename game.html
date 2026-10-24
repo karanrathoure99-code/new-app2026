@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeFire Battle Royale Map - Exact Visual Style</title>
+    <title>Real-World Photorealistic 3D Battleground</title>
     <style>
         body {
             margin: 0;
@@ -18,8 +18,8 @@
             top: 20px;
             left: 20px;
             color: #ffffff;
-            background: rgba(10, 15, 25, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(10, 15, 25, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             padding: 18px 24px;
             border-radius: 12px;
             pointer-events: none;
@@ -29,18 +29,18 @@
             backdrop-filter: blur(10px);
         }
         #instructions span {
-            color: #ff5500;
+            color: #38bdf8;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div id="instructions">
-        <strong>FreeFire Map (Reference Style Match):</strong><br>
+        <strong>Real-World 3D Battleground:</strong><br>
         Move: <span>W, A, S, D</span> or <span>Arrow Keys</span><br>
         Jump: <span>SPACEBAR</span><br>
         Look Around: <span>Mouse Click & Drag</span><br>
-        <em>Explore Pine Trees, Large Houses, Roads, River & Ocean!</em>
+        <em>Explore Photorealistic Trees, Houses, River, Ocean & Mountains!</em>
     </div>
 
     <!-- Include Three.js Library -->
@@ -67,24 +67,39 @@
         animate();
 
         function init() {
-            // Scene & Sky Setup
+            // Scene & Photorealistic Sky Setup
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x6aa6f8);
-            scene.fog = new THREE.FogExp2(0x82b5f9, 0.001);
+            scene.background = new THREE.Color(0x609ef7);
+            scene.fog = new THREE.FogExp2(0x7baef8, 0.0012);
 
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 3500);
 
+            // Renderer with Real-World Shadows Enabled
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = false; 
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.15;
             document.body.appendChild(renderer.domElement);
 
-            // Bright Ambient Lighting (No Shadows)
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
+            // Real-World Lighting (Sun with Soft Shadows & Ambient Glow)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xfffaed, 0.7);
-            sunLight.position.set(300, 600, 300);
+            const sunLight = new THREE.DirectionalLight(0xfffaed, 1.25);
+            sunLight.position.set(300, 500, 300);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 0.5;
+            sunLight.shadow.camera.far = 1500;
+            const shadowRange = 400;
+            sunLight.shadow.camera.left = -shadowRange;
+            sunLight.shadow.camera.right = shadowRange;
+            sunLight.shadow.camera.top = shadowRange;
+            sunLight.shadow.camera.bottom = -shadowRange;
+            sunLight.shadow.bias = -0.0004;
             scene.add(sunLight);
 
             // Ground Setup
@@ -99,37 +114,42 @@
             }
             groundGeo.computeVertexNormals();
 
-            const groundMat = new THREE.MeshStandardMaterial({ color: 0x3b5323, roughness: 0.92 });
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x3a5a25, roughness: 0.88, metalness: 0.04 });
             const ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
             scene.add(ground);
 
-            buildFreeFireMap();
+            buildRealWorldMap();
 
-            // Character Setup (Grounded precisely, no air bug)
+            // Character Setup (Grounded precisely)
             character = new THREE.Group();
             
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5c6a5, roughness: 0.6 });
-            const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.5 }); 
+            const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.45 }); 
             const blackPantsMat = new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.4 }); 
-            const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.3 }); 
+            const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.25, metalness: 0.2 }); 
             const hairMat = new THREE.MeshStandardMaterial({ color: 0x221308, roughness: 0.8 });     
 
             const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.65, 0.3), whiteShirtMat);
             torso.position.y = 0.95;
+            torso.castShadow = true;
             character.add(torso);
 
             const head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), skinMat);
             head.position.y = 1.45;
+            head.castShadow = true;
             character.add(head);
 
             const hair = new THREE.Mesh(new THREE.BoxGeometry(0.37, 0.14, 0.37), hairMat);
             hair.position.set(0, 1.66, 0);
+            hair.castShadow = true;
             character.add(hair);
 
             const armGeo = new THREE.BoxGeometry(0.14, 0.52, 0.14);
             leftArm = new THREE.Mesh(armGeo, whiteShirtMat);
             leftArm.position.set(-0.35, 0.95, 0);
+            leftArm.castShadow = true;
             character.add(leftArm);
 
             const fingerGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
@@ -139,6 +159,7 @@
 
             rightArm = new THREE.Mesh(armGeo, whiteShirtMat);
             rightArm.position.set(0.35, 0.95, 0);
+            rightArm.castShadow = true;
             character.add(rightArm);
 
             const rightHand = new THREE.Mesh(fingerGeo, skinMat);
@@ -148,6 +169,7 @@
             const legGeo = new THREE.BoxGeometry(0.18, 0.5, 0.18);
             leftLeg = new THREE.Mesh(legGeo, blackPantsMat);
             leftLeg.position.set(-0.14, 0.45, 0);
+            leftLeg.castShadow = true;
             character.add(leftLeg);
 
             const shoeGeo = new THREE.BoxGeometry(0.2, 0.12, 0.27);
@@ -157,6 +179,7 @@
 
             rightLeg = new THREE.Mesh(legGeo, blackPantsMat);
             rightLeg.position.set(0.14, 0.45, 0);
+            rightLeg.castShadow = true;
             character.add(rightLeg);
 
             const rightShoe = new THREE.Mesh(shoeGeo, blackShoeMat);
@@ -179,17 +202,19 @@
             window.addEventListener('mousemove', onMouseMove);
         }
 
-        function buildFreeFireMap() {
+        function buildRealWorldMap() {
             // Roads
-            const roadMat = new THREE.MeshStandardMaterial({ color: 0x242424, roughness: 0.9 });
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
             const roadNS = new THREE.Mesh(new THREE.PlaneGeometry(16, 1800), roadMat);
             roadNS.rotation.x = -Math.PI / 2;
             roadNS.position.set(0, 0.05, 0);
+            roadNS.receiveShadow = true;
             scene.add(roadNS);
 
             const roadEW = new THREE.Mesh(new THREE.PlaneGeometry(1800, 16), roadMat);
             roadEW.rotation.x = -Math.PI / 2;
             roadEW.position.set(0, 0.06, 0);
+            roadEW.receiveShadow = true;
             scene.add(roadEW);
 
             // Ocean & River
@@ -205,35 +230,35 @@
             scene.add(river);
 
             // Mountains
-            createMountain(-550, 0, -550, 260, 130, 260, 0x3b4639);
-            createMountain(550, 0, -600, 290, 145, 290, 0x323c30);
-            createMountain(0, 0, -750, 360, 160, 320, 0x2a3328);
-            createMountain(-650, 0, 250, 270, 130, 270, 0x374235);
-            createMountain(680, 0, 300, 310, 145, 310, 0x303a2e);
+            createMountain(-550, 0, -550, 260, 130, 260, 0x4e584c);
+            createMountain(550, 0, -600, 290, 145, 290, 0x444f42);
+            createMountain(0, 0, -750, 360, 160, 320, 0x394437);
+            createMountain(-650, 0, 250, 270, 130, 270, 0x465144);
+            createMountain(680, 0, 300, 310, 145, 310, 0x3d473b);
 
-            // Reference-style Pine & Leafy Trees (Matching Image 1 & 2)
+            // Trees (Pine & Leafy with Shadows)
             for (let i = 0; i < 70; i++) {
                 const tx = (Math.random() - 0.5) * 1400;
                 const tz = (Math.random() - 0.5) * 1400;
                 if (Math.abs(tx) < 25 && Math.abs(tz) < 25) continue;
 
                 if (i % 2 === 0) {
-                    createPineTree(tx, tz); // Pine trees from Image 1
+                    createPineTree(tx, tz);
                 } else {
-                    createLeafyTree(tx, tz); // Round canopy trees from Image 2
+                    createLeafyTree(tx, tz);
                 }
             }
 
-            // FreeFire Houses with Doors & Stairs
-            createFreeFireHouse(-45, -35, 0);
-            createFreeFireHouse(55, -65, Math.PI / 2);
-            createFreeFireHouse(-75, 55, Math.PI);
-            createFreeFireHouse(65, 75, -Math.PI / 4);
-            createFreeFireHouse(-100, -100, Math.PI / 3);
-            createFreeFireHouse(100, 100, -Math.PI / 6);
+            // Real-World Houses with Doors & Stairs
+            createRealHouse(-45, -35, 0);
+            createRealHouse(55, -65, Math.PI / 2);
+            createRealHouse(-75, 55, Math.PI);
+            createRealHouse(65, 75, -Math.PI / 4);
+            createRealHouse(-100, -100, Math.PI / 3);
+            createRealHouse(100, 100, -Math.PI / 6);
 
-            // Detailed Ground Grass Patches
-            const grassMat = new THREE.MeshStandardMaterial({ color: 0x477822, roughness: 0.9 });
+            // Grass Patches
+            const grassMat = new THREE.MeshStandardMaterial({ color: 0x3a6e1d, roughness: 0.9 });
             for (let i = 0; i < 250; i++) {
                 const gx = (Math.random() - 0.5) * 1500;
                 const gz = (Math.random() - 0.5) * 1500;
@@ -241,34 +266,37 @@
                 
                 const patch = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.0, 4), grassMat);
                 patch.position.set(gx, 0.5, gz);
+                patch.castShadow = true;
                 scene.add(patch);
             }
         }
 
-        // Pine Tree (Matching Image 1 reference)
         function createPineTree(x, z) {
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 5, 6), new THREE.MeshStandardMaterial({ color: 0x543d2b, roughness: 0.9 }));
             trunk.position.set(x, 2.5, z);
+            trunk.castShadow = true;
             scene.add(trunk);
 
             const pineMat = new THREE.MeshStandardMaterial({ color: 0x1e4620, roughness: 0.85 });
             for (let j = 0; j < 3; j++) {
                 const tier = new THREE.Mesh(new THREE.ConeGeometry(2.2 - (j * 0.4), 2.5, 6), pineMat);
                 tier.position.set(x, 4 + (j * 1.5), z);
+                tier.castShadow = true;
                 scene.add(tier);
             }
 
             obstacles.push({ minX: x - 0.8, maxX: x + 0.8, minZ: z - 0.8, maxZ: z + 0.8, topY: 0 });
         }
 
-        // Leafy Tree (Matching Image 2 reference)
         function createLeafyTree(x, z) {
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.1, 5.5, 8), new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.85 }));
             trunk.position.set(x, 2.75, z);
+            trunk.castShadow = true;
             scene.add(trunk);
 
             const leaves = new THREE.Mesh(new THREE.SphereGeometry(3.2, 8, 8), new THREE.MeshStandardMaterial({ color: 0x2d6829, roughness: 0.8 }));
             leaves.position.set(x, 6, z);
+            leaves.castShadow = true;
             scene.add(leaves);
 
             obstacles.push({ minX: x - 1.0, maxX: x + 1.0, minZ: z - 1.0, maxZ: z + 1.0, topY: 0 });
@@ -277,26 +305,33 @@
         function createMountain(x, y, z, w, h, d, color) {
             const mountain = new THREE.Mesh(new THREE.ConeGeometry(w / 2, h, 8), new THREE.MeshStandardMaterial({ color: color, roughness: 0.95 }));
             mountain.position.set(x, h / 2, z);
+            mountain.castShadow = true;
+            mountain.receiveShadow = true;
             scene.add(mountain);
         }
 
-        function createFreeFireHouse(x, z, rotationY) {
+        function createRealHouse(x, z, rotationY) {
             const houseGroup = new THREE.Group();
             houseGroup.position.set(x, 0, z);
             houseGroup.rotation.y = rotationY;
 
-            const base = new THREE.Mesh(new THREE.BoxGeometry(9, 5.5, 9), new THREE.MeshStandardMaterial({ color: 0xd6d3c4, roughness: 0.7 }));
+            const base = new THREE.Mesh(new THREE.BoxGeometry(9, 5.5, 9), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.65 }));
             base.position.y = 2.75;
+            base.castShadow = true;
+            base.receiveShadow = true;
             houseGroup.add(base);
 
-            const roof = new THREE.Mesh(new THREE.ConeGeometry(7.0, 3.5, 4), new THREE.MeshStandardMaterial({ color: 0x8a2f24, roughness: 0.6 }));
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(7.0, 3.5, 4), new THREE.MeshStandardMaterial({ color: 0x993d2f, roughness: 0.7 }));
             roof.position.y = 7.25;
             roof.rotation.y = Math.PI / 4;
+            roof.castShadow = true;
             houseGroup.add(roof);
 
             for (let i = 0; i < 3; i++) {
-                const stair = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.3, 0.7), new THREE.MeshStandardMaterial({ color: 0x595959, roughness: 0.5 }));
+                const stair = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.3, 0.7), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 }));
                 stair.position.set(0, i * 0.3 + 0.15, 4.8 + (2 - i) * 0.6);
+                stair.castShadow = true;
+                stair.receiveShadow = true;
                 houseGroup.add(stair);
 
                 const worldStairX = x + stair.position.x * Math.cos(rotationY) - stair.position.z * Math.sin(rotationY);
