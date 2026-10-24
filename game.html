@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tactical Dummy Mission - Update 3</title>
+    <title>3D Tactical Dummy Mission - Update 4 (Combat Edition)</title>
     <style>
         body {
             margin: 0;
@@ -32,6 +32,22 @@
             color: #4CAF50;
             font-weight: bold;
         }
+        #health-bar-container {
+            width: 150px;
+            height: 12px;
+            background: #555;
+            border-radius: 6px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        #health-bar {
+            width: 100%;
+            height: 100%;
+            background: #e74c3c;
+            transition: width 0.2s;
+        }
         #crosshair {
             position: absolute;
             top: 50%;
@@ -48,7 +64,9 @@
 </head>
 <body>
     <div id="ui">
-        <strong>Mission Status:</strong> <span id="status">Explore the full map, use cover boxes, pick up Gun & eliminate targets!</span><br>
+        <strong>Health:</strong> 
+        <div id="health-bar-container"><div id="health-bar"></div></div><br>
+        <strong>Mission Status:</strong> <span id="status">Find the house with Gun, eliminate targets! Avoid enemy fire!</span><br>
         Targets Left: <span id="targetCount">10</span> | Weapon: <span id="weaponStatus">Unarmed</span>
     </div>
     <div id="crosshair"></div>
@@ -66,6 +84,8 @@
         let gunObject = null;
         let hasGun = false;
         let targetsRemaining = 10;
+        let playerHealth = 100;
+        let isGameOver = false;
         
         let velocityY = 0;
         let gravity = 0.015;
@@ -118,7 +138,7 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // 6. Boundary Walls Around Surface
+            // 6. Boundary Walls
             const wallH = 6;
             const wMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.8 });
             createBoundaryWall(0, wallH/2, -mapSize/2, mapSize, wallH, 2, wMat);
@@ -126,26 +146,26 @@
             createBoundaryWall(-mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
             createBoundaryWall(mapSize/2, wallH/2, 0, 2, wallH, mapSize, wMat);
 
-            // 7. Spread Multiple Houses Across FULL Area with Auto-Doors
+            // 7. Houses with Auto-Doors
             const houseCoords = [
                 {x: -70, z: -70}, {x: 70, z: -70}, {x: -70, z: 70}, {x: 70, z: 70},
                 {x: 0, z: -100}, {x: 0, z: 100}, {x: -100, z: 0}, {x: 100, z: 0}
             ];
             houseCoords.forEach(pos => createHouse(pos.x, 0, pos.z));
 
-            // 8. Spread Full-Cover Boxes Across FULL Area (Touching ground surface and giving full cover)
+            // 8. Cover Boxes
             for(let x = -110; x <= 110; x += 40) {
                 for(let z = -110; z <= 110; z += 40) {
-                    if(Math.abs(x) > 20 || Math.abs(z) > 20) { // Keep center slightly open for spawn
+                    if(Math.abs(x) > 20 || Math.abs(z) > 20) {
                         createCoverBox(x + (Math.random()*10 - 5), z + (Math.random()*10 - 5), 4.0, 2.2, 4.0);
                     }
                 }
             }
 
-            // 9. Place Gun Inside House 1 (-70, 0, -70)
+            // 9. Gun Placement
             createGun(-70, 0.3, -70);
 
-            // 10. Spawn 10 Enemy Dummies Across the Map
+            // 10. Enemies
             const enemyCoords = [
                 {x: 50, z: -50}, {x: -50, z: 90}, {x: 80, z: 50}, 
                 {x: -30, z: -100}, {x: 40, z: 100}, {x: -90, z: -30},
@@ -153,7 +173,7 @@
             ];
             enemyCoords.forEach(e => createEnemy(e.x, 0, e.z));
 
-            // 11. Build Dummy Character
+            // 11. Dummy Character
             character = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
             const shirtMat = new THREE.MeshStandardMaterial({ color: 0x337ab7 });
@@ -190,7 +210,7 @@
             window.addEventListener('keyup', (e) => handleKey(e, false));
             
             window.addEventListener('mousedown', (e) => {
-                if (e.button === 0) {
+                if (e.button === 0 && !isGameOver) {
                     isMouseDown = true;
                     mouseX = e.clientX;
                     mouseY = e.clientY;
@@ -272,7 +292,6 @@
             scene.add(roof);
         }
 
-        // Updated Cover Box function: touches ground surface (y = h/2) and provides full cover
         function createCoverBox(x, z, w, h, d) {
             let mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.5 }));
             mesh.position.set(x, h / 2, z);
@@ -319,13 +338,13 @@
                 case 'KeyA': case 'ArrowLeft': keys.a = isDown; break;
                 case 'KeyD': case 'ArrowRight': keys.d = isDown; break;
                 case 'Space': 
-                    if (isDown && isGrounded) { velocityY = jumpForce; isGrounded = false; }
+                    if (isDown && isGrounded && !isGameOver) { velocityY = jumpForce; isGrounded = false; }
                     break;
             }
         }
 
         function onMouseMove(e) {
-            if (!isMouseDown) return;
+            if (!isMouseDown || isGameOver) return;
             cameraAngleX -= (e.clientX - mouseX) * 0.005;
             cameraAngleY = Math.max(0.2, Math.min(1.4, cameraAngleY - (e.clientY - mouseY) * 0.005));
             mouseX = e.clientX; mouseY = e.clientY;
@@ -360,6 +379,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            if (isGameOver) return;
 
             let inputX = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
             let inputZ = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
@@ -374,6 +394,22 @@
                 character.position.z += moveZ;
                 character.rotation.y = Math.atan2(moveX, moveZ);
             }
+
+            // Enemy Attack / Damage Mechanics (If enemy is close to player)
+            enemies.forEach(en => {
+                let distToPlayer = en.position.distanceTo(character.position);
+                if (distToPlayer < 12) {
+                    // Enemy shoots player if close
+                    if (Math.random() < 0.03) {
+                        playerHealth -= 5;
+                        document.getElementById('health-bar').style.width = Math.max(0, playerHealth) + '%';
+                        if (playerHealth <= 0) {
+                            isGameOver = true;
+                            document.getElementById('status').innerHTML = '<span style="color:red; font-size:16px;">GAME OVER! Refresh page to restart.</span>';
+                        }
+                    }
+                }
+            });
 
             doors.forEach(d => {
                 let isOpen = character.position.distanceTo(new THREE.Vector3(d.closedX, d.closedY, d.closedZ)) < 2.5;
@@ -395,7 +431,7 @@
                     gunObject = null;
                     hasGun = true;
                     document.getElementById('weaponStatus').innerText = 'Assault Rifle';
-                    document.getElementById('status').innerText = 'Gun acquired! Eliminate all 10 targets!';
+                    document.getElementById('status').innerText = 'Gun acquired! Eliminate targets & avoid enemy fire!';
                 }
             }
 
