@@ -3,423 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Game Level Editor - Balanced Physics</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>3D Dummy Character & Level Design Prototype</title>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: sans-serif;
+            user-select: none;
+        }
+        #instructions {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 18px;
+            border-radius: 8px;
+            pointer-events: none;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        #instructions span {
+            color: #4CAF50;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center p-4">
-
-    <!-- Top Bar -->
-    <header class="max-w-5xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl mb-4 flex flex-wrap items-center justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-bold text-indigo-400"><i class="fa-solid fa-paintbrush mr-2"></i>Custom Level Builder & Exporter</h1>
-            <p class="text-xs text-slate-400">Balanced player speed, 2-box jump limit, and roof collision!</p>
-        </div>
-
-        <div class="flex items-center space-x-2 flex-wrap gap-2">
-            <button id="editorModeBtn" onclick="setMode('editor')" class="px-3.5 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow-md transition">
-                <i class="fa-solid fa-pen-ruler mr-1.5"></i> Editor
-            </button>
-            <button id="playModeBtn" onclick="setMode('play')" class="px-3.5 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-                <i class="fa-solid fa-play mr-1.5"></i> Play
-            </button>
-            <button onclick="openCodeModal()" class="px-3.5 py-2 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition">
-                <i class="fa-solid fa-code mr-1.5"></i> Copy Level Code
-            </button>
-            <button onclick="clearLevel()" class="px-3 py-2 rounded-xl text-sm font-medium bg-rose-950/50 text-rose-400 border border-rose-800/50 hover:bg-rose-900/50 transition" title="Clear All">
-                <i class="fa-solid fa-trash"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Workspace -->
-    <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-4 gap-4">
-        
-        <!-- Sidebar Tools -->
-        <div id="sidebarTools" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col space-y-4">
-            <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider border-b border-slate-800 pb-2">Select Tool</h3>
-            
-            <div class="space-y-2">
-                <button onclick="setSelectedTool('platform')" id="tool-platform" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-indigo-600/20 border border-indigo-500 text-indigo-300 transition tool-btn">
-                    <i class="fa-solid fa-cube text-indigo-400 w-5"></i>
-                    <span>Surface Block (1 Box)</span>
-                </button>
-                <button onclick="setSelectedTool('spike')" id="tool-spike" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-800/80 transition tool-btn">
-                    <i class="fa-solid fa-triangle-exclamation text-rose-400 w-5"></i>
-                    <span>Spike / Hazard</span>
-                </button>
-                <button onclick="setSelectedTool('goal')" id="tool-goal" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-800/80 transition tool-btn">
-                    <i class="fa-solid fa-flag-checkered text-emerald-400 w-5"></i>
-                    <span>Goal (2 Boxes)</span>
-                </button>
-            </div>
-
-            <div class="mt-auto bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-1.5">
-                <p class="font-semibold text-slate-300"><i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i> Controls:</p>
-                <p>• <b>Click & Drag</b> to paint surfaces.</p>
-                <p>• <b>Right-click</b> on a block to delete it.</p>
-                <p>• Balanced movement & roof collision active!</p>
-            </div>
-        </div>
-
-        <!-- Canvas Area -->
-        <div class="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col items-center relative overflow-hidden">
-            <div class="relative">
-                <canvas id="gameCanvas" width="700" height="400" class="bg-slate-950 rounded-xl border border-slate-800 cursor-crosshair shadow-inner"></canvas>
-                
-                <!-- Game Over / Victory Overlay -->
-                <div id="gameOverlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center text-center p-6">
-                    <h2 id="overlayTitle" class="text-2xl font-bold mb-2 text-emerald-400">Victory!</h2>
-                    <p id="overlayText" class="text-sm text-slate-300 mb-4">You successfully beat your custom level.</p>
-                    <button onclick="setMode('play')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition">Try Again</button>
-                </div>
-            </div>
-        </div>
+<body>
+    <div id="instructions">
+        <strong>Controls:</strong><br>
+        Move: <span>W, A, S, D</span> or <span>Arrow Keys</span><br>
+        Jump: <span>SPACEBAR</span><br>
+        Look Around: <span>Mouse Drag</span>
     </div>
 
-    <!-- Code Export / Import Modal -->
-    <div id="codeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-slate-100"><i class="fa-solid fa-code text-indigo-400 mr-2"></i>Level Code Exporter & Importer</h3>
-                <button onclick="closeCodeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Level JSON Data:</label>
-                <textarea id="levelCodeArea" rows="8" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-            </div>
-            <div class="flex items-center justify-between pt-2">
-                <button onclick="loadLevelFromCode()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-medium transition">
-                    <i class="fa-solid fa-upload mr-1"></i> Load Code
-                </button>
-                <button onclick="copyLevelCode()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-medium transition shadow-md">
-                    <i class="fa-solid fa-copy mr-1"></i> Copy to Clipboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
-        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span id="toastText" class="text-xs font-medium">Code copied successfully!</span>
-    </div>
+    <!-- Include Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        const GRID_SIZE = 20;
-
-        let currentMode = 'editor';
-        let selectedTool = 'platform';
+        let scene, camera, renderer;
+        let character;
+        let head, torso, leftArm, rightArm, leftLeg, rightLeg;
+        let obstacles = [];
+        
+        // Physics & Movement variables
+        let velocityY = 0;
+        let gravity = 0.015;
+        let isGrounded = false;
+        const moveSpeed = 0.1;
+        const jumpForce = 0.3;
+        
+        let keys = { w: false, a: false, s: false, d: false, space: false };
         let isMouseDown = false;
+        let mouseX = 0, mouseY = 0;
+        let cameraAngleX = 0, cameraAngleY = 0.5;
 
-        let levelData = {
-            platforms: [{ x: 0, y: 380, w: 700, h: 20 }],
-            spikes: [],
-            goal: { x: 640, y: 340, w: 20, h: 40 }
-        };
+        init();
+        animate();
 
-        // Balanced Player Physics
-        let player = {
-            x: 40,
-            y: 330,
-            width: 18,
-            height: 28,
-            vx: 0,
-            vy: 0,
-            speed: 2.2,      // Controlled movement speed (1-2 box step)
-            jumpPower: -7.2,   // Exact jump power for max 2 box height
-            grounded: false
-        };
-        const gravity = 0.38; // Balanced gravity
-        let isGameOver = false;
-        let isGameWon = false;
+        function init() {
+            // 1. Scene Setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb); // Sky blue
+            scene.fog = new THREE.FogExp2(0x87ceeb, 0.015);
 
-        let keys = {};
-        window.addEventListener('keydown', e => keys[e.code] = true);
-        window.addEventListener('keyup', e => keys[e.code] = false);
+            // 2. Camera Setup
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-        function setMode(mode) {
-            currentMode = mode;
-            const sidebar = document.getElementById('sidebarTools');
-            const editorBtn = document.getElementById('editorModeBtn');
-            const playBtn = document.getElementById('playModeBtn');
-            const overlay = document.getElementById('gameOverlay');
+            // 3. Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
 
-            overlay.classList.add('hidden');
-            overlay.classList.remove('flex');
+            // 4. Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
 
-            if (mode === 'editor') {
-                sidebar.classList.remove('opacity-50', 'pointer-events-none');
-                editorBtn.className = "px-3.5 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow-md transition";
-                playBtn.className = "px-3.5 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
-                canvas.style.cursor = "crosshair";
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(20, 40, 20);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // 5. Create Ground
+            const groundGeo = new THREE.PlaneGeometry(100, 100);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x4a7c59, roughness: 0.8 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 6. Create Level Obstacles (Boxes to jump on / test collisions)
+            createObstacle(0, 1, -10, 4, 2, 2, 0xd9534f);
+            createObstacle(-6, 0.75, -5, 3, 1.5, 3, 0xf0ad4e);
+            createObstacle(6, 1.5, -8, 2, 3, 4, 0x5bc0de);
+
+            // 7. Build Dummy Character (~1.2 boxes height)
+            character = new THREE.Group();
+            
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
+            const shirtMat = new THREE.MeshStandardMaterial({ color: 0x337ab7 });
+            const pantsMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+
+            // Torso (Middle Area)
+            const torsoGeo = new THREE.BoxGeometry(0.5, 0.6, 0.3);
+            torso = new THREE.Mesh(torsoGeo, shirtMat);
+            torso.position.y = 0.9;
+            torso.castShadow = true;
+            character.add(torso);
+
+            // Head
+            const headGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
+            head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 1.35;
+            head.castShadow = true;
+            character.add(head);
+
+            // Left Arm
+            const armGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
+            leftArm = new THREE.Mesh(armGeo, skinMat);
+            leftArm.position.set(-0.35, 0.9, 0);
+            leftArm.castShadow = true;
+            character.add(leftArm);
+
+            // Right Arm
+            rightArm = new THREE.Mesh(armGeo, skinMat);
+            rightArm.position.set(0.35, 0.9, 0);
+            rightArm.castShadow = true;
+            character.add(rightArm);
+
+            // Left Leg
+            const legGeo = new THREE.BoxGeometry(0.18, 0.6, 0.18);
+            leftLeg = new THREE.Mesh(legGeo, pantsMat);
+            leftLeg.position.set(-0.15, 0.3, 0);
+            leftLeg.castShadow = true;
+            character.add(leftLeg);
+
+            // Right Leg
+            rightLeg = new THREE.Mesh(legGeo, pantsMat);
+            rightLeg.position.set(0.15, 0.3, 0);
+            rightLeg.castShadow = true;
+            character.add(rightLeg);
+
+            // Start position of character
+            character.position.set(0, 0, 5);
+            scene.add(character);
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('keydown', (e) => handleKey(e, true));
+            window.addEventListener('keyup', (e) => handleKey(e, false));
+            
+            window.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            window.addEventListener('mouseup', () => { isMouseDown = false; });
+            window.addEventListener('mousemove', onMouseMove);
+        }
+
+        function createObstacle(x, y, z, w, h, d, color) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshStandardMaterial({ color: color });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            
+            // Store bounding box data for collision detection
+            obstacles.push({
+                minX: x - w / 2, maxX: x + w / 2,
+                minZ: z - d / 2, maxZ: z + d / 2,
+                topY: y + h / 2
+            });
+        }
+
+        function handleKey(e, isDown) {
+            switch(e.code) {
+                case 'KeyW': case 'ArrowUp': keys.w = isDown; break;
+                case 'KeyS': case 'ArrowDown': keys.s = isDown; break;
+                case 'KeyA': case 'ArrowLeft': keys.a = isDown; break;
+                case 'KeyD': case 'ArrowRight': keys.d = isDown; break;
+                case 'Space': 
+                    if (isDown && isGrounded) {
+                        velocityY = jumpForce;
+                        isGrounded = false;
+                    }
+                    break;
+            }
+        }
+
+        function onMouseMove(e) {
+            if (!isMouseDown) return;
+            const deltaX = e.clientX - mouseX;
+            const deltaY = e.clientY - mouseY;
+            
+            cameraAngleX -= deltaX * 0.005;
+            cameraAngleY = Math.max(0.1, Math.min(1.4, cameraAngleY - deltaY * 0.005));
+            
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Character Movement Calculation
+            let moveX = 0;
+            let moveZ = 0;
+
+            if (keys.w) moveZ -= moveSpeed;
+            if (keys.s) moveZ += moveSpeed;
+            if (keys.a) moveX -= moveSpeed;
+            if (keys.d) moveX += moveSpeed;
+
+            if (moveX !== 0 || moveZ !== 0) {
+                character.position.x += moveX;
+                character.position.z += moveZ;
+                // Face towards movement direction
+                character.rotation.y = Math.atan2(moveX, moveZ);
+            }
+
+            // Gravity & Vertical Physics
+            velocityY -= gravity;
+            character.position.y += velocityY;
+
+            // Surface Collision Check (Prevent sinking into ground or obstacles)
+            let targetGroundY = 0; // Default floor
+
+            for (let obs of obstacles) {
+                // Check if character is horizontally within the box boundaries
+                if (character.position.x >= obs.minX && character.position.x <= obs.maxX &&
+                    character.position.z >= obs.minZ && character.position.z <= obs.maxZ) {
+                    // If the character is falling onto or standing on top of this obstacle
+                    if (character.position.y >= obs.topY - 0.5 && character.position.y <= obs.topY + 0.5) {
+                        if (obs.topY > targetGroundY) {
+                            targetGroundY = obs.topY;
+                        }
+                    }
+                }
+            }
+
+            // Ground collision resolution
+            if (character.position.y <= targetGroundY) {
+                character.position.y = targetGroundY;
+                velocityY = 0;
+                isGrounded = true;
+            }
+
+            // Animations (Walking & Jumping)
+            const time = Date.now() * 0.01;
+            const isMoving = (moveX !== 0 || moveZ !== 0) && isGrounded;
+
+            if (!isGrounded) {
+                // Jump Pose: Arms flying/raised up, legs bent
+                leftArm.rotation.x = -Math.PI * 0.6;
+                rightArm.rotation.x = -Math.PI * 0.6;
+                leftLeg.rotation.x = Math.PI * 0.3;
+                rightLeg.rotation.x = -Math.PI * 0.3;
+            } else if (isMoving) {
+                // Walk/Run Animation: Swing arms and legs symmetrically
+                leftArm.rotation.x = Math.sin(time) * 0.8;
+                rightArm.rotation.x = -Math.sin(time) * 0.8;
+                leftLeg.rotation.x = -Math.sin(time) * 0.8;
+                rightLeg.rotation.x = Math.sin(time) * 0.8;
             } else {
-                sidebar.classList.add('opacity-50', 'pointer-events-none');
-                playBtn.className = "px-3.5 py-2 rounded-xl text-sm font-semibold bg-emerald-600 text-white shadow-md transition";
-                editorBtn.className = "px-3.5 py-2 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
-                canvas.style.cursor = "default";
-
-                player.x = 40;
-                player.y = 330;
-                player.vx = 0;
-                player.vy = 0;
-                isGameOver = false;
-                isGameWon = false;
-            }
-        }
-
-        function setSelectedTool(tool) {
-            selectedTool = tool;
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-800/80 transition tool-btn";
-            });
-            document.getElementById(`tool-${tool}`).className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-indigo-600/20 border border-indigo-500 text-indigo-300 transition tool-btn";
-        }
-
-        function clearLevel() {
-            if (confirm("Clear entire level?")) {
-                levelData.platforms = [];
-                levelData.spikes = [];
-                levelData.goal = { x: 640, y: 340, w: 20, h: 40 };
-            }
-        }
-
-        function applyToolAt(clientX, clientY) {
-            const rect = canvas.getBoundingClientRect();
-            const gridX = Math.floor((clientX - rect.left) / GRID_SIZE) * GRID_SIZE;
-            const gridY = Math.floor((clientY - rect.top) / GRID_SIZE) * GRID_SIZE;
-
-            if (gridX < 0 || gridX >= canvas.width || gridY < 0 || gridY >= canvas.height) return;
-
-            if (selectedTool === 'platform') {
-                if (!levelData.platforms.some(p => p.x === gridX && p.y === gridY)) {
-                    levelData.platforms.push({ x: gridX, y: gridY, w: GRID_SIZE, h: GRID_SIZE });
-                }
-            } else if (selectedTool === 'spike') {
-                if (!levelData.spikes.some(s => s.x === gridX && s.y === gridY)) {
-                    levelData.spikes.push({ x: gridX, y: gridY, w: GRID_SIZE, h: GRID_SIZE });
-                }
-            } else if (selectedTool === 'goal') {
-                levelData.goal = { x: gridX, y: gridY, w: GRID_SIZE, h: GRID_SIZE * 2 };
-            }
-        }
-
-        canvas.addEventListener('mousedown', e => {
-            if (currentMode !== 'editor') return;
-            isMouseDown = true;
-            if (e.button === 0) applyToolAt(e.clientX, e.clientY);
-        });
-
-        canvas.addEventListener('mousemove', e => {
-            if (currentMode !== 'editor' || !isMouseDown) return;
-            applyToolAt(e.clientX, e.clientY);
-        });
-
-        window.addEventListener('mouseup', () => isMouseDown = false);
-
-        canvas.addEventListener('contextmenu', e => {
-            e.preventDefault();
-            if (currentMode !== 'editor') return;
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-
-            levelData.platforms = levelData.platforms.filter(p => !(mx >= p.x && mx <= p.x + p.w && my >= p.y && my <= p.y + p.h));
-            levelData.spikes = levelData.spikes.filter(s => !(mx >= s.x && mx <= s.x + s.w && my >= s.y && my <= s.y + s.h));
-        });
-
-        function openCodeModal() {
-            const modal = document.getElementById('codeModal');
-            document.getElementById('levelCodeArea').value = JSON.stringify(levelData, null, 2);
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeCodeModal() {
-            const modal = document.getElementById('codeModal');
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
-        }
-
-        function copyLevelCode() {
-            const textarea = document.getElementById('levelCodeArea');
-            textarea.select();
-            navigator.clipboard.writeText(textarea.value);
-            showToast("Level code copied!");
-            closeCodeModal();
-        }
-
-        function loadLevelFromCode() {
-            try {
-                const parsed = JSON.parse(document.getElementById('levelCodeArea').value);
-                if (parsed.platforms && parsed.goal) {
-                    levelData = parsed;
-                    showToast("Level loaded successfully!");
-                    closeCodeModal();
-                } else {
-                    alert("Invalid level code format!");
-                }
-            } catch (err) {
-                alert("Error parsing JSON code!");
-            }
-        }
-
-        function showToast(text) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastText').textContent = text;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        // Advanced Physics with Roof / Ceiling Collision
-        function updateGame() {
-            if (currentMode !== 'play' || isGameOver || isGameWon) return;
-
-            // Horizontal Movement
-            if (keys['ArrowLeft'] || keys['KeyA']) player.vx = -player.speed;
-            else if (keys['ArrowRight'] || keys['KeyD']) player.vx = player.speed;
-            else player.vx = 0;
-
-            // Jump
-            if ((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && player.grounded) {
-                player.vy = player.jumpPower;
-                player.grounded = false;
+                // Idle Pose
+                leftArm.rotation.x = 0;
+                rightArm.rotation.x = 0;
+                leftLeg.rotation.x = 0;
+                rightLeg.rotation.x = 0;
             }
 
-            // Apply Gravity
-            player.vy += gravity;
+            // Smooth Third-Person Camera Follow
+            const camDistance = 5;
+            const targetCamX = character.position.x + Math.sin(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
+            const targetCamY = character.position.y + Math.sin(cameraAngleY) * camDistance + 0.5;
+            const targetCamZ = character.position.z + Math.cos(cameraAngleX) * camDistance * Math.cos(cameraAngleY);
 
-            // Move Horizontal & Check Horizontal Collisions
-            player.x += player.vx;
-            if (player.x < 0) player.x = 0;
-            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.1);
+            camera.lookAt(character.position.x, character.position.y + 0.8, character.position.z);
 
-            // Move Vertical & Check Vertical Collisions (Floor & Roof)
-            player.y += player.vy;
-            player.grounded = false;
-
-            levelData.platforms.forEach(p => {
-                // Check collision intersection
-                if (
-                    player.x < p.x + p.w &&
-                    player.x + player.width > p.x &&
-                    player.y < p.y + p.h &&
-                    player.y + player.height > p.y
-                ) {
-                    // Moving Down (Landing on Platform)
-                    if (player.vy > 0 && player.y + player.height - player.vy <= p.y + 6) {
-                        player.y = p.y - player.height;
-                        player.vy = 0;
-                        player.grounded = true;
-                    }
-                    // Moving Up (Hitting Roof / Ceiling from Below)
-                    else if (player.vy < 0 && player.y - player.vy >= p.y + p.h - 6) {
-                        player.y = p.y + p.h;
-                        player.vy = 0; // Stop upward movement immediately (Head bump)
-                    }
-                }
-            });
-
-            // Spike Collision
-            levelData.spikes.forEach(s => {
-                if (
-                    player.x < s.x + s.w &&
-                    player.x + player.width > s.x &&
-                    player.y < s.y + s.h &&
-                    player.y + player.height > s.y
-                ) {
-                    isGameOver = true;
-                    showOverlay("Game Over!", "You hit a spike!", "text-rose-400");
-                }
-            });
-
-            // Abyss Fall
-            if (player.y > canvas.height) {
-                isGameOver = true;
-                showOverlay("Game Over!", "You fell down!", "text-rose-400");
-            }
-
-            // Goal Collision
-            let g = levelData.goal;
-            if (
-                player.x < g.x + g.w &&
-                player.x + player.width > g.x &&
-                player.y < g.y + g.h &&
-                player.y + player.height > g.y
-            ) {
-                isGameWon = true;
-                showOverlay("Victory! 🎉", "Level cleared!", "text-emerald-400");
-            }
+            renderer.render(scene, camera);
         }
-
-        function showOverlay(title, text, titleColor) {
-            const overlay = document.getElementById('gameOverlay');
-            document.getElementById('overlayTitle').textContent = title;
-            document.getElementById('overlayTitle').className = `text-2xl font-bold mb-2 ${titleColor}`;
-            document.getElementById('overlayText').textContent = text;
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (currentMode === 'editor') {
-                ctx.strokeStyle = '#1e293b';
-                ctx.lineWidth = 1;
-                for (let x = 0; x < canvas.width; x += GRID_SIZE) {
-                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-                }
-                for (let y = 0; y < canvas.height; y += GRID_SIZE) {
-                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-                }
-            }
-
-            levelData.platforms.forEach(p => {
-                ctx.fillStyle = '#334155';
-                ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.strokeStyle = '#475569';
-                ctx.strokeRect(p.x, p.y, p.w, p.h);
-            });
-
-            levelData.spikes.forEach(s => {
-                ctx.fillStyle = '#f43f5e';
-                ctx.beginPath();
-                ctx.moveTo(s.x, s.y + s.h);
-                ctx.lineTo(s.x + s.w / 2, s.y);
-                ctx.lineTo(s.x + s.w, s.y + s.h);
-                ctx.closePath();
-                ctx.fill();
-            });
-
-            let g = levelData.goal;
-            ctx.fillStyle = '#10b981';
-            ctx.fillRect(g.x, g.y, g.w, g.h);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '9px Inter';
-            if (currentMode === 'editor') ctx.fillText('GOAL', g.x + 1, g.y + 22);
-
-            if (currentMode === 'play') {
-                ctx.fillStyle = '#6366f1';
-                ctx.fillRect(player.x, player.y, player.width, player.height);
-            }
-        }
-
-        function loop() {
-            updateGame();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        loop();
     </script>
 </body>
 </html>
