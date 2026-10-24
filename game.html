@@ -33,7 +33,6 @@
             color: #38bdf8;
             font-weight: bold;
         }
-        /* Live Minimap UI Style */
         #minimap-container {
             position: absolute;
             top: 15px;
@@ -71,20 +70,20 @@
 
     <script>
         let scene, camera, renderer;
-        let mapSize = 20000; // Bermuda Scale
+        let mapSize = 20000;
         let minimapCtx, minimapCanvas;
 
         init();
         animate();
 
         function init() {
-            // 1. Scene & Sky Setup (0% Fog, Clear Horizon)
+            // 1. Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x5294e2);
 
-            // 2. Camera Setup (Static cinematic overview angle of the Bermuda map)
-            camera = new THREE.PerspectiveSystem ? null : new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
-            camera.position.set(0, 2500, 4500);
+            // 2. Camera Setup (Positioned correctly to view the massive map instantly)
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
+            camera.position.set(0, 3000, 5000);
             camera.lookAt(0, 0, 0);
 
             // 3. Renderer Setup
@@ -114,7 +113,7 @@
             sunLight.shadow.camera.bottom = -d;
             scene.add(sunLight);
 
-            // 5. Endless Ocean Surrounding Outside the Bermuda Island
+            // 5. Endless Ocean Surrounding Outside
             const oceanGeo = new THREE.PlaneGeometry(90000, 90000);
             const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1b4f72, roughness: 0.2 });
             const ocean = new THREE.Mesh(oceanGeo, oceanMat);
@@ -122,7 +121,7 @@
             ocean.position.y = -200;
             scene.add(ocean);
 
-            // 6. 100% Exact Bermuda Surface & Layout Generation
+            // 6. Bermuda Surface Generation
             const segments = 350;
             const groundGeo = new THREE.PlaneGeometry(mapSize, mapSize, segments, segments);
             const posAttr = groundGeo.attributes.position;
@@ -132,16 +131,14 @@
                 let vx = posAttr.getX(i);
                 let vy = posAttr.getY(i);
                 
-                // Bermuda Exact Layout: Center Peak elevation + natural rolling bumpy terrain across the island
                 let distFromCenter = Math.sqrt(vx*vx + vy*vy);
-                let centerPeak = Math.max(0, (1 - distFromCenter / (mapSize * 0.3))) * 1100; // Peak in exact center
+                let centerPeak = Math.max(0, (1 - distFromCenter / (mapSize * 0.3))) * 1100;
 
                 let rollingHills = Math.abs(Math.sin(vx * 0.001) * Math.cos(vy * 0.001) * 180) 
                                  + Math.abs(Math.sin(vx * 0.004) * Math.sin(vy * 0.004) * 80);
 
                 let height = centerPeak + rollingHills + 20;
 
-                // Raise outer boundary walls like Bermuda coastal mountains
                 let maxDist = Math.max(Math.abs(vx), Math.abs(vy));
                 let borderThreshold = halfSize - 2000;
                 if (maxDist > borderThreshold) {
@@ -159,7 +156,6 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // Minimap setup
             minimapCanvas = document.getElementById('minimap-canvas');
             minimapCtx = minimapCanvas.getContext('2d');
 
@@ -175,13 +171,11 @@
             minimapCtx.fillStyle = '#1b4f72';
             minimapCtx.fillRect(0, 0, w, h);
 
-            // Bermuda Island Shape Representation on Minimap
             minimapCtx.fillStyle = '#315c1b';
             minimapCtx.beginPath();
             minimapCtx.arc(w/2, h/2, w*0.42, 0, Math.PI*2);
             minimapCtx.fill();
 
-            // Center Peak Dot
             minimapCtx.fillStyle = '#475444';
             minimapCtx.beginPath();
             minimapCtx.arc(w/2, h/2, 10, 0, Math.PI*2);
